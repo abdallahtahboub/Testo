@@ -16,7 +16,7 @@ Read first: `docs/architecture.md`, `docs/roadmap.md`, `docs/design-system.md`,
 
 ## Product name
 
-The name is a placeholder. Never hard-code it in UI text: use the `Brand:ProductName`
+**Testo** is the confirmed working name; it may still change. Never hard-code it in UI text: use the `Brand:ProductName`
 resource / `BrandOptions.ProductName`. Project/namespace prefix is `Testo.`; a rename later is a
 mechanical find-and-replace.
 

@@ -1,6 +1,6 @@
 # Architecture (Frontend Phase)
 
-> Status: **Draft for review (Step 0)**. Decisions marked *(ADR-xxxx)* are recorded in
+> Status: **Accepted** (Step 0 approved on 2026-11-11). Decisions marked *(ADR-xxxx)* are recorded in
 > `docs/decisions/`.
 
 ## 1. Goals
@@ -269,7 +269,7 @@ ship to the browser and the download is larger. Because every service sits behin
 interface, switching the app area to `InteractiveAuto` later is a contained change
 (add a `.Client` project + HTTP implementations).
 
-### Small JavaScript on static pages *(ADR-0004, needs your approval)*
+### Small JavaScript on static pages *(ADR-0004)*
 
 In static SSR there is no Blazor circuit, so Blazor event handlers don't run. Three public
 header features need behavior:
@@ -281,7 +281,7 @@ header features need behavior:
 | Mobile menu | `<details>` drawer | focus trap while open |
 
 The alternative — making the header an interactive Blazor island — would open a SignalR
-circuit (or download WASM) for every visitor, which hurts first load. Recommendation: the
+circuit (or download WASM) for every visitor, which hurts first load. Decision: the
 small JS module. No JS framework.
 
 ## 10. Localization
@@ -290,7 +290,7 @@ small JS module. No JS framework.
   so modules stay self-contained.
 - Cultures: `en` (default) and `de`. Dates, numbers, and relative times use the current culture.
 - **Public website:** culture in the URL path (`/en/pricing`, `/de/pricing`),
-  with `hreflang` links for SEO. See open question in `sitemap.md`.
+  with `hreflang` links for SEO *(ADR-0006)*.
 - **App:** culture from the user's preference (cookie `.AspNetCore.Culture`), switchable in the user menu.
 - A unit test checks that every key in `*.resx` (en) exists in `*.de.resx` and vice versa.
 

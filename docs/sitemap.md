@@ -1,7 +1,8 @@
 # Sitemap
 
-> Status: **Draft for review (Step 0)**.
-> Routes for the public site are shown without a culture prefix; see "Open question" below.
+> Status: **Accepted** (Step 0 approved on 2026-11-11).
+> Public routes are shown without their culture prefix. Every public page is served under
+> `/en/...` and `/de/...` (ADR-0006); `/` redirects to the visitor's language.
 > "(P)" = placeholder content, clearly labeled as such in the UI.
 
 ## A) Public website (static SSR)
@@ -108,9 +109,9 @@ Routes are scoped by project: `/app/p/{projectKey}/...` (e.g., `/app/p/orion/def
 | `/app/search?q=` | Web | Search results | Results across requirements, tests, runs, defects |
 | `/showcase` | UI.Shared | Component showcase (dev/staging only) | All design-system components with variants and states |
 
-## Open question for you
+## Public URLs and language (decided, ADR-0006)
 
-**Public URLs and language:** I recommend culture-prefixed URLs (`/en/...`, `/de/...`)
-with `hreflang` tags — best for German SEO. Paths stay English in both languages
-(`/de/pricing`) to keep routing simple; translated slugs (`/de/preise`) are possible but
-add a mapping layer. Is English-path-with-prefix OK?
+Public pages use culture-prefixed URLs (`/en/...`, `/de/...`) with `hreflang` tags — best
+for German SEO. Paths stay English in both languages (`/de/pricing`). Translated slugs
+(`/de/preise`) stay possible later, because every page declares its routes per language.
+The app (`/app/...`) has no prefix; its language comes from the user's preference cookie.

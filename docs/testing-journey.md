@@ -1,7 +1,7 @@
 # The Software Testing Journey in Testo
 
 > Working product name: **Testo** (placeholder, see `CLAUDE.md` → "Product name").
-> Status: **Draft for review (Step 0)**.
+> Status: **Accepted** (Step 0 approved on 2026-11-11).
 
 Testo supports the whole testing journey, following the **ISTQB test process** (CTFL v4.0).
 The ISTQB activities are not a strict waterfall: planning and monitoring/control run

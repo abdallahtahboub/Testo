@@ -1,6 +1,6 @@
 # 0003 — Render modes: static SSR for the website, Interactive Server for the app
 
-- **Status:** Proposed (awaiting review in Step 0)
+- **Status:** Accepted
 - **Date:** 2026-11-11
 
 ## Context

@@ -1,6 +1,6 @@
 # Design System
 
-> Status: **Draft for review (Step 0)**. Pick a palette (§2) before Milestone 1.
+> Status: **Accepted** (Step 0 approved on 2026-11-11). Palette: **Option A "Indigo & Teal"** (ADR-0005).
 > All contrast ratios below were calculated with the WCAG 2.x relative-luminance formula.
 
 ## 1. Principles
@@ -14,11 +14,12 @@
 6. **Original.** Our own brand: own logo, own SVG illustrations (abstract "flow lines" and
    node graphs that echo the testing journey), no borrowed assets or layouts.
 
-## 2. Color palette options (choose one)
+## 2. Color palette
 
+**Chosen: Option A "Indigo & Teal"** (ADR-0005). Options B and C are kept for the record.
 All three use the same neutrals and semantic colors (§3); only brand and accent differ.
 
-### Option A — "Indigo & Teal" *(recommended)*
+### Option A — "Indigo & Teal" *(chosen)*
 Calm, technical, distinctive. Teal reads as "quality / passing" without being the success green.
 
 | Token | Light | Dark theme | Notes |
@@ -31,7 +32,7 @@ Calm, technical, distinctive. Teal reads as "quality / passing" without being th
 
 Hero gradient: `#1F2170 → #2E3192` with a soft teal glow (`#14B8A6` at 15 % opacity).
 
-### Option B — "Midnight Blue & Amber"
+### Option B — "Midnight Blue & Amber" *(not chosen)*
 Classic enterprise, warm call-to-action.
 
 | Token | Light | Dark theme | Notes |
@@ -42,7 +43,7 @@ Classic enterprise, warm call-to-action.
 
 Risk: amber collides with "warning" semantics in the app; we'd use it only on the public site.
 
-### Option C — "Royal Indigo & Coral"
+### Option C — "Royal Indigo & Coral" *(not chosen)*
 Brighter, more modern / start-up feel.
 
 | Token | Light | Dark theme | Notes |

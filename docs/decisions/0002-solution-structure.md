@@ -1,6 +1,6 @@
 # 0002 — Solution structure: split Platform from Contracts, Website from Web
 
-- **Status:** Proposed (awaiting review in Step 0)
+- **Status:** Accepted
 - **Date:** 2026-11-11
 
 ## Context

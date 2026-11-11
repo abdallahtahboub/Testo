@@ -1,6 +1,6 @@
 # Frontend Roadmap
 
-> Status: **Draft for review (Step 0)**.
+> Status: **Accepted** (Step 0 approved on 2026-11-11).
 > Each milestone ends in a demo-able state. I stop after each one for your review.
 
 ## Definition of Done (applies to every milestone)
@@ -17,6 +17,8 @@
 
 ## Milestone 0 — Planning documents *(this step)*
 **Done when:** `docs/testing-journey.md`, `architecture.md`, `sitemap.md`, `design-system.md`, `roadmap.md`, initial ADRs and `CLAUDE.md` are reviewed and approved, and the open questions are answered (name, palette, URL scheme, JS enhancement).
+
+**Status: done (2026-11-11).** All six decisions followed the recommendations: working name "Testo", palette A, the small header script, culture-prefixed public URLs, Interactive Server for the app, and the adjusted solution structure.
 
 ## Milestone 1 — Foundation
 **Scope**

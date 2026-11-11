@@ -1,6 +1,6 @@
 # 0004 — Small vanilla JS enhancement for the public header
 
-- **Status:** Proposed (needs explicit approval — it is an exception to "no JavaScript")
+- **Status:** Accepted (approved as an explicit exception to "no JavaScript")
 - **Date:** 2026-11-11
 
 ## Context

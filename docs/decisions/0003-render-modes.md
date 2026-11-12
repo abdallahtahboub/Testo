@@ -1,6 +1,6 @@
 # 0003 — Render modes: static SSR for the website, Interactive Server for the app
 
-- **Status:** Accepted
+- **Status:** Accepted (refined by ADR-0009: public pages also ship no Blazor script and set no cookie)
 - **Date:** 2026-11-11
 
 ## Context

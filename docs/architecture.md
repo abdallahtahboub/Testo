@@ -20,19 +20,21 @@
 | Styling | Global design tokens (CSS custom properties) + CSS isolation per component |
 | Localization | `IStringLocalizer<T>` + `.resx`, English (`en`) and German (`de`) |
 | Feature flags | `Microsoft.FeatureManagement.AspNetCore` |
-| Component tests | xUnit + bUnit |
-| E2E tests | Playwright for .NET (+ xUnit) |
+| Component tests | xUnit v3 + bUnit 2 |
+| E2E tests | Playwright for .NET; the real application runs inside the test process *(ADR-0010)* |
 | Accessibility checks | `Deque.AxeCore.Playwright` inside the E2E project |
-| CI | GitHub Actions: restore → build → bUnit → Playwright |
+| Test runner | Microsoft.Testing.Platform, through `dotnet test` *(ADR-0010)* |
+| CI | GitHub Actions: restore → build → all tests, including Playwright |
 | Central package versions | `Directory.Packages.props`; shared settings in `Directory.Build.props` |
+| Solution file | `Testo.slnx` (the XML solution format, the default of the .NET 10 SDK) |
 
 ## 3. Solution structure
 
 The suggested structure is kept, with **three changes** (reasons below):
 
 ```
-Testo.sln
-Directory.Build.props            // nullable, warnings-as-errors, analyzers, LangVersion
+Testo.slnx
+Directory.Build.props            // nullable, warnings-as-errors, analyzers
 Directory.Packages.props         // central package management
 src/
   Testo.Web                      // Blazor Web App host: Program.cs, DI composition, routing, App.razor
@@ -52,7 +54,7 @@ src/
 tests/
   Testo.UI.Tests                 // bUnit: UI.Shared components + module components
   Testo.Mocks.Tests              // xUnit: seed data consistency, mock feed timing
-  Testo.E2E                      // Playwright: smoke per page + main flows
+  Testo.E2E                      // Playwright: smoke per page + main flows; raw HTTP tests of the host
 ```
 
 **Why the changes:**
@@ -89,14 +91,20 @@ The app **Dashboard** and the **app shell** (left nav, top bar) live in `Testo.U
 | `Contracts` | BCL only | anything UI, any other Testo project |
 | `Platform` | `Contracts`, ASP.NET Core Components | modules, mocks, UI.Shared |
 | `UI.Shared` | `Platform`, `Contracts`, Fluent UI | modules, capabilities, mocks |
-| `Website` | `UI.Shared`, `Contracts` | modules, mocks |
+| `Website` | `UI.Shared`, `Platform`, `Contracts` | modules, mocks |
 | `Modules.*` | `UI.Shared`, `Platform`, `Contracts` | **other modules**, capabilities, mocks |
 | `Capabilities.*` | `UI.Shared`, `Platform`, `Contracts` | modules, other capabilities, mocks |
 | `Mocks` | `Contracts` | anything UI |
 | `Web` | everything (composition root only, no business UI) | — |
 
-These rules are **enforced by a test** (`tests/Testo.UI.Tests/Architecture/DependencyRulesTests.cs`,
-reflection over referenced assemblies) so they can't silently erode.
+These rules are **enforced by a test** (`tests/Testo.UI.Tests/Architecture/DependencyRulesTests.cs`).
+It reads the project references from the `.csproj` files, so a forbidden reference fails
+the build pipeline even before any code uses it. A project without a rule fails too, so
+every new project gets a conscious place in this table.
+
+Only `Testo.Web` references the ASP.NET Core **server** framework. All libraries use the
+portable component packages and are marked for the `browser` platform, so they cannot
+call server-only APIs by accident. That keeps WebAssembly possible later (§9).
 
 Cross-module communication only happens through:
 - **Contracts** (shared DTOs + service interfaces), and
@@ -114,44 +122,58 @@ public interface IFeatureModule
 {
     string Id { get; }                          // "planning"
     string? FeatureFlag { get; }                // "Module.Planning" (null = always on)
-    Assembly Assembly { get; }                  // for router AdditionalAssemblies
-    void RegisterServices(IServiceCollection services);
-    void RegisterNavigation(INavigationRegistry nav);
-    void RegisterWidgets(IDashboardWidgetRegistry widgets);
+    Assembly Assembly => GetType().Assembly;    // for the router
+    void RegisterServices(IServiceCollection services) { }
+    void RegisterNavigation(INavigationRegistry navigation) { }
+    void RegisterWidgets(IDashboardWidgetRegistry widgets) { }
 }
 ```
+
+The three `Register…` methods do nothing by default, so a module only writes what it needs.
 
 Host registration (one line per module):
 
 ```csharp
-builder.AddTestoModule<PlanningModule>();
-builder.AddTestoModule<DefectsModule>();
+builder.Services.AddTestoModule<PlanningModule>();
+builder.Services.AddTestoModule<DefectsModule>();
 ```
 
-The host collects module assemblies and passes them to the router
-(`AdditionalAssemblies`) and to `MapRazorComponents<App>().AddAdditionalAssemblies(...)`,
+`AddTestoModule` registers the module (all modules are available as
+`IEnumerable<IFeatureModule>`), calls its `RegisterServices`, and rejects a second module
+with the same id. The host collects the module assemblies in `RoutableAssemblies` and
+passes them to the router and to `MapRazorComponents<App>().AddAdditionalAssemblies(...)`,
 so a module's `@page` components become routable without the host knowing them.
+
+`ModuleConventionTests` checks every module project: exactly one public `IFeatureModule`,
+named after the project, a lowercase id, a `Module.<Name>` flag that is listed in
+`appsettings.json`, and a registration line in `Program.cs`.
+
+**Status after Milestone 1:** the contracts and the one-line registration exist, and every
+module is an empty shell behind its flag. The registry implementations (navigation,
+widgets) and the flag-aware shell arrive in Milestone 4.
 
 ### Navigation registry
 
 ```csharp
 public sealed record NavItem(
-    string Id, string LabelResourceKey, string Href, string Icon,
-    NavGroup Group, int Order, string? FeatureFlag = null, string? RequiredRole = null);
+    string Id, LocalizedText Label, string Href, string Icon,
+    NavGroup Group, int Order = 0, string? FeatureFlag = null, string? RequiredRole = null);
 
 public interface INavigationRegistry { void Add(NavItem item); IReadOnlyList<NavItem> Items { get; } }
 ```
 
 The shell's left navigation renders `Items` grouped by `NavGroup`
 (Overview, Plan, Build, Run, Report, Settings), filtered by feature flags and role.
-Labels are resource keys, so modules localize their own entries.
+A label is a `LocalizedText`: a resource key together with the module's own resource class.
+The shell looks the text up in the user's language when it renders, so modules keep
+their translations to themselves.
 
 ### Dashboard widget registry
 
 ```csharp
 public sealed record DashboardWidget(
-    string Id, string TitleResourceKey, Type ComponentType,
-    WidgetSize Size, int Order, string? FeatureFlag = null);
+    string Id, LocalizedText Title, Type ComponentType,
+    WidgetSize Size = WidgetSize.Medium, int Order = 0, string? FeatureFlag = null);
 ```
 
 The dashboard renders registered widgets with `<DynamicComponent>` inside a responsive grid.
@@ -164,8 +186,8 @@ Each widget component loads its own data through service interfaces.
 public interface ITestCapability
 {
     string Id { get; }                      // "e2e-web"
-    string NameResourceKey { get; }
-    string DescriptionResourceKey { get; }
+    LocalizedText Name { get; }
+    LocalizedText Description { get; }
     string Icon { get; }
     CapabilityKind Kind { get; }            // E2EWeb, Api, Performance, Security, Accessibility, ...
     string? FeatureFlag { get; }
@@ -176,7 +198,7 @@ public interface ITestCapability
 }
 ```
 
-- Registered via DI: `builder.AddTestoCapability<E2EWebCapability>();` — **one line**.
+- Registered via DI: `builder.Services.AddTestoCapability<E2EWebCapability>();` — **one line** (Milestone 6).
 - `ICapabilityRegistry` exposes all enabled capabilities.
 - Execution pages, Settings and the public "Capabilities" listing are **generic**: they
   list registered capabilities and render the capability's components with `DynamicComponent`.
@@ -256,18 +278,40 @@ public sealed record LogEntryWritten(...)    : TestRunEvent(...);   // level, me
 - The live view is a pure function of the event stream (reducer → `LiveRunState`), which
   keeps it easy to test.
 
-## 9. Render modes *(ADR-0003)*
+## 9. Render modes *(ADR-0003, ADR-0009)*
 
 | Area | Render mode | Why |
 |---|---|---|
-| Public website (`/`, `/product`, `/pricing`, …) | **Static SSR** + enhanced navigation | Fast first load, SEO, no SignalR circuit for visitors |
-| Contact form | Static SSR form post (enhanced form) | No interactivity needed |
-| Product app (`/app/**`) | **Interactive Server** (per page/layout) | Rich components (Fluent grids, dialogs), live feed, simplest with in-process mocks |
+| Public website (`/en/...`, `/de/...`), not-found and error page | **Static SSR, without the Blazor script** | Fast first load, SEO, no server connection and no cookie for visitors |
+| Product app (`/app/**`) | **Interactive Server** | Rich components (Fluent grids, dialogs), live feed, simplest with in-process mocks |
+
+How a page gets its mode:
+
+- A page is **public** when it carries `[ExcludeFromInteractiveRouting]`. `Testo.Website`
+  applies it to all of its pages in `Pages/_Imports.razor`. Every other page is an **app page**.
+- `App.razor` asks the framework (`HttpContext.AcceptsInteractiveRouting()`) and renders
+  the router either statically or with `InteractiveServer`. App pages therefore need no
+  `@rendermode` of their own, and navigation inside the app stays on one server connection.
+- For a public page, `App.razor` leaves out `blazor.web.js`, the import map and the app's
+  style bundle. A public page loads our three small style sheets, two component style
+  bundles, one font file and `theme.js` — about 85 KB in total, uncompressed.
+- **No cookie on a plain visit.** Blazor issues an antiforgery token (a cookie plus
+  "no-store") for every page it renders. `PublicPageAntiforgery` skips that for public
+  pages. A public page that has a form posting back to itself opts in with `[HasForm]`.
+- **State from the request to the interactive session.** An interactive session has no
+  HTTP request and so no cookies. The theme choice is read from the cookie while the page
+  is rendered on the server and carried over with `[PersistentState]` (`ThemeState`).
+  Milestone 4 uses the same route for the signed-in user and the current project.
+- **Friendly status pages** (`/not-found`, `/error`) are shown for GET and HEAD requests
+  only; a rejected form post keeps its plain status code. On these pages the language
+  comes from the URL the visitor asked for, and links and forms keep pointing at it
+  (`RequestedUrl`).
 
 Interactive WebAssembly is deliberately **not** used in this phase: mocks would have to
 ship to the browser and the download is larger. Because every service sits behind an
-interface, switching the app area to `InteractiveAuto` later is a contained change
-(add a `.Client` project + HTTP implementations).
+interface, and because no library references the server framework (§4), switching the
+app area to `InteractiveAuto` later is a contained change (add a `.Client` project + HTTP
+implementations).
 
 ### Small JavaScript on static pages *(ADR-0004)*
 
@@ -277,31 +321,50 @@ header features need behavior:
 | Feature | No-JS baseline | Small JS enhancement (~2 KB, vanilla ES module) |
 |---|---|---|
 | Mega menu | `<details>/<summary>` disclosure, keyboard-accessible | close on Escape / outside click, one menu open at a time, `aria-expanded` sync |
-| Theme switch | form POST sets a cookie, page reloads | instant toggle without reload, respects `prefers-color-scheme` before first paint (avoids flash) |
+| Theme switch *(built in Milestone 1: `js/theme.js`, 1.9 KB)* | form POST sets a cookie, page reloads | instant toggle without reload; writes the same cookie |
 | Mobile menu | `<details>` drawer | focus trap while open |
 
 The alternative — making the header an interactive Blazor island — would open a SignalR
 circuit (or download WASM) for every visitor, which hurts first load. Decision: the
 small JS module. No JS framework.
 
+There is no flash of the wrong theme even without JavaScript: the server renders
+`<html data-theme="…">` from the cookie, and "same as system" is handled by CSS alone
+(`color-scheme` and `light-dark()`, ADR-0008).
+
+All JavaScript in the repository: `Testo.UI.Shared/wwwroot/js/theme.js` (ours) and
+`ReconnectModal.razor.js` (the reconnect dialog, unchanged from the .NET project template).
+
 ## 10. Localization
 
-- `IStringLocalizer<T>` with `.resx` files **inside each module** (`Resources/` folder),
-  so modules stay self-contained.
-- Cultures: `en` (default) and `de`. Dates, numbers, and relative times use the current culture.
-- **Public website:** culture in the URL path (`/en/pricing`, `/de/pricing`),
-  with `hreflang` links for SEO *(ADR-0006)*.
-- **App:** culture from the user's preference (cookie `.AspNetCore.Culture`), switchable in the user menu.
-- A unit test checks that every key in `*.resx` (en) exists in `*.de.resx` and vice versa.
+- `IStringLocalizer<T>` with `.resx` files **inside each project** (`Resources/` folder),
+  so modules stay self-contained. Each project has a small marker class next to its
+  resource files (for example `Resources/SharedResources.cs` + `SharedResources.resx` +
+  `SharedResources.de.resx`) and injects `IStringLocalizer<SharedResources>` as `L`.
+- Cultures: `en` (default) and `de`, defined once in `Testo.Platform.Localization.SupportedCultures`.
+  Dates and numbers use the current culture.
+- **Public website:** the language is the first URL segment (`/en/pricing`, `/de/pricing`).
+  Every page declares one literal route per language; `/` redirects to the visitor's
+  language. `App.razor` emits `canonical` and `hreflang` links *(ADR-0006)*.
+- **App:** the language comes from the preference cookie (`.AspNetCore.Culture`), then
+  from the browser. The cookie is written only when the visitor uses the language switch.
+- The language of a request is resolved in this order: URL prefix, cookie,
+  `Accept-Language`, English. The built-in `?culture=` query string is switched off.
+- `ResourceFileTests` checks every resource file: German has exactly the English keys, no
+  text is empty, placeholders match, every key used in code exists, and every key is used.
+- `PageRouteTests` checks that every public page has exactly one route per language.
 
 ## 11. Feature flags
 
 - `Microsoft.FeatureManagement` with flags in `appsettings.json` (`FeatureManagement` section).
 - Naming: `Module.<Name>`, `Capability.<Name>`, `Feature.<Name>` (e.g., `Feature.AiSuggestions`).
-- Registries filter nav items, widgets and capabilities by flag; pages use
-  `[FeatureGate]`-style checks (a `<FeatureGate>` component and a route guard) so a
+- UI code asks through `Testo.Platform.Features.IFeatureFlags`, not through the library.
+  The host implements it with Microsoft.FeatureManagement today; a WebAssembly client or
+  the backend can supply the flags differently later without touching UI code.
+- From Milestone 4: registries filter nav items, widgets and capabilities by flag, and a
   disabled module returns a friendly "not available" page, not a 500.
-- A dev-only "Feature flags" panel in Settings shows current flag states.
+- A dev-only "Feature flags" panel in Settings shows current flag states (Milestone 5.7).
+  Until then the app preview page lists every module with its flag.
 
 ## 12. Authentication (mock)
 
@@ -315,16 +378,29 @@ small JS module. No JS framework.
 
 | Layer | Tool | What |
 |---|---|---|
-| Components | bUnit + xUnit | Every reusable component: rendering, parameters, events, ARIA attributes, keyboard behavior |
+| Components | bUnit + xUnit | Every reusable component: rendering, parameters, events, ARIA attributes, keyboard behavior; with the real English and German texts |
 | Module pages | bUnit | Loading / empty / error / data states using fake services |
 | Mocks | xUnit | Seed data consistency (all links valid), live-feed event order and timing |
-| Architecture | xUnit | Dependency rules, resx key parity |
-| E2E | Playwright for .NET | Smoke test per page (renders, no console errors, title, `h1`), main flows, axe accessibility scan, light + dark, mobile + desktop viewports |
+| Rules | xUnit | Dependency rules, module conventions, page routes, resource files, token contrast (WCAG AA in both themes), "component styles use tokens" |
+| Host over HTTP | xUnit + `HttpClient` | Preference endpoints, redirects, cookies, caching and security headers, feature flags from configuration |
+| E2E | Playwright for .NET | Smoke test per page (title, one `h1`, no browser problems, axe scan in light and dark), theme, language, keyboard, reflow at 320 px |
+
+How the tests run *(ADR-0010)*:
+
+- `dotnet test` runs all three test projects on Microsoft.Testing.Platform.
+- The E2E project starts the real application inside the test process on a free port
+  (`WebApplicationFactory` with Kestrel), in the "Production" environment, and one browser
+  for the whole run. Every test gets its own browser context, so tests share nothing.
+- Every browser test fails on any console error or warning, script error, failed request
+  or HTTP error it did not announce. That is also what catches a violation of the
+  content security policy.
 
 ## 14. Cross-cutting
 
-- **Error handling:** a shell-level `ErrorBoundary` per widget/region so one failing widget doesn't break a page.
-- **Loading states:** skeleton components from `UI.Shared`.
+- **Error handling:** a shell-level `ErrorBoundary` per widget/region so one failing widget doesn't break a page (from Milestone 4). Unhandled server errors show the friendly error page with a request ID and no details.
+- **Loading states:** skeleton components from `UI.Shared` (Milestone 2).
 - **Logging:** `ILogger<T>` everywhere; no `Console.WriteLine`.
-- **Security headers:** CSP (no inline scripts, which also rules out inline theme scripts — the theme script is an external file), HSTS, `X-Content-Type-Options`, `Referrer-Policy`.
-- **Privacy:** no third-party trackers, fonts self-hosted (no Google Fonts CDN — relevant for German GDPR case law).
+- **Security headers** (`SecurityHeadersExtensions`): `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, HSTS outside development, and a content security policy on every response. Public pages allow nothing inline. App pages allow inline styles (the Fluent UI components need them) and the one inline script that carries the request's nonce (the import map).
+- **Preference endpoints** (`/preferences/theme`, `/preferences/culture`): plain form posts without an antiforgery token, because the switches sit in the header of every page. They store only a display preference, reject posts from other websites (`Sec-Fetch-Site` / `Origin`) and only redirect within the site.
+- **Privacy:** no third-party requests at all. Fonts are self-hosted (no font CDN — relevant for German GDPR case law). A plain visit to a public page sets no cookie; the theme and language cookies are written only when the visitor uses a switch.
+- **Fonts:** the file names carry the font version and are cached for a year (`immutable`), so pages do not re-validate them on every load.

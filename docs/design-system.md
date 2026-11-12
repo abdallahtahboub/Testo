@@ -22,15 +22,20 @@ All three use the same neutrals and semantic colors (§3); only brand and accent
 ### Option A — "Indigo & Teal" *(chosen)*
 Calm, technical, distinctive. Teal reads as "quality / passing" without being the success green.
 
-| Token | Light | Dark theme | Notes |
-|---|---|---|---|
-| `--color-brand-900` | `#1F2170` | — | Hero gradients, footer background |
-| `--color-brand-700` (primary) | `#2E3192` | `#8B93FF` | White text on `#2E3192`: **10.66 : 1** · `#8B93FF` on dark bg `#0E1124`: **6.86 : 1** |
-| `--color-brand-100` | `#E8E9FB` | `#1C1F4A` | Selected rows, subtle highlights |
-| `--color-accent-600` | `#0F766E` | `#5EEAD4` | White text on `#0F766E`: **5.47 : 1** · `#5EEAD4` on dark: **12.63 : 1** |
-| `--color-accent-400` | `#14B8A6` | — | Decorative only (illustrations, gradients); dark text on it: 7.61 : 1 |
+Tokens are named by their role, not by a shade number, and every color token holds its
+light and its dark value (`light-dark()`, ADR-0008). Components only use these names.
 
-Hero gradient: `#1F2170 → #2E3192` with a soft teal glow (`#14B8A6` at 15 % opacity).
+| Token | Light | Dark | Notes |
+|---|---|---|---|
+| `--color-brand` | `#2E3192` | `#8B93FF` | Primary color. Also the link and the focus color |
+| `--color-on-brand` | `#FFFFFF` | `#0E1124` | Text on the brand color: **10.66 : 1** light, **6.86 : 1** dark |
+| `--color-brand-hover` | `#1F2170` | `#A5ABFF` | Hover and pressed state of brand-colored controls |
+| `--color-brand-subtle` | `#E8E9FB` | `#1C1F4A` | Selected rows, the option in effect, subtle highlights |
+| `--color-accent` | `#0F766E` | `#5EEAD4` | Accent text and fills: **5.47 : 1** on white, **12.63 : 1** on the dark background |
+| `--color-on-accent` | `#FFFFFF` | `#0E1124` | Text on the accent color |
+| `--color-accent-decorative` | `#14B8A6` | `#14B8A6` | Illustrations and glows only, never text |
+| `--color-hero-start`, `--color-hero-end` | `#1F2170`, `#2E3192` | same | Hero areas keep their deep indigo in both themes |
+| `--color-on-hero`, `--color-on-hero-muted` | `#FFFFFF`, `#C7CBFF` | same | Text on hero areas |
 
 ### Option B — "Midnight Blue & Amber" *(not chosen)*
 Classic enterprise, warm call-to-action.
@@ -62,15 +67,20 @@ Risk: coral is close to "danger" red in the app.
 | `--color-surface` | `#FFFFFF` | `#161A33` | Cards, panels |
 | `--color-surface-subtle` | `#F5F6FA` | `#1B2040` | Alternating sections, app background |
 | `--color-border` | `#D0D4E4` | `#2C3258` | Dividers (decorative, not required to hit 3:1) |
-| `--color-border-strong` | `#8A90A8` | `#5B6178` | Input borders: **3.16 : 1** on white (meets 1.4.11 non-text contrast) |
+| `--color-border-strong` | `#7B8199` | `#6B7290` | Input borders: at least **3.2 : 1** on every surface in both themes (1.4.11 non-text contrast) |
 | `--color-text` | `#1A1D2E` | `#EEF0F8` | Body text: **16.68 : 1** on white |
 | `--color-text-muted` | `#5B6178` | `#A3A9BF` | Secondary text: **6.13 : 1** on white, **5.68 : 1** on `#F5F6FA`, **7.99 : 1** on dark |
-| `--color-success` | `#15803D` | `#4ADE80` | Passed: **5.02 : 1** on white |
-| `--color-warning` | `#B54708` | `#FBBF24` | Warnings, flaky: **5.43 : 1** on white |
+| `--color-success` | `#13753A` | `#4ADE80` | Passed: **5.78 : 1** on white |
+| `--color-warning` | `#AD4407` | `#FBBF24` | Warnings, flaky: **5.82 : 1** on white |
 | `--color-danger` | `#B42318` | `#F87171` | Failed, critical: **6.57 : 1** on white |
 | `--color-info` | `#1D4ED8` | `#60A5FA` | Info, running: **6.70 : 1** on white |
 
-Dark-theme values will be verified against `--color-surface` in Milestone 1 (bUnit can't do this; a small xUnit contrast test over the token file will).
+Three values changed against the first draft (border-strong, success, warning) because they
+missed the minimum on the gray and the tinted surfaces. `TokenContrastTests` now checks every
+text color on every surface, the control borders and the focus color, in both themes.
+It reads `tokens.css` directly, so a later color change cannot slip below WCAG AA unnoticed.
+
+`--color-backdrop` (`rgb(14 17 36 / 0.5)`) dims the page behind dialogs.
 
 ### Test status tokens (app)
 | Status | Token | Icon |
@@ -87,9 +97,9 @@ Critical (danger, filled badge) · Major (warning, filled) · Minor (info, outli
 
 ## 4. Typography
 
-- **Font:** **Inter** (SIL Open Font License), variable font, **self-hosted** (`woff2`, Latin + Latin Extended for German umlauts), `font-display: swap`. No Google Fonts CDN (GDPR).
-- **Monospace:** **JetBrains Mono** (OFL) for logs, IDs, code.
-- **Features:** `font-feature-settings: "cv11", "ss01"`; tabular numbers (`tnum`) in tables and KPIs.
+- **Font:** **Inter** 4.001 (SIL Open Font License), variable font, **self-hosted** (`woff2`), `font-display: swap`. No font CDN (GDPR). The "latin" file (48 KB) covers English and German and is preloaded; "latin-ext" is fetched only when a page needs it. A metric-adjusted fallback ("Inter Fallback", based on Arial) keeps the layout from shifting while the font loads. Sources and licenses: `THIRD-PARTY-NOTICES.md`.
+- **Monospace:** **JetBrains Mono** 2.211 (OFL) for logs, IDs, code. Programming ligatures are switched off, so logs show characters as they are.
+- **Features:** tabular numbers in tables and KPIs (`.t-tabular`). The font files in use do not contain Inter's optional letter variants (`cv11`, `ss01`), so the design does not use them.
 
 Type scale (1.25 ratio, fluid on the public site with `clamp()`):
 
@@ -156,7 +166,15 @@ Dark theme replaces shadows with lighter surfaces + 1 px borders (shadows are ba
 - `@media (prefers-reduced-motion: reduce)`: durations → `0.01ms`, no parallax, no pulsing; live-run "current step" uses a static highlight instead of a pulse.
 - No auto-playing carousels.
 
-## 8. Components (Milestone 2 scope)
+## 8. Components
+
+**Built in Milestone 1** (each with bUnit tests): `TSkipLink`, `TBrand` (mark + product name),
+`TLinkButton` (primary, secondary), `TChoiceForm` (a row of buttons that posts one choice;
+works without JavaScript), `TThemeSwitch`, `TLanguageSwitch`, and the two layouts
+`SiteLayout` and `AppLayout`. Global helper classes: `.t-container`, `.t-visually-hidden`,
+`.t-display`, `.t-lead`, `.t-overline`, `.t-muted`, `.t-tabular`.
+
+**Milestone 2 scope:**
 
 All in `Testo.UI.Shared`, prefixed `T` (e.g., `TButton`) so they don't clash with Fluent's `Fluent*` names.
 
@@ -177,17 +195,17 @@ All in `Testo.UI.Shared`, prefixed `T` (e.g., `TButton`) so they don't clash wit
 | `TChart` (line, bar, donut) | simple charts as accessible inline SVG with a data-table fallback | own (no JS chart lib) |
 | `TAvatar`, `TBreadcrumbs`, `TPagination`, `TSection`, `TContainer`, `TGrid` | layout + misc | own |
 
-### Fluent UI theming
-Fluent UI Blazor reads its own design tokens. In `UI.Shared` we map **our** tokens onto
-Fluent's (accent base color, neutral palette, corner radius, font family, type ramp) in
-one place (`TestoFluentTheme`), and add CSS overrides scoped to the app shell where needed.
-Result: grids, dialogs and menus look like *our* brand. The exact token API is pinned to
-the Fluent UI Blazor version chosen in Milestone 1 (recorded in an ADR).
+### Fluent UI theming *(ADR-0007)*
+Fluent UI Blazor 5 takes its look from CSS variables. The app layout points those
+variables at **our** tokens, so its components follow our brand and both themes without a
+second theme definition. Milestone 1 maps the brand color, font, corner radius and focus
+color (a Fluent button is already exactly our indigo). Milestone 2 completes the mapping
+for neutrals, strokes, type ramp and shadows. Fluent UI is loaded on app pages only.
 
 ## 9. Iconography and imagery
 
 - **Icons:** Fluent UI System Icons (MIT license) via the Fluent icons package — consistent with the components; used at 16/20/24 px, 1.5 px visual stroke.
-- **Logo:** original wordmark + simple geometric mark (a check inside a flowing path), delivered as SVG in Milestone 1. Placeholder until you have a final name.
+- **Logo:** original wordmark + simple geometric mark: a check that flows into a node, on a rounded brand-colored tile (`TBrand`, also the favicon). Placeholder until you have a final name.
 - **Illustrations:** original abstract SVGs (flow lines, nodes, grid dots) in brand colors, theme-aware via `currentColor` / CSS variables.
 - **Photos:** none in this phase. Any placeholder image is a neutral SVG with a visible "Placeholder" label.
 - **Customer logos:** generic shapes labeled "Customer logo placeholder".

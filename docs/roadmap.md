@@ -6,7 +6,7 @@
 ## Definition of Done (applies to every milestone)
 
 - `dotnet build` with **zero warnings** (warnings are errors).
-- All tests green: bUnit/xUnit (`dotnet test`) and Playwright E2E.
+- All tests green: `dotnet test` runs the unit, component, rule and Playwright tests together.
 - New reusable components have bUnit tests; new pages have a Playwright smoke test with an axe scan (0 serious/critical violations).
 - Every new UI string exists in **English and German**.
 - Light and dark theme both checked.
@@ -35,15 +35,28 @@
 
 **Done when:** `dotnet build` and `dotnet test` pass locally and in CI; the app starts and shows a placeholder home page and an empty app shell; theme and language switches work and persist; an ADR records the pinned Fluent UI version.
 
+**Status: built (2026-11-12), waiting for review.** What it delivered beyond the list above:
+
+- Public pages ship no Blazor script and set no cookie on a plain visit (ADR-0009); a public page is about 85 KB in total.
+- Security headers with a content security policy on every response.
+- Guard tests for the dependency rules, the module conventions, the page routes, the resource files, the token contrast and "component styles use tokens".
+- Friendly not-found and error pages in both languages.
+- Fluent UI Blazor **5.0.1** is pinned (ADR-0007), and a first part of the token mapping already puts its components on our brand color.
+- 440 tests: 8 for the mocks, 345 component and rule tests, 87 browser and HTTP tests.
+
+Decisions recorded: ADR-0007 (Fluent UI 5), ADR-0008 (theme tokens), ADR-0009 (public pages), ADR-0010 (test tooling).
+
 ## Milestone 2 — Design system
 **Scope:** the components in `design-system.md` §8: buttons, cards, inputs, badges, tabs, mega menu, header, footer, data table wrapper, KPI tile, timeline, states (skeleton/empty/error), dialog/drawer/menu/toast wrappers, simple SVG charts. A `/showcase` page (dev/staging only, feature-flagged) shows every component with all variants and states in both themes.
 
-**Done when:** every component has bUnit tests (rendering, parameters, events, ARIA, keyboard); the showcase page passes an axe scan in light and dark, at mobile and desktop width; Fluent components visibly use our brand tokens.
+**Done when:** every component has bUnit tests (rendering, parameters, events, ARIA, keyboard); the showcase page passes an axe scan in light and dark, at mobile and desktop width; Fluent components visibly use our brand tokens (Milestone 1 mapped brand color, font, radius and focus; the rest of the mapping is done here).
+
+Already built in Milestone 1 and extended here: `TLinkButton`, the theme and language switch (`TChoiceForm`), the skip link and the brand mark.
 
 ## Milestone 3 — Public website
 **Scope:** all public pages from `sitemap.md` §A with real copy (EN + DE) where we have it and labeled placeholders elsewhere; mega-menu navigation, language switcher, rich footer; contact + demo forms (UI and validation only); Imprint, Privacy, Terms, Accessibility statement placeholders; original SVG illustrations; `sitemap.xml`, `robots.txt`, meta/OpenGraph tags, `hreflang`.
 
-**Done when:** every public page has a Playwright smoke test (title, `h1`, no console errors, axe pass); the pages render in static SSR (no SignalR circuit opened — asserted in E2E); Lighthouse (manual run, documented in the PR) shows Performance ≥ 90 and Accessibility ≥ 95 on Home and Pricing (mobile profile).
+**Done when:** every public page has a Playwright smoke test (title, `h1`, no console errors, axe pass); the pages render in static SSR (no SignalR circuit opened — asserted in E2E); every page with a form carries `[HasForm]` and a test finds pages that forgot it (ADR-0009); Lighthouse (manual run, documented in the PR) shows Performance ≥ 90 and Accessibility ≥ 95 on Home and Pricing (mobile profile).
 
 ## Milestone 4 — App shell + module registry
 **Scope:** mock sign-in with demo users and roles; app shell (registry-driven left nav, top bar with project switcher, search, notifications, user menu); `Testo.Mocks` with the seed data generator and all `Mock*` services (with configurable latency/failure); dashboard rendering registered widgets: quality KPIs, run trends, open defects by severity, release readiness, recent runs; feature flags hiding unfinished modules; "module not available" page.

@@ -26,9 +26,11 @@ mechanical find-and-replace.
 - `Testo.Platform`: module/capability contracts and registries (`IFeatureModule`, `ITestCapability`, `INavigationRegistry`, `IDashboardWidgetRegistry`, `ICapabilityRegistry`, `Routes`).
 - `Testo.UI.Shared`: design system, layouts, tokens. No business logic, no module references.
 - `Testo.Modules.*` and `Testo.Capabilities.*` reference only `Contracts`, `Platform`, `UI.Shared`. **Never another module or capability.** Cross-module links go through `Testo.Platform.Routes` constants; cross-module events through `IAppEventBus`.
+- `Testo.Website` (public pages) references only `Contracts`, `Platform`, `UI.Shared`.
 - `Testo.Mocks` references only `Contracts`.
-- `Testo.Web` is the composition root only: DI, routing, `App.razor`, dashboard host page.
-- Each module exposes **one** public `IFeatureModule` class; everything else is `internal` where possible.
+- `Testo.Web` is the composition root only: DI, routing, `App.razor`, dashboard host page. It is the **only** project that references the ASP.NET Core server framework; libraries never use `HttpContext` or other server-only types.
+- A new project needs a rule in `DependencyRulesTests` and a row in `docs/architecture.md` §4.
+- Each module exposes **one** public `IFeatureModule` class named `<Name>Module`, with a lowercase id and the flag `Module.<Name>` (listed in `appsettings.json`); everything else is `internal` where possible. The host registers it with one line: `builder.Services.AddTestoModule<NameModule>()`.
 - Nav items, dashboard widgets and capabilities are **registered**, never hard-coded in the shell.
 - All data access via interfaces from `Contracts`. Components never `new` a service or touch mock data directly.
 - Service methods: async, `CancellationToken` last parameter, return Contracts DTOs (`record`s), lists via `PagedResult<T>`.
@@ -36,9 +38,19 @@ mechanical find-and-replace.
 
 ## Render modes
 
-- Public website (`Testo.Website`): **static SSR**. No `@rendermode` there. No Blazor event handlers (they don't run).
-- App (`/app/**`): **InteractiveServer**, set on the app layout/pages.
-- JavaScript only where Blazor can't do it, as small vanilla ES modules in `wwwroot/js/`, documented in an ADR. No JS frameworks, no inline scripts (CSP).
+- Public website (`Testo.Website`): **static SSR, without the Blazor script**. No `@rendermode`, no event handlers (`@onclick` does nothing there), no enhanced navigation. Use links and plain forms.
+- A page is public when it has `[ExcludeFromInteractiveRouting]`; `Testo.Website/Pages/_Imports.razor` applies it (and `SiteLayout`) to every page in that folder. Everything else is an app page.
+- App (`/app/**`): **InteractiveServer**, applied once in `App.razor`. App pages need no `@rendermode` and use `AppLayout` by default.
+- Public pages get no antiforgery token. A public page with a form that posts back to itself needs `@attribute [HasForm]`.
+- An interactive session has no HTTP request: no cookies, no `HttpContext`. Read such values while the page is rendered on the server and carry them over with `[PersistentState]` (see `ThemeState`).
+- JavaScript only where Blazor can't do it, as small vanilla ES modules in `wwwroot/js/`, documented in an ADR. No JS frameworks, no inline scripts and no inline styles in our markup (CSP).
+
+## Languages and URLs
+
+- Every public page declares one literal route per language: `@page "/en/pricing"` and `@page "/de/pricing"`. Build public links with `LocalizedPath.For(SupportedCultures.Current, "pricing")`.
+- App pages have no language prefix; routes start with `/app`.
+- Texts: one marker class per project next to its resource files (`Resources/XResources.cs`, `.resx`, `.de.resx`), injected as `@inject IStringLocalizer<XResources> L`, used as `L["Area_Element_Purpose"]`.
+- The product name goes into texts as a placeholder: `L["Home_PageTitle", Brand.Value.ProductName]`.
 
 ## Folder structure inside a module
 
@@ -62,7 +74,7 @@ Testo.Modules.Defects/
 - DTOs end with `Dto` only when needed to avoid a clash; otherwise plain nouns (`Defect`, `TestRun`).
 - Routes: lowercase, kebab-case; app routes under `/app/p/{projectKey}/...`.
 - Resource keys: `Area_Element_Purpose` (e.g., `DefectList_Filter_Severity`).
-- CSS: component styles in `Component.razor.css` (CSS isolation); global tokens only in `UI.Shared/wwwroot/css/tokens.css`. Use tokens (`var(--space-4)`), **never raw hex/px values** in component CSS except 0 and 1px borders.
+- CSS: component styles in `Component.razor.css` (CSS isolation); global tokens only in `UI.Shared/wwwroot/css/tokens.css`. Use tokens (`var(--space-4)`), **never raw colors or px values** in component CSS except 0 and 1px (`ComponentStyleTests` enforces it). Color tokens are named by role and hold both themes: `light-dark(<light>, <dark>)`. Media queries use the breakpoints of `docs/design-system.md` §5 in `rem`.
 
 ## C# style
 
@@ -91,13 +103,21 @@ Testo.Modules.Defects/
 - Test names: `MethodOrScenario_Condition_ExpectedResult`.
 - Use fakes (in-test implementations of the service interfaces) in bUnit tests; don't depend on mock seed data details.
 - Time-based tests use a fake `TimeProvider`; no real sleeps.
-- Playwright runs with `--trace off` by default.
+- bUnit tests derive from `DesignSystemTestContext` (real resource files, brand options, theme state, fixed clock). Test German with `using var german = new CultureScope("de");`.
+- Browser tests derive from `BrowserTest`, open pages with `OpenAsync` and end with `page.AssertNoProblems()`; page smoke tests also call `page.AssertAccessibleAsync()`. Tests over raw HTTP derive from `HttpTest`.
+- In browser tests, check styles and state with Playwright's waiting assertions (`Expect(...).ToHaveCSSAsync`, `ToHaveAttributeAsync`), never with a one-off read right after an action.
+- A rule in this file or in `docs/` that can be checked by a test should be (see `tests/Testo.UI.Tests/Architecture`, `Design`, `Localization`).
 
 ## Commands
 
 ```bash
 dotnet build
-dotnet test
-dotnet run --project src/Testo.Web
+dotnet test                                    # all tests, including the browser tests
+dotnet test --project tests/Testo.UI.Tests     # one test project
+dotnet test --project tests/Testo.E2E --filter-class "Testo.E2E.Pages.ThemeTests"
+dotnet run --project src/Testo.Web             # http://localhost:5080
 ```
-(Playwright browsers: `pwsh tests/Testo.E2E/bin/Debug/net10.0/playwright.ps1 install` on a fresh machine.)
+
+- Tests run on Microsoft.Testing.Platform (xUnit v3): filters are `--filter-class`, `--filter-method`, `--filter-namespace`; reports are `--report-xunit-trx` and `--report-xunit-html`.
+- The browser tests start the application themselves; nothing needs to run beforehand.
+- Browser for the tests, once per machine after a build: `pwsh tests/Testo.E2E/bin/Debug/net10.0/playwright.ps1 install chromium`. Or point `E2E_BROWSER_PATH` at an existing Chromium executable.

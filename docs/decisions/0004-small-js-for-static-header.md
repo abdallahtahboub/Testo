@@ -23,3 +23,9 @@ switch without a flash of the wrong theme, and a mobile menu with a focus trap.
   for every visitor; hurts first load, the main goal for public pages.
 - CSS-only menu (`:hover` / `:focus-within`): cannot close on Escape and is weak for
   touch and screen-reader users; not good enough for WCAG 2.2 AA quality.
+
+## Update (Milestone 1)
+The theme part is built: `Testo.UI.Shared/wwwroot/js/theme.js` (1.9 KB, no dependencies).
+The no-JavaScript baseline did not need the planned "no flash" script at all: the server
+renders the theme from the cookie (ADR-0008). The mega menu and mobile menu parts follow
+with the header in Milestones 2 and 3.

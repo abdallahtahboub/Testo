@@ -5,10 +5,19 @@ about the process around them.
 
 ## Branches
 
-`main` is the trunk. It is always green: it builds without warnings and all tests pass.
-Nothing is committed to `main` directly — every change arrives through a pull request.
+Work flows in one direction: **feature branch → `develop` → `main`.**
 
-Branch off `main` and name the branch `<type>/<short-description>`, in lowercase with
+| Branch | What it is | Who writes to it |
+|---|---|---|
+| `main` | Released, production-ready code. Every commit on it is a version worth shipping, and is tagged. | Only a release or a hotfix pull request |
+| `develop` | The integration branch. Finished work collects here and must stay green. | Only a pull request from a working branch |
+| working branches | One change in progress. Short-lived; deleted after merge. | You |
+
+Nothing is pushed directly to `main` or `develop` — every change arrives through a pull
+request, and CI must be green before it is merged. Both branches always build without
+warnings with all tests passing.
+
+Branch off `develop` and name the branch `<type>/<short-description>`, in lowercase with
 hyphens:
 
 | Type | For |
@@ -22,6 +31,22 @@ hyphens:
 | `milestone/` | A whole roadmap milestone, e.g. `milestone/2-design-system` |
 
 Delete the branch once its pull request is merged.
+
+### Getting work to `main`
+
+While the product has no production deployment, `main` moves when a milestone is
+accepted: open a pull request from `develop` to `main`, and tag the merge commit
+(`v0.1.0`, `v0.2.0`, …).
+
+Once there is a deployment, two more kinds of branch apply:
+
+| Branch | From | Into | For |
+|---|---|---|---|
+| `release/x.y.z` | `develop` | `main` **and** back into `develop` | Stabilizing a release: version bumps and fixes only, no new features |
+| `hotfix/x.y.z` | `main` | `main` **and** back into `develop` | An urgent fix to something already released |
+
+Merging a release or hotfix back into `develop` is what keeps the two branches from
+drifting apart.
 
 ## Commits
 
@@ -52,14 +77,14 @@ empty and error states.
 One pull request per logical change; a whole milestone may be one pull request.
 
 1. Make sure `dotnet build` is clean and `dotnet test` is green locally.
-2. Push the branch and open a pull request against `main`.
+2. Push the branch and open a pull request against `develop` (against `main` only for a release or a hotfix).
 3. Fill in the template: what changed, why, and how you verified it.
 4. CI must pass. A red pull request does not get merged, and a test is never disabled to make it green.
 5. Merge with **squash**, so `main` keeps one clear commit per change.
 
 Because this repository is private on a free plan, GitHub cannot enforce "no direct pushes
-to `main`". It is a convention we keep ourselves. If that becomes too risky, making the
-repository public or upgrading the plan enables branch protection.
+to `main` and `develop`". It is a convention we keep ourselves. If that becomes too risky,
+making the repository public or upgrading the plan enables branch protection.
 
 ## Definition of done
 

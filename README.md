@@ -11,7 +11,11 @@ AI-driven end-to-end web testing with a live progress view.
 
 ## Getting started
 
-You need the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0). Then:
+You need the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
+
+**Run every command below from the repository root**, the folder containing `Testo.slnx`.
+From inside a project folder, `dotnet` only sees that one project: `dotnet test` then
+reports "No test projects were found".
 
 ```bash
 dotnet run --project src/Testo.Web
@@ -31,11 +35,26 @@ dotnet test
 ```
 
 This runs everything: unit, component, architecture and browser tests. The browser tests
-start the application themselves, so nothing needs to be running first. Once per machine,
-after a first build, install the browser they drive:
+start the application themselves, so nothing needs to be running first.
+
+**Once per machine**, the browser the tests drive has to be downloaded, or every browser
+test fails with *"Executable doesn't exist"*. The installer is a PowerShell script that
+Playwright ships; on macOS and Linux, install PowerShell as a .NET tool first:
 
 ```bash
+dotnet tool install --global PowerShell
+```
+
+```bash
+dotnet build
 pwsh tests/Testo.E2E/bin/Debug/net10.0/playwright.ps1 install chromium
+```
+
+To run only part of the suite:
+
+```bash
+dotnet test --project tests/Testo.UI.Tests
+dotnet test --project tests/Testo.E2E --filter-class "Testo.E2E.Pages.ThemeTests"
 ```
 
 ## How the solution is organized

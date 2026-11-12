@@ -1,0 +1,34 @@
+@inherits LayoutComponentBase
+@inject IStringLocalizer<SharedResources> L
+@inject IOptions<BrandOptions> Brand
+@inject TimeProvider Time
+
+@* Layout of the public website. Milestone 3 replaces the header and footer with the full versions. *@
+<TSkipLink />
+
+<div class="site">
+    <header class="site-header">
+        <div class="t-container site-header__inner">
+            <a class="site-header__brand"
+               href="@LocalizedPath.For(SupportedCultures.Current)"
+               aria-label="@L["Site_Header_Home", Brand.Value.ProductName]">
+                <TBrand />
+            </a>
+            <div class="site-header__tools">
+                <TLanguageSwitch />
+                <TThemeSwitch />
+                <TLinkButton Href="@Routes.App">@L["Site_Header_OpenApp"]</TLinkButton>
+            </div>
+        </div>
+    </header>
+
+    <main id="main-content" class="site-main" tabindex="-1">
+        @Body
+    </main>
+
+    <footer class="site-footer">
+        <div class="t-container">
+            <p>@L["Site_Footer_Copyright", Time.GetUtcNow().Year, Brand.Value.ProductName]</p>
+        </div>
+    </footer>
+</div>

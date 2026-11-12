@@ -1,0 +1,35 @@
+.t-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text);
+}
+
+.t-brand__mark {
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: none;
+}
+
+.t-brand__tile {
+  fill: var(--color-brand);
+}
+
+.t-brand__check {
+  fill: none;
+  stroke: var(--color-on-brand);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.t-brand__node {
+  fill: var(--color-accent-decorative);
+}
+
+.t-brand__name {
+  font-size: var(--text-h4);
+  line-height: 1;
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+}

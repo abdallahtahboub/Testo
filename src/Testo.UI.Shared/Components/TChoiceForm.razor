@@ -1,0 +1,63 @@
+@inherits CurrentUrlComponentBase
+
+@*
+    A row of buttons for choosing one of a few options, such as the theme or the language.
+    It is a plain HTML form: each button posts its value to the server, which stores the
+    choice and sends the visitor back to the page they were on. No JavaScript is required.
+*@
+<form class="t-choice-form" method="post" action="@Action" @attributes="AdditionalAttributes">
+    <input type="hidden" name="returnUrl" value="@CurrentUrl" />
+    <div class="t-choice-form__group" role="group" aria-label="@Label">
+        @foreach (var option in Options)
+        {
+            <button type="submit"
+                    class="t-choice-form__option"
+                    name="@FieldName"
+                    value="@option.Value"
+                    lang="@option.Lang"
+                    aria-pressed="@(State == ChoiceState.Pressed ? (option.IsCurrent ? "true" : "false") : null)"
+                    aria-current="@(State == ChoiceState.Current && option.IsCurrent ? "true" : null)">
+                @if (option.Icon is not null)
+                {
+                    @option.Icon
+                    <span class="t-visually-hidden">@option.Label</span>
+                }
+                else if (option.ShortText is not null)
+                {
+                    <span aria-hidden="true">@option.ShortText</span>
+                    <span class="t-visually-hidden">@option.Label</span>
+                }
+                else
+                {
+                    @option.Label
+                }
+            </button>
+        }
+    </div>
+</form>
+
+@code {
+    /// <summary>The URL the form posts to.</summary>
+    [Parameter, EditorRequired]
+    public string Action { get; set; } = "";
+
+    /// <summary>The name of the posted field.</summary>
+    [Parameter, EditorRequired]
+    public string FieldName { get; set; } = "";
+
+    /// <summary>The accessible name of the group, for example "Language".</summary>
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = "";
+
+    /// <summary>The options, in display order.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<ChoiceOption> Options { get; set; } = [];
+
+    /// <summary>How the option in effect is announced. Defaults to <see cref="ChoiceState.Pressed"/>.</summary>
+    [Parameter]
+    public ChoiceState State { get; set; } = ChoiceState.Pressed;
+
+    /// <summary>Any other attribute is passed on to the form element.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+}

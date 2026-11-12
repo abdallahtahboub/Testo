@@ -1,0 +1,56 @@
+@inject ThemeState Theme
+@inject IStringLocalizer<SharedResources> L
+
+@*
+    Light / dark / same as system. The choice is stored in a cookie, so the server renders
+    the right theme on the next request. With JavaScript, js/theme.js applies the choice
+    at once instead of reloading the page (ADR-0004).
+*@
+<TChoiceForm Action="@Routes.ThemePreference"
+             FieldName="theme"
+             Label="@L["ThemeSwitch_Label"]"
+             Options="Options"
+             data-theme-switch
+             data-theme-cookie="@ThemeCookie.Name" />
+
+@code {
+    private IReadOnlyList<ChoiceOption> Options =>
+    [
+        .. ThemeCookie.Choices.Select(choice => new ChoiceOption(
+            Value: ThemeCookie.ToValue(choice),
+            Label: L[LabelKey(choice)],
+            IsCurrent: choice == Theme.Choice,
+            Icon: IconFor(choice))),
+    ];
+
+    private static string LabelKey(ThemeChoice choice) => choice switch
+    {
+        ThemeChoice.Light => "ThemeSwitch_Light",
+        ThemeChoice.Dark => "ThemeSwitch_Dark",
+        _ => "ThemeSwitch_System",
+    };
+
+    private static RenderFragment IconFor(ThemeChoice choice) => choice switch
+    {
+        ThemeChoice.Light => SunIcon,
+        ThemeChoice.Dark => MoonIcon,
+        _ => ScreenIcon,
+    };
+
+    private static readonly RenderFragment SunIcon =
+        @<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <circle cx="10" cy="10" r="3.25" />
+            <path d="M10 2.5v1.75M10 15.75v1.75M2.5 10h1.75M15.75 10h1.75M4.7 4.7l1.24 1.24M14.06 14.06l1.24 1.24M4.7 15.3l1.24-1.24M14.06 5.94l1.24-1.24" />
+        </svg>;
+
+    private static readonly RenderFragment MoonIcon =
+        @<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <path d="M16.5 11.7A6.75 6.75 0 0 1 8.3 3.5a6.75 6.75 0 1 0 8.2 8.2Z" />
+        </svg>;
+
+    private static readonly RenderFragment ScreenIcon =
+        @<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <rect x="2.75" y="3.75" width="14.5" height="9.5" rx="1.5" />
+            <path d="M7.5 16.25h5M10 13.25v3" />
+        </svg>;
+}

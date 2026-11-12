@@ -1,0 +1,24 @@
+@inject IStringLocalizer<SharedResources> L
+
+@*
+    One button per supported language. The server stores the choice in the culture cookie
+    and sends the visitor back; on the public site it sends them to the same page under
+    the other language's URL (ADR-0006).
+*@
+<TChoiceForm Action="@Routes.CulturePreference"
+             FieldName="culture"
+             Label="@L["LanguageSwitch_Label"]"
+             Options="Options"
+             State="ChoiceState.Current" />
+
+@code {
+    private static IReadOnlyList<ChoiceOption> Options =>
+    [
+        .. SupportedCultures.All.Select(culture => new ChoiceOption(
+            Value: culture,
+            Label: SupportedCultures.NativeName(culture),
+            IsCurrent: culture == SupportedCultures.Current,
+            ShortText: culture.ToUpperInvariant(),
+            Lang: culture)),
+    ];
+}

@@ -1,0 +1,34 @@
+@using Microsoft.FluentUI.AspNetCore.Components
+@inherits LayoutComponentBase
+@inject IStringLocalizer<SharedResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    Layout of the product app: top bar, navigation and main region. The navigation is filled
+    from the module registry in Milestone 4; until then it shows its empty state.
+*@
+<TSkipLink />
+
+<div class="app-shell">
+    <header class="app-topbar">
+        <a class="app-topbar__brand" href="@Routes.App" aria-label="@L["App_Header_Home", Brand.Value.ProductName]">
+            <TBrand />
+        </a>
+        <div class="app-topbar__tools">
+            <a class="app-topbar__link" href="@LocalizedPath.For(SupportedCultures.Current)">@L["App_Header_Website"]</a>
+            <TLanguageSwitch />
+            <TThemeSwitch />
+        </div>
+    </header>
+
+    <nav class="app-nav" aria-label="@L["App_Nav_Label"]">
+        <p class="app-nav__empty">@L["App_Nav_Empty"]</p>
+    </nav>
+
+    <main id="main-content" class="app-main" tabindex="-1">
+        @Body
+    </main>
+</div>
+
+@* Hosts the Fluent UI dialogs, tooltips, toasts and menus. *@
+<FluentProviders />

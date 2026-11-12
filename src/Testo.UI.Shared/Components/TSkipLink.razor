@@ -1,0 +1,15 @@
+@inherits CurrentUrlComponentBase
+@inject IStringLocalizer<SharedResources> L
+
+@*
+    The first focusable element of every page (WCAG 2.4.1). target="_top" keeps Blazor's
+    interactive router from intercepting the click, so the browser performs a normal in-page
+    jump, which also moves keyboard focus to the target.
+*@
+<a class="t-skip-link" href="@($"{CurrentUrl}#{TargetId}")" target="_top">@L["SkipLink_Text"]</a>
+
+@code {
+    /// <summary>Id of the element to jump to. The layouts give this id to their main region.</summary>
+    [Parameter]
+    public string TargetId { get; set; } = "main-content";
+}

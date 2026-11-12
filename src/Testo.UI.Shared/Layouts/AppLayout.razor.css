@@ -1,0 +1,97 @@
+.app-shell {
+  display: grid;
+  grid-template-columns: var(--app-nav-width) minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas:
+    "topbar topbar"
+    "nav    main";
+  min-height: 100dvh;
+  background-color: var(--color-surface-subtle);
+}
+
+.app-topbar {
+  grid-area: topbar;
+  position: sticky;
+  inset-block-start: 0;
+  z-index: var(--z-header);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  min-height: var(--app-topbar-height);
+  padding: var(--space-2) var(--space-6);
+  border-block-end: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+}
+
+.app-topbar__brand {
+  display: inline-flex;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+}
+
+.app-topbar__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.app-topbar__link {
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+}
+
+.app-nav {
+  grid-area: nav;
+  padding: var(--space-6) var(--space-4);
+  border-inline-end: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+}
+
+.app-nav__empty {
+  color: var(--color-text-muted);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body-sm);
+}
+
+.app-main {
+  grid-area: main;
+  min-width: 0;
+  padding: var(--space-6);
+}
+
+/* App pages use a compact page title (docs/design-system.md, type scale). */
+.app-main ::deep h1 {
+  font-size: var(--text-h3);
+  line-height: var(--leading-h3);
+  font-weight: var(--weight-semibold);
+  letter-spacing: normal;
+}
+
+/* Below the "md" breakpoint (900px) the navigation moves above the content. */
+@media (width < 56.25rem) {
+  .app-shell {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas:
+      "topbar"
+      "nav"
+      "main";
+  }
+
+  .app-topbar {
+    padding-inline: var(--space-4);
+  }
+
+  .app-nav {
+    padding-block: var(--space-3);
+    border-inline-end: 0;
+    border-block-end: 1px solid var(--color-border);
+  }
+
+  .app-main {
+    padding: var(--space-4);
+  }
+}

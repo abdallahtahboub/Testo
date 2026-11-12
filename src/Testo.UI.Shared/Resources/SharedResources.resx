@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="App_Header_Home" xml:space="preserve">
+    <value>{0} app home</value>
+  </data>
+  <data name="App_Header_Website" xml:space="preserve">
+    <value>Website</value>
+  </data>
+  <data name="App_Nav_Empty" xml:space="preserve">
+    <value>Modules appear here once they are switched on.</value>
+  </data>
+  <data name="App_Nav_Label" xml:space="preserve">
+    <value>App navigation</value>
+  </data>
+  <data name="LanguageSwitch_Label" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="Site_Footer_Copyright" xml:space="preserve">
+    <value>© {0} {1}</value>
+  </data>
+  <data name="Site_Header_Home" xml:space="preserve">
+    <value>{0} home page</value>
+  </data>
+  <data name="Site_Header_OpenApp" xml:space="preserve">
+    <value>Open app</value>
+  </data>
+  <data name="SkipLink_Text" xml:space="preserve">
+    <value>Skip to main content</value>
+  </data>
+  <data name="ThemeSwitch_Dark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="ThemeSwitch_Label" xml:space="preserve">
+    <value>Color theme</value>
+  </data>
+  <data name="ThemeSwitch_Light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="ThemeSwitch_System" xml:space="preserve">
+    <value>Same as system</value>
+  </data>
+</root>

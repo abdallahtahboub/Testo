@@ -8,5 +8,10 @@ namespace Testo.Web.Security;
 /// </summary>
 internal sealed class CspNonce
 {
-    public string Value { get; } = Convert.ToBase64String(RandomNumberGenerator.GetBytes(18));
+    /// <summary>
+    /// 128 random bits as hexadecimal digits. Hexadecimal on purpose: the value is written
+    /// into an HTML attribute and into a response header, and must read the same in both.
+    /// Base64 can contain "+", which HTML writes as "&amp;#x2B;".
+    /// </summary>
+    public string Value { get; } = Convert.ToHexString(RandomNumberGenerator.GetBytes(16));
 }

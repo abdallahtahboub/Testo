@@ -111,7 +111,8 @@ public class ResponseHeaderTests(AppFixture app) : HttpTest(app)
         var html = await first.Content.ReadAsStringAsync(Cancellation);
 
         var nonce = System.Text.RegularExpressions.Regex.Match(policy, "script-src 'self' 'nonce-([^']+)'").Groups[1].Value;
-        Assert.NotEmpty(nonce);
+        // 128 bits, in characters that are written the same in a header and in HTML.
+        Assert.Matches("^[0-9A-F]{32}$", nonce);
         Assert.Contains($"nonce=\"{nonce}\"", html, StringComparison.Ordinal);
         Assert.DoesNotContain("'unsafe-inline'", policy[..policy.IndexOf("style-src", StringComparison.Ordinal)], StringComparison.Ordinal);
         // A nonce is only worth something if it is new for every request.

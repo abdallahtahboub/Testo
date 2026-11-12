@@ -1,0 +1,50 @@
+.journey {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-3);
+}
+
+.journey__panel-start {
+  stop-color: var(--color-hero-start);
+}
+
+.journey__panel-end {
+  stop-color: var(--color-hero-end);
+}
+
+.journey__glow {
+  fill: var(--color-accent-decorative);
+  opacity: 0.16;
+}
+
+.journey__line {
+  fill: none;
+  stroke: var(--color-on-hero);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.journey__line--faint {
+  stroke: var(--color-on-hero-muted);
+  stroke-width: 2;
+  opacity: 0.45;
+}
+
+.journey__node {
+  fill: var(--color-hero-end);
+  stroke: var(--color-on-hero);
+  stroke-width: 3;
+}
+
+.journey__node--release {
+  fill: var(--color-accent-decorative);
+}
+
+.journey__check {
+  fill: none;
+  stroke: var(--color-hero-start);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

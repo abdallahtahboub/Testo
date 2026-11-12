@@ -1,0 +1,88 @@
+.app-home {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: var(--container-narrow);
+}
+
+.app-home__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.app-home__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-1);
+}
+
+.app-home__card-title {
+  font-size: var(--text-h4);
+  line-height: var(--leading-h4);
+  font-weight: var(--weight-semibold);
+  letter-spacing: normal;
+}
+
+.app-home__facts {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.app-home__fact {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-1);
+}
+
+.app-home__fact dt {
+  color: var(--color-text-muted);
+  font-size: var(--text-body-sm);
+}
+
+.app-home__click {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Wide tables scroll inside their own region, never the whole page. */
+.app-home__table-scroll {
+  overflow-x: auto;
+}
+
+.app-home__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-body-sm);
+  text-align: start;
+}
+
+.app-home__table th,
+.app-home__table td {
+  padding: var(--space-2) var(--space-3);
+  border-block-end: 1px solid var(--color-border);
+  font-weight: var(--weight-regular);
+  text-align: start;
+}
+
+.app-home__table thead th {
+  color: var(--color-text-muted);
+  font-weight: var(--weight-medium);
+}
+
+/* "sm" breakpoint (600px) and up: label and value side by side. */
+@media (width >= 37.5rem) {
+  .app-home__fact {
+    grid-template-columns: 14rem minmax(0, 1fr);
+    align-items: center;
+    gap: var(--space-4);
+  }
+}

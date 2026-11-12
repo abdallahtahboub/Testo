@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppHome_Check_ClickButton" xml:space="preserve">
+    <value>Klick zählen</value>
+  </data>
+  <data name="AppHome_Check_Clicks" xml:space="preserve">
+    <value>Klicks: {0}</value>
+  </data>
+  <data name="AppHome_Check_Components" xml:space="preserve">
+    <value>Komponentenbibliothek</value>
+  </data>
+  <data name="AppHome_Check_Connecting" xml:space="preserve">
+    <value>Verbindung wird hergestellt …</value>
+  </data>
+  <data name="AppHome_Check_Formats" xml:space="preserve">
+    <value>Datums- und Zahlenformat</value>
+  </data>
+  <data name="AppHome_Check_Interactive" xml:space="preserve">
+    <value>Interaktiv (mit dem Server verbunden)</value>
+  </data>
+  <data name="AppHome_Check_Language" xml:space="preserve">
+    <value>Sprache</value>
+  </data>
+  <data name="AppHome_Check_Rendering" xml:space="preserve">
+    <value>Rendering</value>
+  </data>
+  <data name="AppHome_Check_Title" xml:space="preserve">
+    <value>Fundament-Check</value>
+  </data>
+  <data name="AppHome_Intro" xml:space="preserve">
+    <value>Dies ist die leere Hülle der Produkt-App. Dashboard und Module folgen in den Meilensteinen 4 und 5.</value>
+  </data>
+  <data name="AppHome_Modules_Column_Flag" xml:space="preserve">
+    <value>Feature-Flag</value>
+  </data>
+  <data name="AppHome_Modules_Column_Module" xml:space="preserve">
+    <value>Modul</value>
+  </data>
+  <data name="AppHome_Modules_Column_State" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="AppHome_Modules_Intro" xml:space="preserve">
+    <value>Jede Phase des Testprozesses ist ein Modul hinter einem Feature-Flag. Ein Flag bleibt aus, bis sein Modul gebaut ist.</value>
+  </data>
+  <data name="AppHome_Modules_Off" xml:space="preserve">
+    <value>Aus</value>
+  </data>
+  <data name="AppHome_Modules_On" xml:space="preserve">
+    <value>Ein</value>
+  </data>
+  <data name="AppHome_Modules_Title" xml:space="preserve">
+    <value>Module</value>
+  </data>
+  <data name="AppHome_PageTitle" xml:space="preserve">
+    <value>App-Vorschau – {0}</value>
+  </data>
+  <data name="AppHome_Title" xml:space="preserve">
+    <value>Vorschau der App-Shell</value>
+  </data>
+  <data name="Error_Code" xml:space="preserve">
+    <value>Fehler</value>
+  </data>
+  <data name="Error_PageTitle" xml:space="preserve">
+    <value>Etwas ist schiefgelaufen – {0}</value>
+  </data>
+  <data name="Error_RequestId" xml:space="preserve">
+    <value>Anfrage-ID: {0}</value>
+  </data>
+  <data name="Error_Text" xml:space="preserve">
+    <value>Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es gleich noch einmal.</value>
+  </data>
+  <data name="Error_Title" xml:space="preserve">
+    <value>Etwas ist schiefgelaufen</value>
+  </data>
+  <data name="NotFound_App" xml:space="preserve">
+    <value>App öffnen</value>
+  </data>
+  <data name="NotFound_Code" xml:space="preserve">
+    <value>Fehler 404</value>
+  </data>
+  <data name="NotFound_Home" xml:space="preserve">
+    <value>Zur Startseite</value>
+  </data>
+  <data name="NotFound_PageTitle" xml:space="preserve">
+    <value>Seite nicht gefunden – {0}</value>
+  </data>
+  <data name="NotFound_Text" xml:space="preserve">
+    <value>Die gesuchte Seite existiert nicht oder wurde verschoben.</value>
+  </data>
+  <data name="NotFound_Title" xml:space="preserve">
+    <value>Seite nicht gefunden</value>
+  </data>
+  <data name="Reconnect_Failed" xml:space="preserve">
+    <value>Die Verbindung konnte nicht wiederhergestellt werden. Bitte erneut versuchen oder die Seite neu laden.</value>
+  </data>
+  <data name="Reconnect_Paused" xml:space="preserve">
+    <value>Die Sitzung wurde vom Server pausiert.</value>
+  </data>
+  <data name="Reconnect_Rejoining" xml:space="preserve">
+    <value>Verbindung zum Server wird wiederhergestellt …</value>
+  </data>
+  <data name="Reconnect_Resume" xml:space="preserve">
+    <value>Fortsetzen</value>
+  </data>
+  <data name="Reconnect_ResumeFailed" xml:space="preserve">
+    <value>Die Sitzung konnte nicht fortgesetzt werden. Bitte erneut versuchen oder die Seite neu laden.</value>
+  </data>
+  <data name="Reconnect_Retry" xml:space="preserve">
+    <value>Erneut versuchen</value>
+  </data>
+  <data name="Reconnect_RetryAfter" xml:space="preserve">
+    <value>Sekunden.</value>
+  </data>
+  <data name="Reconnect_RetryBefore" xml:space="preserve">
+    <value>Wiederverbinden fehlgeschlagen. Neuer Versuch in</value>
+  </data>
+</root>

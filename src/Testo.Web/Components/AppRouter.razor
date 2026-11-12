@@ -1,0 +1,11 @@
+@inject RoutableAssemblies Routable
+
+@* Finds the page for a URL in the host, the public website and all registered modules. *@
+<Router AppAssembly="typeof(Program).Assembly"
+        AdditionalAssemblies="Routable.Additional"
+        NotFoundPage="typeof(Pages.NotFoundPage)">
+    <Found Context="routeData">
+        <RouteView RouteData="routeData" DefaultLayout="typeof(AppLayout)" />
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+</Router>

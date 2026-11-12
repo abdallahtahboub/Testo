@@ -1,0 +1,38 @@
+@inject IStringLocalizer<WebResources> L
+
+@*
+    Shown by Blazor when an app page loses its connection to the server. The element ids
+    and class names are the contract with blazor.web.js; only texts and styles are ours.
+    Based on the Blazor Web App project template (see THIRD-PARTY-NOTICES.md).
+*@
+<script type="module" src="@Assets["Components/Layout/ReconnectModal.razor.js"]"></script>
+
+<dialog id="components-reconnect-modal" data-nosnippet>
+    <div class="components-reconnect-container">
+        <div class="components-rejoining-animation" aria-hidden="true">
+            <div></div>
+            <div></div>
+        </div>
+        <p class="components-reconnect-first-attempt-visible">
+            @L["Reconnect_Rejoining"]
+        </p>
+        <p class="components-reconnect-repeated-attempt-visible">
+            @L["Reconnect_RetryBefore"] <span id="components-seconds-to-next-attempt"></span> @L["Reconnect_RetryAfter"]
+        </p>
+        <p class="components-reconnect-failed-visible">
+            @L["Reconnect_Failed"]
+        </p>
+        <button id="components-reconnect-button" class="components-reconnect-failed-visible">
+            @L["Reconnect_Retry"]
+        </button>
+        <p class="components-pause-visible">
+            @L["Reconnect_Paused"]
+        </p>
+        <p class="components-resume-failed-visible">
+            @L["Reconnect_ResumeFailed"]
+        </p>
+        <button id="components-resume-button" class="components-pause-visible components-resume-failed-visible">
+            @L["Reconnect_Resume"]
+        </button>
+    </div>
+</dialog>

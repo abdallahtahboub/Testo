@@ -1,0 +1,30 @@
+@page "/error"
+@layout SiteLayout
+@attribute [ExcludeFromInteractiveRouting]
+@using System.Diagnostics
+@inject IStringLocalizer<WebResources> L
+@inject IOptions<BrandOptions> Brand
+
+<PageTitle>@L["Error_PageTitle", Brand.Value.ProductName]</PageTitle>
+
+<StatusMessage Code="@L["Error_Code"]" Title="@L["Error_Title"]" Text="@L["Error_Text"]">
+    <ChildContent>
+        @if (_requestId is not null)
+        {
+            @* The ID lets support find this request in the server logs. *@
+            <p>@L["Error_RequestId", _requestId]</p>
+        }
+    </ChildContent>
+    <Actions>
+        <TLinkButton Href="@LocalizedPath.For(SupportedCultures.Current)">@L["NotFound_Home"]</TLinkButton>
+    </Actions>
+</StatusMessage>
+
+@code {
+    private string? _requestId;
+
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    protected override void OnInitialized() => _requestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
+}

@@ -1,0 +1,38 @@
+@* The content of a page that reports a status instead of showing content: not found, error. *@
+<section class="status-message">
+    <div class="t-container t-container--narrow status-message__inner">
+        <p class="t-overline status-message__code">@Code</p>
+        <h1>@Title</h1>
+        <p class="t-lead t-muted">@Text</p>
+        @if (ChildContent is not null)
+        {
+            <div class="status-message__extra">@ChildContent</div>
+        }
+        @if (Actions is not null)
+        {
+            <div class="status-message__actions">@Actions</div>
+        }
+    </div>
+</section>
+
+@code {
+    /// <summary>Short label above the title, for example "Error 404".</summary>
+    [Parameter, EditorRequired]
+    public string Code { get; set; } = "";
+
+    /// <summary>The page heading.</summary>
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    /// <summary>One sentence that says what happened and what to do.</summary>
+    [Parameter, EditorRequired]
+    public string Text { get; set; } = "";
+
+    /// <summary>Optional extra details below the text.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>Links that lead the visitor on.</summary>
+    [Parameter]
+    public RenderFragment? Actions { get; set; }
+}

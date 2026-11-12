@@ -1,0 +1,37 @@
+@using Microsoft.AspNetCore.Diagnostics
+@inject NavigationManager Navigation
+
+@*
+    Tells search engines that a public page exists once per language (ADR-0006).
+    Renders nothing for app pages and for the not-found page.
+*@
+@if (_path is not null)
+{
+    <link rel="canonical" href="@Absolute(_path)" />
+    @foreach (var culture in SupportedCultures.All)
+    {
+        <link rel="alternate" hreflang="@culture" href="@Absolute(LocalizedPath.WithCulture(_path, culture))" />
+    }
+    <link rel="alternate" hreflang="x-default" href="@Absolute(LocalizedPath.WithCulture(_path, SupportedCultures.Default))" />
+}
+
+@code {
+    private string? _path;
+
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    protected override void OnInitialized()
+    {
+        // A page shown in place of a missing one has no language versions of its own.
+        if (HttpContext?.Features.Get<IStatusCodeReExecuteFeature>() is not null)
+        {
+            return;
+        }
+
+        var path = "/" + new Uri(Navigation.Uri).GetComponents(UriComponents.Path, UriFormat.UriEscaped);
+        _path = LocalizedPath.TryGetCulture(path, out _) ? path.TrimEnd('/') : null;
+    }
+
+    private string Absolute(string path) => new Uri(new Uri(Navigation.BaseUri), path).AbsoluteUri;
+}

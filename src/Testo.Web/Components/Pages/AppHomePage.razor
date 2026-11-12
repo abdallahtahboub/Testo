@@ -1,0 +1,98 @@
+@page "/app"
+@using Microsoft.FluentUI.AspNetCore.Components
+@inject IStringLocalizer<WebResources> L
+@inject IOptions<BrandOptions> Brand
+@inject IEnumerable<IFeatureModule> Modules
+@inject IFeatureFlags Flags
+@inject TimeProvider Time
+
+@*
+    Placeholder for the app's start page in Milestone 1. It shows that the foundation works:
+    interactive rendering, the language, the component library and the feature flags.
+    Milestone 4 replaces it with the dashboard.
+*@
+<PageTitle>@L["AppHome_PageTitle", Brand.Value.ProductName]</PageTitle>
+
+<div class="app-home">
+    <header class="app-home__header">
+        <h1>@L["AppHome_Title"]</h1>
+        <p class="t-muted">@L["AppHome_Intro"]</p>
+    </header>
+
+    <section class="app-home__card" aria-labelledby="app-home-check-title">
+        <h2 id="app-home-check-title" class="app-home__card-title">@L["AppHome_Check_Title"]</h2>
+        <dl class="app-home__facts">
+            <div class="app-home__fact">
+                <dt>@L["AppHome_Check_Rendering"]</dt>
+                <dd data-testid="render-state">
+                    @(RendererInfo.IsInteractive ? L["AppHome_Check_Interactive"] : L["AppHome_Check_Connecting"])
+                </dd>
+            </div>
+            <div class="app-home__fact">
+                <dt>@L["AppHome_Check_Language"]</dt>
+                <dd data-testid="language">@CultureInfo.CurrentUICulture.NativeName</dd>
+            </div>
+            <div class="app-home__fact">
+                <dt>@L["AppHome_Check_Formats"]</dt>
+                <dd class="t-tabular" data-testid="formats">@Time.GetLocalNow().ToString("D", CultureInfo.CurrentCulture) · @SampleNumber.ToString("N2", CultureInfo.CurrentCulture)</dd>
+            </div>
+            <div class="app-home__fact">
+                <dt>@L["AppHome_Check_Components"]</dt>
+                <dd class="app-home__click">
+                    <FluentButton Appearance="ButtonAppearance.Primary" OnClick="CountClick" data-testid="click-button">
+                        @L["AppHome_Check_ClickButton"]
+                    </FluentButton>
+                    <span aria-live="polite" data-testid="click-count">@L["AppHome_Check_Clicks", _clicks]</span>
+                </dd>
+            </div>
+        </dl>
+    </section>
+
+    <section class="app-home__card" aria-labelledby="app-home-modules-title">
+        <h2 id="app-home-modules-title" class="app-home__card-title">@L["AppHome_Modules_Title"]</h2>
+        <p class="t-muted">@L["AppHome_Modules_Intro"]</p>
+        <div class="app-home__table-scroll" role="region" aria-labelledby="app-home-modules-title" tabindex="0">
+            <table class="app-home__table">
+                <thead>
+                    <tr>
+                        <th scope="col">@L["AppHome_Modules_Column_Module"]</th>
+                        <th scope="col">@L["AppHome_Modules_Column_Flag"]</th>
+                        <th scope="col">@L["AppHome_Modules_Column_State"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var module in _modules)
+                    {
+                        <tr data-testid="module-row">
+                            <th scope="row"><code>@module.Id</code></th>
+                            <td><code>@module.Flag</code></td>
+                            <td>@(module.IsEnabled ? L["AppHome_Modules_On"] : L["AppHome_Modules_Off"])</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+@code {
+    private const decimal SampleNumber = 1234567.89m;
+
+    private IReadOnlyList<ModuleState> _modules = [];
+    private int _clicks;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var states = new List<ModuleState>();
+        foreach (var module in Modules.OrderBy(module => module.Id, StringComparer.Ordinal))
+        {
+            states.Add(new ModuleState(module.Id, module.FeatureFlag ?? "–", await Flags.IsEnabledAsync(module.FeatureFlag)));
+        }
+
+        _modules = states;
+    }
+
+    private void CountClick() => _clicks++;
+
+    private sealed record ModuleState(string Id, string Flag, bool IsEnabled);
+}

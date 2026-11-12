@@ -1,0 +1,47 @@
+@page "/en"
+@page "/de"
+@inject IStringLocalizer<WebsiteResources> L
+@inject IOptions<BrandOptions> Brand
+
+@* Placeholder home page for Milestone 1. Milestone 3 replaces it with the real one. *@
+<PageTitle>@L["Home_PageTitle", Brand.Value.ProductName]</PageTitle>
+<HeadContent>
+    <meta name="description" content="@L["Home_MetaDescription", Brand.Value.ProductName]" />
+</HeadContent>
+
+<section class="home-hero">
+    <div class="t-container home-hero__inner">
+        <div class="home-hero__copy">
+            <p class="t-overline home-hero__overline">@L["Home_Hero_Overline"]</p>
+            <h1 class="t-display">@L["Home_Hero_Title"]</h1>
+            <p class="t-lead t-muted">@L["Home_Hero_Lead", Brand.Value.ProductName]</p>
+            <div class="home-hero__actions">
+                <TLinkButton Href="@Routes.App">@L["Home_Hero_OpenApp"]</TLinkButton>
+            </div>
+        </div>
+        <div class="home-hero__art">
+            <JourneyIllustration />
+        </div>
+    </div>
+</section>
+
+<section class="home-foundation" aria-labelledby="home-foundation-title">
+    <div class="t-container">
+        <h2 id="home-foundation-title">@L["Home_Foundation_Title"]</h2>
+        <p class="t-lead t-muted home-foundation__intro">@L["Home_Foundation_Intro"]</p>
+        <ul class="home-foundation__cards" role="list">
+            <li class="home-card">
+                <h3>@L["Home_Card_Tokens_Title"]</h3>
+                <p>@L["Home_Card_Tokens_Text"]</p>
+            </li>
+            <li class="home-card">
+                <h3>@L["Home_Card_Languages_Title"]</h3>
+                <p>@L["Home_Card_Languages_Text"]</p>
+            </li>
+            <li class="home-card">
+                <h3>@L["Home_Card_Themes_Title"]</h3>
+                <p>@L["Home_Card_Themes_Text"]</p>
+            </li>
+        </ul>
+    </div>
+</section>

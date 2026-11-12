@@ -1,0 +1,14 @@
+@page "/not-found"
+@layout SiteLayout
+@attribute [ExcludeFromInteractiveRouting]
+@inject IStringLocalizer<WebResources> L
+@inject IOptions<BrandOptions> Brand
+
+<PageTitle>@L["NotFound_PageTitle", Brand.Value.ProductName]</PageTitle>
+
+<StatusMessage Code="@L["NotFound_Code"]" Title="@L["NotFound_Title"]" Text="@L["NotFound_Text"]">
+    <Actions>
+        <TLinkButton Href="@LocalizedPath.For(SupportedCultures.Current)">@L["NotFound_Home"]</TLinkButton>
+        <TLinkButton Href="@Routes.App" Variant="ButtonVariant.Secondary">@L["NotFound_App"]</TLinkButton>
+    </Actions>
+</StatusMessage>

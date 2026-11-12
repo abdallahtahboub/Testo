@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Home_Card_Languages_Text" xml:space="preserve">
+    <value>Jeder Text liegt in beiden Sprachen vor. Öffentliche Seiten tragen die Sprache in ihrer Adresse.</value>
+  </data>
+  <data name="Home_Card_Languages_Title" xml:space="preserve">
+    <value>Englisch und Deutsch</value>
+  </data>
+  <data name="Home_Card_Themes_Text" xml:space="preserve">
+    <value>Das Farbschema folgt dem System oder Ihrer Auswahl – ohne kurzes Aufblitzen des falschen Schemas.</value>
+  </data>
+  <data name="Home_Card_Themes_Title" xml:space="preserve">
+    <value>Hell und dunkel</value>
+  </data>
+  <data name="Home_Card_Tokens_Text" xml:space="preserve">
+    <value>Farben, Schrift, Abstände und Bewegung stammen aus einer einzigen Token-Datei. Jede Komponente nutzt sie.</value>
+  </data>
+  <data name="Home_Card_Tokens_Title" xml:space="preserve">
+    <value>Design-Tokens</value>
+  </data>
+  <data name="Home_Foundation_Intro" xml:space="preserve">
+    <value>Meilenstein 1 legt das Fundament, auf dem alle weiteren Seiten aufbauen.</value>
+  </data>
+  <data name="Home_Foundation_Title" xml:space="preserve">
+    <value>Was diese Vorschau zeigt</value>
+  </data>
+  <data name="Home_Hero_Lead" xml:space="preserve">
+    <value>{0} begleitet den gesamten Testprozess: Planung, Analyse, Entwurf, Durchführung, Fehlermanagement und Reporting. Diese Vorschau zeigt das Fundament; die vollständige Website folgt.</value>
+  </data>
+  <data name="Home_Hero_OpenApp" xml:space="preserve">
+    <value>App-Vorschau öffnen</value>
+  </data>
+  <data name="Home_Hero_Overline" xml:space="preserve">
+    <value>KI-gestützte QA-Plattform</value>
+  </data>
+  <data name="Home_Hero_Title" xml:space="preserve">
+    <value>Qualität, die man sieht – von der Anforderung bis zum Release</value>
+  </data>
+  <data name="Home_MetaDescription" xml:space="preserve">
+    <value>{0} begleitet den gesamten Softwaretest – von den Anforderungen bis zur Release-Freigabe.</value>
+  </data>
+  <data name="Home_PageTitle" xml:space="preserve">
+    <value>{0} – KI-gestützte QA-Plattform</value>
+  </data>
+</root>

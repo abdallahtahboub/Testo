@@ -1,0 +1,71 @@
+@inject ThemeState Theme
+
+@*
+    The HTML document around every page.
+
+    Two kinds of pages share it (ADR-0003):
+      - public pages: rendered statically, no Blazor script at all;
+      - app pages:    rendered interactively over a server connection.
+    A page is public when it carries [ExcludeFromInteractiveRouting]
+    (all pages of Testo.Website do); everything else is an app page.
+*@
+<!DOCTYPE html>
+<html lang="@SupportedCultures.Current" data-theme="@ExplicitTheme">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="@(ExplicitTheme ?? "light dark")" />
+    <base href="/" />
+    @if (IsAppPage)
+    {
+        <ResourcePreloader />
+    }
+    <link rel="preload" href="_content/Testo.UI.Shared/fonts/inter-4.001-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="@Assets["_content/Testo.UI.Shared/css/fonts.css"]" />
+    <link rel="stylesheet" href="@Assets["_content/Testo.UI.Shared/css/tokens.css"]" />
+    <link rel="stylesheet" href="@Assets["_content/Testo.UI.Shared/css/base.css"]" />
+    <link rel="stylesheet" href="@Assets["Testo.Web.styles.css"]" />
+    @if (IsAppPage)
+    {
+        <ImportMap />
+    }
+    <link rel="icon" type="image/svg+xml" href="@Assets["_content/Testo.UI.Shared/favicon.svg"]" />
+    <LanguageAlternates />
+    <HeadOutlet @rendermode="PageRenderMode" />
+</head>
+
+@* The body attributes configure the Fluent UI components of app pages: our theme, our brand color, our base styles. *@
+<body no-fuib-style="@IsAppPage"
+      data-theme="@(IsAppPage ? ThemeCookie.ToValue(Theme.Choice) : null)"
+      data-theme-color="@(IsAppPage ? FluentTheme.BrandColor : null)">
+    <AppRouter @rendermode="PageRenderMode" />
+    @if (IsAppPage)
+    {
+        <ReconnectModal />
+        <script src="@Assets["_framework/blazor.web.js"]"></script>
+    }
+    <script type="module" src="@Assets["_content/Testo.UI.Shared/js/theme.js"]"></script>
+</body>
+
+</html>
+
+@code {
+    // Supplied by the framework for every server-rendered request, so it is never null here.
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    private IComponentRenderMode? PageRenderMode => HttpContext.AcceptsInteractiveRouting() ? InteractiveServer : null;
+
+    private bool IsAppPage => PageRenderMode is not null;
+
+    /// <summary>"light" or "dark" when the visitor chose one; null when the system setting decides.</summary>
+    private string? ExplicitTheme => Theme.Choice == ThemeChoice.System ? null : ThemeCookie.ToValue(Theme.Choice);
+
+    protected override void OnInitialized()
+    {
+        // Read the theme cookie once per request. Rendering the theme on the server is what
+        // prevents a flash of the wrong theme.
+        Theme.Choice = ThemeCookie.Parse(HttpContext.Request.Cookies[ThemeCookie.Name]);
+    }
+}

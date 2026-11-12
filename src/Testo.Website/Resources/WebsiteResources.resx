@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Home_Card_Languages_Text" xml:space="preserve">
+    <value>Every text exists in both languages. Public pages carry the language in their address.</value>
+  </data>
+  <data name="Home_Card_Languages_Title" xml:space="preserve">
+    <value>English and German</value>
+  </data>
+  <data name="Home_Card_Themes_Text" xml:space="preserve">
+    <value>The theme follows your system or your own choice, and the page never flashes the wrong one.</value>
+  </data>
+  <data name="Home_Card_Themes_Title" xml:space="preserve">
+    <value>Light and dark</value>
+  </data>
+  <data name="Home_Card_Tokens_Text" xml:space="preserve">
+    <value>Colors, type, spacing and motion come from one token file. Every component uses it.</value>
+  </data>
+  <data name="Home_Card_Tokens_Title" xml:space="preserve">
+    <value>Design tokens</value>
+  </data>
+  <data name="Home_Foundation_Intro" xml:space="preserve">
+    <value>Milestone 1 lays the groundwork that every later page builds on.</value>
+  </data>
+  <data name="Home_Foundation_Title" xml:space="preserve">
+    <value>What this preview shows</value>
+  </data>
+  <data name="Home_Hero_Lead" xml:space="preserve">
+    <value>{0} supports the whole testing journey: planning, analysis, design, execution, defects and reporting. This preview shows the foundation; the full website follows.</value>
+  </data>
+  <data name="Home_Hero_OpenApp" xml:space="preserve">
+    <value>Open the app preview</value>
+  </data>
+  <data name="Home_Hero_Overline" xml:space="preserve">
+    <value>AI-assisted QA platform</value>
+  </data>
+  <data name="Home_Hero_Title" xml:space="preserve">
+    <value>Quality you can see, from requirement to release</value>
+  </data>
+  <data name="Home_MetaDescription" xml:space="preserve">
+    <value>{0} supports the whole software testing journey, from requirements to release sign-off.</value>
+  </data>
+  <data name="Home_PageTitle" xml:space="preserve">
+    <value>{0} – AI-assisted QA platform</value>
+  </data>
+</root>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppHome_Check_ClickButton" xml:space="preserve">
+    <value>Count a click</value>
+  </data>
+  <data name="AppHome_Check_Clicks" xml:space="preserve">
+    <value>Clicks: {0}</value>
+  </data>
+  <data name="AppHome_Check_Components" xml:space="preserve">
+    <value>Component library</value>
+  </data>
+  <data name="AppHome_Check_Connecting" xml:space="preserve">
+    <value>Connecting…</value>
+  </data>
+  <data name="AppHome_Check_Formats" xml:space="preserve">
+    <value>Date and number format</value>
+  </data>
+  <data name="AppHome_Check_Interactive" xml:space="preserve">
+    <value>Interactive (connected to the server)</value>
+  </data>
+  <data name="AppHome_Check_Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="AppHome_Check_Rendering" xml:space="preserve">
+    <value>Rendering</value>
+  </data>
+  <data name="AppHome_Check_Title" xml:space="preserve">
+    <value>Foundation check</value>
+  </data>
+  <data name="AppHome_Intro" xml:space="preserve">
+    <value>This is the empty shell of the product app. The dashboard and the modules arrive in Milestones 4 and 5.</value>
+  </data>
+  <data name="AppHome_Modules_Column_Flag" xml:space="preserve">
+    <value>Feature flag</value>
+  </data>
+  <data name="AppHome_Modules_Column_Module" xml:space="preserve">
+    <value>Module</value>
+  </data>
+  <data name="AppHome_Modules_Column_State" xml:space="preserve">
+    <value>State</value>
+  </data>
+  <data name="AppHome_Modules_Intro" xml:space="preserve">
+    <value>Every stage of the testing journey is a module behind a feature flag. A flag stays off until its module is built.</value>
+  </data>
+  <data name="AppHome_Modules_Off" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="AppHome_Modules_On" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="AppHome_Modules_Title" xml:space="preserve">
+    <value>Modules</value>
+  </data>
+  <data name="AppHome_PageTitle" xml:space="preserve">
+    <value>App preview – {0}</value>
+  </data>
+  <data name="AppHome_Title" xml:space="preserve">
+    <value>App shell preview</value>
+  </data>
+  <data name="Error_Code" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Error_PageTitle" xml:space="preserve">
+    <value>Something went wrong – {0}</value>
+  </data>
+  <data name="Error_RequestId" xml:space="preserve">
+    <value>Request ID: {0}</value>
+  </data>
+  <data name="Error_Text" xml:space="preserve">
+    <value>An unexpected error occurred. Please try again in a moment.</value>
+  </data>
+  <data name="Error_Title" xml:space="preserve">
+    <value>Something went wrong</value>
+  </data>
+  <data name="NotFound_App" xml:space="preserve">
+    <value>Open the app</value>
+  </data>
+  <data name="NotFound_Code" xml:space="preserve">
+    <value>Error 404</value>
+  </data>
+  <data name="NotFound_Home" xml:space="preserve">
+    <value>Go to the home page</value>
+  </data>
+  <data name="NotFound_PageTitle" xml:space="preserve">
+    <value>Page not found – {0}</value>
+  </data>
+  <data name="NotFound_Text" xml:space="preserve">
+    <value>The page you are looking for does not exist or has moved.</value>
+  </data>
+  <data name="NotFound_Title" xml:space="preserve">
+    <value>Page not found</value>
+  </data>
+  <data name="Reconnect_Failed" xml:space="preserve">
+    <value>Could not reconnect. Please retry or reload the page.</value>
+  </data>
+  <data name="Reconnect_Paused" xml:space="preserve">
+    <value>The session was paused by the server.</value>
+  </data>
+  <data name="Reconnect_Rejoining" xml:space="preserve">
+    <value>Reconnecting to the server…</value>
+  </data>
+  <data name="Reconnect_Resume" xml:space="preserve">
+    <value>Resume</value>
+  </data>
+  <data name="Reconnect_ResumeFailed" xml:space="preserve">
+    <value>Could not resume the session. Please retry or reload the page.</value>
+  </data>
+  <data name="Reconnect_Retry" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="Reconnect_RetryAfter" xml:space="preserve">
+    <value>seconds.</value>
+  </data>
+  <data name="Reconnect_RetryBefore" xml:space="preserve">
+    <value>Reconnecting failed. Trying again in</value>
+  </data>
+</root>

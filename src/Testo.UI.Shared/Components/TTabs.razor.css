@@ -1,6 +1,9 @@
 .t-tabs {
   display: flex;
   flex-direction: column;
+  /* The strip scrolls on its own, so the component never widens what contains it.
+     Without this a flex or grid item refuses to shrink below its content. */
+  min-width: 0;
 }
 
 .t-tabs__strip {

@@ -28,6 +28,11 @@
   align-items: stretch;
 }
 
+/* An example must never make the page wider than the screen, whatever it contains. */
+.showcase-example__stage ::deep * {
+  max-width: 100%;
+}
+
 .showcase-example__note {
   max-width: var(--measure);
   color: var(--color-text-muted);

@@ -51,6 +51,18 @@ Decisions recorded: ADR-0007 (Fluent UI 5), ADR-0008 (theme tokens), ADR-0009 (p
 
 **Done when:** every component has bUnit tests (rendering, parameters, events, ARIA, keyboard); the showcase page passes an axe scan in light and dark, at mobile and desktop width; Fluent components visibly use our brand tokens (Milestone 1 mapped brand color, font, radius and focus; the rest of the mapping is done here).
 
+**Status: built (2026-11-13), waiting for review.** 35 components, 702 tests. The Fluent UI mapping is complete, so its data grid, dialogs and menus take every colour, font, radius and shadow from our tokens in both themes.
+
+The mega menu, site header and footer **move to Milestone 4**, with the public website they belong to: building a mega menu before the pages it points at exists would be guesswork.
+
+Three faults were found by opening the showcase in a browser rather than by a test, and are worth remembering:
+
+- A class cannot cross a component boundary. CSS isolation scopes every selector to the component that declares it, so styles shared by several components now live in `wwwroot/css/controls.css`.
+- A class passed *to* a child component does not reach it either; wrap the child in an element the parent owns.
+- A sample of the type scale must not use real heading elements, or it joins the page outline. Type utility classes (`.t-h1`…`.t-h4`) exist for appearance without semantics.
+
+Decision recorded: ADR-0015 (our own icon set rather than an icon package).
+
 Already built in Milestone 1 and extended here: `TLinkButton`, the theme and language switch (`TChoiceForm`), the skip link and the brand mark.
 
 ## Milestone 3 — Public website

@@ -33,9 +33,9 @@
         <TButton Href="/en">Website</TButton>
     </ShowcaseExample>
 
-    <ShowcaseExample Caption="Counting clicks" Note="Proves the page is interactive, not just rendered.">
-        <TButton Variant="ButtonVariant.Primary" OnClick="() => _clicks++">Count a click</TButton>
-        <span aria-live="polite">Clicks: @_clicks</span>
+    <ShowcaseExample Caption="Counting clicks" Note="Proves the page is interactive, not just rendered — which is also how a browser test knows the circuit is up before it starts pressing keys.">
+        <TButton Variant="ButtonVariant.Primary" OnClick="() => _clicks++" data-testid="showcase-count">Count a click</TButton>
+        <span aria-live="polite" data-testid="showcase-clicks">Clicks: @_clicks</span>
     </ShowcaseExample>
 </ShowcaseSection>
 

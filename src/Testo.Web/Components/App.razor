@@ -1,3 +1,4 @@
+@using Microsoft.AspNetCore.Diagnostics
 @inject ThemeState Theme
 
 @*
@@ -46,7 +47,9 @@
 <body no-fuib-style="@IsAppPage"
       data-theme="@(IsAppPage ? ThemeCookie.ToValue(Theme.Choice) : null)"
       data-theme-color="@(IsAppPage ? FluentTheme.BrandColor : null)">
-    <AppRouter @rendermode="PageRenderMode" />
+    <CascadingValue Value="_requestedUrl" IsFixed="true">
+        <AppRouter @rendermode="PageRenderMode" />
+    </CascadingValue>
     @if (IsAppPage)
     {
         <ReconnectModal />
@@ -69,10 +72,23 @@
     /// <summary>"light" or "dark" when the visitor chose one; null when the system setting decides.</summary>
     private string? ExplicitTheme => Theme.Choice == ThemeChoice.System ? null : ThemeCookie.ToValue(Theme.Choice);
 
+    private RequestedUrl? _requestedUrl;
+
     protected override void OnInitialized()
     {
         // Read the theme cookie once per request. Rendering the theme on the server is what
         // prevents a flash of the wrong theme.
         Theme.Choice = ThemeCookie.Parse(HttpContext.Request.Cookies[ThemeCookie.Name]);
+
+        // When the not-found or the error page stands in for another page, links and forms
+        // must keep pointing at the address the visitor asked for.
+        if (HttpContext.Features.Get<IStatusCodeReExecuteFeature>() is { } missing)
+        {
+            _requestedUrl = new RequestedUrl(missing.OriginalPathBase + missing.OriginalPath + missing.OriginalQueryString);
+        }
+        else if (HttpContext.Features.Get<IExceptionHandlerPathFeature>() is { } failed)
+        {
+            _requestedUrl = new RequestedUrl(failed.Path + HttpContext.Request.QueryString);
+        }
     }
 }

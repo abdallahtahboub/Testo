@@ -28,6 +28,17 @@ public class TSkipLinkTests : DesignSystemTestContext
     }
 
     [Fact]
+    public void Render_OnASubstitutePage_LinksToTheAddressTheVisitorAskedFor()
+    {
+        // On the not-found page the framework reports "/not-found" as the current address.
+        Services.GetRequiredService<NavigationManager>().NavigateTo("/not-found");
+
+        var link = Render<TSkipLink>(parameters => parameters.AddCascadingValue(new RequestedUrl("/de/missing?x=1"))).Find("a");
+
+        Assert.Equal("/de/missing?x=1#main-content", link.GetAttribute("href"));
+    }
+
+    [Fact]
     public void Render_CustomTarget_UsesItsId()
     {
         var link = Render<TSkipLink>(parameters => parameters.Add(component => component.TargetId, "results")).Find("a");

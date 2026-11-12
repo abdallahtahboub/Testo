@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.FeatureManagement;
 using Testo.Mocks;
@@ -66,7 +67,20 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// A friendly page for failed page requests (GET and HEAD). A rejected form post keeps its
+// plain status code instead of being re-run as a post to the not-found page.
 app.UseStatusCodePagesWithReExecute(Routes.NotFound, createScopeForStatusCodePages: true);
+app.Use((context, next) =>
+{
+    if (!HttpMethods.IsGet(context.Request.Method)
+        && !HttpMethods.IsHead(context.Request.Method)
+        && context.Features.Get<IStatusCodePagesFeature>() is { } statusCodePages)
+    {
+        statusCodePages.Enabled = false;
+    }
+
+    return next(context);
+});
 app.UseHttpsRedirection();
 app.UseRequestLocalization();
 app.UseImmutableFontCaching();

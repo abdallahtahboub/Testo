@@ -15,6 +15,13 @@ public abstract class CurrentUrlComponentBase : ComponentBase, IDisposable
     private NavigationManager Navigation { get; set; } = default!;
 
     /// <summary>
+    /// Set by the host when it shows the not-found or the error page in place of the page
+    /// the visitor asked for.
+    /// </summary>
+    [CascadingParameter]
+    private RequestedUrl? Requested { get; set; }
+
+    /// <summary>
     /// The current URL relative to the site root, with query string and without fragment,
     /// for example <c>/app/settings?tab=team</c>.
     /// </summary>
@@ -23,7 +30,7 @@ public abstract class CurrentUrlComponentBase : ComponentBase, IDisposable
     /// <inheritdoc />
     protected override void OnInitialized()
     {
-        CurrentUrl = ToRootRelative(Navigation.Uri);
+        CurrentUrl = Requested?.Value ?? ToRootRelative(Navigation.Uri);
         Navigation.LocationChanged += OnLocationChanged;
     }
 

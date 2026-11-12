@@ -1,0 +1,151 @@
+@*
+    A button, or a link that looks like one.
+
+    One component for both, because they are the same thing to the eye and must not drift
+    apart. Which element it renders follows what it does: something that navigates is a
+    link, something that acts is a button. Giving it an Href makes it a link.
+
+    It needs no JavaScript, so it also works on statically rendered public pages, where a
+    form submit button is the way to act.
+*@
+@if (Href is null)
+{
+    <button class="@CssClass"
+            type="@Type"
+            disabled="@IsUnavailable"
+            aria-busy="@(Loading ? "true" : null)"
+            aria-label="@AriaLabel"
+            @onclick="HandleClickAsync"
+            @attributes="AdditionalAttributes">
+        @Inner
+    </button>
+}
+else
+{
+    <a class="@CssClass"
+       href="@(IsUnavailable ? null : Href)"
+       role="@(IsUnavailable ? "link" : null)"
+       aria-disabled="@(IsUnavailable ? "true" : null)"
+       aria-label="@AriaLabel"
+       @attributes="AdditionalAttributes">
+        @Inner
+    </a>
+}
+
+@code {
+    /// <summary>Makes this a link to the given target instead of a button.</summary>
+    [Parameter]
+    public string? Href { get; set; }
+
+    /// <summary>How important the action is. Defaults to <see cref="ButtonVariant.Secondary"/>.</summary>
+    [Parameter]
+    public ButtonVariant Variant { get; set; } = ButtonVariant.Secondary;
+
+    /// <summary>How large. Defaults to <see cref="ButtonSize.Medium"/>.</summary>
+    [Parameter]
+    public ButtonSize Size { get; set; } = ButtonSize.Medium;
+
+    /// <summary>An icon shown before the label, or on its own when there is no label.</summary>
+    [Parameter]
+    public IconName? Icon { get; set; }
+
+    /// <summary>The label. Leave it out for an icon-only button, which then needs an <see cref="AriaLabel"/>.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>The name read out when the visible content does not say enough. Required for an icon-only button.</summary>
+    [Parameter]
+    public string? AriaLabel { get; set; }
+
+    /// <summary>Shows a spinner and stops further clicks while something is in progress.</summary>
+    [Parameter]
+    public bool Loading { get; set; }
+
+    /// <summary>Switches the button off, for example while a form is incomplete.</summary>
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    /// <summary>Stretches the button to the width of its container.</summary>
+    [Parameter]
+    public bool FullWidth { get; set; }
+
+    /// <summary>The HTML button type. <c>submit</c> inside a form, otherwise <c>button</c>.</summary>
+    [Parameter]
+    public string Type { get; set; } = "button";
+
+    /// <summary>What happens on click. Only runs where the page is interactive.</summary>
+    [Parameter]
+    public EventCallback<MouseEventArgs> OnClick { get; set; }
+
+    /// <summary>Any other attribute is passed on to the element.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private bool IsUnavailable => Disabled || Loading;
+
+    /// <summary>
+    /// A browser does not click a disabled button, but it does click a link marked
+    /// aria-disabled, and code can dispatch the event either way. So the guard is here.
+    /// </summary>
+    private Task HandleClickAsync(MouseEventArgs args) =>
+        IsUnavailable ? Task.CompletedTask : OnClick.InvokeAsync(args);
+
+    private bool IsIconOnly => ChildContent is null && Icon is not null;
+
+    private string CssClass => string.Join(' ',
+        new[]
+        {
+            "t-button",
+            Variant switch
+            {
+                ButtonVariant.Primary => "t-button--primary",
+                ButtonVariant.Ghost => "t-button--ghost",
+                ButtonVariant.Danger => "t-button--danger",
+                _ => "t-button--secondary",
+            },
+            Size switch
+            {
+                ButtonSize.Small => "t-button--sm",
+                ButtonSize.Large => "t-button--lg",
+                _ => "t-button--md",
+            },
+            IsIconOnly ? "t-button--icon-only" : null,
+            FullWidth ? "t-button--full" : null,
+        }.Where(part => part is not null));
+
+    /// <summary>
+    /// Written without whitespace between the parts: a newline in here becomes a space in
+    /// the button's text, which shows up in its accessible name.
+    /// </summary>
+    private RenderFragment Inner => builder =>
+    {
+        if (Loading)
+        {
+            builder.OpenComponent<TIcon>(0);
+            builder.AddComponentParameter(1, nameof(TIcon.Name), IconName.Spinner);
+            builder.AddComponentParameter(2, nameof(TIcon.Size), IconSizeForButton);
+            builder.CloseComponent();
+        }
+        else if (Icon is { } icon)
+        {
+            builder.OpenComponent<TIcon>(3);
+            builder.AddComponentParameter(4, nameof(TIcon.Name), icon);
+            builder.AddComponentParameter(5, nameof(TIcon.Size), IconSizeForButton);
+            builder.CloseComponent();
+        }
+
+        builder.AddContent(6, ChildContent);
+    };
+
+    private IconSize IconSizeForButton => Size == ButtonSize.Small ? IconSize.Small : IconSize.Medium;
+
+    protected override void OnParametersSet()
+    {
+        if (IsIconOnly && string.IsNullOrWhiteSpace(AriaLabel))
+        {
+            throw new InvalidOperationException(
+                $"{nameof(TButton)} with an icon and no label needs an {nameof(AriaLabel)}, " +
+                "or nobody using a screen reader can tell what it does.");
+        }
+    }
+}

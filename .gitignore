@@ -1,0 +1,27 @@
+# Build output
+bin/
+obj/
+artifacts/
+
+# IDE and editor state
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.DotSettings.user
+
+# Test output
+TestResults/
+*.trx
+coverage/
+playwright-report/
+test-results/
+
+# Local, machine-specific settings and secrets
+appsettings.*.local.json
+.env
+
+# OS files
+.DS_Store
+Thumbs.db

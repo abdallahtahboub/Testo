@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- DTOs and service interfaces shared with the future backend.
+       Must stay free of UI dependencies (enforced by DependencyRulesTests). -->
+
+</Project>

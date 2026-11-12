@@ -1,0 +1,25 @@
+<Project>
+
+  <!-- Settings shared by every project in the solution. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <NeutralLanguage>en</NeutralLanguage>
+    <!-- Only ship the languages the product supports (trims satellite assemblies of dependencies). -->
+    <SatelliteResourceLanguages>en;de</SatelliteResourceLanguages>
+    <Product>Testo</Product>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!-- Code quality: every warning fails the build. -->
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!-- NuGet vulnerability advisories stay visible as warnings, but a newly published
+         advisory must not break an otherwise unchanged build. -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);NU1901;NU1902;NU1903;NU1904</WarningsNotAsErrors>
+  </PropertyGroup>
+
+</Project>

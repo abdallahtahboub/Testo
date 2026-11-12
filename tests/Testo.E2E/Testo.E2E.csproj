@@ -10,4 +10,28 @@
     <ProjectReference Include="..\..\src\Testo.Web\Testo.Web.csproj" />
   </ItemGroup>
 
+  <!--
+    Downloads the browser the tests drive. Run once per machine:
+
+        dotnet build tests/Testo.E2E -t:InstallTestBrowser
+
+    Playwright ships its own Node runtime and command line inside the build output, so this
+    needs nothing else installed: no PowerShell and no global tool. It replaces the
+    playwright.ps1 script that the Playwright documentation mentions.
+  -->
+  <PropertyGroup>
+    <!-- CI overrides this to also install the system libraries the browser needs. -->
+    <PlaywrightInstallArguments Condition="'$(PlaywrightInstallArguments)' == ''">chromium</PlaywrightInstallArguments>
+  </PropertyGroup>
+
+  <Target Name="InstallTestBrowser" DependsOnTargets="Build">
+    <ItemGroup>
+      <PlaywrightNode Include="$(OutputPath).playwright/node/*/node" />
+      <PlaywrightNode Include="$(OutputPath).playwright/node/*/node.exe" />
+    </ItemGroup>
+    <Error Condition="'@(PlaywrightNode)' == ''"
+           Text="Could not find the Node runtime that Playwright ships in $(OutputPath).playwright/node. Build the project first." />
+    <Exec Command="&quot;%(PlaywrightNode.FullPath)&quot; &quot;$(MSBuildProjectDirectory)/$(OutputPath).playwright/package/cli.js&quot; install $(PlaywrightInstallArguments)" />
+  </Target>
+
 </Project>

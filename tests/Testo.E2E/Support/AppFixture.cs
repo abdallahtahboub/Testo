@@ -53,10 +53,32 @@ public sealed class AppFixture : IAsyncLifetime
         BaseAddress = new Uri(addresses.Addresses.First());
 
         _playwright = await Playwright.CreateAsync();
-        _browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+        _browser = await LaunchBrowserAsync(_playwright);
+    }
+
+    private static async Task<IBrowser> LaunchBrowserAsync(IPlaywright playwright)
+    {
+        try
         {
-            ExecutablePath = Environment.GetEnvironmentVariable(BrowserPathVariable) is { Length: > 0 } path ? path : null,
-        });
+            return await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+            {
+                ExecutablePath = Environment.GetEnvironmentVariable(BrowserPathVariable) is { Length: > 0 } path ? path : null,
+            });
+        }
+        catch (PlaywrightException exception) when (exception.Message.Contains("Executable doesn't exist", StringComparison.Ordinal))
+        {
+            // Playwright's own message tells the reader to run a PowerShell script. Point at
+            // the way that works in this repository on every platform instead.
+            throw new InvalidOperationException(
+                """
+                The browser these tests drive is not installed. Install it once per machine, from the repository root:
+
+                    dotnet build tests/Testo.E2E -t:InstallTestBrowser
+
+                That needs nothing beyond the .NET SDK. See the "Tests" section of README.md.
+                """,
+                exception);
+        }
     }
 
     public async ValueTask DisposeAsync()

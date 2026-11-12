@@ -9,6 +9,7 @@ Read first: `docs/architecture.md`, `docs/roadmap.md`, `docs/design-system.md`,
 ## Working agreement
 
 - **Plan first.** Work milestone by milestone (`docs/roadmap.md`). **Stop after each milestone** and summarize for review. Don't start the next one without approval.
+- **Branches:** work on `<type>/<slug>` cut from `develop`; never commit to `develop` or `main` directly. A change reaches `develop` through a pull request with green CI, and `develop` reaches `main` at a release. See `CONTRIBUTING.md`.
 - **Ask before** adding a dependency, deviating from the architecture, using JavaScript, or using a non-.NET tool. Explain why.
 - **Update docs when you change behavior or structure** — in the same commit. Record architectural decisions as ADRs in `docs/decisions/NNNN-short-title.md` (template: `0000-template.md`).
 - Commit after each meaningful step; small commits with clear messages (imperative mood, e.g. `Add TKpiTile component with delta indicator`).
@@ -109,6 +110,9 @@ Testo.Modules.Defects/
 - A rule in this file or in `docs/` that can be checked by a test should be (see `tests/Testo.UI.Tests/Architecture`, `Design`, `Localization`).
 
 ## Commands
+
+Run these from the repository root (the folder with `Testo.slnx`); from inside a project
+folder `dotnet test` reports "No test projects were found".
 
 ```bash
 dotnet build

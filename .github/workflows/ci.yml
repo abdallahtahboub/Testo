@@ -5,6 +5,9 @@ name: CI
 
 on:
   push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
   workflow_dispatch:
 
 concurrency:
@@ -39,7 +42,9 @@ jobs:
         run: dotnet build Testo.slnx --configuration Release --no-restore
 
       - name: Install the browser for the Playwright tests
-        run: pwsh tests/Testo.E2E/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
+        run: >
+          dotnet build tests/Testo.E2E --configuration Release --no-restore
+          -t:InstallTestBrowser -p:PlaywrightInstallArguments="--with-deps chromium"
 
       - name: Test
         run: dotnet test --solution Testo.slnx --configuration Release --no-build --report-xunit-trx --results-directory TestResults

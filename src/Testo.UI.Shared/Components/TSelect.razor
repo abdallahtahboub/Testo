@@ -1,0 +1,59 @@
+@*
+    A choice from a known list. A native select, so it behaves the way the person's
+    device expects — including on a phone, where the browser gives a far better control
+    than anything we would build.
+*@
+<div class="t-select">
+    <select class="t-input t-select__control @(Context.IsInvalid ? "t-input--invalid" : null)"
+            id="@Context.ControlId"
+            value="@Value"
+            required="@Required"
+            disabled="@Disabled"
+            aria-describedby="@Context.DescribedBy"
+            aria-invalid="@(Context.IsInvalid ? "true" : null)"
+            @onchange="OnChangeAsync"
+            @attributes="AdditionalAttributes">
+        @if (Placeholder is not null)
+        {
+            <option value="" disabled selected="@(string.IsNullOrEmpty(Value))">@Placeholder</option>
+        }
+        @ChildContent
+    </select>
+    <TIcon Name="IconName.ChevronDown" Size="IconSize.Small" class="t-select__chevron" />
+</div>
+
+@code {
+    /// <summary>Supplied by the <see cref="TField"/> around it.</summary>
+    [Parameter, EditorRequired]
+    public TFieldContext Context { get; set; }
+
+    /// <summary>The selected value.</summary>
+    [Parameter]
+    public string? Value { get; set; }
+
+    /// <summary>Raised when the selection changes.</summary>
+    [Parameter]
+    public EventCallback<string?> ValueChanged { get; set; }
+
+    /// <summary>Shown while nothing is chosen, for example "Choose an environment".</summary>
+    [Parameter]
+    public string? Placeholder { get; set; }
+
+    /// <summary>The options, as <c>option</c> elements.</summary>
+    [Parameter, EditorRequired]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>Marks the control as required.</summary>
+    [Parameter]
+    public bool Required { get; set; }
+
+    /// <summary>Switches the control off.</summary>
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    /// <summary>Any other attribute is passed on to the select.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private Task OnChangeAsync(ChangeEventArgs args) => ValueChanged.InvokeAsync(args.Value?.ToString());
+}

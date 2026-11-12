@@ -1,0 +1,125 @@
+@typeparam TValue
+
+@*
+    A choice between a few options, all visible at once.
+
+    A fieldset with a legend, so the group has a name and arrow keys move between the
+    options the way a keyboard user expects from radio buttons.
+*@
+<fieldset class="t-radio-group @(HasError ? "t-radio-group--invalid" : null)" @attributes="AdditionalAttributes">
+    <legend class="t-radio-group__legend">
+        @Label
+        @if (Required)
+        {
+            <span class="t-radio-group__required" aria-hidden="true">*</span>
+            <span class="t-visually-hidden">@L["Field_Required"]</span>
+        }
+    </legend>
+
+    @if (!string.IsNullOrWhiteSpace(Hint))
+    {
+        <p class="t-radio-group__hint" id="@HintId">@Hint</p>
+    }
+
+    <div class="t-radio-group__options" role="radiogroup" aria-describedby="@DescribedBy" aria-invalid="@(HasError ? "true" : null)">
+        @for (var index = 0; index < Options.Count; index++)
+        {
+            var option = Options[index];
+            var id = $"{_name}-{index}";
+            <div class="t-radio">
+                <input class="t-radio__control"
+                       id="@id"
+                       type="radio"
+                       name="@_name"
+                       checked="@Equals(option.Value, Value)"
+                       disabled="@(Disabled || option.Disabled)"
+                       @onchange="() => SelectAsync(option.Value)" />
+                <label class="t-radio__label" for="@id">
+                    @option.Label
+                    @if (!string.IsNullOrWhiteSpace(option.Hint))
+                    {
+                        <span class="t-radio__hint">@option.Hint</span>
+                    }
+                </label>
+            </div>
+        }
+    </div>
+
+    @if (HasError)
+    {
+        <p class="t-radio-group__error" id="@ErrorId" aria-live="polite">
+            <TIcon Name="IconName.Warning" Size="IconSize.Small" />
+            @Error
+        </p>
+    }
+</fieldset>
+
+@code {
+    /// <summary>What the group is choosing.</summary>
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = "";
+
+    /// <summary>The options, in the order they should be read.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<TRadioOption<TValue>> Options { get; set; } = [];
+
+    /// <summary>The chosen value.</summary>
+    [Parameter]
+    public TValue? Value { get; set; }
+
+    /// <summary>Raised when the choice changes.</summary>
+    [Parameter]
+    public EventCallback<TValue?> ValueChanged { get; set; }
+
+    /// <summary>What the choice is for.</summary>
+    [Parameter]
+    public string? Hint { get; set; }
+
+    /// <summary>What is wrong, in words that say what to do.</summary>
+    [Parameter]
+    public string? Error { get; set; }
+
+    /// <summary>Marks the group as one that must be answered.</summary>
+    [Parameter]
+    public bool Required { get; set; }
+
+    /// <summary>Switches every option off.</summary>
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    /// <summary>Any other attribute is passed on to the fieldset.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    [Inject]
+    private IStringLocalizer<SharedResources> L { get; set; } = default!;
+
+    private readonly string _name = "r" + Guid.NewGuid().ToString("N")[..8];
+
+    private string HintId => _name + "-hint";
+
+    private string ErrorId => _name + "-error";
+
+    private bool HasError => !string.IsNullOrWhiteSpace(Error);
+
+    private string? DescribedBy
+    {
+        get
+        {
+            var parts = new List<string>(2);
+            if (!string.IsNullOrWhiteSpace(Hint))
+            {
+                parts.Add(HintId);
+            }
+
+            if (HasError)
+            {
+                parts.Add(ErrorId);
+            }
+
+            return parts.Count == 0 ? null : string.Join(' ', parts);
+        }
+    }
+
+    private Task SelectAsync(TValue? value) => ValueChanged.InvokeAsync(value);
+}

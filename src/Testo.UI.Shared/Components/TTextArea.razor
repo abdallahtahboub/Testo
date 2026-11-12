@@ -1,0 +1,61 @@
+@*
+    A multi-line text field, for a description or steps to reproduce.
+*@
+<textarea class="t-input t-textarea @(Context.IsInvalid ? "t-input--invalid" : null)"
+          id="@Context.ControlId"
+          rows="@Rows"
+          placeholder="@Placeholder"
+          required="@Required"
+          disabled="@Disabled"
+          readonly="@ReadOnly"
+          aria-describedby="@Context.DescribedBy"
+          aria-invalid="@(Context.IsInvalid ? "true" : null)"
+          @oninput="OnInputAsync"
+          @onchange="OnChangeAsync"
+          @attributes="AdditionalAttributes">@Value</textarea>
+
+@code {
+    /// <summary>Supplied by the <see cref="TField"/> around it.</summary>
+    [Parameter, EditorRequired]
+    public TFieldContext Context { get; set; }
+
+    /// <summary>The current value.</summary>
+    [Parameter]
+    public string? Value { get; set; }
+
+    /// <summary>Raised as the person types.</summary>
+    [Parameter]
+    public EventCallback<string?> ValueChanged { get; set; }
+
+    /// <summary>Raised when they leave the field.</summary>
+    [Parameter]
+    public EventCallback<string?> OnCommitted { get; set; }
+
+    /// <summary>How many lines tall it starts. It grows no further on its own; the person can drag it.</summary>
+    [Parameter]
+    public int Rows { get; set; } = 4;
+
+    /// <summary>An example of the expected content. Never a replacement for the label.</summary>
+    [Parameter]
+    public string? Placeholder { get; set; }
+
+    /// <summary>Marks the control as required.</summary>
+    [Parameter]
+    public bool Required { get; set; }
+
+    /// <summary>Switches the control off.</summary>
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    /// <summary>Shows the value without allowing a change.</summary>
+    [Parameter]
+    public bool ReadOnly { get; set; }
+
+    /// <summary>Any other attribute is passed on to the textarea.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private Task OnInputAsync(ChangeEventArgs args) => ValueChanged.InvokeAsync(args.Value?.ToString());
+
+    private Task OnChangeAsync(ChangeEventArgs args) => OnCommitted.InvokeAsync(args.Value?.ToString());
+}

@@ -24,6 +24,9 @@
   <data name="App_Nav_Label" xml:space="preserve">
     <value>App-Navigation</value>
   </data>
+  <data name="Field_Required" xml:space="preserve">
+    <value>Pflichtfeld</value>
+  </data>
   <data name="LanguageSwitch_Label" xml:space="preserve">
     <value>Sprache</value>
   </data>

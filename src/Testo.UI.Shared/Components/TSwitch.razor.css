@@ -1,0 +1,70 @@
+.t-switch {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+/* The native checkbox, drawn as a track with a knob. */
+.t-switch__control {
+  /* The knob and its inset are derived from the track, so the three always agree. */
+  --switch-track-width: 2.25rem;
+  --switch-track-height: 1.25rem;
+  --switch-knob: 1rem;
+  --switch-inset: calc((var(--switch-track-height) - var(--switch-knob)) / 2);
+
+  position: relative;
+  flex: none;
+  appearance: none;
+  width: var(--switch-track-width);
+  height: var(--switch-track-height);
+  margin: 0;
+  border-radius: var(--radius-full);
+  background-color: var(--color-border-strong);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.t-switch__control::after {
+  content: "";
+  position: absolute;
+  inset-block-start: var(--switch-inset);
+  inset-inline-start: var(--switch-inset);
+  width: var(--switch-knob);
+  height: var(--switch-knob);
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg);
+  transition: translate var(--duration-fast) var(--ease-standard);
+}
+
+.t-switch__control:checked {
+  background-color: var(--color-brand);
+}
+
+.t-switch__control:checked::after {
+  translate: calc(var(--switch-track-width) - var(--switch-knob) - (2 * var(--switch-inset))) 0;
+}
+
+.t-switch__control:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.t-switch__label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body-sm);
+  cursor: pointer;
+}
+
+.t-switch__control:disabled + .t-switch__label {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.t-switch__hint {
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  color: var(--color-text-muted);
+}

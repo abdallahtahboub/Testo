@@ -1,0 +1,166 @@
+/*
+ * Design tokens — the single source of truth for color, type, spacing, shape and motion.
+ * Components use these tokens and never raw values (docs/design-system.md).
+ *
+ * Themes: a color token carries both of its values, light-dark(<light>, <dark>).
+ * Which one applies follows `color-scheme`:
+ *   - default ............................ the visitor's system setting
+ *   - <html data-theme="light|dark"> ..... the visitor's own choice, rendered by the server
+ *                                          from the theme cookie (so there is no flash on load)
+ *
+ * TokenContrastTests checks the text/background pairs of this file against WCAG 2.2 AA.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* ---------- Color: surfaces and text ---------- */
+  --color-bg: light-dark(#FFFFFF, #0E1124);
+  --color-surface: light-dark(#FFFFFF, #161A33);
+  --color-surface-subtle: light-dark(#F5F6FA, #1B2040);
+  --color-border: light-dark(#D0D4E4, #2C3258);
+  --color-border-strong: light-dark(#7B8199, #6B7290);
+  --color-text: light-dark(#1A1D2E, #EEF0F8);
+  --color-text-muted: light-dark(#5B6178, #A3A9BF);
+
+  /* ---------- Color: brand "Indigo & Teal" (ADR-0005) ---------- */
+  --color-brand: light-dark(#2E3192, #8B93FF);
+  --color-brand-hover: light-dark(#1F2170, #A5ABFF);
+  --color-on-brand: light-dark(#FFFFFF, #0E1124);
+  --color-brand-subtle: light-dark(#E8E9FB, #1C1F4A);
+  --color-accent: light-dark(#0F766E, #5EEAD4);
+  --color-on-accent: light-dark(#FFFFFF, #0E1124);
+  --color-accent-decorative: #14B8A6;
+  --color-link: var(--color-brand);
+  --color-focus: var(--color-brand);
+
+  /* Hero areas keep their deep indigo in both themes. */
+  --color-hero-start: #1F2170;
+  --color-hero-end: #2E3192;
+  --color-on-hero: #FFFFFF;
+  --color-on-hero-muted: #C7CBFF;
+
+  /* ---------- Color: meaning ---------- */
+  --color-success: light-dark(#13753A, #4ADE80);
+  --color-warning: light-dark(#AD4407, #FBBF24);
+  --color-danger: light-dark(#B42318, #F87171);
+  --color-info: light-dark(#1D4ED8, #60A5FA);
+
+  /* Test status. Always shown together with an icon or a label, never as color alone. */
+  --status-passed: var(--color-success);
+  --status-failed: var(--color-danger);
+  --status-running: var(--color-info);
+  --status-blocked: var(--color-warning);
+  --status-flaky: var(--color-warning);
+  --status-skipped: var(--color-text-muted);
+
+  /* ---------- Typography ---------- */
+  --font-sans: "Inter", "Inter Fallback", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* Fluid sizes grow between a 400px and a 1440px wide viewport. */
+  --text-display: clamp(2.5rem, 1.9231rem + 2.3077vw, 4rem);     /* 40–64px */
+  --text-h1: clamp(2.125rem, 1.7885rem + 1.3462vw, 3rem);        /* 34–48px */
+  --text-h2: clamp(1.75rem, 1.5577rem + 0.7692vw, 2.25rem);      /* 28–36px */
+  --text-h3: 1.5rem;        /* 24px */
+  --text-h4: 1.25rem;       /* 20px */
+  --text-lead: 1.25rem;     /* 20px */
+  --text-body: 1rem;        /* 16px */
+  --text-body-sm: 0.875rem; /* 14px */
+  --text-caption: 0.75rem;  /* 12px */
+
+  --leading-display: 1.05;
+  --leading-h1: 1.1;
+  --leading-h2: 1.15;
+  --leading-h3: 1.25;
+  --leading-h4: 1.3;
+  --leading-lead: 1.55;
+  --leading-body: 1.6;
+  --leading-body-sm: 1.5;
+  --leading-caption: 1.4;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-heading: 650;
+  --weight-bold: 700;
+
+  --tracking-tight: -0.02em;
+  --tracking-wide: 0.08em;
+
+  --measure: 65ch;
+
+  /* ---------- Spacing (4px base) ---------- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  /* ---------- Layout ---------- */
+  --container-max: 90rem;      /* 1440px */
+  --container-narrow: 55rem;   /* 880px */
+  --container-padding: clamp(1rem, 4vw, 4rem);
+  --grid-gutter: var(--space-6);
+  --control-height: 2.5rem;    /* 40px: comfortable targets on the public site */
+  --control-height-sm: 2rem;   /* 32px: dense app UI */
+
+  --app-nav-width: 16.5rem;          /* 264px */
+  --app-nav-width-collapsed: 4rem;   /* 64px */
+  --app-topbar-height: 3.5rem;       /* 56px */
+
+  /* ---------- Shape ---------- */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1.25rem;
+  --radius-full: 9999px;
+
+  /* Depth. The dark theme shows depth with lighter surfaces and borders instead of shadows. */
+  --shadow-1: 0 1px 2px light-dark(rgb(16 20 50 / 0.06), transparent), 0 1px 3px light-dark(rgb(16 20 50 / 0.08), transparent);
+  --shadow-2: 0 4px 12px light-dark(rgb(16 20 50 / 0.08), transparent);
+  --shadow-3: 0 12px 32px light-dark(rgb(16 20 50 / 0.12), rgb(0 0 0 / 0.4));
+
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+
+  /* ---------- Motion ---------- */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-exit: cubic-bezier(0.3, 0, 1, 1);
+
+  /* ---------- Layers ---------- */
+  --z-header: 100;
+  --z-dropdown: 200;
+  --z-overlay: 300;
+  --z-dialog: 400;
+  --z-toast: 500;
+  --z-skip-link: 1000;
+}
+
+/* The visitor's explicit choice wins over the system setting. */
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0.01ms;
+    --duration-base: 0.01ms;
+    --duration-slow: 0.01ms;
+  }
+}

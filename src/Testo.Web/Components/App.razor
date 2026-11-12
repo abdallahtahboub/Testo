@@ -1,5 +1,6 @@
 @using Microsoft.AspNetCore.Diagnostics
 @inject ThemeState Theme
+@inject CspNonce Nonce
 
 @*
     The HTML document around every page.
@@ -30,7 +31,8 @@
     {
         @* Component styles of the host, the modules and the Fluent UI library. *@
         <link rel="stylesheet" href="@Assets["Testo.Web.styles.css"]" />
-        <ImportMap />
+        @* The only inline script. The nonce tells the browser it is ours (see SecurityHeadersExtensions). *@
+        <ImportMap nonce="@Nonce.Value" />
     }
     else
     {

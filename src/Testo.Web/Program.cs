@@ -23,6 +23,7 @@ using Testo.Web.Features;
 using Testo.Web.Localization;
 using Testo.Web.Preferences;
 using Testo.Web.Routing;
+using Testo.Web.Security;
 using Testo.Web.StaticAssets;
 
 // The host is the composition root: it wires the pieces together and contains no feature code.
@@ -45,6 +46,7 @@ builder.Services.AddTestoLocalization();
 builder.Services.AddFeatureManagement();
 builder.Services.AddScoped<IFeatureFlags, FeatureManagementFlags>();
 builder.Services.TryAddSingleton(TimeProvider.System);
+builder.Services.AddScoped<CspNonce>();
 
 // Data. Mock services today; the real backend replaces this one call with its HTTP clients.
 builder.Services.AddTestoMocks(options => builder.Configuration.GetSection(MockOptions.SectionName).Bind(options));
@@ -82,6 +84,7 @@ app.Use((context, next) =>
     return next(context);
 });
 app.UseHttpsRedirection();
+app.UseSecurityHeaders(app.Environment);
 app.UseRequestLocalization();
 app.UseImmutableFontCaching();
 app.UseAntiforgery();

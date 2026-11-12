@@ -72,6 +72,53 @@ public class ResponseHeaderTests(AppFixture app) : HttpTest(app)
     }
 
     [Theory]
+    [InlineData("/en")]
+    [InlineData("/app")]
+    [InlineData("/en/no-such-page")]
+    [InlineData("/_content/Testo.UI.Shared/css/tokens.css")]
+    public async Task AnyResponse_CarriesTheSecurityHeaders(string path)
+    {
+        using var response = await GetAsync(path);
+
+        Assert.Equal(["nosniff"], Header(response, "X-Content-Type-Options"));
+        Assert.Equal(["DENY"], Header(response, "X-Frame-Options"));
+        Assert.Equal(["strict-origin-when-cross-origin"], Header(response, "Referrer-Policy"));
+        Assert.Single(Header(response, "Permissions-Policy"));
+        var policy = Assert.Single(Header(response, "Content-Security-Policy"));
+        Assert.Contains("default-src 'self'", policy, StringComparison.Ordinal);
+        Assert.Contains("frame-ancestors 'none'", policy, StringComparison.Ordinal);
+        Assert.Contains("object-src 'none'", policy, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task PublicPage_Policy_AllowsNothingInline()
+    {
+        using var response = await GetAsync("/en");
+        var policy = Assert.Single(Header(response, "Content-Security-Policy"));
+
+        Assert.Contains("script-src 'self';", policy, StringComparison.Ordinal);
+        Assert.Contains("style-src 'self';", policy, StringComparison.Ordinal);
+        Assert.DoesNotContain("unsafe", policy, StringComparison.Ordinal);
+        Assert.DoesNotContain("nonce", policy, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task AppPage_Policy_AllowsOnlyTheScriptWithThisRequestsNonce()
+    {
+        using var first = await GetAsync("/app");
+        using var second = await GetAsync("/app");
+        var policy = Assert.Single(Header(first, "Content-Security-Policy"));
+        var html = await first.Content.ReadAsStringAsync(Cancellation);
+
+        var nonce = System.Text.RegularExpressions.Regex.Match(policy, "script-src 'self' 'nonce-([^']+)'").Groups[1].Value;
+        Assert.NotEmpty(nonce);
+        Assert.Contains($"nonce=\"{nonce}\"", html, StringComparison.Ordinal);
+        Assert.DoesNotContain("'unsafe-inline'", policy[..policy.IndexOf("style-src", StringComparison.Ordinal)], StringComparison.Ordinal);
+        // A nonce is only worth something if it is new for every request.
+        Assert.DoesNotContain(nonce, Assert.Single(Header(second, "Content-Security-Policy")), StringComparison.Ordinal);
+    }
+
+    [Theory]
     [InlineData("inter-4.001-latin.woff2")]
     [InlineData("inter-4.001-latin-ext.woff2")]
     [InlineData("jetbrains-mono-2.211-latin.woff2")]

@@ -24,11 +24,26 @@
   <data name="App_Nav_Label" xml:space="preserve">
     <value>App-Navigation</value>
   </data>
+  <data name="ErrorState_Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="ErrorState_Retry" xml:space="preserve">
+    <value>Erneut versuchen</value>
+  </data>
+  <data name="ErrorState_Text" xml:space="preserve">
+    <value>Bitte versuchen Sie es gleich noch einmal. Wenn es weiterhin auftritt, wenden Sie sich an Ihre Administration.</value>
+  </data>
+  <data name="ErrorState_Title" xml:space="preserve">
+    <value>Konnte nicht geladen werden</value>
+  </data>
   <data name="Field_Required" xml:space="preserve">
     <value>Pflichtfeld</value>
   </data>
   <data name="LanguageSwitch_Label" xml:space="preserve">
     <value>Sprache</value>
+  </data>
+  <data name="Loading_Label" xml:space="preserve">
+    <value>Wird geladen …</value>
   </data>
   <data name="Severity_Critical" xml:space="preserve">
     <value>Kritisch</value>
@@ -53,6 +68,12 @@
   </data>
   <data name="SkipLink_Text" xml:space="preserve">
     <value>Zum Hauptinhalt springen</value>
+  </data>
+  <data name="Stale_Notice" xml:space="preserve">
+    <value>Diese Zahlen stammen von {0}.</value>
+  </data>
+  <data name="Stale_Refresh" xml:space="preserve">
+    <value>Aktualisieren</value>
   </data>
   <data name="Status_Blocked" xml:space="preserve">
     <value>Blockiert</value>

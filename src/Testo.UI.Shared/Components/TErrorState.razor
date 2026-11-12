@@ -1,0 +1,55 @@
+@inject IStringLocalizer<SharedResources> L
+
+@*
+    Something failed.
+
+    Says what failed, whether it is worth retrying, and offers the retry — never a raw
+    status code (ux/patterns.md §1). Technical detail goes behind "Details", for the
+    people who want it.
+*@
+<div class="t-error-state" role="alert" @attributes="AdditionalAttributes">
+    <span class="t-error-state__icon">
+        <TIcon Name="IconName.Warning" Size="IconSize.Large" />
+    </span>
+    <h3 class="t-error-state__title">@(Title ?? L["ErrorState_Title"])</h3>
+    <p class="t-error-state__text">@(Text ?? L["ErrorState_Text"])</p>
+
+    @if (!string.IsNullOrWhiteSpace(Details))
+    {
+        <details class="t-error-state__details">
+            <summary>@L["ErrorState_Details"]</summary>
+            <pre class="t-error-state__detail-text">@Details</pre>
+        </details>
+    }
+
+    @if (OnRetry.HasDelegate)
+    {
+        <div class="t-error-state__action">
+            <TButton Variant="ButtonVariant.Secondary" Icon="IconName.Refresh" OnClick="OnRetry">
+                @L["ErrorState_Retry"]
+            </TButton>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>What failed. Defaults to a general message.</summary>
+    [Parameter]
+    public string? Title { get; set; }
+
+    /// <summary>What it means and what to do. Defaults to a general message.</summary>
+    [Parameter]
+    public string? Text { get; set; }
+
+    /// <summary>Technical detail, hidden behind a disclosure. For Jonas and Nadia, not for everyone.</summary>
+    [Parameter]
+    public string? Details { get; set; }
+
+    /// <summary>Offers a retry. Leave it unset when retrying cannot help.</summary>
+    [Parameter]
+    public EventCallback OnRetry { get; set; }
+
+    /// <summary>Any other attribute is passed on to the wrapper.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+}

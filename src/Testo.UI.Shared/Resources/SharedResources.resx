@@ -24,11 +24,26 @@
   <data name="App_Nav_Label" xml:space="preserve">
     <value>App navigation</value>
   </data>
+  <data name="ErrorState_Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="ErrorState_Retry" xml:space="preserve">
+    <value>Try again</value>
+  </data>
+  <data name="ErrorState_Text" xml:space="preserve">
+    <value>Try again in a moment. If it keeps happening, tell your administrator.</value>
+  </data>
+  <data name="ErrorState_Title" xml:space="preserve">
+    <value>Could not load this</value>
+  </data>
   <data name="Field_Required" xml:space="preserve">
     <value>required</value>
   </data>
   <data name="LanguageSwitch_Label" xml:space="preserve">
     <value>Language</value>
+  </data>
+  <data name="Loading_Label" xml:space="preserve">
+    <value>Loading…</value>
   </data>
   <data name="Severity_Critical" xml:space="preserve">
     <value>Critical</value>
@@ -53,6 +68,12 @@
   </data>
   <data name="SkipLink_Text" xml:space="preserve">
     <value>Skip to main content</value>
+  </data>
+  <data name="Stale_Notice" xml:space="preserve">
+    <value>These figures are from {0}.</value>
+  </data>
+  <data name="Stale_Refresh" xml:space="preserve">
+    <value>Refresh</value>
   </data>
   <data name="Status_Blocked" xml:space="preserve">
     <value>Blocked</value>

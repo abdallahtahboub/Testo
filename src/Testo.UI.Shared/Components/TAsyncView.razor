@@ -1,0 +1,87 @@
+@inject IStringLocalizer<SharedResources> L
+
+@*
+    The five states of anything that loads, in one place (ux/patterns.md §1).
+
+    A view that uses this cannot accidentally ship with only the happy path, because
+    every state is a parameter it has to think about. Loading and error have sensible
+    defaults; the empty state does not, because "nothing here" is always specific.
+*@
+@if (Loading)
+{
+    @(LoadingContent ?? DefaultLoading)
+}
+else if (!string.IsNullOrWhiteSpace(Error))
+{
+    @if (ErrorContent is not null)
+    {
+        @ErrorContent
+    }
+    else
+    {
+        <TErrorState Text="@Error" OnRetry="OnRetry" />
+    }
+}
+else if (IsEmpty)
+{
+    @EmptyContent
+}
+else
+{
+    @if (StaleSince is { } since)
+    {
+        @* Quietly showing old numbers is worse than showing none. *@
+        <div class="t-async__stale" role="status">
+            <TIcon Name="IconName.Clock" Size="IconSize.Small" />
+            <span>@L["Stale_Notice", since.ToString("t", System.Globalization.CultureInfo.CurrentCulture)]</span>
+            @if (OnRetry.HasDelegate)
+            {
+                <TButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="OnRetry">@L["Stale_Refresh"]</TButton>
+            }
+        </div>
+    }
+    @ChildContent
+}
+
+@code {
+    /// <summary>The data is on its way.</summary>
+    [Parameter]
+    public bool Loading { get; set; }
+
+    /// <summary>What went wrong, in words. Null means nothing went wrong.</summary>
+    [Parameter]
+    public string? Error { get; set; }
+
+    /// <summary>The data arrived and there is none.</summary>
+    [Parameter]
+    public bool IsEmpty { get; set; }
+
+    /// <summary>When the data on screen was fetched, if it may now be out of date.</summary>
+    [Parameter]
+    public DateTimeOffset? StaleSince { get; set; }
+
+    /// <summary>The data. Shown only when there is some, and nothing went wrong.</summary>
+    [Parameter, EditorRequired]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// What belongs here and the action that fills it. Required: an empty state is always
+    /// specific to the thing that is missing.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public RenderFragment? EmptyContent { get; set; }
+
+    /// <summary>A skeleton in the shape of the content. Defaults to three lines of text.</summary>
+    [Parameter]
+    public RenderFragment? LoadingContent { get; set; }
+
+    /// <summary>Replaces the standard error state, when this view needs to say something more specific.</summary>
+    [Parameter]
+    public RenderFragment? ErrorContent { get; set; }
+
+    /// <summary>Offered on the error state and beside a stale notice.</summary>
+    [Parameter]
+    public EventCallback OnRetry { get; set; }
+
+    private RenderFragment DefaultLoading => @<TSkeleton Shape="SkeletonShape.Text" Lines="3" />;
+}

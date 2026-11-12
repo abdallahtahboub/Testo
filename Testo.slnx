@@ -17,5 +17,6 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Testo.Mocks.Tests/Testo.Mocks.Tests.csproj" />
+    <Project Path="tests/Testo.UI.Tests/Testo.UI.Tests.csproj" />
   </Folder>
 </Solution>

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="bunit" />
+  </ItemGroup>
+
+  <!-- The host references every project, so this one reference gives the tests access to all of them. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Testo.Web\Testo.Web.csproj" />
+  </ItemGroup>
+
+</Project>

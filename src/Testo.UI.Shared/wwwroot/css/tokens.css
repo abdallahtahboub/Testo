@@ -33,6 +33,7 @@
   --color-accent-decorative: #14B8A6;
   --color-link: var(--color-brand);
   --color-focus: var(--color-brand);
+  --color-backdrop: rgb(14 17 36 / 0.5);
 
   /* Hero areas keep their deep indigo in both themes. */
   --color-hero-start: #1F2170;

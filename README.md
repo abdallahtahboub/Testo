@@ -38,17 +38,15 @@ This runs everything: unit, component, architecture and browser tests. The brows
 start the application themselves, so nothing needs to be running first.
 
 **Once per machine**, the browser the tests drive has to be downloaded, or every browser
-test fails with *"Executable doesn't exist"*. The installer is a PowerShell script that
-Playwright ships; on macOS and Linux, install PowerShell as a .NET tool first:
+test fails with *"Executable doesn't exist"*:
 
 ```bash
-dotnet tool install --global PowerShell
+dotnet build tests/Testo.E2E -t:InstallTestBrowser
 ```
 
-```bash
-dotnet build
-pwsh tests/Testo.E2E/bin/Debug/net10.0/playwright.ps1 install chromium
-```
+That needs nothing beyond the .NET SDK: Playwright ships its own Node runtime inside the
+build output and the target uses it. (Playwright's own documentation points at a
+`playwright.ps1` script, which would mean installing PowerShell first.)
 
 To run only part of the suite:
 

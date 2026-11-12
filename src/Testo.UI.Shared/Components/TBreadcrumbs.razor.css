@@ -31,5 +31,6 @@
 }
 
 .t-breadcrumbs__separator {
+  display: flex;
   color: var(--color-text-muted);
 }

@@ -1,0 +1,64 @@
+<ShowcaseSection Id="states" Title="The five states"
+                 Description="Every view that fetches data has all of these designed, not just the one where the data arrives. TAsyncView makes the empty state a required parameter, so a view cannot quietly ship without one.">
+
+    <ShowcaseExample Caption="Try each state" Stacked="true">
+        <div class="state-switch">
+            <TTabs Label="View states" Tabs="StateTabs" Selected="@_state" SelectedChanged="value => _state = value">
+                <div class="state-stage">
+                    <TAsyncView Loading="@(_state == "loading")"
+                                Error="@(_state == "error" ? "The run service did not answer." : null)"
+                                IsEmpty="@(_state == "empty")"
+                                StaleSince="@(_state == "stale" ? DateTimeOffset.Now.AddHours(-3) : null)"
+                                OnRetry="ShowData">
+                        <EmptyContent>
+                            <TEmptyState Title="No test runs yet" Icon="IconName.Play">
+                                <ChildContent>A run appears here as soon as a suite is started against an environment.</ChildContent>
+                                <Action><TButton Variant="ButtonVariant.Primary" Icon="IconName.Play">Start a run</TButton></Action>
+                            </TEmptyState>
+                        </EmptyContent>
+                        <ChildContent>
+                            <TTimeline>
+                                <TTimelineItem Title="Open the home page" Status="TestStatus.Passed" Duration="TimeSpan.FromSeconds(1.4)" />
+                                <TTimelineItem Title="Search for a product" Status="TestStatus.Passed" Duration="TimeSpan.FromSeconds(2.1)" />
+                                <TTimelineItem Title="Add to basket" Status="TestStatus.Failed" Duration="TimeSpan.FromSeconds(0.9)"
+                                               Subtitle="Expected the basket count to be 1, but it was 0." />
+                            </TTimeline>
+                        </ChildContent>
+                    </TAsyncView>
+                </div>
+            </TTabs>
+        </div>
+    </ShowcaseExample>
+
+    <ShowcaseExample Caption="Skeletons" Stacked="true"
+                     Note="In the shape of what is coming, so the page does not jump. A paragraph ends on a short line, the way real text does.">
+        <div class="skeletons">
+            <TSkeleton Shape="SkeletonShape.Heading" />
+            <TSkeleton Shape="SkeletonShape.Text" Lines="3" />
+            <TSkeleton Shape="SkeletonShape.Block" />
+            <TSkeleton Shape="SkeletonShape.Circle" />
+        </div>
+    </ShowcaseExample>
+
+    <ShowcaseExample Caption="Error, with detail for the people who want it" Stacked="true">
+        <TErrorState Title="Could not reach the test environment"
+                     Text="Staging did not answer within 30 seconds. The run was not started."
+                     Details="GET https://staging.example/health — timed out after 30000 ms"
+                     OnRetry="() => { }" />
+    </ShowcaseExample>
+</ShowcaseSection>
+
+@code {
+    private string _state = "data";
+
+    private void ShowData() => _state = "data";
+
+    private static readonly IReadOnlyList<TTab> StateTabs =
+    [
+        new("data", "Data"),
+        new("loading", "Loading"),
+        new("empty", "Empty"),
+        new("error", "Error"),
+        new("stale", "Stale"),
+    ];
+}

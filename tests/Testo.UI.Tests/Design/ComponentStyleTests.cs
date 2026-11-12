@@ -9,8 +9,24 @@ namespace Testo.UI.Tests.Design;
 /// </summary>
 public partial class ComponentStyleTests
 {
+    /// <summary>
+    /// Component styles, plus the shared stylesheets. Not <c>tokens.css</c>, which is where
+    /// the raw values are allowed to live, and not <c>fluent-bridge.css</c>, which only maps
+    /// one set of names onto another.
+    /// </summary>
     public static TheoryData<string> StyleSheets =>
-        [.. RepositoryRoot.SourceFiles("*.razor.css").Order(StringComparer.Ordinal).Select(RepositoryRoot.Relative)];
+    [
+        .. RepositoryRoot.SourceFiles("*.razor.css")
+            .Concat(RepositoryRoot.SourceFiles("*.css").Where(IsSharedStyleSheet))
+            .Order(StringComparer.Ordinal)
+            .Select(RepositoryRoot.Relative),
+    ];
+
+    private static bool IsSharedStyleSheet(string file)
+    {
+        var name = Path.GetFileName(file);
+        return name is "base.css" or "controls.css";
+    }
 
     private static string Read(string relativePath) =>
         Comment().Replace(File.ReadAllText(Path.Combine(RepositoryRoot.Path, relativePath)), "");

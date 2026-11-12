@@ -1,0 +1,44 @@
+<ShowcaseSection Id="buttons" Title="Buttons"
+                 Description="One component renders either a button or a link, depending on whether it is given a target. Prominence is opted into: the default is secondary.">
+
+    <ShowcaseExample Caption="Variants">
+        <TButton Variant="ButtonVariant.Primary">Start run</TButton>
+        <TButton Variant="ButtonVariant.Secondary">Edit</TButton>
+        <TButton Variant="ButtonVariant.Ghost">Filter</TButton>
+        <TButton Variant="ButtonVariant.Danger">Delete suite</TButton>
+    </ShowcaseExample>
+
+    <ShowcaseExample Caption="Sizes">
+        <TButton Size="ButtonSize.Small">Small</TButton>
+        <TButton Size="ButtonSize.Medium">Medium</TButton>
+        <TButton Size="ButtonSize.Large">Large</TButton>
+    </ShowcaseExample>
+
+    <ShowcaseExample Caption="With an icon, and icon only"
+                     Note="An icon-only button without an AriaLabel throws rather than shipping unlabelled.">
+        <TButton Variant="ButtonVariant.Primary" Icon="IconName.Play">Start run</TButton>
+        <TButton Icon="IconName.Refresh">Rerun</TButton>
+        <TButton Icon="IconName.Edit" AriaLabel="Edit test case" />
+        <TButton Icon="IconName.Delete" AriaLabel="Delete test case" Variant="ButtonVariant.Danger" />
+    </ShowcaseExample>
+
+    <ShowcaseExample Caption="Unavailable and working">
+        <TButton Disabled="true">Disabled</TButton>
+        <TButton Variant="ButtonVariant.Primary" Loading="true">Starting</TButton>
+        <TButton Href="/app" Disabled="true">Disabled link</TButton>
+    </ShowcaseExample>
+
+    <ShowcaseExample Caption="As a link" Note="Renders an anchor, so it navigates, opens in a new tab, and works on a statically rendered page.">
+        <TButton Href="/app" Variant="ButtonVariant.Primary">Open app</TButton>
+        <TButton Href="/en">Website</TButton>
+    </ShowcaseExample>
+
+    <ShowcaseExample Caption="Counting clicks" Note="Proves the page is interactive, not just rendered.">
+        <TButton Variant="ButtonVariant.Primary" OnClick="() => _clicks++">Count a click</TButton>
+        <span aria-live="polite">Clicks: @_clicks</span>
+    </ShowcaseExample>
+</ShowcaseSection>
+
+@code {
+    private int _clicks;
+}

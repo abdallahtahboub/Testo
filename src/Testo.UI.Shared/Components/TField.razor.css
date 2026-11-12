@@ -30,8 +30,3 @@
   line-height: var(--leading-caption);
   color: var(--color-danger);
 }
-
-/* The hint comes before the control, the error after it. */
-.t-field__hint {
-  order: -1;
-}

@@ -13,7 +13,10 @@
     @if (Delta is { } delta)
     {
         <div class="t-kpi__delta t-kpi__delta--@DeltaToneName">
-            <TIcon Name="@(delta >= 0 ? IconName.ArrowUp : IconName.ArrowDown)" Size="IconSize.Small" />
+            @if (delta != 0)
+            {
+                <TIcon Name="@(delta > 0 ? IconName.ArrowUp : IconName.ArrowDown)" Size="IconSize.Small" />
+            }
             <span>@FormattedDelta</span>
             @if (!string.IsNullOrWhiteSpace(DeltaLabel))
             {

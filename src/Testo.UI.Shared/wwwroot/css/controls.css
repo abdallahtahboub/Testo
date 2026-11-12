@@ -1,3 +1,14 @@
+/*
+ * Styles shared by more than one component.
+ *
+ * These cannot live in a component's own .razor.css: CSS isolation adds a scope attribute
+ * to every selector, so `.t-input` declared by TInput would never match the textarea
+ * rendered by TTextArea. A class used by several components is a design-system primitive
+ * and belongs here, next to the tokens, like `.t-container` in base.css.
+ */
+
+/* ---------- Text controls: input, textarea, select ---------- */
+
 .t-input {
   width: 100%;
   min-height: var(--control-height);

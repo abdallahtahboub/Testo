@@ -1,0 +1,69 @@
+@page "/showcase"
+@using Testo.Platform
+@using Testo.Platform.Features
+@inject IFeatureFlags Flags
+
+@*
+    Every component, with its variants and states, on one page.
+
+    A development tool rather than product UI, so its own headings are English only; the
+    components in it show their real translated content. It is behind Feature.Showcase,
+    which is off outside development.
+*@
+<PageTitle>Component showcase</PageTitle>
+
+@if (_enabled is null)
+{
+    <TSkeleton Shape="SkeletonShape.Text" Lines="3" />
+}
+else if (_enabled is false)
+{
+    <TEmptyState Title="The showcase is switched off here" Icon="IconName.Settings">
+        <ChildContent>It is a development tool, behind the <code>Feature.Showcase</code> flag.</ChildContent>
+    </TEmptyState>
+}
+else
+{
+    <div class="showcase">
+        <header class="showcase__header">
+            <p class="t-overline">Design system</p>
+            <h1>Component showcase</h1>
+            <p class="t-lead t-muted">
+                Every component the product is built from. Switch the theme and the language in the
+                top bar: everything here follows both.
+            </p>
+            <nav class="showcase__toc" aria-label="Sections">
+                @foreach (var (id, label) in Sections)
+                {
+                    <a class="showcase__toc-link" href="@($"{Routes.Showcase}#{id}")">@label</a>
+                }
+            </nav>
+        </header>
+
+        <FoundationsSection />
+        <ButtonsSection />
+        <StatusSection />
+        <FormsSection />
+        <StatesSection />
+        <DataSection />
+        <NavigationSection />
+    </div>
+}
+
+@code {
+    private bool? _enabled;
+
+    private static readonly (string Id, string Label)[] Sections =
+    [
+        ("foundations", "Foundations"),
+        ("buttons", "Buttons"),
+        ("status", "Status and badges"),
+        ("forms", "Forms"),
+        ("states", "The five states"),
+        ("data", "Showing data"),
+        ("navigation", "Navigation and decisions"),
+    ];
+
+    protected override async Task OnInitializedAsync() =>
+        _enabled = await Flags.IsEnabledAsync(FeatureFlags.Showcase);
+}

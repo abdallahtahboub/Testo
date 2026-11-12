@@ -1,0 +1,31 @@
+@*
+    One example inside a section: a caption saying what is being shown, and the thing itself.
+*@
+<div class="showcase-example">
+    <p class="showcase-example__caption">@Caption</p>
+    <div class="showcase-example__stage @(Stacked ? "showcase-example__stage--stacked" : null)">
+        @ChildContent
+    </div>
+    @if (!string.IsNullOrWhiteSpace(Note))
+    {
+        <p class="showcase-example__note">@Note</p>
+    }
+</div>
+
+@code {
+    /// <summary>What this example shows.</summary>
+    [Parameter, EditorRequired]
+    public string Caption { get; set; } = "";
+
+    /// <summary>Why it looks or behaves this way, where that is not obvious.</summary>
+    [Parameter]
+    public string? Note { get; set; }
+
+    /// <summary>Lays the examples out in a column instead of a row.</summary>
+    [Parameter]
+    public bool Stacked { get; set; }
+
+    /// <summary>The examples.</summary>
+    [Parameter, EditorRequired]
+    public RenderFragment? ChildContent { get; set; }
+}

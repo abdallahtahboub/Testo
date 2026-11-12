@@ -1,0 +1,14 @@
+.state-switch {
+  width: 100%;
+}
+
+.state-stage {
+  min-height: 14rem;
+}
+
+.skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  width: 100%;
+}

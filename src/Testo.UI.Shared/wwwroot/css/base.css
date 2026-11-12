@@ -90,7 +90,7 @@ a {
 
 a:hover {
   color: var(--color-brand-hover);
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: var(--indicator-width);
 }
 
 strong,

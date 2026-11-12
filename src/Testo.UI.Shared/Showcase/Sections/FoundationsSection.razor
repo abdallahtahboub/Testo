@@ -1,0 +1,79 @@
+<ShowcaseSection Id="foundations" Title="Foundations"
+                 Description="Colour, type and icons. Every component is built from these; nothing below uses a value that is not here.">
+
+    <ShowcaseExample Caption="Surfaces and text" Stacked="true"
+                     Note="Each pair is checked against WCAG 2.2 AA in both themes by TokenContrastTests, which reads the token file directly.">
+        <div class="swatches">
+            @foreach (var (name, token) in Surfaces)
+            {
+                <div class="swatch" style="background:var(@token)">
+                    <span class="swatch__name">@name</span>
+                    <code class="swatch__token">@token</code>
+                </div>
+            }
+        </div>
+    </ShowcaseExample>
+
+    <ShowcaseExample Caption="Meaning" Stacked="true"
+                     Note="Status colours are reserved. They never stand for a series in a chart, and they always travel with an icon or a word.">
+        <div class="swatches">
+            @foreach (var (name, token) in Meanings)
+            {
+                <div class="swatch swatch--ink" style="color:var(@token)">
+                    <span class="swatch__dot" style="background:var(@token)"></span>
+                    <span class="swatch__name">@name</span>
+                    <code class="swatch__token">@token</code>
+                </div>
+            }
+        </div>
+    </ShowcaseExample>
+
+    <ShowcaseExample Caption="Type scale" Stacked="true">
+        <div class="type-scale">
+            <p class="t-display">Display — the home page hero</p>
+            <h1>Heading 1 — a page title</h1>
+            <h2>Heading 2 — a section</h2>
+            <h3>Heading 3 — a card</h3>
+            <p class="t-lead">Lead — the sentence under a page title that says what this page is for.</p>
+            <p>Body — the default. Set at 65 characters for comfortable reading.</p>
+            <p class="t-muted" style="font-size:var(--text-body-sm)">Body small — the app's default, and table cells.</p>
+            <p class="t-overline">Overline — above a heading</p>
+            <p class="t-tabular" style="font-variant-numeric:tabular-nums">Tabular numbers 1,234,567.89 — so a column lines up</p>
+        </div>
+    </ShowcaseExample>
+
+    <ShowcaseExample Caption="Icons" Stacked="true"
+                     Note="Our own set of 34, one 20×20 grid, 1.5px strokes (ADR-0015). A name that does not exist is a compile error.">
+        <div class="icons">
+            @foreach (var icon in Enum.GetValues<IconName>())
+            {
+                <span class="icons__item">
+                    <TIcon Name="icon" />
+                    <code>@icon</code>
+                </span>
+            }
+        </div>
+    </ShowcaseExample>
+</ShowcaseSection>
+
+@code {
+    private static readonly (string Name, string Token)[] Surfaces =
+    [
+        ("Page", "--color-bg"),
+        ("Surface", "--color-surface"),
+        ("Subtle", "--color-surface-subtle"),
+        ("Brand subtle", "--color-brand-subtle"),
+        ("Brand", "--color-brand"),
+        ("Hero", "--color-hero-start"),
+    ];
+
+    private static readonly (string Name, string Token)[] Meanings =
+    [
+        ("Success", "--color-success"),
+        ("Warning", "--color-warning"),
+        ("Danger", "--color-danger"),
+        ("Info", "--color-info"),
+        ("Accent", "--color-accent"),
+        ("Muted", "--color-text-muted"),
+    ];
+}

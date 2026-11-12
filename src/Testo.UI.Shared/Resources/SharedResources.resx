@@ -27,6 +27,18 @@
   <data name="LanguageSwitch_Label" xml:space="preserve">
     <value>Language</value>
   </data>
+  <data name="Severity_Critical" xml:space="preserve">
+    <value>Critical</value>
+  </data>
+  <data name="Severity_Major" xml:space="preserve">
+    <value>Major</value>
+  </data>
+  <data name="Severity_Minor" xml:space="preserve">
+    <value>Minor</value>
+  </data>
+  <data name="Severity_Trivial" xml:space="preserve">
+    <value>Trivial</value>
+  </data>
   <data name="Site_Footer_Copyright" xml:space="preserve">
     <value>© {0} {1}</value>
   </data>
@@ -38,6 +50,27 @@
   </data>
   <data name="SkipLink_Text" xml:space="preserve">
     <value>Skip to main content</value>
+  </data>
+  <data name="Status_Blocked" xml:space="preserve">
+    <value>Blocked</value>
+  </data>
+  <data name="Status_Failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="Status_Flaky" xml:space="preserve">
+    <value>Flaky</value>
+  </data>
+  <data name="Status_NotRun" xml:space="preserve">
+    <value>Not run</value>
+  </data>
+  <data name="Status_Passed" xml:space="preserve">
+    <value>Passed</value>
+  </data>
+  <data name="Status_Running" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="Status_Skipped" xml:space="preserve">
+    <value>Skipped</value>
   </data>
   <data name="ThemeSwitch_Dark" xml:space="preserve">
     <value>Dark</value>

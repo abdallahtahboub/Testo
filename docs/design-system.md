@@ -3,6 +3,10 @@
 > Status: **Accepted** (Step 0 approved on 2026-11-11). Palette: **Option A "Indigo & Teal"** (ADR-0005).
 > All contrast ratios below were calculated with the WCAG 2.x relative-luminance formula.
 
+> This document is the **visual** language: color, type, spacing, components.
+> How the interface **behaves** — states, forms, tables, AI suggestions, wording — is in
+> [`ux/patterns.md`](ux/patterns.md), and who it is for is in [`ux/users.md`](ux/users.md).
+
 ## 1. Principles
 
 1. **Calm and trustworthy.** White and light-gray surfaces, one strong brand color, few accents.

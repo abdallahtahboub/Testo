@@ -1,0 +1,27 @@
+@using Testo.Contracts.Testing
+@inject IStringLocalizer<SharedResources> L
+
+@*
+    The outcome of a test, a step or a run. One component, so a passed test looks and
+    reads the same in a list, on a detail page and on a dashboard.
+*@
+<TBadge Tone="TestStatusVisuals.ToneFor(Status)"
+        Appearance="Appearance"
+        Icon="TestStatusVisuals.IconFor(Status)"
+        @attributes="AdditionalAttributes">
+    @L[TestStatusVisuals.ResourceKeyFor(Status)]
+</TBadge>
+
+@code {
+    /// <summary>The outcome to show.</summary>
+    [Parameter, EditorRequired]
+    public TestStatus Status { get; set; }
+
+    /// <summary>How strongly it is drawn. Defaults to <see cref="BadgeAppearance.Subtle"/>.</summary>
+    [Parameter]
+    public BadgeAppearance Appearance { get; set; } = BadgeAppearance.Subtle;
+
+    /// <summary>Any other attribute is passed on to the badge.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+}

@@ -1,0 +1,42 @@
+.t-icon {
+  display: inline-block;
+  flex: none;
+  vertical-align: middle;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.t-icon--sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+.t-icon--md {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.t-icon--lg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* The spinner is the one icon that moves. It stands still under reduced motion. */
+.t-icon[data-spin] {
+  animation: t-icon-spin 900ms linear infinite;
+}
+
+@keyframes t-icon-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-icon[data-spin] {
+    animation: none;
+  }
+}

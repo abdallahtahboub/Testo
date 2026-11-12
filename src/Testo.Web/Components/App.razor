@@ -25,10 +25,17 @@
     <link rel="stylesheet" href="@Assets["_content/Testo.UI.Shared/css/fonts.css"]" />
     <link rel="stylesheet" href="@Assets["_content/Testo.UI.Shared/css/tokens.css"]" />
     <link rel="stylesheet" href="@Assets["_content/Testo.UI.Shared/css/base.css"]" />
-    <link rel="stylesheet" href="@Assets["Testo.Web.styles.css"]" />
     @if (IsAppPage)
     {
+        @* Component styles of the host, the modules and the Fluent UI library. *@
+        <link rel="stylesheet" href="@Assets["Testo.Web.styles.css"]" />
         <ImportMap />
+    }
+    else
+    {
+        @* Public pages load only the component styles they use, not those of the app. *@
+        <link rel="stylesheet" href="@Assets["_content/Testo.UI.Shared/Testo.UI.Shared.bundle.scp.css"]" />
+        <link rel="stylesheet" href="@Assets["_content/Testo.Website/Testo.Website.bundle.scp.css"]" />
     }
     <link rel="icon" type="image/svg+xml" href="@Assets["_content/Testo.UI.Shared/favicon.svg"]" />
     <LanguageAlternates />

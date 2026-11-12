@@ -1,3 +1,18 @@
+/*
+ * Fluent UI components take their look from CSS variables. Pointing those at our tokens
+ * makes them follow our brand and theme. This is the first step (brand color, font, radius,
+ * focus); Milestone 2 completes the mapping.
+ */
+.app-root {
+  --colorBrandBackground: var(--color-brand);
+  --colorBrandBackgroundHover: var(--color-brand-hover);
+  --colorBrandBackgroundPressed: var(--color-brand-hover);
+  --colorNeutralForegroundOnBrand: var(--color-on-brand);
+  --colorStrokeFocus2: var(--color-focus);
+  --fontFamilyBase: var(--font-sans);
+  --borderRadiusMedium: var(--radius-md);
+}
+
 .app-shell {
   display: grid;
   grid-template-columns: var(--app-nav-width) minmax(0, 1fr);

@@ -1,8 +1,6 @@
 @page "/error"
-@layout SiteLayout
-@attribute [ExcludeFromInteractiveRouting]
 @using System.Diagnostics
-@inject IStringLocalizer<WebResources> L
+@inject IStringLocalizer<WebsiteResources> L
 @inject IOptions<BrandOptions> Brand
 
 <PageTitle>@L["Error_PageTitle", Brand.Value.ProductName]</PageTitle>
@@ -23,8 +21,5 @@
 @code {
     private string? _requestId;
 
-    [CascadingParameter]
-    private HttpContext? HttpContext { get; set; }
-
-    protected override void OnInitialized() => _requestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
+    protected override void OnInitialized() => _requestId = Activity.Current?.Id;
 }

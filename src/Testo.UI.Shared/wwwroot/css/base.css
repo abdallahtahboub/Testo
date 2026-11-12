@@ -147,8 +147,13 @@ button {
   outline-offset: var(--focus-ring-offset);
 }
 
-/* The main region receives focus from the skip link; it needs no ring of its own. */
-main:focus {
+/*
+ * The main region (after the skip link) and the page title (after navigating inside the app)
+ * receive focus from code so that assistive technology continues there. Neither is a
+ * control, so neither shows a ring.
+ */
+main:focus,
+h1[tabindex="-1"]:focus {
   outline: none;
 }
 

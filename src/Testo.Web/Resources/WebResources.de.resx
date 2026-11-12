@@ -69,39 +69,6 @@
   <data name="AppHome_Title" xml:space="preserve">
     <value>Vorschau der App-Shell</value>
   </data>
-  <data name="Error_Code" xml:space="preserve">
-    <value>Fehler</value>
-  </data>
-  <data name="Error_PageTitle" xml:space="preserve">
-    <value>Etwas ist schiefgelaufen – {0}</value>
-  </data>
-  <data name="Error_RequestId" xml:space="preserve">
-    <value>Anfrage-ID: {0}</value>
-  </data>
-  <data name="Error_Text" xml:space="preserve">
-    <value>Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es gleich noch einmal.</value>
-  </data>
-  <data name="Error_Title" xml:space="preserve">
-    <value>Etwas ist schiefgelaufen</value>
-  </data>
-  <data name="NotFound_App" xml:space="preserve">
-    <value>App öffnen</value>
-  </data>
-  <data name="NotFound_Code" xml:space="preserve">
-    <value>Fehler 404</value>
-  </data>
-  <data name="NotFound_Home" xml:space="preserve">
-    <value>Zur Startseite</value>
-  </data>
-  <data name="NotFound_PageTitle" xml:space="preserve">
-    <value>Seite nicht gefunden – {0}</value>
-  </data>
-  <data name="NotFound_Text" xml:space="preserve">
-    <value>Die gesuchte Seite existiert nicht oder wurde verschoben.</value>
-  </data>
-  <data name="NotFound_Title" xml:space="preserve">
-    <value>Seite nicht gefunden</value>
-  </data>
   <data name="Reconnect_Failed" xml:space="preserve">
     <value>Die Verbindung konnte nicht wiederhergestellt werden. Bitte erneut versuchen oder die Seite neu laden.</value>
   </data>

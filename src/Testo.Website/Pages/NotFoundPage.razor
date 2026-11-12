@@ -1,7 +1,5 @@
 @page "/not-found"
-@layout SiteLayout
-@attribute [ExcludeFromInteractiveRouting]
-@inject IStringLocalizer<WebResources> L
+@inject IStringLocalizer<WebsiteResources> L
 @inject IOptions<BrandOptions> Brand
 
 <PageTitle>@L["NotFound_PageTitle", Brand.Value.ProductName]</PageTitle>

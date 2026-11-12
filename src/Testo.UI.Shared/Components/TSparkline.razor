@@ -1,0 +1,56 @@
+@*
+    A trend, drawn small enough to sit beside a number.
+
+    Decorative on purpose: the figure next to it carries the information, and a screen
+    reader hearing a list of twenty numbers learns nothing. Where the shape itself is the
+    point, use a chart with its data table instead.
+*@
+@if (Points.Length >= 2)
+{
+    <svg class="t-sparkline" viewBox="0 0 @Width @Height" preserveAspectRatio="none" aria-hidden="true" focusable="false" @attributes="AdditionalAttributes">
+        <polyline class="t-sparkline__line" points="@Points" />
+        @if (Last is { } last)
+        {
+            <circle class="t-sparkline__last" cx="@last.X.ToString(Invariant)" cy="@last.Y.ToString(Invariant)" r="2" />
+        }
+    </svg>
+}
+
+@code {
+    private const int Width = 100;
+    private const int Height = 28;
+    private static readonly System.Globalization.CultureInfo Invariant = System.Globalization.CultureInfo.InvariantCulture;
+
+    /// <summary>The values, oldest first. Fewer than two draws nothing.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<double> Values { get; set; } = [];
+
+    /// <summary>Any other attribute is passed on to the svg.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private (double X, double Y)[] Coordinates = [];
+
+    private string Points => string.Join(' ', Coordinates.Select(point => $"{point.X.ToString(Invariant)},{point.Y.ToString(Invariant)}"));
+
+    private (double X, double Y)? Last => Coordinates.Length == 0 ? null : Coordinates[^1];
+
+    protected override void OnParametersSet()
+    {
+        if (Values.Count < 2)
+        {
+            Coordinates = [];
+            return;
+        }
+
+        var low = Values.Min();
+        var high = Values.Max();
+        // A flat line sits in the middle rather than dividing by zero.
+        var span = high - low;
+        var stepX = (double)Width / (Values.Count - 1);
+
+        Coordinates = [.. Values.Select((value, index) => (
+            X: Math.Round(index * stepX, 2),
+            Y: Math.Round(span == 0 ? Height / 2d : Height - 2 - ((value - low) / span * (Height - 4)), 2)))];
+    }
+}

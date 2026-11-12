@@ -1,0 +1,87 @@
+@using Testo.Contracts.Testing
+@inject IStringLocalizer<SharedResources> L
+
+@*
+    One step of a TTimeline.
+
+    The outcome is shown as an icon and said in words for a screen reader, so the step
+    never depends on the colour of its marker (ux/patterns.md §4).
+*@
+<li class="t-timeline__item @(IsCurrent ? "t-timeline__item--current" : null) t-timeline__item--@ToneName"
+    aria-current="@(IsCurrent ? "step" : null)"
+    @attributes="AdditionalAttributes">
+
+    <span class="t-timeline__marker">
+        <TIcon Name="TestStatusVisuals.IconFor(Status)" Size="IconSize.Small" />
+    </span>
+
+    <div class="t-timeline__content">
+        <div class="t-timeline__heading">
+            <span class="t-timeline__title">@Title</span>
+            <span class="t-visually-hidden">@L[TestStatusVisuals.ResourceKeyFor(Status)]</span>
+            @if (Duration is { } duration)
+            {
+                <span class="t-timeline__duration">@Format(duration)</span>
+            }
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Subtitle))
+        {
+            <p class="t-timeline__subtitle">@Subtitle</p>
+        }
+
+        @if (ChildContent is not null)
+        {
+            <div class="t-timeline__details">@ChildContent</div>
+        }
+    </div>
+</li>
+
+@code {
+    /// <summary>The timeline this step belongs to. Supplied automatically.</summary>
+    [CascadingParameter]
+    private TTimeline? Parent { get; set; }
+
+    /// <summary>What the step did.</summary>
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    /// <summary>Its outcome.</summary>
+    [Parameter, EditorRequired]
+    public TestStatus Status { get; set; }
+
+    /// <summary>What happened, or why it failed.</summary>
+    [Parameter]
+    public string? Subtitle { get; set; }
+
+    /// <summary>How long it took.</summary>
+    [Parameter]
+    public TimeSpan? Duration { get; set; }
+
+    /// <summary>The step being executed now.</summary>
+    [Parameter]
+    public bool IsCurrent { get; set; }
+
+    /// <summary>Evidence: a screenshot, a log extract, an assertion.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>Any other attribute is passed on to the list item.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string ToneName => TestStatusVisuals.ToneFor(Status).ToString().ToLowerInvariant();
+
+    protected override void OnInitialized()
+    {
+        if (Parent is null)
+        {
+            throw new InvalidOperationException($"{nameof(TTimelineItem)} must be inside a {nameof(TTimeline)}.");
+        }
+    }
+
+    /// <summary>Seconds below a minute, then minutes and seconds. Milliseconds help nobody read a run.</summary>
+    private static string Format(TimeSpan duration) => duration.TotalMinutes < 1
+        ? $"{duration.TotalSeconds:0.#} s"
+        : $"{(int)duration.TotalMinutes} min {duration.Seconds} s";
+}

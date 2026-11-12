@@ -1,0 +1,66 @@
+.t-tabs {
+  display: flex;
+  flex-direction: column;
+}
+
+.t-tabs__strip {
+  display: flex;
+  gap: var(--space-1);
+  overflow-x: auto;
+  border-block-end: 1px solid var(--color-border);
+}
+
+.t-tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 0;
+  /* The selected tab is marked by a line it shares with the strip's edge. */
+  border-block-end: var(--indicator-width) solid transparent;
+  background-color: transparent;
+  color: var(--color-text-muted);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  transition:
+    color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
+}
+
+.t-tabs__tab:hover {
+  color: var(--color-text);
+}
+
+.t-tabs__tab--selected {
+  border-block-end-color: var(--color-brand);
+  color: var(--color-brand);
+  font-weight: var(--weight-semibold);
+}
+
+/* Inside the strip the outline would be clipped by the overflow, so it sits inside. */
+.t-tabs__tab:focus-visible {
+  outline-offset: calc(-1 * var(--focus-ring-width));
+}
+
+.t-tabs__count {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-subtle);
+  font-size: var(--text-caption);
+  font-variant-numeric: tabular-nums;
+}
+
+.t-tabs__tab--selected .t-tabs__count {
+  background-color: var(--color-brand-subtle);
+}
+
+.t-tabs__panel {
+  padding-block-start: var(--space-5);
+}
+
+/* The panel is focusable so the keyboard can reach content that is not itself focusable;
+   it needs no ring of its own. */
+.t-tabs__panel:focus {
+  outline: none;
+}

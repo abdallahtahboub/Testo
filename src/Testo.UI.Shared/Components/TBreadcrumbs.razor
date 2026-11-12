@@ -1,0 +1,43 @@
+@inject IStringLocalizer<SharedResources> L
+
+@*
+    Where this page sits. The last crumb is the current page and is not a link, because
+    linking to where you already are is noise.
+*@
+<nav class="t-breadcrumbs" aria-label="@(Label ?? L["Breadcrumbs_Label"])" @attributes="AdditionalAttributes">
+    <ol class="t-breadcrumbs__list">
+        @for (var index = 0; index < Items.Count; index++)
+        {
+            var item = Items[index];
+            var last = index == Items.Count - 1;
+            <li class="t-breadcrumbs__item">
+                @if (last || item.Href is null)
+                {
+                    <span class="t-breadcrumbs__current" aria-current="@(last ? "page" : null)">@item.Label</span>
+                }
+                else
+                {
+                    <a class="t-breadcrumbs__link" href="@item.Href">@item.Label</a>
+                }
+                @if (!last)
+                {
+                    <TIcon Name="IconName.ChevronRight" Size="IconSize.Small" class="t-breadcrumbs__separator" />
+                }
+            </li>
+        }
+    </ol>
+</nav>
+
+@code {
+    /// <summary>The trail, from the outermost to the current page.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<TBreadcrumb> Items { get; set; } = [];
+
+    /// <summary>What this trail describes. Defaults to "Breadcrumb".</summary>
+    [Parameter]
+    public string? Label { get; set; }
+
+    /// <summary>Any other attribute is passed on to the navigation element.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+}

@@ -1,0 +1,98 @@
+@*
+    Switching between views of the same thing.
+
+    The ARIA tabs pattern, with the keyboard behaviour that goes with it: arrow keys move
+    between tabs, Home and End jump to the ends, and only the selected tab is in the tab
+    order, so Tab moves out of the strip rather than through every tab in it.
+
+    For a public page, use links to separate pages instead: a static page cannot respond
+    to a key press, and each view deserves its own address anyway.
+*@
+<div class="t-tabs" @attributes="AdditionalAttributes">
+    <div class="t-tabs__strip" role="tablist" aria-label="@Label" @onkeydown="OnKeyDownAsync">
+        @foreach (var tab in Tabs)
+        {
+            var selected = tab.Id == Selected;
+            <button type="button"
+                    class="t-tabs__tab @(selected ? "t-tabs__tab--selected" : null)"
+                    role="tab"
+                    id="@TabId(tab)"
+                    aria-selected="@(selected ? "true" : "false")"
+                    aria-controls="@PanelId(tab)"
+                    tabindex="@(selected ? 0 : -1)"
+                    @onclick="() => SelectAsync(tab.Id)">
+                @if (tab.Icon is { } icon)
+                {
+                    <TIcon Name="icon" Size="IconSize.Small" />
+                }
+                <span>@tab.Label</span>
+                @if (tab.Count is { } count)
+                {
+                    <span class="t-tabs__count">@count.ToString("N0", System.Globalization.CultureInfo.CurrentCulture)</span>
+                }
+            </button>
+        }
+    </div>
+
+    @foreach (var tab in Tabs.Where(tab => tab.Id == Selected))
+    {
+        <div class="t-tabs__panel" role="tabpanel" id="@PanelId(tab)" aria-labelledby="@TabId(tab)" tabindex="0">
+            @ChildContent
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>What the strip is choosing between, for a screen reader: "Defect views".</summary>
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = "";
+
+    /// <summary>The tabs, in order.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<TTab> Tabs { get; set; } = [];
+
+    /// <summary>The id of the selected tab.</summary>
+    [Parameter, EditorRequired]
+    public string? Selected { get; set; }
+
+    /// <summary>Raised when another tab is chosen.</summary>
+    [Parameter]
+    public EventCallback<string> SelectedChanged { get; set; }
+
+    /// <summary>The content of the selected tab.</summary>
+    [Parameter, EditorRequired]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>Any other attribute is passed on to the wrapper.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private readonly string _id = "t" + Guid.NewGuid().ToString("N")[..8];
+
+    private string TabId(TTab tab) => $"{_id}-tab-{tab.Id}";
+
+    private string PanelId(TTab tab) => $"{_id}-panel-{tab.Id}";
+
+    private Task SelectAsync(string id) => id == Selected ? Task.CompletedTask : SelectedChanged.InvokeAsync(id);
+
+    /// <summary>Arrow keys wrap around the strip; Home and End jump to its ends.</summary>
+    private Task OnKeyDownAsync(KeyboardEventArgs args)
+    {
+        if (Tabs.Count == 0)
+        {
+            return Task.CompletedTask;
+        }
+
+        var current = Math.Max(0, Tabs.ToList().FindIndex(tab => tab.Id == Selected));
+        var next = args.Key switch
+        {
+            "ArrowRight" or "ArrowDown" => (current + 1) % Tabs.Count,
+            "ArrowLeft" or "ArrowUp" => (current - 1 + Tabs.Count) % Tabs.Count,
+            "Home" => 0,
+            "End" => Tabs.Count - 1,
+            _ => current,
+        };
+
+        return next == current ? Task.CompletedTask : SelectAsync(Tabs[next].Id);
+    }
+}

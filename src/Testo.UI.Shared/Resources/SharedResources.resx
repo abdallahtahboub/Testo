@@ -24,6 +24,12 @@
   <data name="App_Nav_Label" xml:space="preserve">
     <value>App navigation</value>
   </data>
+  <data name="Breadcrumbs_Label" xml:space="preserve">
+    <value>Breadcrumb</value>
+  </data>
+  <data name="Confirm_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
   <data name="ErrorState_Details" xml:space="preserve">
     <value>Details</value>
   </data>
@@ -44,6 +50,18 @@
   </data>
   <data name="Loading_Label" xml:space="preserve">
     <value>Loading…</value>
+  </data>
+  <data name="Pagination_Label" xml:space="preserve">
+    <value>Pages</value>
+  </data>
+  <data name="Pagination_Next" xml:space="preserve">
+    <value>Next page</value>
+  </data>
+  <data name="Pagination_Previous" xml:space="preserve">
+    <value>Previous page</value>
+  </data>
+  <data name="Pagination_Status" xml:space="preserve">
+    <value>{0} to {1} of {2}</value>
   </data>
   <data name="Severity_Critical" xml:space="preserve">
     <value>Critical</value>

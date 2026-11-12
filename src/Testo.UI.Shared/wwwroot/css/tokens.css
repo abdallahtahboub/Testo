@@ -134,6 +134,8 @@
   --focus-ring-offset: 2px;
   /* The ring that marks the step a run is on, or the row a person is reading. */
   --ring-width: 3px;
+  /* The line that marks a selected tab or a current item. */
+  --indicator-width: 2px;
 
   /* ---------- Charts ----------
      The surface showing between two touching marks. Two colours that are close — ours

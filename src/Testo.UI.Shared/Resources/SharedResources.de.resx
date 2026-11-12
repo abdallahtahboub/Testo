@@ -27,6 +27,18 @@
   <data name="LanguageSwitch_Label" xml:space="preserve">
     <value>Sprache</value>
   </data>
+  <data name="Severity_Critical" xml:space="preserve">
+    <value>Kritisch</value>
+  </data>
+  <data name="Severity_Major" xml:space="preserve">
+    <value>Schwerwiegend</value>
+  </data>
+  <data name="Severity_Minor" xml:space="preserve">
+    <value>Gering</value>
+  </data>
+  <data name="Severity_Trivial" xml:space="preserve">
+    <value>Kosmetisch</value>
+  </data>
   <data name="Site_Footer_Copyright" xml:space="preserve">
     <value>© {0} {1}</value>
   </data>
@@ -38,6 +50,27 @@
   </data>
   <data name="SkipLink_Text" xml:space="preserve">
     <value>Zum Hauptinhalt springen</value>
+  </data>
+  <data name="Status_Blocked" xml:space="preserve">
+    <value>Blockiert</value>
+  </data>
+  <data name="Status_Failed" xml:space="preserve">
+    <value>Fehlgeschlagen</value>
+  </data>
+  <data name="Status_Flaky" xml:space="preserve">
+    <value>Instabil</value>
+  </data>
+  <data name="Status_NotRun" xml:space="preserve">
+    <value>Nicht ausgeführt</value>
+  </data>
+  <data name="Status_Passed" xml:space="preserve">
+    <value>Bestanden</value>
+  </data>
+  <data name="Status_Running" xml:space="preserve">
+    <value>Läuft</value>
+  </data>
+  <data name="Status_Skipped" xml:space="preserve">
+    <value>Übersprungen</value>
   </data>
   <data name="ThemeSwitch_Dark" xml:space="preserve">
     <value>Dunkel</value>

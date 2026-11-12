@@ -1,0 +1,69 @@
+.t-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-2);
+  min-height: 1.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+.t-badge__text {
+  /* Tabular digits keep a column of counts aligned. */
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Tone: the colour each meaning uses ---------- */
+
+.t-badge--neutral {
+  --badge-color: var(--color-text-muted);
+  --badge-tint: var(--color-surface-subtle);
+}
+
+.t-badge--brand {
+  --badge-color: var(--color-brand);
+  --badge-tint: var(--color-brand-subtle);
+}
+
+.t-badge--success {
+  --badge-color: var(--color-success);
+  --badge-tint: var(--color-surface-subtle);
+}
+
+.t-badge--warning {
+  --badge-color: var(--color-warning);
+  --badge-tint: var(--color-surface-subtle);
+}
+
+.t-badge--danger {
+  --badge-color: var(--color-danger);
+  --badge-tint: var(--color-surface-subtle);
+}
+
+.t-badge--info {
+  --badge-color: var(--color-info);
+  --badge-tint: var(--color-surface-subtle);
+}
+
+/* ---------- Appearance ---------- */
+
+.t-badge--subtle {
+  background-color: var(--badge-tint);
+  color: var(--badge-color);
+  border-color: var(--color-border);
+}
+
+.t-badge--outline {
+  background-color: transparent;
+  color: var(--badge-color);
+  border-color: currentColor;
+}
+
+.t-badge--filled {
+  background-color: var(--badge-color);
+  color: var(--color-bg);
+}

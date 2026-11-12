@@ -1,0 +1,58 @@
+@*
+    A surface that groups related content.
+
+    Giving it an Href makes the whole card a link, which is a larger and more forgiving
+    target than a link in its corner.
+*@
+@if (Href is null)
+{
+    <div class="t-card" @attributes="AdditionalAttributes">@Inner</div>
+}
+else
+{
+    <a class="t-card t-card--interactive" href="@Href" @attributes="AdditionalAttributes">@Inner</a>
+}
+
+@code {
+    /// <summary>Makes the whole card a link to this target.</summary>
+    [Parameter]
+    public string? Href { get; set; }
+
+    /// <summary>A heading, rendered as an h3.</summary>
+    [Parameter]
+    public string? Title { get; set; }
+
+    /// <summary>Extra content beside the heading, such as a badge or a menu.</summary>
+    [Parameter]
+    public RenderFragment? Header { get; set; }
+
+    /// <summary>The content.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>Content at the bottom, separated by a line: actions, or a summary.</summary>
+    [Parameter]
+    public RenderFragment? Footer { get; set; }
+
+    /// <summary>Any other attribute is passed on to the element.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private RenderFragment Inner => @<text>
+        @if (Header is not null || Title is not null)
+        {
+            <div class="t-card__header">
+                @if (Title is not null)
+                {
+                    <h3 class="t-card__title">@Title</h3>
+                }
+                @Header
+            </div>
+        }
+        <div class="t-card__body">@ChildContent</div>
+        @if (Footer is not null)
+        {
+            <div class="t-card__footer">@Footer</div>
+        }
+    </text>;
+}

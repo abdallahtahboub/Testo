@@ -1,0 +1,67 @@
+@*
+    A person, as their initials or their picture.
+
+    Decorative by default: a name next to the avatar is the real label, and reading it
+    twice helps nobody. Standing alone, it is given the name.
+*@
+<span class="t-avatar t-avatar--@SizeName"
+      role="@(Standalone ? "img" : null)"
+      aria-label="@(Standalone ? Name : null)"
+      aria-hidden="@(Standalone ? null : "true")"
+      title="@(Standalone ? null : Name)"
+      @attributes="AdditionalAttributes">
+    @if (!string.IsNullOrWhiteSpace(ImageUrl))
+    {
+        <img class="t-avatar__image" src="@ImageUrl" alt="" />
+    }
+    else
+    {
+        <span class="t-avatar__initials">@Initials(Name)</span>
+    }
+</span>
+
+@code {
+    /// <summary>The person's name. Used for the initials and the accessible name.</summary>
+    [Parameter, EditorRequired]
+    public string Name { get; set; } = "";
+
+    /// <summary>A picture. Without one, the initials are shown.</summary>
+    [Parameter]
+    public string? ImageUrl { get; set; }
+
+    /// <summary>How large. Defaults to <see cref="IconSize.Medium"/>.</summary>
+    [Parameter]
+    public IconSize Size { get; set; } = IconSize.Medium;
+
+    /// <summary>True when no name is shown next to it, so the avatar must carry the name itself.</summary>
+    [Parameter]
+    public bool Standalone { get; set; }
+
+    /// <summary>Any other attribute is passed on to the element.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string SizeName => Size switch
+    {
+        IconSize.Small => "sm",
+        IconSize.Large => "lg",
+        _ => "md",
+    };
+
+    /// <summary>
+    /// The first letter of the first and last word: "Mara Lindqvist" gives "ML". Works for
+    /// one name, and for names that are not Latin, because it never assumes two words.
+    /// </summary>
+    public static string Initials(string? name)
+    {
+        var words = (name ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return words.Length switch
+        {
+            0 => "?",
+            1 => First(words[0]),
+            _ => First(words[0]) + First(words[^1]),
+        };
+
+        static string First(string word) => char.ToUpperInvariant(word[0]).ToString();
+    }
+}

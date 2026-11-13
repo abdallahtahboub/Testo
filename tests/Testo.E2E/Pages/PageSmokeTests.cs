@@ -1,5 +1,6 @@
 using Microsoft.Playwright;
 using Testo.E2E.Support;
+using Testo.Platform;
 using static Microsoft.Playwright.Assertions;
 
 namespace Testo.E2E.Pages;
@@ -31,7 +32,10 @@ public class PageSmokeTests(AppFixture app) : BrowserTest(app)
     [MemberData(nameof(Pages))]
     public async Task Page_Loads_WithTitleHeadingAndNoProblems(string path, string language, string title, string heading, ColorScheme scheme)
     {
-        var page = await OpenAsync(path, options => options.ColorScheme = scheme);
+        // /app requires a session (D-1); the public pages must not.
+        var page = path.StartsWith(Routes.App, StringComparison.Ordinal)
+            ? await OpenSignedInAsync(path, options => options.ColorScheme = scheme)
+            : await OpenAsync(path, options => options.ColorScheme = scheme);
 
         await Expect(page.Page).ToHaveTitleAsync(title);
         await Expect(page.Page.Locator("html")).ToHaveAttributeAsync("lang", language);

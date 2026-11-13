@@ -15,7 +15,7 @@ a missing lock, and the room does not stay empty.
 
 ## Confirmed defects
 
-### D-1 · Nothing requires a sign-in — **Critical**
+### D-1 · Nothing requires a sign-in — **Critical** · *Fixed 2026-11-13, Milestone 3.1*
 
 `GET /app` with no cookie answers **200 OK** and renders the page.
 
@@ -30,9 +30,22 @@ throws rather than guessing. So no tenant data is exposed. The gate is simply ab
 **Why it cannot wait.** Every module page from the testing-journey milestones would be built on
 the assumption that the gate exists.
 
-**Fix.** A fallback policy requiring an authenticated user; `[AllowAnonymous]` on the website and
-account pages; a test asserting that `/app` redirects a signed-out visitor to sign-in, and that the
-account pages stay reachable.
+**Fixed.** Not with a fallback policy, which was the plan and does not fit a Blazor Web App:
+`MapRazorComponents` registers a catch-all endpoint so the router can render the not-found page,
+and a fallback challenges that too — a plain 404 on the public website became a redirect to
+sign-in. Measured, not assumed.
+
+Instead:
+
+- `[Authorize]` on the app pages and `[AllowAnonymous]` on the website, the account pages and the
+  showcase, each declared once in an `_Imports.razor`;
+- `PageAuthorizationTests` fails the build for any routable page that declares neither, and for any
+  page under `/app` that is not protected. Removing the attribute was tried; the test named the
+  page;
+- `AuthorizeRouteView` in the router, because an interactive session navigates inside the circuit
+  without touching the server's routing, so the endpoint check alone would not run;
+- `AuthorizationTests` asserts the redirect, that a session reaches `/app`, that the public pages
+  and the theme switch stay open, and that an unknown address is still a 404.
 
 ### D-2 · The tenant guard trusts any pre-set `OrganizationId` — **High** (not reachable by a user)
 

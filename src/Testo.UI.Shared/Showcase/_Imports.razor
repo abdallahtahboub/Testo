@@ -1,3 +1,4 @@
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
@@ -7,3 +8,9 @@
 @using Testo.UI.Shared.Resources
 @using Testo.UI.Shared.Showcase
 @using Testo.UI.Shared.Showcase.Sections
+
+@*
+    A development tool, behind Feature.Showcase, which a test asserts is off by default. It is
+    reachable without a session so that the design system can be reviewed before there is one.
+*@
+@attribute [AllowAnonymous]

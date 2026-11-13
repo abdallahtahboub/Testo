@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.DependencyInjection;
+using System.Text.RegularExpressions;
 using Microsoft.Playwright;
 using Testo.Application;
 using Testo.E2E.Support;
@@ -57,6 +58,16 @@ public sealed class AppFixture : IAsyncLifetime
     /// <summary>The password every seeded person has.</summary>
     public static string SeededPassword => DevelopmentData.Password;
 
+    /// <summary>
+    /// A browser state that is already signed in as the owner, created once for the whole run.
+    /// </summary>
+    /// <remarks>
+    /// Signing in costs a form post and a password hash, and most tests that need a session do not
+    /// care how it was obtained. Doing it once and reusing the cookie keeps the suite quick; the
+    /// tests that are *about* signing in do it themselves, through the screen, as a person would.
+    /// </remarks>
+    public string SignedInStateFile { get; private set; } = string.Empty;
+
     public async ValueTask InitializeAsync()
     {
         _database = await E2EDatabase.CreateAsync();
@@ -73,6 +84,26 @@ public sealed class AppFixture : IAsyncLifetime
 
         _playwright = await Playwright.CreateAsync();
         _browser = await LaunchBrowserAsync(_playwright);
+
+        SignedInStateFile = await SignInOnceAsync();
+    }
+
+    /// <summary>Signs in through the real screen once, and keeps the cookie for the run.</summary>
+    private async Task<string> SignInOnceAsync()
+    {
+        var file = Path.Combine(Path.GetTempPath(), $"testo-signed-in-{Guid.CreateVersion7():N}.json");
+
+        await using var context = await Browser.NewContextAsync();
+        var page = await context.NewPageAsync();
+
+        await page.GotoAsync(Url("/account/sign-in"));
+        await page.FillAsync("input[name='Input.Email']", OwnerEmail);
+        await page.FillAsync("input[name='Input.Password']", SeededPassword);
+        await page.Locator("form.account-form button[type=submit]").ClickAsync();
+        await page.WaitForURLAsync(new Regex(@"/app$"));
+
+        await context.StorageStateAsync(new BrowserContextStorageStateOptions { Path = file });
+        return file;
     }
 
     private static async Task<IBrowser> LaunchBrowserAsync(IPlaywright playwright)
@@ -117,6 +148,11 @@ public sealed class AppFixture : IAsyncLifetime
         if (_database is not null)
         {
             await _database.DisposeAsync();
+        }
+
+        if (SignedInStateFile is { Length: > 0 } file && File.Exists(file))
+        {
+            File.Delete(file);
         }
     }
 }

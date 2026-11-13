@@ -9,7 +9,7 @@ public class AppShellTests(AppFixture app) : BrowserTest(app)
     [Fact]
     public async Task AppPage_BecomesInteractiveOverAServerConnection()
     {
-        var page = await OpenAsync("/app");
+        var page = await OpenSignedInAsync("/app");
 
         await page.Page.WaitUntilInteractiveAsync();
 
@@ -20,7 +20,7 @@ public class AppShellTests(AppFixture app) : BrowserTest(app)
     [Fact]
     public async Task FluentButton_Click_UpdatesThePage()
     {
-        var page = await OpenAsync("/app");
+        var page = await OpenSignedInAsync("/app");
         await page.Page.WaitUntilInteractiveAsync();
         var button = page.Page.GetByTestId("click-button");
 
@@ -35,7 +35,7 @@ public class AppShellTests(AppFixture app) : BrowserTest(app)
     [Fact]
     public async Task Modules_AreListedWithTheirFlagsSwitchedOff()
     {
-        var page = await OpenAsync("/app");
+        var page = await OpenSignedInAsync("/app");
 
         var rows = page.Page.GetByTestId("module-row");
         await Expect(rows).ToHaveCountAsync(7);
@@ -59,7 +59,7 @@ public class AppShellTests(AppFixture app) : BrowserTest(app)
     [Fact]
     public async Task WebsiteLink_LeadsBackToThePublicHomePage()
     {
-        var page = await OpenAsync("/app");
+        var page = await OpenSignedInAsync("/app");
         await page.Page.WaitUntilInteractiveAsync();
 
         await page.Page.GetByRole(Microsoft.Playwright.AriaRole.Link, new Microsoft.Playwright.PageGetByRoleOptions { Name = "Website", Exact = true }).ClickAsync();

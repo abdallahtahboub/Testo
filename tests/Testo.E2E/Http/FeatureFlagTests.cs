@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Testo.E2E.Support;
 
 namespace Testo.E2E.Http;
@@ -14,9 +15,15 @@ public partial class FeatureFlagTests(AppFixture app)
         await using var application = new TestoWebApplication(app.ConnectionString);
         using var client = application
             .WithWebHostBuilder(builder => builder.UseSetting("FeatureManagement:Module.Planning", "true"))
-            .CreateClient();
+            .CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = false });
 
-        var html = await client.GetStringAsync("/app", TestContext.Current.CancellationToken);
+        // /app needs a session (D-1), and this copy of the application has data-protection keys of
+        // its own, so the run's shared cookie means nothing here.
+        var cookies = await SignIn.AsOwnerAsync(client, TestContext.Current.CancellationToken);
+
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/app").WithCookies(cookies);
+        using var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
+        var html = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
         var states = ModuleRow().Matches(html).ToDictionary(row => row.Groups["id"].Value, row => row.Groups["state"].Value);
         Assert.Equal(7, states.Count);

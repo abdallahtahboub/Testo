@@ -86,7 +86,7 @@ public class ThemeTests(AppFixture app) : BrowserTest(app)
     [Fact]
     public async Task ChoosingDark_InTheApp_KeepsTheSessionAndThemesTheFluentComponents()
     {
-        var page = await OpenAsync("/app");
+        var page = await OpenSignedInAsync("/app");
         await page.Page.WaitUntilInteractiveAsync();
         await page.Page.GetByTestId("click-button").ClickAsync();
         await Expect(page.Page.GetByTestId("click-count")).ToHaveTextAsync("Clicks: 1");
@@ -120,7 +120,10 @@ public class ThemeTests(AppFixture app) : BrowserTest(app)
     [Fact]
     public async Task DarkCookie_InTheApp_IsStillPressedAfterTheSessionBecomesInteractive()
     {
-        var page = await OpenAsync("/en");
+        // Signed in from the start, because the second half of this journey is an app page, which
+        // needs a session (D-1). What is under test is unchanged: a choice made on a statically
+        // rendered page travelling into the interactive one.
+        var page = await OpenSignedInAsync("/en");
         await page.Page.SwitchButton("Dark").ClickAsync();
         await Expect(page.Page.Locator("html")).ToHaveAttributeAsync("data-theme", "dark");
 

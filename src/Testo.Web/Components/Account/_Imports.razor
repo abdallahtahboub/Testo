@@ -1,3 +1,4 @@
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
@@ -21,6 +22,12 @@
     uses an event handler.
 *@
 @attribute [ExcludeFromInteractiveRouting]
+
+@*
+    Reachable without an account, necessarily: these are the pages somebody uses when they have
+    no session, or cannot get one. The fallback policy protects everything else (D-1).
+*@
+@attribute [AllowAnonymous]
 
 @* These pages carry forms, so they need an antiforgery token (ADR-0009). *@
 @attribute [HasForm]

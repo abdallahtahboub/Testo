@@ -105,8 +105,12 @@ public class ResponseHeaderTests(AppFixture app) : HttpTest(app)
     [Fact]
     public async Task AppPage_Policy_AllowsOnlyTheScriptWithThisRequestsNonce()
     {
-        using var first = await GetAsync("/app");
-        using var second = await GetAsync("/app");
+        // /app needs a session (D-1); without one the response is a redirect with no page to
+        // carry a nonce.
+        var cookies = await SignInAsync();
+
+        using var first = await GetAsync("/app", ("Cookie", cookies));
+        using var second = await GetAsync("/app", ("Cookie", cookies));
         var policy = Assert.Single(Header(first, "Content-Security-Policy"));
         var html = await first.Content.ReadAsStringAsync(Cancellation);
 

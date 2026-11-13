@@ -5,8 +5,10 @@ namespace Testo.Contracts.Identity;
 /// A person has exactly one role per organization, and may hold a different one elsewhere.
 /// </summary>
 /// <remarks>
-/// Six roles: fewer would not express a QA team, more would not be understood. The numbers are
-/// stored, so they are assigned explicitly and never reordered.
+/// Six roles: fewer would not express a QA team, more would not be understood. The <em>name</em>
+/// is what the database stores, so that a security review reading the table sees <c>QaLead</c>
+/// rather than a number nobody can interpret. The numbers are assigned explicitly all the same,
+/// so that ordering them by seniority later cannot silently change anyone's access.
 /// </remarks>
 public enum Role
 {

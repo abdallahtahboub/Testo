@@ -11,6 +11,7 @@
     <Project Path="src/Testo.Modules.Planning/Testo.Modules.Planning.csproj" />
     <Project Path="src/Testo.Modules.Reporting/Testo.Modules.Reporting.csproj" />
     <Project Path="src/Testo.Modules.Settings/Testo.Modules.Settings.csproj" />
+    <Project Path="src/Testo.Persistence/Testo.Persistence.csproj" />
     <Project Path="src/Testo.Platform/Testo.Platform.csproj" />
     <Project Path="src/Testo.UI.Shared/Testo.UI.Shared.csproj" />
     <Project Path="src/Testo.Web/Testo.Web.csproj" />

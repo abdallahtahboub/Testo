@@ -1,7 +1,14 @@
 # CLAUDE.md — Conventions for every session
 
 **Testo** (working name) is an AI-assisted QA platform covering the whole ISTQB testing
-journey. Current phase: **frontend only**, with mock data behind interfaces.
+journey.
+
+**Current state (2026-11-13, after Milestone 3).** Identity, organizations, memberships,
+invitations, roles and the audit log are **real**, on PostgreSQL. The design system is real.
+Everything about the testing journey itself — plans, requirements, cases, runs, defects — **does
+not exist yet, in any form, not even mocked**: the seven module projects are shells of one class
+each, and `Testo.Mocks` holds options and a random source, no services. `docs/roadmap.md` §Inventory
+is the authoritative list of what is built.
 
 Read first: `docs/architecture.md`, `docs/roadmap.md`, `docs/design-system.md`,
 `docs/sitemap.md`, `docs/testing-journey.md`, `docs/decisions/`.
@@ -26,7 +33,7 @@ mechanical find-and-replace.
 - `Testo.Contracts`: DTOs + service interfaces only. **No UI dependencies.** The backend will reuse it.
 - `Testo.Platform`: module/capability contracts and registries (`IFeatureModule`, `ITestCapability`, `INavigationRegistry`, `IDashboardWidgetRegistry`, `ICapabilityRegistry`, `Routes`).
 - `Testo.UI.Shared`: design system, layouts, tokens. No business logic, no module references.
-- `Testo.Modules.*` and `Testo.Capabilities.*` reference only `Contracts`, `Platform`, `UI.Shared`. **Never another module or capability.** Cross-module links go through `Testo.Platform.Routes` constants; cross-module events through `IAppEventBus`.
+- `Testo.Modules.*` and `Testo.Capabilities.*` reference only `Contracts`, `Platform`, `UI.Shared`. **Never another module or capability.** Cross-module links go through `Testo.Platform.Routes` constants. (`IAppEventBus`, for cross-module events, is designed in `docs/architecture.md` §6 but **not built**.)
 - `Testo.Website` (public pages) references only `Contracts`, `Platform`, `UI.Shared`.
 - `Testo.Mocks` references only `Contracts`.
 - `Testo.Domain`: entities and the rules that hold regardless of storage. References only `Contracts`. **No EF Core, no ASP.NET Core Identity, no UI.**

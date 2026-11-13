@@ -117,6 +117,72 @@ Found by opening it in a browser rather than by a test, and worth remembering:
 - A test that clicks `button[type=submit]` clicks the language switch, because the layout has
   four submit buttons of its own.
 
+---
+
+## Inventory — what is actually built
+
+> Verified at `8af40e34f9057afc2ad0c8cfa062c92df87401d5` on 2026-11-13: `dotnet build` clean,
+> **810 tests passed, 0 failed, 0 skipped** (Mocks 8, UI 623, Application 68, E2E 111), CI green.
+> This table is authoritative. Where another document disagrees with it, this one is right.
+
+| Area | State |
+|---|---|
+| Identity, organizations, memberships, invitations, roles, audit log | **Real**, on PostgreSQL |
+| Tenant isolation: query filter, save guard, indexes, alternate key | **Real** — with one hole, D-2 in `security-register.md` |
+| Sign in, sign out, password reset, one-time code, accept invitation | **Real** |
+| Design system, 35 components | **Real** |
+| Public website | **One page** (home, EN + DE) plus not-found and error |
+| App area | **One placeholder page** at `/app`, and it does not require signing in (D-1) |
+| The seven feature modules | **Shells.** One class each: an id and a feature flag. No pages, no services |
+| `Testo.Capabilities.E2EWeb` | **Empty.** An `_Imports.razor` |
+| `Testo.Mocks` | **Shell.** Options and a random source. No services, no seed data |
+| Plans, requirements, test cases, runs, defects, reporting | **Do not exist**, in any form, not even mocked |
+| Email delivery | **Deferred.** Invitation and reset links go to the log (D-3) |
+| Authenticator enrollment | **Deferred.** Signing in with a code works; setting one up does not |
+| Breached-password check | **Partial.** An embedded list plus runs and repeats; no online check |
+
+---
+
+## Order of work
+
+Changed on 2026-11-13 by ADR-0017, with the owner's approval. The milestones below keep their
+numbers; only the order changed. New work is inserted as 3.1 to 3.4 rather than renumbering,
+because renumbering is what put the issue tracker a number behind this document.
+
+**3.1 → 3.2 → 3.3 → 3.4 → 4 → 5 → 6 → 7 → 8**
+
+### Milestone 3.1 — Milestone 3 debt
+The confirmed defects in [`security-register.md`](security-register.md): the authorization gate
+that was never fitted, tokens in logs, no rate limiting, and the tenant guard's trust in a pre-set
+organization. Not new work — Milestone 3 finished properly.
+
+**Done when:** every defect D-1 to D-4 is closed with a test that fails without the fix; the
+register records the date and the pull request.
+
+### Milestone 3.2 — Execution isolation threat model and ADR
+Written before any code opens a browser. Covers SSRF including DNS rebinding and redirect chains,
+internal network reach, prompt injection from hostile pages, downloads, secrets, and model cost.
+Decides the worker boundary, the egress allowlist and the artifact storage model.
+
+**Done when:** an accepted ADR exists and R-1 to R-3 in the register point at it.
+
+### Milestone 3.3 — A deterministic execution slice
+One allowlisted local demo target. One happy path and one known failure. Real `TestRun` and step
+persistence, artifacts, cancel and rerun. A worker outside the Blazor process. **No AI.**
+
+**Done when:** an authorized person can start, cancel and rerun a real Playwright run; a failure
+carries replayable steps, a screenshot and timestamps; cross-tenant access is refused in adversarial
+tests; it all passes in CI.
+
+### Milestone 3.4 — Bounded AI, measured
+A planner behind a provider-agnostic interface. Schema-validated plans, a fixed browser-action
+vocabulary, hostile pages treated as untrusted data, never model-generated code. Benchmarked on
+10 to 20 controlled scenarios against the deterministic baseline.
+
+**Done when:** pass rate, false positives, flake rate, time and cost per run are measured and
+published next to the baseline. No claim of autonomy without those numbers.
+
+---
 ## Milestone 4 — Public website
 **Scope:** all public pages from `sitemap.md` §A with real copy (EN + DE) where we have it and labeled placeholders elsewhere; mega-menu navigation, language switcher, rich footer; contact + demo forms (UI and validation only); Imprint, Privacy, Terms, Accessibility statement placeholders; original SVG illustrations; `sitemap.xml`, `robots.txt`, meta/OpenGraph tags, `hreflang`.
 

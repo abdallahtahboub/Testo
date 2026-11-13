@@ -51,6 +51,10 @@ src/
   Testo.Modules.Settings         // NEW: integrations, team, capability settings host
   Testo.Capabilities.E2EWeb      // first capability plug-in
   Testo.Mocks                    // Mock* services, seed data, simulated live feed
+  Testo.Domain                   // PLANNED: entities and rules (ADR-0014)
+  Testo.Application              // PLANNED: use cases; implements the Contracts interfaces
+  Testo.Persistence              // PLANNED: EF Core, PostgreSQL, migrations
+  Testo.Api                      // PLANNED: REST host for CI integrations, over the same use cases
 tests/
   Testo.UI.Tests                 // bUnit: UI.Shared components + module components
   Testo.Mocks.Tests              // xUnit: seed data consistency, mock feed timing
@@ -95,6 +99,10 @@ The app **Dashboard** and the **app shell** (left nav, top bar) live in `Testo.U
 | `Modules.*` | `UI.Shared`, `Platform`, `Contracts` | **other modules**, capabilities, mocks |
 | `Capabilities.*` | `UI.Shared`, `Platform`, `Contracts` | modules, other capabilities, mocks |
 | `Mocks` | `Contracts` | anything UI |
+| `Domain` *(planned)* | BCL only | anything UI, persistence, other projects |
+| `Application` *(planned)* | `Domain`, `Contracts` | anything UI, `Persistence` |
+| `Persistence` *(planned)* | `Domain`, `Application`, EF Core | anything UI |
+| `Api` *(planned)* | `Application`, `Contracts` | anything UI |
 | `Web` | everything (composition root only, no business UI) | — |
 
 These rules are **enforced by a test** (`tests/Testo.UI.Tests/Architecture/DependencyRulesTests.cs`).
@@ -241,10 +249,18 @@ Composition (later swap):
 
 ```csharp
 // now
-builder.Services.AddTestoMocks();          // Testo.Mocks
-// later
-builder.Services.AddTestoHttpClients(apiBaseUrl);  // Testo.Client.Http, same interfaces
+builder.Services.AddTestoMocks();          // Testo.Mocks, in memory
+// after the identity and data milestone
+builder.Services.AddTestoApplication();    // Testo.Application, over PostgreSQL
 ```
+
+The user interface does not change when that line changes: it is why every service is an
+interface in `Contracts`. `Testo.Mocks` stays afterwards, for component tests and for a
+demo mode that needs no database (ADR-0014).
+
+Persistence, tenancy and identity are specified in [`domain-model.md`](domain-model.md)
+and [`identity-and-access.md`](identity-and-access.md), with the decisions in ADR-0011
+to ADR-0014.
 
 Mock seed data is deterministic (fixed random seed) so tests and screenshots are stable.
 Seed: 3–4 believable projects (e.g., a retail web shop, an insurance customer portal,

@@ -56,3 +56,28 @@
   min-height: unset;
   resize: vertical;
 }
+
+/* ---------- Account forms ----------
+   Used by the sign-in, password and invitation pages. They live in the host, and a class
+   declared in a component there would be scoped to that component, so these are global. */
+
+.account-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.account-form__aside {
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body-sm);
+}
+
+/* A wrong password is an expected outcome, not a failed page, so it reads as a message in the
+   form rather than as the error state of a view that could not load. */
+.account-form__alert {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-subtle);
+  color: var(--color-text);
+}

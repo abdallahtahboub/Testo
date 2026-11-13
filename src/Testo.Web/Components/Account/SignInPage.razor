@@ -1,0 +1,126 @@
+@page "/account/sign-in"
+@inject IStringLocalizer<WebResources> L
+@inject IOptions<BrandOptions> Brand
+@inject IAuthenticationService Authentication
+@inject NavigationManager Navigation
+
+<PageTitle>@L["Account_SignIn_PageTitle"] · @Brand.Value.ProductName</PageTitle>
+
+<h1>@L["Account_SignIn_Title", Brand.Value.ProductName]</h1>
+
+<EditForm Model="Form" Context="form" FormName="sign-in" OnValidSubmit="SubmitAsync" method="post" class="account-form">
+
+    @if (_problem is not null)
+    {
+        @* An expected outcome, not a failed page: an alert in the form, not an error state. *@
+        <p class="account-form__alert" role="alert">@_problem</p>
+    }
+
+    @* The address is asked for on its own screen later, when an organization may sign in at its
+       own provider. Asking for it first here means that change moves nothing. *@
+    <TField Label="@L["Account_SignIn_Email"]" Required Error="@_emailError">
+        <TInput Context="context"
+                Type="email"
+                Value="@Form.Email"
+                Required
+                name="Input.Email"
+                autocomplete="username"
+                autofocus />
+    </TField>
+
+    <TField Label="@L["Account_SignIn_Password"]" Required Error="@_passwordError">
+        <TInput Context="context"
+                Type="password"
+                Required
+                name="Input.Password"
+                autocomplete="current-password" />
+    </TField>
+
+    <TCheckbox Label="@L["Account_SignIn_RememberMe"]"
+               Checked="Form.RememberMe"
+               name="Input.RememberMe" />
+
+    <TButton Type="submit" Variant="ButtonVariant.Primary">@L["Account_SignIn_Submit"]</TButton>
+
+    <p class="account-form__aside">
+        <a href="@Routes.ForgotPassword">@L["Account_SignIn_ForgotPassword"]</a>
+    </p>
+</EditForm>
+
+@code {
+    /// <summary>What the form posts back.</summary>
+    [SupplyParameterFromForm]
+    private SignInInput? Input { get; set; }
+
+    /// <summary>The posted values, or a fresh set the first time the page is shown.</summary>
+    private SignInInput Form => Input ??= new();
+
+    /// <summary>Where to go once they are in. Carried through so a deep link survives signing in.</summary>
+    [SupplyParameterFromQuery(Name = "next")]
+    private string? Next { get; set; }
+
+    private string? _problem;
+    private string? _emailError;
+    private string? _passwordError;
+
+    private async Task SubmitAsync()
+    {
+        _problem = null;
+        _emailError = string.IsNullOrWhiteSpace(Form.Email) ? L["Account_Error_EmailRequired"].Value : null;
+        _passwordError = string.IsNullOrEmpty(Form.Password) ? L["Account_Error_PasswordRequired"].Value : null;
+
+        if (_emailError is not null || _passwordError is not null)
+        {
+            return;
+        }
+
+        var result = await Authentication.SignInAsync(Form.Email, Form.Password, Form.RememberMe);
+
+        switch (result.Outcome)
+        {
+            case SignInOutcome.Succeeded:
+                Navigation.NavigateTo(SafeNext(), forceLoad: true);
+                return;
+
+            case SignInOutcome.RequiresTwoFactor:
+                Navigation.NavigateTo(Routes.TwoFactor, forceLoad: true);
+                return;
+
+            case SignInOutcome.RequiresTwoFactorSetup:
+                _problem = L["Account_TwoFactor_SetupRequired", Brand.Value.ProductName].Value;
+                return;
+
+            case SignInOutcome.LockedOut:
+                _problem = L["Account_SignIn_LockedOut", result.LockoutEnds?.ToString("t") ?? ""].Value;
+                return;
+
+            case SignInOutcome.NoActiveMembership:
+                _problem = L["Account_SignIn_NoMembership"].Value;
+                return;
+
+            default:
+                // One message for a wrong password and for an address with no account. Saying
+                // which it was turns this screen into a way of finding out who has an account.
+                _problem = L["Account_SignIn_Failed"].Value;
+                return;
+        }
+    }
+
+    /// <summary>
+    /// Only a path inside this site. An attacker who can choose where sign-in sends somebody has
+    /// a convincing way to send them somewhere else entirely.
+    /// </summary>
+    private string SafeNext() =>
+        !string.IsNullOrEmpty(Next) && Next.StartsWith('/') && !Next.StartsWith("//", StringComparison.Ordinal)
+            ? Next
+            : Routes.App;
+
+    private sealed class SignInInput
+    {
+        public string Email { get; set; } = "";
+
+        public string Password { get; set; } = "";
+
+        public bool RememberMe { get; set; }
+    }
+}

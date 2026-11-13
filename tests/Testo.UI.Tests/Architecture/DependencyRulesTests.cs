@@ -9,6 +9,9 @@ namespace Testo.UI.Tests.Architecture;
 public class DependencyRulesTests
 {
     private const string Contracts = "Testo.Contracts";
+    private const string Domain = "Testo.Domain";
+    private const string Persistence = "Testo.Persistence";
+    private const string Application = "Testo.Application";
     private const string Platform = "Testo.Platform";
     private const string UiShared = "Testo.UI.Shared";
     private const string Host = "Testo.Web";
@@ -17,6 +20,9 @@ public class DependencyRulesTests
     private static readonly (string Project, string[] MayReference)[] Rules =
     [
         (Contracts, []),
+        (Domain, [Contracts]),
+        (Persistence, [Contracts, Domain]),
+        (Application, [Contracts, Domain, Persistence]),
         (Platform, [Contracts]),
         (UiShared, [Contracts, Platform]),
         ("Testo.Website", [Contracts, Platform, UiShared]),

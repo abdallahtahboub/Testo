@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.FeatureManagement;
+using Testo.Application;
 using Testo.Mocks;
 using Testo.Modules.Analysis;
 using Testo.Modules.Defects;
@@ -16,10 +17,12 @@ using Testo.Platform.Localization;
 using Testo.Platform.Modules;
 using Testo.UI.Shared;
 using Testo.UI.Shared.Branding;
+using Testo.UI.Shared.Identity;
 using Testo.UI.Shared.Theming;
 using Testo.Web.Antiforgery;
 using Testo.Web.Components;
 using Testo.Web.Features;
+using Testo.Web.Identity;
 using Testo.Web.Localization;
 using Testo.Web.Preferences;
 using Testo.Web.Routing;
@@ -34,7 +37,8 @@ var builder = WebApplication.CreateBuilder(args);
 // The theme choice travels from the server-rendered page into the interactive session.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
-    .RegisterPersistentService<ThemeState>(RenderMode.InteractiveServer);
+    .RegisterPersistentService<ThemeState>(RenderMode.InteractiveServer)
+    .RegisterPersistentService<SignedInUser>(RenderMode.InteractiveServer);
 
 // Public pages without forms stay free of the antiforgery cookie.
 builder.Services.AddPublicPageAntiforgery();
@@ -48,8 +52,26 @@ builder.Services.AddScoped<IFeatureFlags, FeatureManagementFlags>();
 builder.Services.TryAddSingleton(TimeProvider.System);
 builder.Services.AddScoped<CspNonce>();
 
-// Data. Mock services today; the real backend replaces this one call with its HTTP clients.
+// Signing in. The session cookie, and the services that answer "who is asking".
+builder.Services.AddTestoIdentity(
+    allowInsecureCookie: builder.Configuration.GetValue<bool>(TestoIdentityServiceCollectionExtensions.AllowInsecureCookiesKey));
+
+// Data, in two parts while the product is half built (ADR-0014).
+//
+// The mock services still answer everything about the testing journey — plans, cases, runs,
+// defects — because their real implementations arrive with Milestone 5. They are registered
+// first, so that anything the application layer does implement replaces them.
 builder.Services.AddTestoMocks(options => builder.Configuration.GetSection(MockOptions.SectionName).Bind(options));
+
+// Identity and access are real, and need a database. Starting without one would give a product
+// nobody can sign in to, so this fails here rather than at the sign-in screen.
+var connectionString = builder.Configuration.GetConnectionString("Testo")
+    ?? throw new InvalidOperationException(
+        "No database is configured. Set ConnectionStrings:Testo, for example "
+        + "\"Host=localhost;Database=testo_dev;Username=postgres;Password=postgres\". "
+        + "See README.md for how to get a PostgreSQL to point it at.");
+
+builder.Services.AddTestoApplication(connectionString);
 
 // Feature modules: one line each. A module brings its own pages, services, navigation and widgets.
 builder.Services.AddTestoModule<PlanningModule>();
@@ -62,6 +84,12 @@ builder.Services.AddTestoModule<SettingsModule>();
 builder.Services.AddSingleton<RoutableAssemblies>();
 
 var app = builder.Build();
+
+// A developer who cannot sign in reaches for a shortcut that is worse than a seeded database.
+if (app.Environment.IsDevelopment())
+{
+    await DevelopmentData.EnsureSeededAsync(app.Services);
+}
 
 if (!app.Environment.IsDevelopment())
 {
@@ -86,6 +114,8 @@ app.Use((context, next) =>
 app.UseHttpsRedirection();
 app.UseSecurityHeaders(app.Environment);
 app.UseRequestLocalization();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseImmutableFontCaching();
 app.UseAntiforgery();
 

@@ -1,0 +1,22 @@
+@inherits LayoutComponentBase
+@inject IOptions<BrandOptions> Brand
+
+@*
+    A single column, centred, with nothing else on it. Signing in is the one screen where every
+    other thing on the page is a distraction or a way in for somebody else.
+*@
+<TSkipLink />
+
+<div class="account">
+    <main id="main" class="account__card" tabindex="-1">
+        <div class="account__brand">
+            <TBrand />
+        </div>
+        @Body
+    </main>
+
+    <footer class="account__footer">
+        <TLanguageSwitch />
+        <TThemeSwitch />
+    </footer>
+</div>

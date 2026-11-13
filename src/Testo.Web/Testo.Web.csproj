@@ -10,7 +10,9 @@
 
   <!-- The host is the composition root: it is the only project that references everything. -->
   <ItemGroup>
+    <ProjectReference Include="..\Testo.Application\Testo.Application.csproj" />
     <ProjectReference Include="..\Testo.Contracts\Testo.Contracts.csproj" />
+    <ProjectReference Include="..\Testo.Domain\Testo.Domain.csproj" />
     <ProjectReference Include="..\Testo.Platform\Testo.Platform.csproj" />
     <ProjectReference Include="..\Testo.UI.Shared\Testo.UI.Shared.csproj" />
     <ProjectReference Include="..\Testo.Website\Testo.Website.csproj" />

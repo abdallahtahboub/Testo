@@ -29,6 +29,11 @@ mechanical find-and-replace.
 - `Testo.Modules.*` and `Testo.Capabilities.*` reference only `Contracts`, `Platform`, `UI.Shared`. **Never another module or capability.** Cross-module links go through `Testo.Platform.Routes` constants; cross-module events through `IAppEventBus`.
 - `Testo.Website` (public pages) references only `Contracts`, `Platform`, `UI.Shared`.
 - `Testo.Mocks` references only `Contracts`.
+- `Testo.Domain`: entities and the rules that hold regardless of storage. References only `Contracts`. **No EF Core, no ASP.NET Core Identity, no UI.**
+- `Testo.Persistence`: EF Core on PostgreSQL, the migrations, and the Identity stores. **The only project that may see ASP.NET Core Identity**, and only through `CredentialService`.
+- `Testo.Application`: the use cases; implements the `Contracts` interfaces. References `Domain`, `Persistence`, `Contracts`. A failed use case returns **resource keys**, never English sentences.
+- Everything inside the tenant boundary implements `IBelongsToOrganization`. Never write a `WHERE organization_id = …` by hand; the query filter does it. A query that must cross the boundary says `IgnoreQueryFilters()` with a comment saying why.
+- Account pages (`/account/**`) are **static SSR with plain form posts** (ADR-0016): a cookie can only be issued during an HTTP request. They carry `[ExcludeFromInteractiveRouting]` and `[HasForm]`.
 - `Testo.Web` is the composition root only: DI, routing, `App.razor`, dashboard host page. It is the **only** project that references the ASP.NET Core server framework; libraries never use `HttpContext` or other server-only types.
 - A new project needs a rule in `DependencyRulesTests` and a row in `docs/architecture.md` §4.
 - Each module exposes **one** public `IFeatureModule` class named `<Name>Module`, with a lowercase id and the flag `Module.<Name>` (listed in `appsettings.json`); everything else is `internal` where possible. The host registers it with one line: `builder.Services.AddTestoModule<NameModule>()`.
@@ -85,6 +90,9 @@ Testo.Modules.Defects/
 - Components small and focused; no copy-pasted markup between pages — extract a component.
 - `ILogger<T>` for logging; no `Console.WriteLine`.
 - Use `TimeProvider` instead of `DateTime.Now` / `Task.Delay` in anything time-based (testability).
+- Log with `[LoggerMessage]` partial methods, not `logger.LogInformation("…", args)`; the analyzers require it.
+- A layout never lives in the folder its `_Imports.razor` points at with `@layout`: it would be given itself as its own layout and nest without end. Layouts go in `Components/Layout`.
+- `EditForm` renders its own antiforgery token in static rendering. Do not add `<AntiforgeryToken />` as well, or the post carries two and the server answers 400.
 
 ## UI rules
 
@@ -123,6 +131,10 @@ dotnet test --project tests/Testo.UI.Tests     # one test project
 dotnet test --project tests/Testo.E2E --filter-class "Testo.E2E.Pages.ThemeTests"
 dotnet run --project src/Testo.Web             # http://localhost:5080
 ```
+
+The product needs PostgreSQL. `docker run -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16`,
+or point `ConnectionStrings__Testo` elsewhere. The data and browser tests create a database of
+their own per class and find the server through `TESTO_TEST_DB`.
 
 - Tests run on Microsoft.Testing.Platform (xUnit v3): filters are `--filter-class`, `--filter-method`, `--filter-namespace`; reports are `--report-xunit-trx` and `--report-xunit-html`.
 - The browser tests start the application themselves; nothing needs to run beforehand.

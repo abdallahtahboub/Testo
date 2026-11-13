@@ -93,4 +93,163 @@
   <data name="Reconnect_RetryBefore" xml:space="preserve">
     <value>Wiederverbinden fehlgeschlagen. Neuer Versuch in</value>
   </data>
+  <data name="Account_SignIn_PageTitle" xml:space="preserve">
+    <value>Anmelden</value>
+  </data>
+  <data name="Account_SignIn_Title" xml:space="preserve">
+    <value>Bei {0} anmelden</value>
+  </data>
+  <data name="Account_SignIn_Email" xml:space="preserve">
+    <value>E-Mail-Adresse</value>
+  </data>
+  <data name="Account_SignIn_Password" xml:space="preserve">
+    <value>Passwort</value>
+  </data>
+  <data name="Account_SignIn_RememberMe" xml:space="preserve">
+    <value>Auf diesem Gerät angemeldet bleiben</value>
+  </data>
+  <data name="Account_SignIn_Submit" xml:space="preserve">
+    <value>Anmelden</value>
+  </data>
+  <data name="Account_SignIn_ForgotPassword" xml:space="preserve">
+    <value>Ich habe mein Passwort vergessen</value>
+  </data>
+  <data name="Account_SignIn_Failed" xml:space="preserve">
+    <value>Diese E-Mail-Adresse und dieses Passwort gehören zu keinem Konto.</value>
+  </data>
+  <data name="Account_SignIn_LockedOut" xml:space="preserve">
+    <value>Zu viele Versuche. Versuchen Sie es nach {0} erneut, oder setzen Sie Ihr Passwort zurück, um sofort wieder hineinzukommen.</value>
+  </data>
+  <data name="Account_SignIn_NoMembership" xml:space="preserve">
+    <value>Dieses Konto gehört zu keiner Organisation. Bitten Sie eine Administratorin oder einen Administrator um eine Einladung.</value>
+  </data>
+  <data name="Account_SignOut_PageTitle" xml:space="preserve">
+    <value>Abmelden</value>
+  </data>
+  <data name="Account_SignOut_Title" xml:space="preserve">
+    <value>Abmelden</value>
+  </data>
+  <data name="Account_SignOut_Confirm" xml:space="preserve">
+    <value>Von {0} abmelden?</value>
+  </data>
+  <data name="Account_SignOut_Submit" xml:space="preserve">
+    <value>Abmelden</value>
+  </data>
+  <data name="Account_SignOut_Cancel" xml:space="preserve">
+    <value>Angemeldet bleiben</value>
+  </data>
+  <data name="Account_Forgot_PageTitle" xml:space="preserve">
+    <value>Passwort vergessen</value>
+  </data>
+  <data name="Account_Forgot_Title" xml:space="preserve">
+    <value>Neues Passwort wählen</value>
+  </data>
+  <data name="Account_Forgot_Intro" xml:space="preserve">
+    <value>Nennen Sie uns die Adresse, mit der Sie sich anmelden, und wir schicken einen Link dorthin.</value>
+  </data>
+  <data name="Account_Forgot_Submit" xml:space="preserve">
+    <value>Link schicken</value>
+  </data>
+  <data name="Account_Forgot_Sent" xml:space="preserve">
+    <value>Wenn zu dieser Adresse ein Konto gehört, ist ein Link unterwegs. Er funktioniert einmal und zwei Stunden lang.</value>
+  </data>
+  <data name="Account_Reset_PageTitle" xml:space="preserve">
+    <value>Neues Passwort</value>
+  </data>
+  <data name="Account_Reset_Title" xml:space="preserve">
+    <value>Neues Passwort wählen</value>
+  </data>
+  <data name="Account_Reset_NewPassword" xml:space="preserve">
+    <value>Neues Passwort</value>
+  </data>
+  <data name="Account_Reset_Hint" xml:space="preserve">
+    <value>Mindestens 12 Zeichen. Auf die Länge kommt es an; ein Satz, den Sie behalten, ist besser als ein kurzes Durcheinander aus Sonderzeichen.</value>
+  </data>
+  <data name="Account_Reset_Submit" xml:space="preserve">
+    <value>Passwort speichern</value>
+  </data>
+  <data name="Account_Reset_Done" xml:space="preserve">
+    <value>Ihr Passwort ist gespeichert. Sie können sich jetzt damit anmelden.</value>
+  </data>
+  <data name="Account_TwoFactor_PageTitle" xml:space="preserve">
+    <value>Einmalcode</value>
+  </data>
+  <data name="Account_TwoFactor_Title" xml:space="preserve">
+    <value>Einmalcode eingeben</value>
+  </data>
+  <data name="Account_TwoFactor_Intro" xml:space="preserve">
+    <value>Öffnen Sie Ihre Authenticator-App und tippen Sie die sechs Ziffern ein, die sie anzeigt.</value>
+  </data>
+  <data name="Account_TwoFactor_Code" xml:space="preserve">
+    <value>Sechsstelliger Code</value>
+  </data>
+  <data name="Account_TwoFactor_Submit" xml:space="preserve">
+    <value>Weiter</value>
+  </data>
+  <data name="Account_TwoFactor_Failed" xml:space="preserve">
+    <value>Dieser Code stimmt nicht oder ist bereits abgelaufen. Nehmen Sie den nächsten.</value>
+  </data>
+  <data name="Account_TwoFactor_SetupRequired" xml:space="preserve">
+    <value>{0} verlangt einen zweiten Faktor. Das Einrichten gehört zu Meilenstein 4; bitten Sie bis dahin eine Administratorin oder einen Administrator, die Anforderung auszuschalten.</value>
+  </data>
+  <data name="Account_Accept_PageTitle" xml:space="preserve">
+    <value>Einladung annehmen</value>
+  </data>
+  <data name="Account_Accept_Title" xml:space="preserve">
+    <value>{0} beitreten</value>
+  </data>
+  <data name="Account_Accept_Intro" xml:space="preserve">
+    <value>{0} hat Sie als {2} zu {1} eingeladen.</value>
+  </data>
+  <data name="Account_Accept_DisplayName" xml:space="preserve">
+    <value>Ihr Name</value>
+  </data>
+  <data name="Account_Accept_Password" xml:space="preserve">
+    <value>Passwort wählen</value>
+  </data>
+  <data name="Account_Accept_Submit" xml:space="preserve">
+    <value>Beitreten</value>
+  </data>
+  <data name="Account_Accept_SubmitExisting" xml:space="preserve">
+    <value>Einladung annehmen</value>
+  </data>
+  <data name="Account_Accept_NotUsable" xml:space="preserve">
+    <value>Dieser Link funktioniert nicht mehr. Vielleicht wurde er schon benutzt oder zurückgezogen, oder er ist abgelaufen. Bitten Sie um einen neuen.</value>
+  </data>
+  <data name="Account_Accept_Done" xml:space="preserve">
+    <value>Sie gehören jetzt zu {0}. Melden Sie sich an, um loszulegen.</value>
+  </data>
+  <data name="Account_Error_EmailRequired" xml:space="preserve">
+    <value>Geben Sie die Adresse ein, mit der Sie sich anmelden.</value>
+  </data>
+  <data name="Account_Error_PasswordRequired" xml:space="preserve">
+    <value>Geben Sie Ihr Passwort ein.</value>
+  </data>
+  <data name="Account_Error_CodeRequired" xml:space="preserve">
+    <value>Geben Sie die sechs Ziffern aus Ihrer Authenticator-App ein.</value>
+  </data>
+  <data name="Account_Error_NameRequired" xml:space="preserve">
+    <value>Geben Sie den Namen ein, den Ihre Kolleginnen und Kollegen sehen.</value>
+  </data>
+  <data name="Password_PasswordTooShort" xml:space="preserve">
+    <value>Dieses Passwort ist zu kurz. Zwölf Zeichen oder mehr.</value>
+  </data>
+  <data name="Password_Breached" xml:space="preserve">
+    <value>Dieses Passwort steht in Listen, die Angreifer bereits haben. Wählen Sie ein anderes.</value>
+  </data>
+  <data name="Password_PasswordRequiresUniqueChars" xml:space="preserve">
+    <value>Dieses Passwort wiederholt zu wenige verschiedene Zeichen.</value>
+  </data>
+  <data name="PasswordReset_Error_LinkNotUsable" xml:space="preserve">
+    <value>Dieser Link funktioniert nicht mehr. Vielleicht wurde er schon benutzt, oder er ist abgelaufen. Bitten Sie um einen neuen.</value>
+  </data>
+  <data name="Invitation_Error_NotUsable" xml:space="preserve">
+    <value>Diese Einladung funktioniert nicht mehr. Vielleicht wurde sie schon benutzt oder zurückgezogen, oder sie ist abgelaufen.</value>
+  </data>
+  <data name="Invitation_Error_AccountDetailsMissing" xml:space="preserve">
+    <value>Geben Sie Ihren Namen ein und wählen Sie ein Passwort, um den Beitritt abzuschließen.</value>
+  </data>
+  <data name="Password_NotAcceptable" xml:space="preserve">
+    <value>Dieses Passwort kann nicht verwendet werden. Wählen Sie ein anderes.</value>
+  </data>
 </root>

@@ -1,0 +1,125 @@
+@page "/account/accept"
+@inject IStringLocalizer<WebResources> L
+@inject IOptions<BrandOptions> Brand
+@inject IInvitationService Invitations
+
+<PageTitle>@L["Account_Accept_PageTitle"] · @Brand.Value.ProductName</PageTitle>
+
+@if (_joined is not null)
+{
+    <h1>@L["Account_Accept_PageTitle"]</h1>
+    <p>@L["Account_Accept_Done", _joined]</p>
+    <p class="account-form__aside"><a href="@Routes.SignIn">@L["Account_SignIn_Submit"]</a></p>
+}
+else if (_invitation is null)
+{
+    @* A link that has been used, withdrawn or has expired looks the same as one that was never
+       real: nothing here says whether the token ever existed. *@
+    <h1>@L["Account_Accept_PageTitle"]</h1>
+    <p class="account-form__alert" role="alert">@L["Account_Accept_NotUsable"]</p>
+    <p class="account-form__aside"><a href="@Routes.SignIn">@L["Account_SignIn_Submit"]</a></p>
+}
+else
+{
+    <h1>@L["Account_Accept_Title", _invitation.OrganizationName]</h1>
+
+    <EditForm Model="Form" Context="form" FormName="accept-invitation" OnValidSubmit="SubmitAsync" method="post" class="account-form">
+        <input type="hidden" name="Input.Token" value="@Token" />
+
+        <p>@L["Account_Accept_Intro", _invitation.InvitedByName, _invitation.OrganizationName, _invitation.Role]</p>
+
+        @if (_problem is not null)
+        {
+            @* An expected outcome, not a failed page: an alert in the form, not an error state. *@
+        <p class="account-form__alert" role="alert">@_problem</p>
+        }
+
+        <TField Label="@L["Account_SignIn_Email"]">
+            @* Fixed: the invitation is valid for this address and no other. *@
+            <TInput Context="context" Value="@_invitation.Email" ReadOnly />
+        </TField>
+
+        @if (_invitation.NeedsAccount)
+        {
+            <TField Label="@L["Account_Accept_DisplayName"]" Required Error="@_nameError">
+                <TInput Context="context"
+                        Value="@Form.DisplayName"
+                        Required
+                        name="Input.DisplayName"
+                        autocomplete="name"
+                        autofocus />
+            </TField>
+
+            <TField Label="@L["Account_Accept_Password"]" Hint="@L["Account_Reset_Hint"]" Required>
+                <TInput Context="context"
+                        Type="password"
+                        Required
+                        name="Input.Password"
+                        autocomplete="new-password" />
+            </TField>
+        }
+
+        <TButton Type="submit" Variant="ButtonVariant.Primary">
+            @(_invitation.NeedsAccount ? L["Account_Accept_Submit"] : L["Account_Accept_SubmitExisting"])
+        </TButton>
+    </EditForm>
+}
+
+@code {
+    [SupplyParameterFromQuery(Name = "token")]
+    private string? Token { get; set; }
+
+    [SupplyParameterFromForm]
+    private AcceptInput? Input { get; set; }
+
+    /// <summary>The posted values, or a fresh set the first time the page is shown.</summary>
+    private AcceptInput Form => Input ??= new();
+
+    private InvitationDetails? _invitation;
+    private string? _joined;
+    private string? _problem;
+    private string? _nameError;
+
+    protected override async Task OnInitializedAsync() =>
+        _invitation = await Invitations.DescribeAsync(Form.Token ?? Token ?? "");
+
+    private async Task SubmitAsync()
+    {
+        if (_invitation is null)
+        {
+            return;
+        }
+
+        _problem = null;
+        _nameError = _invitation.NeedsAccount && string.IsNullOrWhiteSpace(Form.DisplayName)
+            ? L["Account_Error_NameRequired"].Value
+            : null;
+
+        if (_nameError is not null)
+        {
+            return;
+        }
+
+        var result = await Invitations.AcceptAsync(
+            Form.Token ?? Token ?? "",
+            Form.DisplayName,
+            Form.Password);
+
+        if (result.Succeeded)
+        {
+            _joined = _invitation.OrganizationName;
+            return;
+        }
+
+        _problem = string.Join(" ", result.Errors.Select(error => L[error].Value));
+    }
+
+    private sealed class AcceptInput
+    {
+        public string? Token { get; set; }
+
+        public string? DisplayName { get; set; }
+
+        public string? Password { get; set; }
+    }
+}

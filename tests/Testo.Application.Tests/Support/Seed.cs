@@ -30,6 +30,7 @@ public static class Seed
         using var scope = services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<TestoDbContext>();
         var credentials = scope.ServiceProvider.GetRequiredService<CredentialService>();
+        var writeScope = scope.ServiceProvider.GetRequiredService<TenantWriteScope>();
 
         var organization = new Organization
         {
@@ -51,7 +52,11 @@ public static class Seed
             JoinedAt = DateTimeOffset.UtcNow,
         });
 
-        await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+        // Creating an organization happens outside any organization, as it does in production.
+        using (writeScope.AllowWritingTo(organization.Id))
+        {
+            await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
 
         database.Principal.Become(organization.Id, owner.Id, Role.Owner, owner.Email);
         return (organization.Id, owner.Id);
@@ -69,6 +74,7 @@ public static class Seed
         using var scope = services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<TestoDbContext>();
         var credentials = scope.ServiceProvider.GetRequiredService<CredentialService>();
+        var writeScope = scope.ServiceProvider.GetRequiredService<TenantWriteScope>();
 
         var user = await PersonAsync(credentials, email, email);
 
@@ -81,7 +87,11 @@ public static class Seed
             JoinedAt = DateTimeOffset.UtcNow,
         });
 
-        await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+        using (writeScope.AllowWritingTo(organizationId))
+        {
+            await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
         return user.Id;
     }
 

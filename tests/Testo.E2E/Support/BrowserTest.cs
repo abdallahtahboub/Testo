@@ -22,6 +22,22 @@ public abstract class BrowserTest(AppFixture app) : IAsyncLifetime
         return page;
     }
 
+    /// <summary>
+    /// Opens a page as somebody who is already signed in as the owner of the seeded organization.
+    /// Use this for anything under <c>/app</c>, which requires a session (D-1).
+    /// </summary>
+    protected async Task<TestPage> OpenSignedInAsync(string path, Action<BrowserNewContextOptions>? configure = null)
+    {
+        var page = await NewPageAsync(options =>
+        {
+            options.StorageStatePath = App.SignedInStateFile;
+            configure?.Invoke(options);
+        });
+
+        await page.Page.GotoAsync(App.Url(path));
+        return page;
+    }
+
     /// <summary>Creates a page in a fresh browser context without navigating anywhere yet.</summary>
     protected async Task<TestPage> NewPageAsync(Action<BrowserNewContextOptions>? configure = null)
     {

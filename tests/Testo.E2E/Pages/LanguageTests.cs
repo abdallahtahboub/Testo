@@ -70,7 +70,7 @@ public class LanguageTests(AppFixture app) : BrowserTest(app)
     [Fact]
     public async Task App_FirstVisit_UsesTheBrowsersLanguageAndItsFormats()
     {
-        var page = await OpenAsync("/app", options => options.Locale = "de-DE");
+        var page = await OpenSignedInAsync("/app", options => options.Locale = "de-DE");
         await page.Page.WaitUntilInteractiveAsync();
 
         await Expect(page.Page.Locator("html")).ToHaveAttributeAsync("lang", "de");
@@ -84,7 +84,7 @@ public class LanguageTests(AppFixture app) : BrowserTest(app)
     [Fact]
     public async Task SwitchingLanguage_InTheApp_ReloadsInThatLanguageAndRemembersIt()
     {
-        var page = await OpenAsync("/app");
+        var page = await OpenSignedInAsync("/app");
         await page.Page.WaitUntilInteractiveAsync();
         await Expect(page.Page.GetByTestId("formats")).ToContainTextAsync("1,234,567.89");
 

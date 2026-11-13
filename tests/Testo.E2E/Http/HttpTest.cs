@@ -10,6 +10,12 @@ public abstract class HttpTest(AppFixture app) : IDisposable
     /// <summary>The token that ends a request when the test run is cancelled.</summary>
     protected static CancellationToken Cancellation => TestContext.Current.CancellationToken;
 
+    /// <summary>
+    /// Signs in as the owner and returns the cookies, for the paths that need a session (D-1).
+    /// Pass them on as a <c>Cookie</c> header.
+    /// </summary>
+    protected Task<string> SignInAsync() => SignIn.AsOwnerAsync(_client, Cancellation);
+
     protected Task<HttpResponseMessage> GetAsync(string path, params (string Name, string Value)[] headers) =>
         SendAsync(new HttpRequestMessage(HttpMethod.Get, path), headers);
 

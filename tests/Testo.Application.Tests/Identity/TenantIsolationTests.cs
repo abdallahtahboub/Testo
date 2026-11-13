@@ -161,6 +161,91 @@ public sealed class TenantIsolationTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Save_IntoAnotherOrganization_IsRefused()
+    {
+        // D-2. Before the guard checked this, acting as one organization could write a row into
+        // another, and the other could read it. Reproduced before the fix; this keeps it fixed.
+        _database.Principal.OrganizationId = _first;
+
+        await using var database = _database.NewContext();
+        database.Projects.Add(new Project { OrganizationId = _second, Name = "Planted", KeyPrefix = "PLANT" });
+
+        var refusal = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => database.SaveChangesAsync(TestContext.Current.CancellationToken));
+
+        Assert.Contains("not the one this request is acting in", refusal.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Save_IntoAnotherOrganization_IsNeverVisibleToIt()
+    {
+        _database.Principal.OrganizationId = _first;
+
+        await using (var database = _database.NewContext())
+        {
+            database.Projects.Add(new Project { OrganizationId = _second, Name = "Planted", KeyPrefix = "PLANT" });
+
+            await Assert.ThrowsAsync<InvalidOperationException>(
+                () => database.SaveChangesAsync(TestContext.Current.CancellationToken));
+        }
+
+        // The other organization gained nothing. This is the assertion that matters; the message
+        // above is only how the refusal reads.
+        _database.Principal.OrganizationId = _second;
+        await using var asSecond = _database.NewContext();
+
+        Assert.Equal(
+            0,
+            await asSecond.Projects.CountAsync(
+                project => project.Name == "Planted",
+                TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task Save_IntoAnotherOrganization_IsAllowedWhenItIsDeclared()
+    {
+        // The escape hatch the invitation and password-reset flows use. Without it they could not
+        // work: both write outside the current organization while nobody is signed in.
+        _database.Principal.OrganizationId = _first;
+
+        await using var database = _database.NewContext();
+        database.Projects.Add(new Project { OrganizationId = _second, Name = "Declared", KeyPrefix = "DECL" });
+
+        using (_database.WriteScope.AllowWritingTo(_second))
+        {
+            await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        _database.Principal.OrganizationId = _second;
+        await using var asSecond = _database.NewContext();
+
+        Assert.Equal(
+            1,
+            await asSecond.Projects.CountAsync(
+                project => project.Name == "Declared",
+                TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task WriteScope_AfterTheBlockEnds_RefusesAgain()
+    {
+        // The permission is a block, not a switch. If it outlived its block it would be worse
+        // than no guard at all, because it would read as one.
+        _database.Principal.OrganizationId = _first;
+
+        using (_database.WriteScope.AllowWritingTo(_second))
+        {
+            // Deliberately empty: the permission is taken and given back.
+        }
+
+        await using var database = _database.NewContext();
+        database.Projects.Add(new Project { OrganizationId = _second, Name = "Late", KeyPrefix = "LATE" });
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => database.SaveChangesAsync(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task Save_ChangingAnAuditEntry_Refuses()
     {
         _database.Principal.OrganizationId = _first;
@@ -213,7 +298,13 @@ public sealed class TenantIsolationTests : IAsyncLifetime
             database.Add(seed(organization.Id, user.Id));
         }
 
-        await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+        // Seeding is the one place a test writes into an organization it is not acting in, and it
+        // declares that the same way a use case does (D-2).
+        using (_database.WriteScope.AllowWritingTo(organization.Id))
+        {
+            await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
         return organization.Id;
     }
 

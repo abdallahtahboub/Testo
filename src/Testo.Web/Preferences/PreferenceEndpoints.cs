@@ -23,6 +23,8 @@ internal static class PreferenceEndpoints
 
     public static IEndpointRouteBuilder MapPreferenceEndpoints(this IEndpointRouteBuilder endpoints)
     {
+        // Deliberately reachable without a session: a visitor reading the public website switches
+        // theme and language before they have one. The same-origin filter is what guards these.
         endpoints.MapPost(Routes.ThemePreference, SetTheme)
             .DisableAntiforgery()
             .AddEndpointFilter<SameOriginFilter>();

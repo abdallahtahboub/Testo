@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.FeatureManagement;
 using Testo.Application;
+using Testo.Application.Identity;
 using Testo.Mocks;
 using Testo.Modules.Analysis;
 using Testo.Modules.Defects;
@@ -52,6 +53,9 @@ builder.Services.AddScoped<IFeatureFlags, FeatureManagementFlags>();
 builder.Services.TryAddSingleton(TimeProvider.System);
 builder.Services.AddScoped<CspNonce>();
 
+// How often one address may try to sign in (D-4).
+builder.Services.AddAccountRateLimiting(builder.Configuration);
+
 // Signing in. The session cookie, and the services that answer "who is asking".
 builder.Services.AddTestoIdentity(
     allowInsecureCookie: builder.Configuration.GetValue<bool>(TestoIdentityServiceCollectionExtensions.AllowInsecureCookiesKey));
@@ -89,6 +93,9 @@ var app = builder.Build();
 // a sentence rather than with Entity Framework's connection error.
 await DatabaseStartup.EnsureReachableAsync(app.Services);
 
+// A deployed application that writes invitation tokens to its log should not start (D-3).
+NotifierStartup.EnsureLinksReachPeople(app.Services, app.Environment.IsDevelopment());
+
 // A developer who cannot sign in reaches for a shortcut that is worse than a seeded database.
 if (app.Environment.IsDevelopment())
 {
@@ -118,6 +125,11 @@ app.Use((context, next) =>
 app.UseHttpsRedirection();
 app.UseSecurityHeaders(app.Environment);
 app.UseRequestLocalization();
+
+// Before authentication, so a refused attempt costs a dictionary lookup rather than a password
+// hash and a database read.
+app.UseAccountRateLimiting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseImmutableFontCaching();

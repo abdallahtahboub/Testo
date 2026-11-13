@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Testo.Application.Identity;
 using Testo.Contracts.Identity;
@@ -80,6 +81,17 @@ public static class TestoIdentityServiceCollectionExtensions
                 options.SlidingExpiration = false;
             });
 
+        // Note on what is deliberately *not* here: a fallback policy.
+        //
+        // It is the usual way to be secure by default, and it does not fit a Blazor Web App.
+        // MapRazorComponents registers a catch-all endpoint that serves every unknown URL so the
+        // router can render the not-found page; a fallback policy challenges that endpoint too,
+        // and a plain 404 on the public website turns into a redirect to sign-in.
+        //
+        // Pages are protected instead by declaring [Authorize] or [AllowAnonymous], with
+        // PageAuthorizationTests failing the build for any routable page that declares neither.
+        // A test that refuses to compile the mistake is a stronger guarantee than a default,
+        // because it cannot be silently overridden by a page that forgets (D-1).
         services.AddAuthorization();
 
         return services;

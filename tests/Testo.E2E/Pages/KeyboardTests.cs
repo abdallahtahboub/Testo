@@ -67,7 +67,7 @@ public class KeyboardTests(AppFixture app) : BrowserTest(app)
     [Fact]
     public async Task App_SkipLink_MovesFocusToTheMainContentWithoutLosingTheSession()
     {
-        var page = await OpenAsync("/app");
+        var page = await OpenSignedInAsync("/app");
         await page.Page.WaitUntilInteractiveAsync();
         await page.Page.GetByTestId("click-button").ClickAsync();
         await Expect(page.Page.GetByTestId("click-count")).ToHaveTextAsync("Clicks: 1");
@@ -85,7 +85,7 @@ public class KeyboardTests(AppFixture app) : BrowserTest(app)
     public async Task App_AfterLoading_FocusStartsAtThePageTitle()
     {
         // Screen reader users land on the title of the page instead of the top of the document.
-        var page = await OpenAsync("/app");
+        var page = await OpenSignedInAsync("/app");
         await page.Page.WaitUntilInteractiveAsync();
 
         await Expect(page.Page.Locator("h1")).ToBeFocusedAsync();

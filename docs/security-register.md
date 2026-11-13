@@ -15,7 +15,7 @@ a missing lock, and the room does not stay empty.
 
 ## Confirmed defects
 
-### D-1 · Nothing requires a sign-in — **Critical**
+### D-1 · Nothing requires a sign-in — **Critical** · *Fixed 2026-11-13, Milestone 3.1*
 
 `GET /app` with no cookie answers **200 OK** and renders the page.
 
@@ -30,11 +30,24 @@ throws rather than guessing. So no tenant data is exposed. The gate is simply ab
 **Why it cannot wait.** Every module page from the testing-journey milestones would be built on
 the assumption that the gate exists.
 
-**Fix.** A fallback policy requiring an authenticated user; `[AllowAnonymous]` on the website and
-account pages; a test asserting that `/app` redirects a signed-out visitor to sign-in, and that the
-account pages stay reachable.
+**Fixed.** Not with a fallback policy, which was the plan and does not fit a Blazor Web App:
+`MapRazorComponents` registers a catch-all endpoint so the router can render the not-found page,
+and a fallback challenges that too — a plain 404 on the public website became a redirect to
+sign-in. Measured, not assumed.
 
-### D-2 · The tenant guard trusts any pre-set `OrganizationId` — **High** (not reachable by a user)
+Instead:
+
+- `[Authorize]` on the app pages and `[AllowAnonymous]` on the website, the account pages and the
+  showcase, each declared once in an `_Imports.razor`;
+- `PageAuthorizationTests` fails the build for any routable page that declares neither, and for any
+  page under `/app` that is not protected. Removing the attribute was tried; the test named the
+  page;
+- `AuthorizeRouteView` in the router, because an interactive session navigates inside the circuit
+  without touching the server's routing, so the endpoint check alone would not run;
+- `AuthorizationTests` asserts the redirect, that a session reaches `/app`, that the public pages
+  and the theme switch stay open, and that an unknown address is still a 404.
+
+### D-2 · The tenant guard trusts any pre-set `OrganizationId` — **High** · *Fixed 2026-11-13, Milestone 3.1*
 
 `Testo.Persistence/Interceptors/TenantGuardInterceptor.cs`, the `case EntityState.Added:` branch:
 a row that already carries an organization is accepted without comparing it to the current context.
@@ -53,11 +66,19 @@ blanket "must equal the current organization" rule would break both:
 - a password reset writes an audit entry into *every* organization the person belongs to, while
   nobody is signed in (`PasswordResetWorkflow.cs`).
 
-**Fix.** An explicit, scoped permission — the two flows declare "I am deliberately writing to
-organization X", and every other pre-set id is refused. Tests: the refusal, and both flows still
-working.
+**Fixed.** `TenantWriteScope`. A row whose organization matches the request passes as before; one
+that does not is refused unless a flow has declared it with `AllowWritingTo`, which lasts until the
+block ends.
 
-### D-3 · Invitation and password-reset tokens are written to the log — **Critical on first deployment**
+Five places genuinely need it, and each now says so in a line of code a reviewer can see: signing
+in (success and failure both write an audit entry into the organization being entered), accepting
+an invitation, both halves of a password reset, and seeding a development database.
+
+Tests: the write is refused; the other organization gains nothing, which is the assertion that
+matters; a declared write succeeds; and the permission stops working once its block ends — a
+permission that outlived its block would be worse than no guard, because it would read like one.
+
+### D-3 · Invitation and password-reset tokens are written to the log — **Critical** · *Fixed 2026-11-13, Milestone 3.1*
 
 `Testo.Application/ApplicationServiceCollectionExtensions.cs` registers `LoggingInvitationNotifier`
 unconditionally, including in production. It logs the raw token at `Warning`.
@@ -65,10 +86,13 @@ unconditionally, including in production. It logs the raw token at `Warning`.
 Anyone who can read the logs can accept any invitation or reset any password. The severity is
 zero while nothing is deployed and total the day something is.
 
-**Fix.** Refuse to start outside Development unless a real notifier is registered. That converts a
-silent credential leak into a loud startup failure.
+**Fixed.** `NotifierStartup.EnsureLinksReachPeople` refuses to start outside development unless a
+real sender is registered, and says why. A silent credential leak is now a loud startup failure.
 
-### D-4 · No rate limiting of any kind — **High**
+The browser tests run the application as a deployed site, so they had to register a sender of their
+own — which is the check proving itself rather than a workaround.
+
+### D-4 · No rate limiting of any kind — **High** · *Fixed 2026-11-13, Milestone 3.1*
 
 `docs/identity-and-access.md` §5 promises "Rate limit per address **and per IP**". Only the
 per-account lockout exists: ten attempts, fifteen minutes.
@@ -77,8 +101,21 @@ One address can therefore try one likely password against every account in the p
 friction, which is how credential stuffing actually works. The lockout is also an availability
 lever: an attacker who knows an email address can keep that person locked out indefinitely.
 
-**Fix.** ASP.NET Core rate limiting per IP on `/account/**`, and a decision about how to respond to
-spraying that does not hand an attacker a denial-of-service primitive.
+**Fixed.** `AccountRateLimiting`: a sliding window of thirty posts a minute per address on
+`/account/**`, in six segments so the allowance returns gradually rather than all at once on a
+boundary somebody could wait for. A refusal carries `Retry-After`.
+
+Only unsafe methods are limited. Reading the sign-in page is somebody arriving, and an office
+behind one address arrives all morning; posting is an attempt. Limiting the former would have made
+the product unusable for a customer whose staff share an address, which is the denial-of-service
+primitive the fix had to avoid rather than create.
+
+The limiter runs before authentication, so a refused attempt costs a dictionary lookup instead of a
+password hash and a database read.
+
+**Still required at deployment:** behind a reverse proxy the partition is the proxy's address
+unless `UseForwardedHeaders` is configured with the known proxies. The limit still works, as one
+bucket for everybody — safe, and much blunter than intended. Recorded as R-8.
 
 ### D-5 · The documentation asserted things that were false — **Medium** *(fixed by this register's own pull request)*
 
@@ -153,6 +190,17 @@ test host can be told apart another way.
 
 The only caller checks the environment; the method does not. A second caller added later would not
 have to.
+
+### R-8 · Rate limiting needs forwarded headers behind a proxy — **Medium when deployed**
+
+`AccountRateLimiting` partitions on the connection's remote address. Behind a load balancer or a
+CDN every request arrives from the same place, so the per-address limit becomes one global bucket:
+still a limit, no longer per address.
+
+**Fix at deployment.** `UseForwardedHeaders` with `KnownProxies` or `KnownNetworks` set to the
+actual infrastructure. Deliberately not configured blind: trusting `X-Forwarded-For` from an
+unknown source lets anybody claim any address and escape the limit entirely, which is worse than
+the blunt version.
 
 ### R-7 · One database for every tenant — **Accepted, documented**
 

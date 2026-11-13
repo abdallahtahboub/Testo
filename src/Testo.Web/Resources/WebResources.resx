@@ -40,7 +40,7 @@
     <value>Foundation check</value>
   </data>
   <data name="AppHome_Intro" xml:space="preserve">
-    <value>This is the empty shell of the product app. The dashboard and the modules arrive in Milestones 4 and 5.</value>
+    <value>This is the empty shell of the product app. The dashboard and the modules arrive in Milestones 5 and 6.</value>
   </data>
   <data name="AppHome_Modules_Column_Flag" xml:space="preserve">
     <value>Feature flag</value>

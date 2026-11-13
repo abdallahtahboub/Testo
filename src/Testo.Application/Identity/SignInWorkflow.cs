@@ -21,6 +21,7 @@ namespace Testo.Application.Identity;
 public sealed class SignInWorkflow(
     TestoDbContext database,
     CredentialService credentials,
+    TenantWriteScope writeScope,
     TimeProvider timeProvider,
     ILogger<SignInWorkflow> logger)
 {
@@ -176,17 +177,22 @@ public sealed class SignInWorkflow(
         string? ipAddress,
         CancellationToken cancellationToken)
     {
-        new AuditWriter(database, timeProvider).Record(
-            membership.OrganizationId,
-            user.Id,
-            user.Email,
-            AuditActions.SignedIn,
-            nameof(User),
-            user.Id,
-            user.DisplayName,
-            ipAddress);
+        // Nobody is signed in yet, so the entry is written into the organization being entered
+        // rather than the current one, which is why the permission is declared (D-2).
+        using (writeScope.AllowWritingTo(membership.OrganizationId))
+        {
+            new AuditWriter(database, timeProvider).Record(
+                membership.OrganizationId,
+                user.Id,
+                user.Email,
+                AuditActions.SignedIn,
+                nameof(User),
+                user.Id,
+                user.DisplayName,
+                ipAddress);
 
-        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
 
         return new SignInResult(SignInOutcome.Succeeded, user.Id, membership.OrganizationId);
     }
@@ -209,21 +215,24 @@ public sealed class SignInWorkflow(
 
         var membership = await FindMembershipAsync(user.Id, cancellationToken).ConfigureAwait(false);
 
-        if (membership is not null)
+        using (writeScope.AllowWritingTo(membership?.OrganizationId ?? Guid.Empty))
         {
-            new AuditWriter(database, timeProvider).Record(
-                membership.OrganizationId,
-                user.Id,
-                user.Email,
-                AuditActions.SignInFailed,
-                nameof(User),
-                user.Id,
-                user.DisplayName,
-                ipAddress,
-                after: new { lockedOut });
-        }
+            if (membership is not null)
+            {
+                new AuditWriter(database, timeProvider).Record(
+                    membership.OrganizationId,
+                    user.Id,
+                    user.Email,
+                    AuditActions.SignInFailed,
+                    nameof(User),
+                    user.Id,
+                    user.DisplayName,
+                    ipAddress,
+                    after: new { lockedOut });
+            }
 
-        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
 
         return lockedOut
             ? new SignInResult(SignInOutcome.LockedOut, LockoutEnds: user.LockoutEnd)

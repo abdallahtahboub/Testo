@@ -159,6 +159,22 @@ organization. Not new work — Milestone 3 finished properly.
 **Done when:** every defect D-1 to D-4 is closed with a test that fails without the fix; the
 register records the date and the pull request.
 
+**Status: built (2026-11-13), waiting for review.** 860 tests, 53 of them new. Each fix was
+checked by breaking it again: removing the page attribute, commenting out the rate limiter,
+writing into another organization. Each failed, naming what was wrong.
+
+Two things found along the way:
+
+- A fallback authorization policy, the obvious way to be secure by default, does not fit a Blazor
+  Web App: it challenges the catch-all endpoint that serves unknown URLs, so a public 404 becomes
+  a redirect to sign-in. Pages declare the attribute instead, and a test refuses any page that
+  declares neither.
+- The browser harness read lists that Playwright appends to from its own threads, which failed a
+  test with "collection was modified". It looked like a product fault and was a harness fault.
+
+Making sign-in compulsory also made it necessary to be able to leave: the top bar now says who is
+signed in and how to sign out. The user menu proper belongs to Milestone 5.
+
 ### Milestone 3.2 — Execution isolation threat model and ADR
 Written before any code opens a browser. Covers SSRF including DNS rebinding and redirect chains,
 internal network reach, prompt injection from hostile pages, downloads, secrets, and model cost.

@@ -1,0 +1,20 @@
+@inject NavigationManager Navigation
+
+@*
+    Shown in place of a page the current person may not see. Endpoint authorization catches a
+    direct request, but an interactive session navigates inside the circuit without touching the
+    server's routing, so the router checks again and lands here (D-1).
+*@
+
+@code {
+    protected override void OnInitialized()
+    {
+        // Where they were heading, so signing in finishes the journey rather than restarting it.
+        var next = Uri.EscapeDataString(
+            Navigation.ToBaseRelativePath(Navigation.Uri) is { Length: > 0 } path ? "/" + path : Routes.App);
+
+        // forceLoad, because issuing the cookie needs a real request: the account pages are
+        // rendered statically for exactly that reason (ADR-0016).
+        Navigation.NavigateTo($"{Routes.SignIn}?next={next}", forceLoad: true);
+    }
+}

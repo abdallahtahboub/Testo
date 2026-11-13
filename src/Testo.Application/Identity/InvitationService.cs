@@ -12,6 +12,7 @@ namespace Testo.Application.Identity;
 internal sealed class InvitationService(
     TestoDbContext database,
     CredentialService credentials,
+    TenantWriteScope writeScope,
     IInvitationNotifier notifier,
     ICurrentUser currentUser,
     IOrganizationContext organizationContext,
@@ -295,7 +296,13 @@ internal sealed class InvitationService(
             user.DisplayName,
             after: new { Role = invitation.Role.ToString() });
 
-        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        // The membership and the entry go into the inviting organization, which the person is not
+        // yet in and the request is not acting in (D-2).
+        using (writeScope.AllowWritingTo(invitation.OrganizationId))
+        {
+            await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
         return OperationResult.Success;
     }
 

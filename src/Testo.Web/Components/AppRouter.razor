@@ -5,7 +5,13 @@
         AdditionalAssemblies="Routable.Additional"
         NotFoundPage="typeof(Testo.Website.Pages.NotFoundPage)">
     <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(AppLayout)" />
+        @* Authorize, not Route, so that navigating inside the circuit is checked as well as a
+           direct request to the server (D-1). *@
+        <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(AppLayout)">
+            <NotAuthorized>
+                <RedirectToSignIn />
+            </NotAuthorized>
+        </AuthorizeRouteView>
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
 </Router>

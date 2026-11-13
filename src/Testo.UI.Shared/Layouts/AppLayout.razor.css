@@ -95,3 +95,10 @@
     padding: var(--space-4);
   }
 }
+
+/* The person's name beside the way out. Quiet: it is a label, not a control. */
+.app-topbar__person {
+  color: var(--color-text-muted);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body-sm);
+}

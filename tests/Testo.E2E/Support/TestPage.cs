@@ -10,6 +10,14 @@ namespace Testo.E2E.Support;
 /// </summary>
 public sealed class TestPage
 {
+    /// <summary>
+    /// Playwright raises its events on its own threads, so everything below is appended from
+    /// somewhere other than the test and read by the test. Without this lock a page that is still
+    /// loading can make a test fail with "collection was modified", which looks like a product
+    /// fault and is not one.
+    /// </summary>
+    private readonly Lock _gate = new();
+
     private readonly List<string> _problems = [];
     private readonly List<string> _webSockets = [];
     private readonly List<string> _requests = [];
@@ -26,20 +34,45 @@ public sealed class TestPage
         {
             if (message.Type is "error" or "warning")
             {
-                _problems.Add($"console {message.Type}: {message.Text}");
+                lock (_gate)
+                {
+                    _problems.Add($"console {message.Type}: {message.Text}");
+                }
             }
         };
-        page.PageError += (_, error) => _problems.Add($"script error: {error}");
-        page.RequestFailed += (_, request) => _problems.Add($"request failed: {request.Url} ({request.Failure})");
+        page.PageError += (_, error) => Record($"script error: {error}");
+        page.RequestFailed += (_, request) => Record($"request failed: {request.Url} ({request.Failure})");
         page.Response += (_, response) =>
         {
             if (response.Status >= 400)
             {
-                _problems.Add($"HTTP {response.Status}: {response.Url.Replace(origin, "", StringComparison.Ordinal)}");
+                Record($"HTTP {response.Status}: {response.Url.Replace(origin, "", StringComparison.Ordinal)}");
             }
         };
-        page.Request += (_, request) => _requests.Add(request.Url.Replace(origin, "", StringComparison.Ordinal));
-        page.WebSocket += (_, socket) => _webSockets.Add(socket.Url);
+        page.Request += (_, request) =>
+        {
+            lock (_gate)
+            {
+                _requests.Add(request.Url.Replace(origin, "", StringComparison.Ordinal));
+            }
+        };
+
+        page.WebSocket += (_, socket) =>
+        {
+            lock (_gate)
+            {
+                _webSockets.Add(socket.Url);
+            }
+        };
+    }
+
+    /// <summary>Adds a problem, from whichever thread noticed it.</summary>
+    private void Record(string problem)
+    {
+        lock (_gate)
+        {
+            _problems.Add(problem);
+        }
     }
 
     /// <summary>
@@ -52,11 +85,32 @@ public sealed class TestPage
     /// <summary>The Playwright page.</summary>
     public IPage Page { get; }
 
-    /// <summary>The site-relative URLs the page has requested so far.</summary>
-    public IReadOnlyList<string> Requests => _requests;
+    /// <summary>
+    /// The site-relative URLs the page has requested so far. A snapshot: the page may be loading
+    /// still, and a list that grows while a test reads it fails the test for the wrong reason.
+    /// </summary>
+    public IReadOnlyList<string> Requests
+    {
+        get
+        {
+            lock (_gate)
+            {
+                return [.. _requests];
+            }
+        }
+    }
 
-    /// <summary>The WebSocket connections the page has opened so far.</summary>
-    public IReadOnlyList<string> WebSockets => _webSockets;
+    /// <summary>The WebSocket connections the page has opened so far, as a snapshot.</summary>
+    public IReadOnlyList<string> WebSockets
+    {
+        get
+        {
+            lock (_gate)
+            {
+                return [.. _webSockets];
+            }
+        }
+    }
 
     /// <summary>The current URL without scheme and host, for example <c>/de/pricing</c>.</summary>
     public string Path => new Uri(Page.Url).PathAndQuery;
@@ -68,9 +122,16 @@ public sealed class TestPage
     /// </summary>
     public void AssertNoProblems(params string[] expected)
     {
-        var unexpected = _problems
-            .Where(problem => !expected.Any(fragment => problem.Contains(fragment, StringComparison.Ordinal)))
-            .ToList();
+        List<string> unexpected;
+
+        lock (_gate)
+        {
+            unexpected =
+            [
+                .. _problems.Where(problem =>
+                    !expected.Any(fragment => problem.Contains(fragment, StringComparison.Ordinal))),
+            ];
+        }
 
         Assert.True(unexpected.Count == 0, "The browser reported problems:\n" + string.Join('\n', unexpected));
     }
@@ -94,15 +155,23 @@ public sealed class TestPage
         // security policy refuses. Those refusals are the test tool's, not the page's, so the
         // ones it causes while scanning are dropped afterwards. Anything the page itself did is
         // already in the list and stays there.
-        var before = _problems.Count;
+        int before;
+
+        lock (_gate)
+        {
+            before = _problems.Count;
+        }
 
         var result = await Page.RunAxe(options);
 
-        for (var index = _problems.Count - 1; index >= before; index--)
+        lock (_gate)
         {
-            if (IsScannerNoise(_problems[index]))
+            for (var index = _problems.Count - 1; index >= before; index--)
             {
-                _problems.RemoveAt(index);
+                if (IsScannerNoise(_problems[index]))
+                {
+                    _problems.RemoveAt(index);
+                }
             }
         }
         var violations = result.Violations

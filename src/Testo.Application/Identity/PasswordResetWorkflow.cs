@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Microsoft.EntityFrameworkCore;
 using Testo.Application.Audit;
 using Testo.Contracts.Common;
@@ -16,6 +17,7 @@ namespace Testo.Application.Identity;
 public sealed class PasswordResetWorkflow(
     TestoDbContext database,
     CredentialService credentials,
+    TenantWriteScope writeScope,
     IInvitationNotifier notifier,
     TimeProvider timeProvider)
 {
@@ -60,14 +62,16 @@ public sealed class PasswordResetWorkflow(
             RequestedFromIp = ipAddress,
         });
 
-        await RecordAgainstEveryOrganizationAsync(
+        using (await RecordAgainstEveryOrganizationAsync(
                 user,
                 AuditActions.PasswordResetRequested,
                 ipAddress,
                 cancellationToken)
-            .ConfigureAwait(false);
+            .ConfigureAwait(false))
+        {
+            await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
 
-        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         await notifier.SendPasswordResetAsync(user.Email, token, cancellationToken).ConfigureAwait(false);
     }
 
@@ -110,10 +114,16 @@ public sealed class PasswordResetWorkflow(
         reset.User.LockoutEnd = null;
         reset.User.AccessFailedCount = 0;
 
-        await RecordAgainstEveryOrganizationAsync(reset.User, AuditActions.PasswordReset, ipAddress, cancellationToken)
-            .ConfigureAwait(false);
+        using (await RecordAgainstEveryOrganizationAsync(
+                reset.User,
+                AuditActions.PasswordReset,
+                ipAddress,
+                cancellationToken)
+            .ConfigureAwait(false))
+        {
+            await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
 
-        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return OperationResult.Success;
     }
 
@@ -122,7 +132,11 @@ public sealed class PasswordResetWorkflow(
     /// has a right to see that their credentials changed — it is the sort of thing a security
     /// review asks about.
     /// </summary>
-    private async Task RecordAgainstEveryOrganizationAsync(
+    /// <summary>
+    /// Writes the entries and saves, holding the permission for exactly the organizations
+    /// involved. Returns nothing; the caller has already made its other changes.
+    /// </summary>
+    private async Task<IDisposable> RecordAgainstEveryOrganizationAsync(
         User user,
         string action,
         string? ipAddress,
@@ -141,5 +155,9 @@ public sealed class PasswordResetWorkflow(
         {
             writer.Record(organizationId, user.Id, user.Email, action, nameof(User), user.Id, user.DisplayName, ipAddress);
         }
+
+        // Nobody is signed in during a reset, so every one of these is a write outside the current
+        // organization and each is declared (D-2). The permission ends with the save.
+        return writeScope.AllowWritingTo(CollectionsMarshal.AsSpan(organizationIds));
     }
 }

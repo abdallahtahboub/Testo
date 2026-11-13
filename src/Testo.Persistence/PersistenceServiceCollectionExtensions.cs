@@ -19,6 +19,7 @@ public static class PersistenceServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
+        services.AddScoped<TenantWriteScope>();
         services.AddScoped<TenantGuardInterceptor>();
         services.AddScoped<StampInterceptor>();
 

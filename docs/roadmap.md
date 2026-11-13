@@ -182,6 +182,14 @@ Decides the worker boundary, the egress allowlist and the artifact storage model
 
 **Done when:** an accepted ADR exists and R-1 to R-3 in the register point at it.
 
+**Status: built (2026-11-13), waiting for review.** [`execution-threat-model.md`](execution-threat-model.md)
+and [ADR-0018](decisions/0018-execution-isolation.md); R-1 to R-3 point at them. No code. Two
+things it decides that the review did not ask for: a target must be *proved* before an organization
+may run against it, or the product is a free way to send a browser at somebody else's website from
+our address; and the worker cannot name an organization at all, so a worker a hostile page fully
+owns learns one run's configuration and nothing about any other customer. Milestone 3.3 inherits
+seven refusals as acceptance tests.
+
 ### Milestone 3.3 — A deterministic execution slice
 One allowlisted local demo target. One happy path and one known failure. Real `TestRun` and step
 persistence, artifacts, cancel and rerun. A worker outside the Blazor process. **No AI.**

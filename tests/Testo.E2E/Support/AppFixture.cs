@@ -48,9 +48,7 @@ public sealed class AppFixture : IAsyncLifetime
         _application.UseKestrel(0);
         _application.StartServer();
 
-        var addresses = _application.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()
-            ?? throw new InvalidOperationException("The server does not report its addresses.");
-        BaseAddress = new Uri(addresses.Addresses.First());
+        BaseAddress = new Uri(_application.ServerAddress());
 
         _playwright = await Playwright.CreateAsync();
         _browser = await LaunchBrowserAsync(_playwright);

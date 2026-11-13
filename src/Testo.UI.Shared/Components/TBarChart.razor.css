@@ -1,0 +1,78 @@
+.t-chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.t-chart__title {
+  color: var(--color-text);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.t-chart__plot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.t-chart__row {
+  display: grid;
+  grid-template-columns: minmax(6rem, 10rem) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.t-chart__row-label {
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: var(--text-body-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.t-chart__row-track {
+  display: block;
+  min-width: 0;
+}
+
+/* Capped so a bar never fills its row; the leftover is air, per the mark specs. */
+.t-chart__bar {
+  display: block;
+  width: 100%;
+  height: 1rem;
+}
+
+.t-chart__row-value {
+  color: var(--color-text);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The fill. One hue unless the point carries a meaning of its own. */
+.t-chart__bar--brand path {
+  fill: var(--color-brand);
+}
+
+.t-chart__bar--success path {
+  fill: var(--color-success);
+}
+
+.t-chart__bar--warning path {
+  fill: var(--color-warning);
+}
+
+.t-chart__bar--danger path {
+  fill: var(--color-danger);
+}
+
+.t-chart__bar--info path {
+  fill: var(--color-info);
+}
+
+.t-chart__bar--neutral path {
+  fill: var(--color-text-muted);
+}

@@ -1,0 +1,47 @@
+<ShowcaseSection Id="navigation" Title="Navigation and decisions"
+                 Description="Where you are, how to move through a long list, and how the product asks before doing something it cannot undo.">
+
+    <ShowcaseExample Caption="Breadcrumbs" Stacked="true" Note="The last crumb is the current page and is not a link.">
+        <TBreadcrumbs Items="Trail" />
+    </ShowcaseExample>
+
+    <ShowcaseExample Caption="Tabs" Stacked="true"
+                     Note="Arrow keys move between tabs, Home and End jump to the ends, and only the selected tab is in the tab order — so Tab leaves the strip rather than walking through every tab in it.">
+        <TTabs Label="Defect views" Tabs="Views" Selected="@_view" SelectedChanged="value => _view = value">
+            <p class="t-muted">Showing the <strong>@Views.First(view => view.Id == _view).Label.ToLowerInvariant()</strong> view.</p>
+        </TTabs>
+    </ShowcaseExample>
+
+    <ShowcaseExample Caption="Pagination" Stacked="true"
+                     Note="Says which rows are on screen, because a range out of a total tells a person more than a page number out of a page count.">
+        <TPagination PageIndex="_page" PageSize="20" TotalCount="237" PageIndexChanged="value => _page = value" />
+    </ShowcaseExample>
+
+    <ShowcaseExample Caption="Confirming something that cannot be undone" Stacked="true"
+                     Note="Names the thing instead of asking whether you are sure, states what else is affected, and labels the button with the verb. Where an action can be undone instead, offer undo and do not ask at all.">
+        <TConfirm Title="Delete test suite “Checkout — regression”?"
+                  ConfirmLabel="Delete suite"
+                  Consequence="47 test cases stay. Their membership of this suite is removed, and two scheduled runs that use it will stop."
+                  OnConfirm="() => { }"
+                  OnCancel="() => { }" />
+    </ShowcaseExample>
+</ShowcaseSection>
+
+@code {
+    private string _view = "list";
+    private int _page = 2;
+
+    private static readonly IReadOnlyList<TBreadcrumb> Trail =
+    [
+        new("Orion", "/app"),
+        new("Defects", "/app"),
+        new("DEF-734"),
+    ];
+
+    private static readonly IReadOnlyList<TTab> Views =
+    [
+        new("list", "List", IconName.Document),
+        new("board", "Board", IconName.Folder),
+        new("open", "Open", Count: 42),
+    ];
+}

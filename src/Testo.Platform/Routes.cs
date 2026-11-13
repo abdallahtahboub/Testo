@@ -9,6 +9,12 @@ public static class Routes
     /// <summary>Root of the product app. Everything below it is interactive.</summary>
     public const string App = "/app";
 
+    /// <summary>
+    /// Every component with its variants, for developers and designers. Behind
+    /// <c>Feature.Showcase</c>, which is off outside development.
+    /// </summary>
+    public const string Showcase = "/showcase";
+
     /// <summary>The page shown for unknown URLs.</summary>
     public const string NotFound = "/not-found";
 

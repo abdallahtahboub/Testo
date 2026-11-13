@@ -1,0 +1,60 @@
+.swatches {
+  display: grid;
+  /* min() so a column never forces the page wider than the screen. */
+  grid-template-columns: repeat(auto-fill, minmax(min(10rem, 100%), 1fr));
+  gap: var(--space-3);
+  width: 100%;
+}
+
+/*
+ * The colour is a chip; the name and token sit on the normal surface. Text on top of each
+ * swatch would need a matching text colour per swatch, which is exactly the kind of
+ * invented value the design system exists to prevent.
+ */
+.swatch {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+}
+
+.swatch__chip {
+  height: var(--space-10);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.swatch__name {
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.swatch__token {
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+}
+
+.type-scale {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+.icons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(9rem, 100%), 1fr));
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.icons__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+}

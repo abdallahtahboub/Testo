@@ -1,0 +1,45 @@
+@*
+    Nothing here yet.
+
+    Three parts, as ux/patterns.md §1 asks: what belongs here, why it is empty, and the
+    one action that fills it. Never just "No data".
+*@
+<div class="t-empty-state" @attributes="AdditionalAttributes">
+    @if (Icon is { } icon)
+    {
+        <span class="t-empty-state__icon">
+            <TIcon Name="icon" Size="IconSize.Large" />
+        </span>
+    }
+    <h3 class="t-empty-state__title">@Title</h3>
+    @if (ChildContent is not null)
+    {
+        <div class="t-empty-state__text">@ChildContent</div>
+    }
+    @if (Action is not null)
+    {
+        <div class="t-empty-state__action">@Action</div>
+    }
+</div>
+
+@code {
+    /// <summary>What belongs here, as a statement: "No test cases yet".</summary>
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    /// <summary>Why it is empty, and what filling it would do.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>The one action that fills it.</summary>
+    [Parameter]
+    public RenderFragment? Action { get; set; }
+
+    /// <summary>A quiet illustration above the title.</summary>
+    [Parameter]
+    public IconName? Icon { get; set; }
+
+    /// <summary>Any other attribute is passed on to the wrapper.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+}

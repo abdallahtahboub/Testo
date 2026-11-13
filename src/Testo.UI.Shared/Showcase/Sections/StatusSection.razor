@@ -1,0 +1,42 @@
+<ShowcaseSection Id="status" Title="Status and badges"
+                 Description="Status is never shown by colour alone: every badge carries an icon and a word, and both are translated.">
+
+    <ShowcaseExample Caption="Test outcomes">
+        @foreach (var status in Enum.GetValues<TestStatus>())
+        {
+            <TStatusBadge Status="status" />
+        }
+    </ShowcaseExample>
+
+    <ShowcaseExample Caption="Defect severity" Note="The two that need acting on are filled; the rest stay quiet in a long list.">
+        @foreach (var severity in Enum.GetValues<DefectSeverity>().Reverse())
+        {
+            <TSeverityBadge Severity="severity" />
+        }
+    </ShowcaseExample>
+
+    <ShowcaseExample Caption="Badge tones and appearances" Stacked="true">
+        <div class="badge-grid">
+            @foreach (var appearance in Enum.GetValues<BadgeAppearance>())
+            {
+                <div class="badge-grid__row">
+                    <code>@appearance</code>
+                    @foreach (var tone in Enum.GetValues<Tone>())
+                    {
+                        <TBadge Tone="tone" Appearance="appearance">@tone</TBadge>
+                    }
+                </div>
+            }
+        </div>
+    </ShowcaseExample>
+
+    <ShowcaseExample Caption="Avatars" Note="Decorative beside a name, and named itself when it stands alone.">
+        <TAvatar Name="Mara Lindqvist" Size="IconSize.Small" />
+        <TAvatar Name="Tom Weber" />
+        <TAvatar Name="Nadia Haddad" Size="IconSize.Large" />
+        <span>
+            <TAvatar Name="Jonas Berg" />
+            Jonas Berg
+        </span>
+    </ShowcaseExample>
+</ShowcaseSection>

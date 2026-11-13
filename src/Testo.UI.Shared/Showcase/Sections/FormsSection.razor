@@ -1,0 +1,73 @@
+<ShowcaseSection Id="forms" Title="Forms"
+                 Description="A visible label above every control, never a placeholder instead of one. The field owns the ids, so a control cannot forget to be described by its hint and its error.">
+
+    <ShowcaseExample Caption="Text fields" Stacked="true">
+        <div class="form-grid">
+            <TField Label="Suite name" Required="true" Hint="Shown wherever this suite appears">
+                <TInput Context="context" Value="@_name" ValueChanged="value => _name = value" Placeholder="Checkout — regression" />
+            </TField>
+
+            <TField Label="Environment" Required="true" Error="@(_environment is null ? "Choose where the suite runs" : null)">
+                <TSelect Context="context" Value="@_environment" ValueChanged="value => _environment = value" Placeholder="Choose an environment">
+                    <option value="staging">Staging</option>
+                    <option value="preprod">Pre-production</option>
+                </TSelect>
+            </TField>
+        </div>
+    </ShowcaseExample>
+
+    <ShowcaseExample Caption="Longer text" Stacked="true">
+        <TField Label="Steps to reproduce" Hint="One step per line, as a person would do them">
+            <TTextArea Context="context" Value="@_steps" ValueChanged="value => _steps = value" Rows="4" />
+        </TField>
+    </ShowcaseExample>
+
+    <ShowcaseExample Caption="Choices" Stacked="true">
+        <div class="form-grid">
+            <div class="form-stack">
+                <TCheckbox Label="Include skipped tests"
+                           Hint="Skipped tests count as neither passed nor failed"
+                           Checked="_includeSkipped"
+                           CheckedChanged="value => _includeSkipped = value" />
+                <TSwitch Label="Require a second factor"
+                         Hint="Applies to everyone in this organisation"
+                         Checked="_mfa"
+                         CheckedChanged="value => _mfa = value" />
+            </div>
+
+            <TRadioGroup TValue="string"
+                         Label="Technique"
+                         Hint="How the cases are derived"
+                         Options="Techniques"
+                         Value="@_technique"
+                         ValueChanged="value => _technique = value" />
+        </div>
+    </ShowcaseExample>
+
+    <ShowcaseExample Caption="States" Stacked="true">
+        <div class="form-grid">
+            <TField Label="Read only">
+                <TInput Context="context" Value="REQ-1042" ReadOnly="true" />
+            </TField>
+            <TField Label="Disabled" Hint="Not available on this plan">
+                <TInput Context="context" Value="" Disabled="true" />
+            </TField>
+        </div>
+    </ShowcaseExample>
+</ShowcaseSection>
+
+@code {
+    private string? _name = "";
+    private string? _environment;
+    private string? _steps = "";
+    private string? _technique = "boundary";
+    private bool _includeSkipped = true;
+    private bool _mfa;
+
+    private static readonly IReadOnlyList<TRadioOption<string>> Techniques =
+    [
+        new("boundary", "Boundary values", "The edges of each input range"),
+        new("equivalence", "Equivalence classes"),
+        new("pairwise", "Pairwise", "Not available on this plan", Disabled: true),
+    ];
+}

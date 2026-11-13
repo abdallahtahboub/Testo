@@ -1,0 +1,90 @@
+@using Microsoft.FluentUI.AspNetCore.Components
+@typeparam TItem where TItem : class
+@inject IStringLocalizer<SharedResources> L
+
+@*
+    The product's lists: test cases, runs, defects, requirements.
+
+    A wrapper around FluentDataGrid (ADR-0007) that applies our conventions rather than
+    leaving each page to remember them: our loading and empty states, our density, a
+    header that stays put, and sort state kept in the URL so a filtered view can be
+    shared (ux/patterns.md §3).
+*@
+<div class="t-table t-table--@DensityName">
+    <FluentDataGrid TGridItem="TItem"
+                    Items="Items"
+                    ItemKey="ItemKey"
+                    Loading="Loading"
+                    Pagination="Pagination"
+                    OnRowClick="OnRowClick"
+                    ShowHover="true"
+                    GenerateHeader="DataGridGeneratedHeaderType.Sticky"
+                    SaveStateInUrl="@(SaveStateKey is not null)"
+                    SaveStatePrefix="@SaveStateKey"
+                    aria-label="@Caption"
+                    @attributes="AdditionalAttributes">
+        <ChildContent>
+            @ChildContent
+        </ChildContent>
+        <LoadingContent>
+            <TSkeleton Shape="SkeletonShape.Text" Lines="5" Label="@Caption" />
+        </LoadingContent>
+        <EmptyContent>
+            @EmptyContent
+        </EmptyContent>
+    </FluentDataGrid>
+</div>
+
+@code {
+    /// <summary>The rows.</summary>
+    [Parameter, EditorRequired]
+    public IQueryable<TItem>? Items { get; set; }
+
+    /// <summary>The columns.</summary>
+    [Parameter, EditorRequired]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// What belongs in this table and how to put it there. Required, because "no rows" is
+    /// always specific to what is missing (ux/patterns.md §1).
+    /// </summary>
+    [Parameter, EditorRequired]
+    public RenderFragment? EmptyContent { get; set; }
+
+    /// <summary>What the table lists, for a screen reader: "Test runs in this release".</summary>
+    [Parameter, EditorRequired]
+    public string Caption { get; set; } = "";
+
+    /// <summary>A stable key per row, so the grid can tell rows apart as data changes.</summary>
+    [Parameter]
+    public Func<TItem, object>? ItemKey { get; set; }
+
+    /// <summary>The rows are on their way.</summary>
+    [Parameter]
+    public bool Loading { get; set; }
+
+    /// <summary>How tightly rows are packed.</summary>
+    [Parameter]
+    public TableDensity Density { get; set; } = TableDensity.Comfortable;
+
+    /// <summary>Paging, when the list is long enough to need it.</summary>
+    [Parameter]
+    public PaginationState? Pagination { get; set; }
+
+    /// <summary>
+    /// A prefix under which sort and page state is kept in the URL, so a view can be
+    /// shared or bookmarked. Null keeps the state out of the URL.
+    /// </summary>
+    [Parameter]
+    public string? SaveStateKey { get; set; }
+
+    /// <summary>Opening a row. The row itself is the target, not a link inside it.</summary>
+    [Parameter]
+    public EventCallback<FluentDataGridRow<TItem>> OnRowClick { get; set; }
+
+    /// <summary>Any other attribute is passed on to the grid.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string DensityName => Density.ToString().ToLowerInvariant();
+}

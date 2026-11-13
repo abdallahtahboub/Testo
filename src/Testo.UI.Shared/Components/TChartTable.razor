@@ -1,0 +1,49 @@
+@*
+    The numbers behind a chart, as a table.
+
+    Every chart has one (ux/patterns.md §11). It is hidden from sight — the chart is the
+    visual answer — but a screen reader reads the figures rather than being told there is
+    a picture it cannot see.
+*@
+<table class="t-visually-hidden">
+    <caption>@Caption</caption>
+    <thead>
+        <tr>
+            <th scope="col">@CategoryHeader</th>
+            <th scope="col">@ValueHeader</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var point in Points)
+        {
+            <tr>
+                <th scope="row">@point.Label</th>
+                <td>@Format(point.Value)</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    /// <summary>What the chart shows.</summary>
+    [Parameter, EditorRequired]
+    public string Caption { get; set; } = "";
+
+    /// <summary>The points, in the order they are drawn.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<ChartPoint> Points { get; set; } = [];
+
+    /// <summary>The heading of the first column: "Status", "Severity", "Day".</summary>
+    [Parameter, EditorRequired]
+    public string CategoryHeader { get; set; } = "";
+
+    /// <summary>The heading of the second column: "Tests", "Defects".</summary>
+    [Parameter, EditorRequired]
+    public string ValueHeader { get; set; } = "";
+
+    /// <summary>A .NET number format, for example <c>N0</c> or <c>P0</c>.</summary>
+    [Parameter]
+    public string ValueFormat { get; set; } = "N0";
+
+    private string Format(double value) => value.ToString(ValueFormat, System.Globalization.CultureInfo.CurrentCulture);
+}

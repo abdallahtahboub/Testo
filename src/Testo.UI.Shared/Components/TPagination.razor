@@ -1,0 +1,61 @@
+@inject IStringLocalizer<SharedResources> L
+
+@*
+    Moving through a long list.
+
+    Says which rows are on screen out of how many, because "page 3 of 12" tells a person
+    far less than "41 to 60 of 237". The count is announced politely, so a screen reader
+    hears the new range after the page changes.
+*@
+<nav class="t-pagination" aria-label="@L["Pagination_Label"]" @attributes="AdditionalAttributes">
+    <p class="t-pagination__status" aria-live="polite">@L["Pagination_Status", First, Last, TotalCount]</p>
+
+    <div class="t-pagination__controls">
+        <TButton Variant="ButtonVariant.Secondary"
+                 Size="ButtonSize.Small"
+                 Icon="IconName.ChevronLeft"
+                 AriaLabel="@L["Pagination_Previous"]"
+                 Disabled="@(PageIndex <= 0)"
+                 OnClick="() => GoToAsync(PageIndex - 1)" />
+        <TButton Variant="ButtonVariant.Secondary"
+                 Size="ButtonSize.Small"
+                 Icon="IconName.ChevronRight"
+                 AriaLabel="@L["Pagination_Next"]"
+                 Disabled="@(PageIndex >= LastPageIndex)"
+                 OnClick="() => GoToAsync(PageIndex + 1)" />
+    </div>
+</nav>
+
+@code {
+    /// <summary>The page being shown, counting from zero.</summary>
+    [Parameter, EditorRequired]
+    public int PageIndex { get; set; }
+
+    /// <summary>How many rows fit on a page.</summary>
+    [Parameter, EditorRequired]
+    public int PageSize { get; set; } = 25;
+
+    /// <summary>How many rows there are in total.</summary>
+    [Parameter, EditorRequired]
+    public int TotalCount { get; set; }
+
+    /// <summary>Raised when another page is asked for.</summary>
+    [Parameter]
+    public EventCallback<int> PageIndexChanged { get; set; }
+
+    /// <summary>Any other attribute is passed on to the navigation element.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private int LastPageIndex => TotalCount == 0 ? 0 : (TotalCount - 1) / Math.Max(1, PageSize);
+
+    private int First => TotalCount == 0 ? 0 : (PageIndex * PageSize) + 1;
+
+    private int Last => Math.Min(TotalCount, (PageIndex + 1) * PageSize);
+
+    private Task GoToAsync(int index)
+    {
+        var clamped = Math.Clamp(index, 0, LastPageIndex);
+        return clamped == PageIndex ? Task.CompletedTask : PageIndexChanged.InvokeAsync(clamped);
+    }
+}

@@ -1,0 +1,32 @@
+@*
+    One section of the showcase: a heading, a note on when to reach for the component,
+    and its variants.
+*@
+<section class="showcase-section" id="@Id">
+    <header class="showcase-section__header">
+        <h2 class="showcase-section__title">@Title</h2>
+        @if (!string.IsNullOrWhiteSpace(Description))
+        {
+            <p class="showcase-section__description">@Description</p>
+        }
+    </header>
+    <div class="showcase-section__body">@ChildContent</div>
+</section>
+
+@code {
+    /// <summary>The anchor, so a section can be linked to.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = "";
+
+    /// <summary>What this section covers.</summary>
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    /// <summary>When to reach for it, and the rule it follows.</summary>
+    [Parameter]
+    public string? Description { get; set; }
+
+    /// <summary>The examples.</summary>
+    [Parameter, EditorRequired]
+    public RenderFragment? ChildContent { get; set; }
+}

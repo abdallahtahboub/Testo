@@ -1,0 +1,16 @@
+.state-switch {
+  width: 100%;
+  /* Lets the tab strip inside scroll rather than widening the page. */
+  min-width: 0;
+}
+
+.state-stage {
+  min-height: 14rem;
+}
+
+.skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  width: 100%;
+}

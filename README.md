@@ -89,6 +89,9 @@ registration line. Nothing existing changes.
 | [`docs/testing-journey.md`](docs/testing-journey.md) | Which testing activities the platform supports and what it does in each |
 | [`docs/architecture.md`](docs/architecture.md) | How the solution is put together and why |
 | [`docs/sitemap.md`](docs/sitemap.md) | Every page of the website and the app |
+| [`docs/domain-model.md`](docs/domain-model.md) | What is stored, and how customers are kept apart |
+| [`docs/identity-and-access.md`](docs/identity-and-access.md) | Sign-in, roles, permissions, audit, GDPR |
+| [`docs/ux/`](docs/ux/) | Who uses Testo, the flows, how the interface behaves, how it is written |
 | [`docs/design-system.md`](docs/design-system.md) | Colors, type, spacing, components, accessibility rules |
 | [`docs/roadmap.md`](docs/roadmap.md) | The milestones and what "done" means for each |
 | [`docs/decisions/`](docs/decisions/) | Why each significant decision was made |

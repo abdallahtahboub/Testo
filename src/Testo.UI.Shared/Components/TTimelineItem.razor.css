@@ -1,0 +1,103 @@
+.t-timeline__item {
+  --marker: 1.5rem;
+
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--marker) minmax(0, 1fr);
+  gap: var(--space-3);
+  padding-block-end: var(--space-5);
+}
+
+/* The line joining the steps, stopping at the last one. */
+.t-timeline__item:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  inset-block: var(--marker) 0;
+  inset-inline-start: calc(var(--marker) / 2);
+  width: 1px;
+  background-color: var(--color-border);
+}
+
+.t-timeline__item:last-child {
+  padding-block-end: 0;
+}
+
+.t-timeline__marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--marker);
+  height: var(--marker);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface);
+}
+
+.t-timeline__item--success .t-timeline__marker {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.t-timeline__item--danger .t-timeline__marker {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.t-timeline__item--warning .t-timeline__marker {
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+}
+
+.t-timeline__item--info .t-timeline__marker {
+  border-color: var(--color-info);
+  color: var(--color-info);
+}
+
+.t-timeline__item--neutral .t-timeline__marker {
+  color: var(--color-text-muted);
+}
+
+.t-timeline__content {
+  min-width: 0;
+  padding-block-start: var(--space-1);
+}
+
+.t-timeline__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.t-timeline__title {
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body-sm);
+  font-weight: var(--weight-medium);
+}
+
+.t-timeline__duration {
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+  font-variant-numeric: tabular-nums;
+}
+
+.t-timeline__subtitle {
+  margin-block-start: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+}
+
+.t-timeline__details {
+  margin-block-start: var(--space-2);
+}
+
+/* The step running now. A ring rather than a pulse, so it is just as clear with
+   reduced motion and in a screenshot. */
+.t-timeline__item--current .t-timeline__marker {
+  box-shadow: 0 0 0 var(--ring-width) var(--color-brand-subtle);
+}
+
+.t-timeline__item--current .t-timeline__title {
+  font-weight: var(--weight-semibold);
+}

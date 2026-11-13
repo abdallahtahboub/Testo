@@ -1,0 +1,77 @@
+@*
+    Magnitudes compared against each other: defects by severity, runs by day, the slowest
+    tests.
+
+    Horizontal bars on one baseline, because bars sharing a baseline compare far more
+    exactly than slices of a circle, and because category names have room to be read.
+    Every bar is directly labelled with its value, so the chart is readable without
+    counting gridlines — and without relying on colour.
+*@
+<figure class="t-chart" @attributes="AdditionalAttributes">
+    <figcaption class="t-chart__title">@Title</figcaption>
+
+    <div class="t-chart__plot">
+        @foreach (var point in Points)
+        {
+            <div class="t-chart__row">
+                <span class="t-chart__row-label" title="@point.Label">@point.Label</span>
+                <span class="t-chart__row-track">
+                    <svg class="t-chart__bar t-chart__bar--@ToneName(point)"
+                         viewBox="0 0 @Width @BarHeight"
+                         preserveAspectRatio="none"
+                         aria-hidden="true"
+                         focusable="false">
+                        <path d="@ChartGeometry.HorizontalBar(0, 0, Length(point), BarHeight)" />
+                    </svg>
+                </span>
+                <span class="t-chart__row-value">@Format(point.Value)</span>
+            </div>
+        }
+    </div>
+
+    <TChartTable Caption="@Title" Points="Points" CategoryHeader="@CategoryHeader" ValueHeader="@ValueHeader" ValueFormat="@ValueFormat" />
+</figure>
+
+@code {
+    private const double Width = 100;
+    private const double BarHeight = 16;
+
+    /// <summary>What the chart shows. Also the caption of its data table.</summary>
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    /// <summary>The bars, in the order they should be read. Rank them before passing them in.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<ChartPoint> Points { get; set; } = [];
+
+    /// <summary>The heading of the category column in the data table.</summary>
+    [Parameter, EditorRequired]
+    public string CategoryHeader { get; set; } = "";
+
+    /// <summary>The heading of the value column in the data table.</summary>
+    [Parameter, EditorRequired]
+    public string ValueHeader { get; set; } = "";
+
+    /// <summary>A .NET number format for the values.</summary>
+    [Parameter]
+    public string ValueFormat { get; set; } = "N0";
+
+    /// <summary>
+    /// The value the longest bar represents. Left unset, the largest point sets the scale.
+    /// Set it when several charts must be compared with each other.
+    /// </summary>
+    [Parameter]
+    public double? Maximum { get; set; }
+
+    /// <summary>Any other attribute is passed on to the figure.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private double Scale => Maximum ?? (Points.Count == 0 ? 0 : Points.Max(point => point.Value));
+
+    private double Length(ChartPoint point) => Scale <= 0 ? 0 : point.Value / Scale * Width;
+
+    private static string ToneName(ChartPoint point) => (point.Tone ?? Components.Tone.Brand).ToString().ToLowerInvariant();
+
+    private string Format(double value) => value.ToString(ValueFormat, System.Globalization.CultureInfo.CurrentCulture);
+}

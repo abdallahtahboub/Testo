@@ -1,0 +1,59 @@
+@inject IStringLocalizer<SharedResources> L
+
+@*
+    A placeholder in the shape of the content that is coming, rather than a spinner
+    (ux/patterns.md §1). Because it takes the same room, the page does not jump when the
+    real content arrives.
+
+    One region announces that something is loading; the shapes themselves are decorative,
+    so a screen reader hears "Loading…" once, not twelve times.
+*@
+<div class="t-skeleton" role="status" aria-label="@(Label ?? L["Loading_Label"])" @attributes="AdditionalAttributes">
+    @for (var line = 0; line < Lines; line++)
+    {
+        <span class="t-skeleton__shape t-skeleton__shape--@ShapeName"
+              style="@WidthFor(line)"
+              aria-hidden="true"></span>
+    }
+</div>
+
+@code {
+    /// <summary>What shape is coming. Defaults to <see cref="SkeletonShape.Text"/>.</summary>
+    [Parameter]
+    public SkeletonShape Shape { get; set; } = SkeletonShape.Text;
+
+    /// <summary>How many shapes. A paragraph is three or four lines.</summary>
+    [Parameter]
+    public int Lines { get; set; } = 1;
+
+    /// <summary>What is loading, for a screen reader. Defaults to "Loading…".</summary>
+    [Parameter]
+    public string? Label { get; set; }
+
+    /// <summary>A fixed height for a block, for example the height of the chart it stands in for.</summary>
+    [Parameter]
+    public string? Height { get; set; }
+
+    /// <summary>Any other attribute is passed on to the wrapper.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string ShapeName => Shape.ToString().ToLowerInvariant();
+
+    /// <summary>
+    /// The last line of a paragraph is short, the way real text ends mid-line. Without
+    /// this a skeleton reads as a block, not as text.
+    /// </summary>
+    private string? WidthFor(int line)
+    {
+        var height = Height is null ? null : $"height:{Height};";
+        var lastOfSeveral = Shape == SkeletonShape.Text && Lines > 1 && line == Lines - 1;
+        return (height, lastOfSeveral) switch
+        {
+            (null, false) => null,
+            (null, true) => "width:60%",
+            (_, false) => height,
+            (_, true) => height + "width:60%",
+        };
+    }
+}

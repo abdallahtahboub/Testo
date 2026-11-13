@@ -75,7 +75,7 @@ Testo.Modules.Defects/
 - DTOs end with `Dto` only when needed to avoid a clash; otherwise plain nouns (`Defect`, `TestRun`).
 - Routes: lowercase, kebab-case; app routes under `/app/p/{projectKey}/...`.
 - Resource keys: `Area_Element_Purpose` (e.g., `DefectList_Filter_Severity`).
-- CSS: component styles in `Component.razor.css` (CSS isolation); global tokens only in `UI.Shared/wwwroot/css/tokens.css`. Use tokens (`var(--space-4)`), **never raw colors or px values** in component CSS except 0 and 1px (`ComponentStyleTests` enforces it). Color tokens are named by role and hold both themes: `light-dark(<light>, <dark>)`. Media queries use the breakpoints of `docs/design-system.md` §5 in `rem`.
+- CSS: component styles in `Component.razor.css` (CSS isolation); global tokens only in `UI.Shared/wwwroot/css/tokens.css`. **A class cannot cross a component boundary**: CSS isolation scopes every selector to the component that declares it, so a class shared by several components goes in `wwwroot/css/controls.css`, and a class passed *to* a child component never reaches it — wrap the child in an element the parent owns. Use tokens (`var(--space-4)`), **never raw colors or px values** in component CSS except 0 and 1px (`ComponentStyleTests` enforces it). Color tokens are named by role and hold both themes: `light-dark(<light>, <dark>)`. Media queries use the breakpoints of `docs/design-system.md` §5 in `rem`.
 
 ## C# style
 
@@ -99,6 +99,8 @@ Testo.Modules.Defects/
 ## Testing rules
 
 - Every reusable component (`UI.Shared`, module components used in more than one place) has **bUnit** tests: rendering, parameters, events, ARIA, keyboard.
+- **Look at it in a browser before calling it done.** Unit tests do not catch an unstyled control, a class that never applied, or a sample heading that joined the page outline. All three happened in Milestone 2.
+- A browser test must wait for the page to be interactive before pressing keys: until the circuit connects the page is only prerendered, and its components are replaced when it does.
 - Every page has at least one **Playwright smoke test**: loads, correct title + `h1`, no console errors, axe scan with zero serious/critical violations.
 - Main flows get dedicated E2E tests (see roadmap Milestone 7).
 - Test names: `MethodOrScenario_Condition_ExpectedResult`.

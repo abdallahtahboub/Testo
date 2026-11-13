@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The use cases. Implements the interfaces of Testo.Contracts, so replacing Testo.Mocks with
+       this one is a single line in the host (ADR-0014). The REST host of a later milestone uses
+       the same use cases rather than its own copy. -->
+
+  <ItemGroup>
+    <ProjectReference Include="../Testo.Contracts/Testo.Contracts.csproj" />
+    <ProjectReference Include="../Testo.Domain/Testo.Domain.csproj" />
+    <ProjectReference Include="../Testo.Persistence/Testo.Persistence.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+  </ItemGroup>
+
+</Project>

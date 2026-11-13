@@ -29,6 +29,7 @@ public static class PersistenceServiceCollectionExtensions
                     provider.GetRequiredService<StampInterceptor>()));
 
         services.AddScoped<IUserStore<User>, UserStore>();
+        services.AddScoped<CredentialService>();
 
         services.AddIdentityCore<User>(options =>
             {
@@ -53,7 +54,8 @@ public static class PersistenceServiceCollectionExtensions
             // Only the authenticator provider, which checks a time-based one-time code. Password
             // reset and invitation links are rows of our own, so that each can be withdrawn, used
             // once, and shown in the audit log (see PasswordReset).
-            .AddTokenProvider<AuthenticatorTokenProvider<User>>(TokenOptions.DefaultAuthenticatorProvider);
+            .AddTokenProvider<AuthenticatorTokenProvider<User>>(TokenOptions.DefaultAuthenticatorProvider)
+            .AddPasswordValidator<BreachedPasswordValidator>();
 
         return services;
     }

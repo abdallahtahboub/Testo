@@ -48,6 +48,7 @@ public static class DevelopmentData
 
         var database = scope.ServiceProvider.GetRequiredService<TestoDbContext>();
         var credentials = scope.ServiceProvider.GetRequiredService<CredentialService>();
+        var writeScope = scope.ServiceProvider.GetRequiredService<TenantWriteScope>();
         var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(DevelopmentData));
 
         await database.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
@@ -104,7 +105,12 @@ public static class DevelopmentData
             });
         }
 
-        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        // There is no request and therefore no current organization, so the writes into the one
+        // being created are declared (D-2).
+        using (writeScope.AllowWritingTo(organization.Id))
+        {
+            await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
 
         SeedLog.Seeded(logger, organization.Name, People[0].Email, Password);
     }

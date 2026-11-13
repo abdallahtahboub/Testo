@@ -79,12 +79,19 @@ public sealed class TestDatabase : IAsyncDisposable
     /// test would be exercising a context the application never uses, and would pass while the
     /// product refused the same operation — or worse, the other way round.
     /// </remarks>
+    /// <summary>
+    /// The permission to write outside the current organization, for contexts built by
+    /// <see cref="NewContext"/>. The container in <see cref="NewServices"/> has its own, scoped
+    /// one per request, as the application does.
+    /// </summary>
+    public TenantWriteScope WriteScope { get; } = new();
+
     public TestoDbContext NewContext()
     {
         var options = new DbContextOptionsBuilder<TestoDbContext>()
             .UseNpgsql(ConnectionString)
             .AddInterceptors(
-                new TenantGuardInterceptor(Principal),
+                new TenantGuardInterceptor(Principal, WriteScope),
                 new StampInterceptor(TimeProvider.System, Principal))
             .Options;
 

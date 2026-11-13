@@ -17,7 +17,10 @@ namespace Testo.Persistence.Interceptors;
 /// legitimate operation ever does. It also refuses to change or delete an audit entry, because
 /// that log is append-only even for an owner (<c>docs/identity-and-access.md</c> §4).
 /// </remarks>
-public sealed class TenantGuardInterceptor(IOrganizationContext organizationContext) : SaveChangesInterceptor
+public sealed class TenantGuardInterceptor(
+    IOrganizationContext organizationContext,
+    TenantWriteScope writeScope)
+    : SaveChangesInterceptor
 {
     /// <inheritdoc />
     public override InterceptionResult<int> SavingChanges(
@@ -79,10 +82,21 @@ public sealed class TenantGuardInterceptor(IOrganizationContext organizationCont
                 entity.OrganizationId = organizationContext.RequireOrganizationId();
                 break;
 
-            case EntityState.Added:
-                // Set deliberately — by the invitation flow, which creates a membership in the
-                // organization the invitation names, before the person belongs to it.
+            case EntityState.Added when entity.OrganizationId == organizationContext.OrganizationId:
+                // The row says what the request already says. Nothing to decide.
                 break;
+
+            case EntityState.Added when writeScope.Allows(entity.OrganizationId):
+                // Declared by a flow that legitimately writes outside the current organization:
+                // signing in, accepting an invitation, resetting a password. See TenantWriteScope.
+                break;
+
+            case EntityState.Added:
+                throw new InvalidOperationException(
+                    $"{entry.Entity.GetType().Name} was about to be written into organization "
+                    + $"{entity.OrganizationId}, which is not the one this request is acting in. "
+                    + $"If that is deliberate, say so with {nameof(TenantWriteScope)}."
+                    + $"{nameof(TenantWriteScope.AllowWritingTo)}.");
 
             case EntityState.Modified when entry.Property(organizationId).IsModified:
                 throw new InvalidOperationException(

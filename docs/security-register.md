@@ -47,7 +47,7 @@ Instead:
 - `AuthorizationTests` asserts the redirect, that a session reaches `/app`, that the public pages
   and the theme switch stay open, and that an unknown address is still a 404.
 
-### D-2 · The tenant guard trusts any pre-set `OrganizationId` — **High** (not reachable by a user)
+### D-2 · The tenant guard trusts any pre-set `OrganizationId` — **High** · *Fixed 2026-11-13, Milestone 3.1*
 
 `Testo.Persistence/Interceptors/TenantGuardInterceptor.cs`, the `case EntityState.Added:` branch:
 a row that already carries an organization is accepted without comparing it to the current context.
@@ -66,9 +66,17 @@ blanket "must equal the current organization" rule would break both:
 - a password reset writes an audit entry into *every* organization the person belongs to, while
   nobody is signed in (`PasswordResetWorkflow.cs`).
 
-**Fix.** An explicit, scoped permission — the two flows declare "I am deliberately writing to
-organization X", and every other pre-set id is refused. Tests: the refusal, and both flows still
-working.
+**Fixed.** `TenantWriteScope`. A row whose organization matches the request passes as before; one
+that does not is refused unless a flow has declared it with `AllowWritingTo`, which lasts until the
+block ends.
+
+Five places genuinely need it, and each now says so in a line of code a reviewer can see: signing
+in (success and failure both write an audit entry into the organization being entered), accepting
+an invitation, both halves of a password reset, and seeding a development database.
+
+Tests: the write is refused; the other organization gains nothing, which is the assertion that
+matters; a declared write succeeds; and the permission stops working once its block ends — a
+permission that outlived its block would be worse than no guard, because it would read like one.
 
 ### D-3 · Invitation and password-reset tokens are written to the log — **Critical on first deployment**
 

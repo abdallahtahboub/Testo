@@ -88,7 +88,24 @@ The app **Dashboard** and the **app shell** (left nav, top bar) live in `Testo.U
                                └──────┬───────┘          │
                                       ▼                  │
                               Testo.Contracts  ◄─────────┘
+                                      ▲
+                                      │
+     Testo.Web ──► Testo.Application ─┴─► Testo.Domain
+                          │
+                          └──────────► Testo.Persistence ──► PostgreSQL
 ```
+
+The host calls the application layer in process: the app pages already render on the server,
+so an HTTP hop to our own API would add latency and a failure mode for nothing (ADR-0014).
+`Testo.Api`, a later milestone, is a second host over the same use cases.
+
+`Domain` references `Contracts` rather than the other way round, because `Role` and `Permission`
+are vocabulary the interface, the application and the future backend all share, and one
+definition is better than two that agree by hand. `Contracts` still references nothing at all.
+
+ASP.NET Core Identity is reached only through `Testo.Persistence.Identity.CredentialService`, so
+the whole of that dependency is one class and swapping to an external provider changes one
+project (ADR-0013).
 
 | Project | May reference | Must NOT reference |
 |---|---|---|
@@ -99,9 +116,9 @@ The app **Dashboard** and the **app shell** (left nav, top bar) live in `Testo.U
 | `Modules.*` | `UI.Shared`, `Platform`, `Contracts` | **other modules**, capabilities, mocks |
 | `Capabilities.*` | `UI.Shared`, `Platform`, `Contracts` | modules, other capabilities, mocks |
 | `Mocks` | `Contracts` | anything UI |
-| `Domain` *(planned)* | BCL only | anything UI, persistence, other projects |
-| `Application` *(planned)* | `Domain`, `Contracts` | anything UI, `Persistence` |
-| `Persistence` *(planned)* | `Domain`, `Application`, EF Core | anything UI |
+| `Domain` | `Contracts` | anything UI, EF Core, ASP.NET Core Identity |
+| `Persistence` | `Domain`, `Contracts`, EF Core, Identity stores | anything UI, the application layer |
+| `Application` | `Domain`, `Persistence`, `Contracts` | anything UI, ASP.NET Core Identity |
 | `Api` *(planned)* | `Application`, `Contracts` | anything UI |
 | `Web` | everything (composition root only, no business UI) | — |
 

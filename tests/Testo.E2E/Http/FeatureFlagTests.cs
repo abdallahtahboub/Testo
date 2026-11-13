@@ -5,13 +5,13 @@ using Testo.E2E.Support;
 namespace Testo.E2E.Http;
 
 /// <summary>Feature flags come from configuration and reach the pages.</summary>
-public partial class FeatureFlagTests
+public partial class FeatureFlagTests(AppFixture app)
 {
     [Fact]
     public async Task ModuleFlag_SwitchedOnInConfiguration_IsShownAsOn()
     {
         // A second copy of the application, in memory, with one flag switched on.
-        await using var application = new TestoWebApplication();
+        await using var application = new TestoWebApplication(app.ConnectionString);
         using var client = application
             .WithWebHostBuilder(builder => builder.UseSetting("FeatureManagement:Module.Planning", "true"))
             .CreateClient();

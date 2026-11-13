@@ -1,0 +1,41 @@
+@page "/account/sign-out"
+@inject IStringLocalizer<WebResources> L
+@inject IOptions<BrandOptions> Brand
+@inject IAuthenticationService Authentication
+@inject NavigationManager Navigation
+
+<PageTitle>@L["Account_SignOut_PageTitle"] · @Brand.Value.ProductName</PageTitle>
+
+<h1>@L["Account_SignOut_Title"]</h1>
+
+@*
+    Signing out is a form, not a link. A link can be followed by an image tag on another site,
+    which would let anyone sign a person out at will.
+*@
+<EditForm Model="Form" Context="form" FormName="sign-out" OnValidSubmit="SubmitAsync" method="post" class="account-form">
+
+    <p>@L["Account_SignOut_Confirm", Brand.Value.ProductName]</p>
+
+    <TButton Type="submit" Variant="ButtonVariant.Primary">@L["Account_SignOut_Submit"]</TButton>
+
+    <p class="account-form__aside">
+        <a href="@Routes.App">@L["Account_SignOut_Cancel"]</a>
+    </p>
+</EditForm>
+
+@code {
+    [SupplyParameterFromForm]
+    private SignOutInput? Input { get; set; }
+
+    /// <summary>The posted values, or a fresh set the first time the page is shown.</summary>
+    private SignOutInput Form => Input ??= new();
+
+    private async Task SubmitAsync()
+    {
+        await Authentication.SignOutAsync();
+        Navigation.NavigateTo(Routes.SignIn, forceLoad: true);
+    }
+
+    /// <summary>Nothing is typed here; the model exists so the form can be posted at all.</summary>
+    private sealed class SignOutInput;
+}

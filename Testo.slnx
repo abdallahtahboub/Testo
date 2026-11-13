@@ -1,7 +1,9 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Testo.Application/Testo.Application.csproj" />
     <Project Path="src/Testo.Capabilities.E2EWeb/Testo.Capabilities.E2EWeb.csproj" />
     <Project Path="src/Testo.Contracts/Testo.Contracts.csproj" />
+    <Project Path="src/Testo.Domain/Testo.Domain.csproj" />
     <Project Path="src/Testo.Mocks/Testo.Mocks.csproj" />
     <Project Path="src/Testo.Modules.Analysis/Testo.Modules.Analysis.csproj" />
     <Project Path="src/Testo.Modules.Defects/Testo.Modules.Defects.csproj" />
@@ -10,12 +12,14 @@
     <Project Path="src/Testo.Modules.Planning/Testo.Modules.Planning.csproj" />
     <Project Path="src/Testo.Modules.Reporting/Testo.Modules.Reporting.csproj" />
     <Project Path="src/Testo.Modules.Settings/Testo.Modules.Settings.csproj" />
+    <Project Path="src/Testo.Persistence/Testo.Persistence.csproj" />
     <Project Path="src/Testo.Platform/Testo.Platform.csproj" />
     <Project Path="src/Testo.UI.Shared/Testo.UI.Shared.csproj" />
     <Project Path="src/Testo.Web/Testo.Web.csproj" />
     <Project Path="src/Testo.Website/Testo.Website.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Testo.Application.Tests/Testo.Application.Tests.csproj" />
     <Project Path="tests/Testo.E2E/Testo.E2E.csproj" />
     <Project Path="tests/Testo.Mocks.Tests/Testo.Mocks.Tests.csproj" />
     <Project Path="tests/Testo.UI.Tests/Testo.UI.Tests.csproj" />

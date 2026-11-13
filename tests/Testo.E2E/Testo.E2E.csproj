@@ -4,10 +4,21 @@
     <PackageReference Include="Deque.AxeCore.Playwright" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="Microsoft.Playwright" />
+    <PackageReference Include="Npgsql" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Testo.Web\Testo.Web.csproj" />
+  </ItemGroup>
+
+  <!--
+    Browser tests are the heaviest thing this repository runs: each one drives a Chromium
+    against the real application and a real database. Left to fill the machine they are killed
+    for want of memory, and the failure looks like a timeout rather than what it is. Two at a
+    time is enough to keep the suite quick without that.
+  -->
+  <ItemGroup>
+    <None Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <!--

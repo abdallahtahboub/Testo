@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- EF Core on PostgreSQL, the migrations, and the stores ASP.NET Core Identity reads the
+       domain entities through (ADR-0011, ADR-0013). Nothing above this layer knows EF Core
+       exists. -->
+
+  <ItemGroup>
+    <ProjectReference Include="../Testo.Contracts/Testo.Contracts.csproj" />
+    <ProjectReference Include="../Testo.Domain/Testo.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <!-- Only the "dotnet ef" tooling uses this; it ships no code of its own into the output. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

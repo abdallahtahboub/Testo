@@ -2,6 +2,10 @@ name: CI
 
 # Builds the solution (warnings are errors) and runs every test: unit, component,
 # architecture and the Playwright browser tests.
+#
+# The data and browser tests run against a real PostgreSQL in a service container. Two of the
+# three layers of tenant isolation are the database's own (ADR-0012), so an in-memory provider
+# would pass tests that PostgreSQL fails.
 
 on:
   push:
@@ -25,6 +29,22 @@ jobs:
     env:
       DOTNET_NOLOGO: true
       DOTNET_CLI_TELEMETRY_OPTOUT: true
+      # Where the tests create a database of their own for each run.
+      TESTO_TEST_DB: "Host=localhost;Port=5432;Username=postgres;Password=postgres"
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        # Nothing may run until the server answers, or the first test fails on a race.
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Check out

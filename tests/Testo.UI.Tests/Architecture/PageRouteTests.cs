@@ -24,6 +24,14 @@ public class PageRouteTests
     /// </summary>
     private static readonly string[] ToolRoutes = [Routes.Showcase];
 
+    /// <summary>
+    /// Signing in and the pages around it. They sit outside <c>/app</c> and are rendered
+    /// statically, because a session cookie can only be issued while an HTTP request is in
+    /// progress and an interactive session has none (ADR-0016).
+    /// </summary>
+    private static bool IsAccountRoute(string route) =>
+        route.StartsWith(Routes.Account + "/", StringComparison.Ordinal);
+
     private static readonly Assembly Website = typeof(HomePage).Assembly;
 
     private static IEnumerable<Type> Pages(Assembly assembly) =>
@@ -83,11 +91,35 @@ public class PageRouteTests
     [MemberData(nameof(AppPages))]
     public void AppPage_LivesBelowTheAppRootAndIsInteractive(Type page)
     {
-        Assert.All(RoutesOf(page), route =>
+        var routes = RoutesOf(page);
+
+        if (routes.All(IsAccountRoute))
+        {
+            // An account page is the other way round: outside /app, and deliberately static.
+            Assert.NotNull(page.GetCustomAttribute<ExcludeFromInteractiveRoutingAttribute>());
+            return;
+        }
+
+        Assert.All(routes, route =>
             Assert.True(
                 route == Routes.App || route.StartsWith(Routes.App + "/", StringComparison.Ordinal) || ToolRoutes.Contains(route),
                 $"{page.Name}: the route '{route}' is not below {Routes.App}."));
         Assert.Null(page.GetCustomAttribute<ExcludeFromInteractiveRoutingAttribute>());
+    }
+
+    [Fact]
+    public void AccountPages_Exist()
+    {
+        // If these ever stop being found, the rule above would pass by never applying.
+        var accountPages = SourceProjects.Names
+            .Where(name => name != "Testo.Website")
+            .Select(Assembly.Load)
+            .SelectMany(Pages)
+            .Where(page => RoutesOf(page).Any(IsAccountRoute))
+            .ToList();
+
+        Assert.NotEmpty(accountPages);
+        Assert.Contains(accountPages, page => RoutesOf(page).Contains(Routes.SignIn));
     }
 
     [Fact]

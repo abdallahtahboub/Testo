@@ -1,0 +1,58 @@
+.account {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  min-height: 100dvh;
+  padding: var(--space-6);
+  background-color: var(--color-surface-subtle);
+}
+
+.account__card {
+  width: 100%;
+  max-width: 26rem;
+  padding: var(--space-8);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+}
+
+.account__brand {
+  margin-bottom: var(--space-6);
+}
+
+/*
+ * The page supplies its own heading, so these rules reach into @Body with ::deep. A page title
+ * at full h1 size fills a card this narrow on its own and leaves the first field crowded
+ * against it; the element stays an h1 for the document outline, and only its appearance
+ * changes (docs/design-system.md §2).
+ */
+.account__card ::deep h1 {
+  margin-bottom: var(--space-6);
+  font-size: var(--text-h2);
+  line-height: var(--leading-h2);
+}
+
+.account__card ::deep p + p {
+  margin-top: var(--space-4);
+}
+
+.account__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 30rem) {
+  .account {
+    padding: var(--space-4);
+  }
+
+  .account__card {
+    padding: var(--space-6);
+  }
+}

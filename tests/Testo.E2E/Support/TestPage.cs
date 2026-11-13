@@ -42,6 +42,13 @@ public sealed class TestPage
         page.WebSocket += (_, socket) => _webSockets.Add(socket.Url);
     }
 
+    /// <summary>
+    /// Whether a problem was caused by the accessibility scanner rather than by the page.
+    /// </summary>
+    private static bool IsScannerNoise(string problem) =>
+        problem.Contains("violates the following Content Security Policy", StringComparison.Ordinal)
+        || problem.Contains("Couldn't load preload assets", StringComparison.Ordinal);
+
     /// <summary>The Playwright page.</summary>
     public IPage Page { get; }
 
@@ -83,7 +90,21 @@ public sealed class TestPage
             },
         };
 
+        // The scanner measures contrast by styling probe elements, which a strict content
+        // security policy refuses. Those refusals are the test tool's, not the page's, so the
+        // ones it causes while scanning are dropped afterwards. Anything the page itself did is
+        // already in the list and stays there.
+        var before = _problems.Count;
+
         var result = await Page.RunAxe(options);
+
+        for (var index = _problems.Count - 1; index >= before; index--)
+        {
+            if (IsScannerNoise(_problems[index]))
+            {
+                _problems.RemoveAt(index);
+            }
+        }
         var violations = result.Violations
             .Where(violation => violation.Impact is "serious" or "critical")
             .Select(violation =>

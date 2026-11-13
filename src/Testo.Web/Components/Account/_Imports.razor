@@ -1,0 +1,33 @@
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.Extensions.Localization
+@using Microsoft.Extensions.Options
+@using Testo.Contracts.Identity
+@using Testo.Platform
+@using Testo.Platform.Localization
+@using Testo.UI.Shared.Branding
+@using Testo.UI.Shared.Components
+@using Testo.Web.Components.Account
+@using Testo.Platform.Rendering
+@using Testo.Web.Components.Layout
+@using Testo.Web.Resources
+
+@*
+    Every page in this folder is rendered statically and posts a plain form.
+
+    A session cookie can only be set while an HTTP request is in progress, and an interactive
+    session has none (ADR-0016). That is why these pages sit outside /app and why nothing here
+    uses an event handler.
+*@
+@attribute [ExcludeFromInteractiveRouting]
+
+@* These pages carry forms, so they need an antiforgery token (ADR-0009). *@
+@attribute [HasForm]
+
+@*
+    The layout lives in Components/Layout, not here. An @layout in an _Imports applies to every
+    component in the folder, so a layout kept beside the pages it serves would be given itself as
+    its own layout and would nest inside itself without end.
+*@
+@layout AccountLayout

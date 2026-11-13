@@ -57,3 +57,8 @@ dotnet_diagnostic.CA1056.severity = none
 dotnet_diagnostic.CA1707.severity = none
 # CA1515: xUnit needs public test classes.
 dotnet_diagnostic.CA1515.severity = none
+
+# EF Core writes the migrations; they are generated code, not code we style or review line by
+# line. Correcting them by hand would be undone the next time one is scaffolded.
+[src/Testo.Persistence/Migrations/**.cs]
+generated_code = true

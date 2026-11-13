@@ -1,6 +1,7 @@
 # Identity and access
 
-> Status: **Proposal, awaiting review.** Nothing here is built yet.
+> Status: **Accepted**, and built in Milestone 3 except where this document says otherwise.
+> Decisions recorded in ADR-0011 to ADR-0014 and ADR-0016.
 
 Who can sign in, what they may do, and how that is proved. Testo is sold to businesses, so
 this is a sales topic as much as a technical one: a security questionnaire will ask most of
@@ -124,12 +125,31 @@ Germany is the first market, so this is a feature, not paperwork.
 - **AI.** No customer data is used to train anything. Which model processes what, and
   where it runs, is stated in the settings and in the processor list.
 
-## 7. Open questions for review
+## 7. What is built, and what is not
 
-1. **Self-service sign-up, or invitation only?** Self-service brings trials and support
-   load; invitation-only suits a sales-led enterprise product. The proposal is
-   **invitation-only at first**, with sign-up behind a feature flag for when trials start.
-2. **Is a second factor required?** The proposal is **optional per person, enforceable per
-   organization** — mandatory from day one would cost trials.
-3. **How long is a session?** 8 hours sliding fits a working day. Security questionnaires
-   sometimes demand less; the proposal is to make it **configurable per organization** later.
+Milestone 3 built: sign in and out, the lockout, the password reset, invitations with
+acceptance, changing a role, removing somebody with their sessions ending at once, the audit
+log, and the tenant isolation underneath all of it.
+
+Not built yet, and each one is a deliberate gap rather than an oversight:
+
+| Not yet | Why, and when |
+|---|---|
+| **Sending email** | No provider is chosen. Invitation and reset links go to the log with a warning. Choosing one, and listing it as an EU processor, is its own piece of work |
+| **Setting up a second factor** | Signing in with one works; the screen that enrols an authenticator comes with the settings area in Milestone 5.7. An organization that requires one today turns people away with an explanation |
+| **The breached-password check** | A short embedded list of long-but-common passwords, plus runs and repeats. The full Have I Been Pwned range check needs an outbound host and comes with the other integrations |
+| **Self-service sign-up** | Invitation-only, as decided below |
+
+### The three questions, answered
+
+These were open when this document was written. Milestone 3 proceeded on the proposals, and
+nothing since has argued against them. Each is cheap to revisit.
+
+1. **Self-service sign-up, or invitation only?** **Invitation only.** Self-service brings trials
+   and support load; invitation-only suits a sales-led enterprise product. Sign-up goes behind a
+   feature flag when trials start.
+2. **Is a second factor required?** **Optional per person, enforceable per organization.**
+   `Organization.RequiresTwoFactor` carries it. Mandatory from day one would cost trials.
+3. **How long is a session?** **8 hours sliding, 30 days at the outside**, which fits a working
+   day. Making it configurable per organization waits for the first questionnaire that demands
+   it.

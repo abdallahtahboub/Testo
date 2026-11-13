@@ -1,6 +1,7 @@
 # Domain model
 
-> Status: **Proposal, awaiting review.** Nothing here is built yet.
+> Status: **Accepted.** The identity and tenancy part is built (Milestone 3); the testing-journey
+> entities are built one stage at a time in Milestone 5.
 
 What Testo stores, and how the pieces relate. This is the expensive thing to get wrong:
 the user interface can be rewritten in an afternoon, a schema that leaks one customer's
@@ -154,14 +155,13 @@ without a name against it, which is what [`ux/patterns.md`](ux/patterns.md) §7 
 - **Test data management** as its own area — `TestCaseStep.Data` carries it for now.
 - **Billing.** `Organization.Plan` is a placeholder; invoicing is a separate concern.
 
-## 7. Open questions for review
+## 7. The three questions, answered
 
-1. **Project keys.** `REQ-1042` unique per project, or per organization? Per project reads
-   better and matches Jira; per organization makes links unambiguous when a person works
-   across projects. The proposal is **per project**.
-2. **Requirement import.** When a requirement changes in Jira, does Testo overwrite its copy,
-   or flag the difference for a person? The proposal is **flag it**, since a silently
-   changed requirement invalidates tests nobody re-checked.
-3. **Evidence retention.** Screenshots and videos are the bulk of the storage cost. How long
-   are they kept? The proposal is **90 days by default, configurable per organization**,
-   with the result rows kept forever.
+1. **Project keys: per project.** `REQ-1042` reads better and matches Jira. `Project.KeyPrefix`
+   is unique within an organization, so `SHOP-REQ-1042` is unambiguous when somebody works across
+   projects. Decided in Milestone 3; the counters themselves arrive with Milestone 5.
+2. **Requirement import: flag it, never overwrite.** A silently changed requirement invalidates
+   tests nobody re-checked. Built in Milestone 5.2.
+3. **Evidence retention: 90 days by default, configurable per organization**, with the result
+   rows kept for good. Screenshots and videos are the bulk of the storage cost. Built in
+   Milestone 5.4.

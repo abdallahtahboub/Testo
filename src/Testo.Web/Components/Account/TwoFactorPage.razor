@@ -1,0 +1,76 @@
+@page "/account/two-factor"
+@inject IStringLocalizer<WebResources> L
+@inject IOptions<BrandOptions> Brand
+@inject IAuthenticationService Authentication
+@inject NavigationManager Navigation
+
+<PageTitle>@L["Account_TwoFactor_PageTitle"] · @Brand.Value.ProductName</PageTitle>
+
+<h1>@L["Account_TwoFactor_Title"]</h1>
+
+<EditForm Model="Form" Context="form" FormName="two-factor" OnValidSubmit="SubmitAsync" method="post" class="account-form">
+
+    <p>@L["Account_TwoFactor_Intro"]</p>
+
+    @if (_problem is not null)
+    {
+        @* An expected outcome, not a failed page: an alert in the form, not an error state. *@
+        <p class="account-form__alert" role="alert">@_problem</p>
+    }
+
+    <TField Label="@L["Account_TwoFactor_Code"]" Required Error="@_codeError">
+        <TInput Context="context"
+                Required
+                name="Input.Code"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                pattern="[0-9]*"
+                maxlength="7"
+                autofocus />
+    </TField>
+
+    <TButton Type="submit" Variant="ButtonVariant.Primary">@L["Account_TwoFactor_Submit"]</TButton>
+</EditForm>
+
+@code {
+    [SupplyParameterFromForm]
+    private TwoFactorInput? Input { get; set; }
+
+    /// <summary>The posted values, or a fresh set the first time the page is shown.</summary>
+    private TwoFactorInput Form => Input ??= new();
+
+    private string? _problem;
+    private string? _codeError;
+
+    private async Task SubmitAsync()
+    {
+        _problem = null;
+        _codeError = string.IsNullOrWhiteSpace(Form.Code) ? L["Account_Error_CodeRequired"].Value : null;
+
+        if (_codeError is not null)
+        {
+            return;
+        }
+
+        var result = await Authentication.VerifyTwoFactorAsync(Form.Code.Trim(), rememberMachine: false);
+
+        if (result.Outcome == SignInOutcome.Succeeded)
+        {
+            Navigation.NavigateTo(Routes.App, forceLoad: true);
+            return;
+        }
+
+        if (result.Outcome == SignInOutcome.LockedOut)
+        {
+            _problem = L["Account_SignIn_LockedOut", result.LockoutEnds?.ToString("t") ?? ""].Value;
+            return;
+        }
+
+        _problem = L["Account_TwoFactor_Failed"].Value;
+    }
+
+    private sealed class TwoFactorInput
+    {
+        public string Code { get; set; } = "";
+    }
+}

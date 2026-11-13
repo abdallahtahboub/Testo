@@ -150,10 +150,12 @@ a hostile page into any model reading it, malicious downloads, and unbounded mod
 A Playwright `BrowserContext` is a cookie jar, **not an isolation boundary**. It shares the
 process, the file system, the network stack and any ambient cloud credentials.
 
-**Position.** This is a hard gate, not a recommendation: no execution against a customer-controlled
-URL until the worker is a separate process in its own container, with its own egress allowlist, no
-ambient credentials and no route to the application database. ADR required before any code opens a
-browser (see ADR-0017).
+**Decided — [ADR-0018](decisions/0018-execution-isolation.md), threat model in
+[`execution-threat-model.md`](execution-threat-model.md).** A container per run, non-root, no
+database, no cloud role; every connection through a proxy that refuses by default and checks the
+resolved address rather than the URL, which is what closes DNS rebinding and redirect chains; a
+target must be proved before it may be one. Milestone 3.3 builds it and carries the refusals as
+tests.
 
 ### R-2 · No background work, durable run state, idempotency or tenant propagation — **High when it arrives**
 
@@ -161,12 +163,22 @@ A test run outlives the request that started it. Nothing in the codebase support
 no outbox, no job table, no way to carry the tenant identity into a worker, no cancellation that
 survives a restart.
 
+**Decided — [ADR-0018](decisions/0018-execution-isolation.md) §"treated as already compromised".**
+The worker never writes to the database and cannot name an organization: it returns a result
+naming its run, and the application re-reads the organization from the stored row and writes under
+`TenantWriteScope`. The queue and the durable state are Milestone 3.3's to build.
+
 ### R-3 · No artifact storage — **High when it arrives**
 
 `docs/domain-model.md` §3 assumes screenshots and traces live in object storage with a row pointing
 at them. Neither the storage nor the row exists. Needs tenant-scoped, expiring access, retention and
 redaction before the first screenshot is taken, because a screenshot of a customer's staging system
 is customer data.
+
+**Decided — [ADR-0018](decisions/0018-execution-isolation.md) §"Evidence".** Keyed by organization,
+never public, reached through a short-lived signed URL the application issues after the ordinary
+permission check; 90 days, less for traces, which carry request bodies and therefore passwords and
+are off unless asked for.
 
 ### R-4 · The audit log is append-only only through Entity Framework — **Medium**
 

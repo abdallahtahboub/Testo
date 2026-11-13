@@ -126,4 +126,10 @@
   <data name="ThemeSwitch_System" xml:space="preserve">
     <value>Wie Systemeinstellung</value>
   </data>
+  <data name="App_Header_SignOut" xml:space="preserve">
+    <value>Abmelden</value>
+  </data>
+  <data name="App_Header_SignedInAs" xml:space="preserve">
+    <value>Angemeldet als {0}</value>
+  </data>
 </root>

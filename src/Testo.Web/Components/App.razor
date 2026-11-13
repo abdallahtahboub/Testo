@@ -1,5 +1,9 @@
 @using Microsoft.AspNetCore.Diagnostics
+@using System.Security.Claims
+@using Testo.UI.Shared.Identity
+@using Testo.Web.Identity
 @inject ThemeState Theme
+@inject SignedInUser Session
 @inject CspNonce Nonce
 
 @*
@@ -41,6 +45,12 @@
         @* Public pages load only the component styles they use, not those of the app. *@
         <link rel="stylesheet" href="@Assets["_content/Testo.UI.Shared/Testo.UI.Shared.bundle.scp.css"]" />
         <link rel="stylesheet" href="@Assets["_content/Testo.Website/Testo.Website.bundle.scp.css"]" />
+        @if (IsAccountPage)
+        {
+            @* The account pages are rendered statically but live in the host, so their own
+               component styles are in the host bundle rather than the shared one. *@
+            <link rel="stylesheet" href="@Assets["Testo.Web.styles.css"]" />
+        }
     }
     <link rel="icon" type="image/svg+xml" href="@Assets["_content/Testo.UI.Shared/favicon.svg"]" />
     <LanguageAlternates />
@@ -73,16 +83,46 @@
 
     private bool IsAppPage => PageRenderMode is not null;
 
+    /// <summary>Signing in and the pages around it: statically rendered, but not the public site.</summary>
+    private bool IsAccountPage =>
+        HttpContext.Request.Path.StartsWithSegments(Routes.Account, StringComparison.OrdinalIgnoreCase);
+
     /// <summary>"light" or "dark" when the visitor chose one; null when the system setting decides.</summary>
     private string? ExplicitTheme => Theme.Choice == ThemeChoice.System ? null : ThemeCookie.ToValue(Theme.Choice);
 
     private RequestedUrl? _requestedUrl;
+
+    /// <summary>Fills <see cref="SignedInUser"/> from the claims the session cookie carries.</summary>
+    private void ReadSession()
+    {
+        var user = HttpContext.User;
+
+        if (user.Identity?.IsAuthenticated != true)
+        {
+            return;
+        }
+
+        Session.UserId = Guid.TryParse(user.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? id : null;
+        Session.Email = user.FindFirstValue(ClaimTypes.Email);
+        Session.DisplayName = user.FindFirstValue(ClaimTypes.Name);
+        Session.OrganizationName = user.FindFirstValue(TestoClaims.OrganizationName);
+
+        Session.OrganizationId = Guid.TryParse(user.FindFirstValue(TestoClaims.Organization), out var organization)
+            ? organization
+            : null;
+
+        Session.Role = Enum.TryParse<Role>(user.FindFirstValue(TestoClaims.Role), out var role) ? role : null;
+    }
 
     protected override void OnInitialized()
     {
         // Read the theme cookie once per request. Rendering the theme on the server is what
         // prevents a flash of the wrong theme.
         Theme.Choice = ThemeCookie.Parse(HttpContext.Request.Cookies[ThemeCookie.Name]);
+
+        // Read the session once per request, here, where there still is one. The values travel
+        // with the prerendered page into the interactive session, which has no cookie to read.
+        ReadSession();
 
         // When the not-found or the error page stands in for another page, links and forms
         // must keep pointing at the address the visitor asked for.

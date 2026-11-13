@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Testo.Web.Components;
+using Testo.Web.Identity;
 
 namespace Testo.E2E.Support;
 
@@ -18,7 +19,7 @@ namespace Testo.E2E.Support;
 /// files of the class libraries (a published site has them in its web root) and one URL
 /// that fails on purpose.
 /// </remarks>
-internal class TestoWebApplication : WebApplicationFactory<App>
+internal class TestoWebApplication(string connectionString) : WebApplicationFactory<App>
 {
     /// <summary>A URL that makes the server throw, so the error page can be tested.</summary>
     public const string FailingPath = "/__e2e/fail";
@@ -35,6 +36,18 @@ internal class TestoWebApplication : WebApplicationFactory<App>
     {
         builder.UseEnvironment("Production");
         builder.UseStaticWebAssets();
+
+        // The real application needs a real database, and these tests give it one of its own.
+        builder.UseSetting("ConnectionStrings:Testo", connectionString);
+
+        // There is no certificate on a loopback test port, so a Secure cookie would never be
+        // stored and every sign-in test would fail for a reason the product does not have.
+        builder.UseSetting(TestoIdentityServiceCollectionExtensions.AllowInsecureCookiesKey, "true");
+
+        // The migration and seeding statements are tens of lines of SQL each and bury the
+        // failure a test is actually reporting.
+        builder.UseSetting("Logging:LogLevel:Microsoft.EntityFrameworkCore.Database.Command", "Warning");
+
         builder.ConfigureServices(services => services.AddSingleton<IStartupFilter, FailingPathFilter>());
     }
 

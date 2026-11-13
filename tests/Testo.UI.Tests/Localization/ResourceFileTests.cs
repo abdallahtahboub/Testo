@@ -89,12 +89,41 @@ public partial class ResourceFileTests
         Assert.Empty(file.English.Keys.Where(key => !code.Contains($"\"{key}\"", StringComparison.Ordinal)).Select(key => $"never used: {key}"));
     }
 
-    /// <summary>The Razor and C# files of the project a resource file belongs to.</summary>
-    private static List<(string File, string Text)> SourceTexts(ResourceFile file) =>
-        [.. SourcePatterns
-            .SelectMany(pattern => RepositoryRoot.SourceFiles(pattern))
-            .Where(source => source.StartsWith(file.ProjectDirectory + Path.DirectorySeparatorChar, StringComparison.Ordinal))
-            .Select(source => (source, File.ReadAllText(source)))];
+    /// <summary>
+    /// Projects whose keys live in another project's resource file.
+    /// </summary>
+    /// <remarks>
+    /// The application layer answers a failed use case with a resource key rather than an English
+    /// sentence, so that the message is translated where it is shown. Those keys are in the host's
+    /// resource file, so the host's file must count uses in the application too — otherwise every
+    /// such key would look unused.
+    /// </remarks>
+    private static readonly Dictionary<string, string[]> AlsoUsedBy = new(StringComparer.Ordinal)
+    {
+        ["Testo.Web"] = ["Testo.Application", "Testo.Persistence"],
+    };
+
+    /// <summary>The Razor and C# files that may use the keys of a resource file.</summary>
+    private static List<(string File, string Text)> SourceTexts(ResourceFile file)
+    {
+        var owner = Path.GetFileName(file.ProjectDirectory);
+
+        var directories = new List<string> { file.ProjectDirectory };
+
+        if (AlsoUsedBy.TryGetValue(owner, out var others))
+        {
+            directories.AddRange(others.Select(other => Path.Combine(RepositoryRoot.Source, other)));
+        }
+
+        return
+        [
+            .. SourcePatterns
+                .SelectMany(pattern => RepositoryRoot.SourceFiles(pattern))
+                .Where(source => directories.Any(directory =>
+                    source.StartsWith(directory + Path.DirectorySeparatorChar, StringComparison.Ordinal)))
+                .Select(source => (source, File.ReadAllText(source))),
+        ];
+    }
 
     [GeneratedRegex(@"^[A-Z][A-Za-z0-9]*(_[A-Z][A-Za-z0-9]*)+$")]
     private static partial Regex KeyName();

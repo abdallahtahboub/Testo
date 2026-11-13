@@ -17,7 +17,7 @@ public class ShowcaseTests(AppFixture app) : BrowserTest(app)
     /// The showcase is off in the test application, as it is in production, so these tests
     /// run against their own copy with the flag on.
     /// </summary>
-    private sealed class ShowcaseApplication : TestoWebApplication
+    private sealed class ShowcaseApplication(string connectionString) : TestoWebApplication(connectionString)
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
@@ -40,7 +40,7 @@ public class ShowcaseTests(AppFixture app) : BrowserTest(app)
     [InlineData(ColorScheme.Dark)]
     public async Task Showcase_WithTheFlagOn_ShowsEverySectionAndPassesAnAccessibilityScan(ColorScheme scheme)
     {
-        await using var application = new ShowcaseApplication();
+        await using var application = new ShowcaseApplication(App.ConnectionString);
         application.UseKestrel(0);
         application.StartServer();
         var address = application.ServerAddress();
@@ -61,7 +61,7 @@ public class ShowcaseTests(AppFixture app) : BrowserTest(app)
     [Fact]
     public async Task Showcase_Always_FitsAPhoneWithoutHorizontalScrolling()
     {
-        await using var application = new ShowcaseApplication();
+        await using var application = new ShowcaseApplication(App.ConnectionString);
         application.UseKestrel(0);
         application.StartServer();
 
@@ -77,7 +77,7 @@ public class ShowcaseTests(AppFixture app) : BrowserTest(app)
     [Fact]
     public async Task Showcase_Tabs_RespondToTheArrowKeys()
     {
-        await using var application = new ShowcaseApplication();
+        await using var application = new ShowcaseApplication(App.ConnectionString);
         application.UseKestrel(0);
         application.StartServer();
 

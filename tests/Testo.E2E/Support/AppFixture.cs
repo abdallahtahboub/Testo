@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Playwright;
+using Testo.Application;
 using Testo.E2E.Support;
 
 [assembly: AssemblyFixture(typeof(AppFixture))]
@@ -20,7 +21,8 @@ public sealed class AppFixture : IAsyncLifetime
     /// </summary>
     public const string BrowserPathVariable = "E2E_BROWSER_PATH";
 
-    private readonly TestoWebApplication _application = new();
+    private E2EDatabase? _database;
+    private TestoWebApplication? _application;
     private IPlaywright? _playwright;
     private IBrowser? _browser;
 
@@ -43,12 +45,31 @@ public sealed class AppFixture : IAsyncLifetime
             BaseAddress = BaseAddress,
         };
 
+    /// <summary>
+    /// The database this run uses, for a test that starts a second copy of the application.
+    /// </summary>
+    public string ConnectionString =>
+        _database?.ConnectionString ?? throw new InvalidOperationException("The database has not been created.");
+
+    /// <summary>The people the seeded organization has, for tests that sign in.</summary>
+    public static string OwnerEmail => "mara@northwind.example";
+
+    /// <summary>The password every seeded person has.</summary>
+    public static string SeededPassword => DevelopmentData.Password;
+
     public async ValueTask InitializeAsync()
     {
+        _database = await E2EDatabase.CreateAsync();
+
+        _application = new TestoWebApplication(_database.ConnectionString);
         _application.UseKestrel(0);
         _application.StartServer();
 
         BaseAddress = new Uri(_application.ServerAddress());
+
+        // The application runs as a deployed site, which does not seed itself. The tests ask for
+        // it explicitly, so that signing in has somebody to sign in as.
+        await DevelopmentData.EnsureSeededAsync(_application.Services);
 
         _playwright = await Playwright.CreateAsync();
         _browser = await LaunchBrowserAsync(_playwright);
@@ -87,6 +108,15 @@ public sealed class AppFixture : IAsyncLifetime
         }
 
         _playwright?.Dispose();
-        await _application.DisposeAsync();
+
+        if (_application is not null)
+        {
+            await _application.DisposeAsync();
+        }
+
+        if (_database is not null)
+        {
+            await _database.DisposeAsync();
+        }
     }
 }

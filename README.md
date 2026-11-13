@@ -5,13 +5,30 @@ software testing journey, from requirements to release sign-off, following the
 [ISTQB test process](docs/testing-journey.md). The first automated capability is
 AI-driven end-to-end web testing with a live progress view.
 
-> **Status: frontend phase.** The user interface is being built against mock data behind
-> clean interfaces, so the real backend can be plugged in later without rewriting the UI.
+> **Status: frontend phase, with real accounts.** Most of the product still runs on mock data
+> behind clean interfaces. Identity, organizations and the data underneath them are real and
+> live in PostgreSQL, because they were the part that could not be faked.
 > `Testo` is a working name.
 
 ## Getting started
 
-You need the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
+You need the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) and a
+**PostgreSQL 16** to point it at. The product keeps accounts, organizations and roles in a
+database, so it will not start without one.
+
+The quickest way to get one:
+
+```bash
+docker run --name testo-db -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16
+```
+
+Or install PostgreSQL locally (`brew install postgresql@16`, `apt install postgresql`) and
+make sure the `postgres` user has the password `postgres`. To use anything else, override the
+connection string:
+
+```bash
+export ConnectionStrings__Testo="Host=localhost;Database=testo_dev;Username=me;Password=secret"
+```
 
 **Run every command below from the repository root**, the folder containing `Testo.slnx`.
 From inside a project folder, `dotnet` only sees that one project: `dotnet test` then
@@ -21,11 +38,20 @@ reports "No test projects were found".
 dotnet run --project src/Testo.Web
 ```
 
+On the first run in development it creates the schema and seeds an organization, so there is
+somebody to sign in as. The log says who:
+
+```
+Seeded the development database with Northwind Software.
+Sign in as mara@northwind.example with the password testo-development-password.
+```
+
 The site is served at `http://localhost:5080`:
 
 | Address | What it is |
 |---|---|
 | `/en`, `/de` | Public website (static, fast, indexable per language) |
+| `/account/sign-in` | Signing in (static, posts a plain form — ADR-0016) |
 | `/app` | Product app (interactive, behind the app shell) |
 
 ### Tests
@@ -36,6 +62,16 @@ dotnet test
 
 This runs everything: unit, component, architecture and browser tests. The browser tests
 start the application themselves, so nothing needs to be running first.
+
+The data tests and the browser tests need **PostgreSQL**, because two of the three layers of
+tenant isolation are the database's own and an in-memory provider would pass tests that
+PostgreSQL fails. Each test class creates a database of its own and drops it afterwards. They
+look for the server at `localhost:5432` with the usual development credentials; point them
+somewhere else with:
+
+```bash
+export TESTO_TEST_DB="Host=localhost;Port=5432;Username=me;Password=secret"
+```
 
 **Once per machine**, the browser the tests drive has to be downloaded, or every browser
 test fails with *"Executable doesn't exist"*:

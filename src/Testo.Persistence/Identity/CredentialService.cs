@@ -50,7 +50,7 @@ public sealed class CredentialService(UserManager<User> users, IPasswordHasher<U
             var result = await validator.ValidateAsync(users, user, password).ConfigureAwait(false);
             if (!result.Succeeded)
             {
-                return [.. result.Errors.Select(error => $"Password_{error.Code}")];
+                return [.. result.Errors.Select(error => KeyFor(error.Code))];
             }
         }
 
@@ -61,6 +61,22 @@ public sealed class CredentialService(UserManager<User> users, IPasswordHasher<U
         user.SecurityStamp = Guid.CreateVersion7().ToString("N");
         return [];
     }
+
+    /// <summary>
+    /// The resource key for one of Identity's error codes.
+    /// </summary>
+    /// <remarks>
+    /// Mapped rather than built from the code, so that every key a person can be shown exists as
+    /// a literal somewhere. A key assembled at run time cannot be checked against the resource
+    /// files, and the first anyone hears of a missing one is a person seeing its name.
+    /// </remarks>
+    private static string KeyFor(string code) => code switch
+    {
+        "PasswordTooShort" => "Password_PasswordTooShort",
+        "PasswordRequiresUniqueChars" => "Password_PasswordRequiresUniqueChars",
+        "Breached" => "Password_Breached",
+        _ => "Password_NotAcceptable",
+    };
 
     /// <summary>A new shared secret for an authenticator application.</summary>
     public string NewAuthenticatorKey() => users.GenerateNewAuthenticatorKey();

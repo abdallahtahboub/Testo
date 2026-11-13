@@ -93,4 +93,163 @@
   <data name="Reconnect_RetryBefore" xml:space="preserve">
     <value>Reconnecting failed. Trying again in</value>
   </data>
+  <data name="Account_SignIn_PageTitle" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
+  <data name="Account_SignIn_Title" xml:space="preserve">
+    <value>Sign in to {0}</value>
+  </data>
+  <data name="Account_SignIn_Email" xml:space="preserve">
+    <value>Email address</value>
+  </data>
+  <data name="Account_SignIn_Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Account_SignIn_RememberMe" xml:space="preserve">
+    <value>Stay signed in on this device</value>
+  </data>
+  <data name="Account_SignIn_Submit" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
+  <data name="Account_SignIn_ForgotPassword" xml:space="preserve">
+    <value>I have forgotten my password</value>
+  </data>
+  <data name="Account_SignIn_Failed" xml:space="preserve">
+    <value>That email address and password do not match an account.</value>
+  </data>
+  <data name="Account_SignIn_LockedOut" xml:space="preserve">
+    <value>Too many attempts. Try again after {0}, or reset your password to get back in now.</value>
+  </data>
+  <data name="Account_SignIn_NoMembership" xml:space="preserve">
+    <value>This account does not belong to an organization. Ask an administrator to invite you.</value>
+  </data>
+  <data name="Account_SignOut_PageTitle" xml:space="preserve">
+    <value>Sign out</value>
+  </data>
+  <data name="Account_SignOut_Title" xml:space="preserve">
+    <value>Sign out</value>
+  </data>
+  <data name="Account_SignOut_Confirm" xml:space="preserve">
+    <value>Sign out of {0}?</value>
+  </data>
+  <data name="Account_SignOut_Submit" xml:space="preserve">
+    <value>Sign out</value>
+  </data>
+  <data name="Account_SignOut_Cancel" xml:space="preserve">
+    <value>Stay signed in</value>
+  </data>
+  <data name="Account_Forgot_PageTitle" xml:space="preserve">
+    <value>Forgotten password</value>
+  </data>
+  <data name="Account_Forgot_Title" xml:space="preserve">
+    <value>Choose a new password</value>
+  </data>
+  <data name="Account_Forgot_Intro" xml:space="preserve">
+    <value>Give us the address you sign in with and we will send a link to it.</value>
+  </data>
+  <data name="Account_Forgot_Submit" xml:space="preserve">
+    <value>Send the link</value>
+  </data>
+  <data name="Account_Forgot_Sent" xml:space="preserve">
+    <value>If that address has an account, a link is on its way. It works once, and for two hours.</value>
+  </data>
+  <data name="Account_Reset_PageTitle" xml:space="preserve">
+    <value>New password</value>
+  </data>
+  <data name="Account_Reset_Title" xml:space="preserve">
+    <value>Choose a new password</value>
+  </data>
+  <data name="Account_Reset_NewPassword" xml:space="preserve">
+    <value>New password</value>
+  </data>
+  <data name="Account_Reset_Hint" xml:space="preserve">
+    <value>At least 12 characters. Length is what matters; a phrase you will remember beats a short tangle of symbols.</value>
+  </data>
+  <data name="Account_Reset_Submit" xml:space="preserve">
+    <value>Save the password</value>
+  </data>
+  <data name="Account_Reset_Done" xml:space="preserve">
+    <value>Your password is saved. You can sign in with it now.</value>
+  </data>
+  <data name="Account_TwoFactor_PageTitle" xml:space="preserve">
+    <value>One-time code</value>
+  </data>
+  <data name="Account_TwoFactor_Title" xml:space="preserve">
+    <value>Enter your one-time code</value>
+  </data>
+  <data name="Account_TwoFactor_Intro" xml:space="preserve">
+    <value>Open your authenticator app and type the six digits it shows.</value>
+  </data>
+  <data name="Account_TwoFactor_Code" xml:space="preserve">
+    <value>Six-digit code</value>
+  </data>
+  <data name="Account_TwoFactor_Submit" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="Account_TwoFactor_Failed" xml:space="preserve">
+    <value>That code is not right, or it has already expired. Try the next one.</value>
+  </data>
+  <data name="Account_TwoFactor_SetupRequired" xml:space="preserve">
+    <value>{0} requires a second factor. Setting one up is part of Milestone 4; until then, ask an administrator to turn the requirement off.</value>
+  </data>
+  <data name="Account_Accept_PageTitle" xml:space="preserve">
+    <value>Accept invitation</value>
+  </data>
+  <data name="Account_Accept_Title" xml:space="preserve">
+    <value>Join {0}</value>
+  </data>
+  <data name="Account_Accept_Intro" xml:space="preserve">
+    <value>{0} invited you to {1} as {2}.</value>
+  </data>
+  <data name="Account_Accept_DisplayName" xml:space="preserve">
+    <value>Your name</value>
+  </data>
+  <data name="Account_Accept_Password" xml:space="preserve">
+    <value>Choose a password</value>
+  </data>
+  <data name="Account_Accept_Submit" xml:space="preserve">
+    <value>Join</value>
+  </data>
+  <data name="Account_Accept_SubmitExisting" xml:space="preserve">
+    <value>Accept the invitation</value>
+  </data>
+  <data name="Account_Accept_NotUsable" xml:space="preserve">
+    <value>This link no longer works. It may have been used already, withdrawn, or it may have expired. Ask for a new one.</value>
+  </data>
+  <data name="Account_Accept_Done" xml:space="preserve">
+    <value>You have joined {0}. Sign in to get started.</value>
+  </data>
+  <data name="Account_Error_EmailRequired" xml:space="preserve">
+    <value>Enter the address you sign in with.</value>
+  </data>
+  <data name="Account_Error_PasswordRequired" xml:space="preserve">
+    <value>Enter your password.</value>
+  </data>
+  <data name="Account_Error_CodeRequired" xml:space="preserve">
+    <value>Enter the six digits from your authenticator app.</value>
+  </data>
+  <data name="Account_Error_NameRequired" xml:space="preserve">
+    <value>Enter the name your colleagues will see.</value>
+  </data>
+  <data name="Password_PasswordTooShort" xml:space="preserve">
+    <value>That password is too short. Twelve characters or more.</value>
+  </data>
+  <data name="Password_Breached" xml:space="preserve">
+    <value>That password appears in lists attackers already have. Choose another.</value>
+  </data>
+  <data name="Password_PasswordRequiresUniqueChars" xml:space="preserve">
+    <value>That password repeats too few different characters.</value>
+  </data>
+  <data name="PasswordReset_Error_LinkNotUsable" xml:space="preserve">
+    <value>This link no longer works. It may have been used already, or it may have expired. Ask for a new one.</value>
+  </data>
+  <data name="Invitation_Error_NotUsable" xml:space="preserve">
+    <value>This invitation no longer works. It may have been used already, withdrawn, or it may have expired.</value>
+  </data>
+  <data name="Invitation_Error_AccountDetailsMissing" xml:space="preserve">
+    <value>Give your name and choose a password to finish joining.</value>
+  </data>
+  <data name="Password_NotAcceptable" xml:space="preserve">
+    <value>That password cannot be used. Choose another.</value>
+  </data>
 </root>

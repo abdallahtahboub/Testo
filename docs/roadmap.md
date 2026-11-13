@@ -82,6 +82,41 @@ decisions in ADR-0011 to ADR-0014.
 
 **Done when:** a person can be invited, accept, sign in and see only their organization's data; the permission table in `identity-and-access.md` §2 is asserted cell by cell by a test; the tenant leak test passes across every entity; every access change appears in the audit log; the general Definition of Done is met.
 
+**Status: built (2026-11-13), waiting for review.** 807 tests, 105 of them new. The headline
+works end to end in a browser: invited, accepted, signed in, and seeing only one organization.
+
+What it delivered beyond the list above:
+
+- Tenant isolation is refused in four places, not three. The query filter, the save guard and
+  `organization_id` first in every index were planned; an alternate key of
+  `(organization_id, id)` on organizations and projects means Entity Framework will not even
+  let the column be changed, and lets the entities of Milestone 5 carry a composite foreign key
+  the database itself checks.
+- The leak test seeds two organizations with a row of every kind and asks each whether it can
+  see the other's. A second test fails if an entity inside the boundary has no seed, so a new
+  one cannot quietly go untested.
+- The permission test transcribes the table from the document independently of the code, so the
+  two cannot drift apart. Both guards were checked by breaking them on purpose.
+- Removing somebody ends their sessions at the next request, not at the next expiry, and leaves
+  their other organizations alone. A password reset ends every session everywhere.
+- A seeded development database, so the application can be signed into the first time it runs.
+
+Three things are deliberately not built, and `identity-and-access.md` §7 says why: sending email,
+enrolling an authenticator, and the full breached-password check.
+
+Decisions recorded: ADR-0016 (the account pages are static). ADR-0011 to ADR-0014 move from
+proposed to built.
+
+Found by opening it in a browser rather than by a test, and worth remembering:
+
+- An `@layout` in an `_Imports.razor` applies to every component in that folder, including a
+  layout kept there — which then nests inside itself without end. The page never finishes
+  rendering, and the symptom is a timeout, not an error. Layouts live in `Components/Layout`.
+- `EditForm` renders its own antiforgery token in static rendering. A second one posts two
+  values and the server rejects the pair with 400.
+- A test that clicks `button[type=submit]` clicks the language switch, because the layout has
+  four submit buttons of its own.
+
 ## Milestone 4 — Public website
 **Scope:** all public pages from `sitemap.md` §A with real copy (EN + DE) where we have it and labeled placeholders elsewhere; mega-menu navigation, language switcher, rich footer; contact + demo forms (UI and validation only); Imprint, Privacy, Terms, Accessibility statement placeholders; original SVG illustrations; `sitemap.xml`, `robots.txt`, meta/OpenGraph tags, `hreflang`.
 

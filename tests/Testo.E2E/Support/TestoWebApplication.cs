@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Testo.Application.Identity;
 using Testo.Web.Components;
 using Testo.Web.Identity;
+using Testo.Web.Security;
 
 namespace Testo.E2E.Support;
 
@@ -48,6 +49,11 @@ internal class TestoWebApplication(string connectionString) : WebApplicationFact
         // The migration and seeding statements are tens of lines of SQL each and bury the
         // failure a test is actually reporting.
         builder.UseSetting("Logging:LogLevel:Microsoft.EntityFrameworkCore.Database.Command", "Warning");
+
+        // Every test shares this application and they all post to the account pages, from one
+        // address, in parallel. Left at the real limit they would throttle each other. The limit
+        // itself is tested against an application of its own, with a strict one (D-4).
+        builder.UseSetting(AccountRateLimiting.PermitsPerMinuteKey, "100000");
 
         builder.ConfigureServices(services =>
         {

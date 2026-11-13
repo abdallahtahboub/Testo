@@ -53,6 +53,9 @@ builder.Services.AddScoped<IFeatureFlags, FeatureManagementFlags>();
 builder.Services.TryAddSingleton(TimeProvider.System);
 builder.Services.AddScoped<CspNonce>();
 
+// How often one address may try to sign in (D-4).
+builder.Services.AddAccountRateLimiting(builder.Configuration);
+
 // Signing in. The session cookie, and the services that answer "who is asking".
 builder.Services.AddTestoIdentity(
     allowInsecureCookie: builder.Configuration.GetValue<bool>(TestoIdentityServiceCollectionExtensions.AllowInsecureCookiesKey));
@@ -122,6 +125,11 @@ app.Use((context, next) =>
 app.UseHttpsRedirection();
 app.UseSecurityHeaders(app.Environment);
 app.UseRequestLocalization();
+
+// Before authentication, so a refused attempt costs a dictionary lookup rather than a password
+// hash and a database read.
+app.UseAccountRateLimiting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseImmutableFontCaching();

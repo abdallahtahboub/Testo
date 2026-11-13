@@ -101,7 +101,7 @@ than a shrug.
 
 | Risk | What stops it |
 |---|---|
-| Guessing a password | Rate limit per address and per IP; slow down, then lock with a self-service recovery. Never a silent lock |
+| Guessing a password | **Built:** lockout after ten attempts on an account, and thirty posts a minute per IP address on the account pages. Reading a page is never limited, so a shared office address still works. Never a silent lock |
 | Finding out who has an account | Identical response and timing whether the address exists or not |
 | Stealing a session | `HttpOnly` cookie, `Secure`, the session identifier rotated on sign-in and on privilege change |
 | Cross-site request forgery | Antiforgery tokens on every form that changes something, already in place |

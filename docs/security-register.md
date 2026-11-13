@@ -92,7 +92,7 @@ real sender is registered, and says why. A silent credential leak is now a loud 
 The browser tests run the application as a deployed site, so they had to register a sender of their
 own — which is the check proving itself rather than a workaround.
 
-### D-4 · No rate limiting of any kind — **High**
+### D-4 · No rate limiting of any kind — **High** · *Fixed 2026-11-13, Milestone 3.1*
 
 `docs/identity-and-access.md` §5 promises "Rate limit per address **and per IP**". Only the
 per-account lockout exists: ten attempts, fifteen minutes.
@@ -101,8 +101,21 @@ One address can therefore try one likely password against every account in the p
 friction, which is how credential stuffing actually works. The lockout is also an availability
 lever: an attacker who knows an email address can keep that person locked out indefinitely.
 
-**Fix.** ASP.NET Core rate limiting per IP on `/account/**`, and a decision about how to respond to
-spraying that does not hand an attacker a denial-of-service primitive.
+**Fixed.** `AccountRateLimiting`: a sliding window of thirty posts a minute per address on
+`/account/**`, in six segments so the allowance returns gradually rather than all at once on a
+boundary somebody could wait for. A refusal carries `Retry-After`.
+
+Only unsafe methods are limited. Reading the sign-in page is somebody arriving, and an office
+behind one address arrives all morning; posting is an attempt. Limiting the former would have made
+the product unusable for a customer whose staff share an address, which is the denial-of-service
+primitive the fix had to avoid rather than create.
+
+The limiter runs before authentication, so a refused attempt costs a dictionary lookup instead of a
+password hash and a database read.
+
+**Still required at deployment:** behind a reverse proxy the partition is the proxy's address
+unless `UseForwardedHeaders` is configured with the known proxies. The limit still works, as one
+bucket for everybody — safe, and much blunter than intended. Recorded as R-8.
 
 ### D-5 · The documentation asserted things that were false — **Medium** *(fixed by this register's own pull request)*
 
@@ -177,6 +190,17 @@ test host can be told apart another way.
 
 The only caller checks the environment; the method does not. A second caller added later would not
 have to.
+
+### R-8 · Rate limiting needs forwarded headers behind a proxy — **Medium when deployed**
+
+`AccountRateLimiting` partitions on the connection's remote address. Behind a load balancer or a
+CDN every request arrives from the same place, so the per-address limit becomes one global bucket:
+still a limit, no longer per address.
+
+**Fix at deployment.** `UseForwardedHeaders` with `KnownProxies` or `KnownNetworks` set to the
+actual infrastructure. Deliberately not configured blind: trusting `X-Forwarded-For` from an
+unknown source lets anybody claim any address and escape the limit entirely, which is worse than
+the blunt version.
 
 ### R-7 · One database for every tenant — **Accepted, documented**
 

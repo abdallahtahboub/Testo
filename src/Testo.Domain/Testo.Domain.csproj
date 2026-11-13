@@ -1,6 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!-- Entities and the rules that are true regardless of storage (ADR-0014).
-       References nothing: no EF Core, no ASP.NET Core Identity, no UI. -->
+       References only Testo.Contracts, for the vocabulary the product and the future backend
+       share: no EF Core, no ASP.NET Core Identity, no UI. -->
+
+  <ItemGroup>
+    <ProjectReference Include="../Testo.Contracts/Testo.Contracts.csproj" />
+  </ItemGroup>
 
 </Project>

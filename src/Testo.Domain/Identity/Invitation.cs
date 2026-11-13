@@ -1,3 +1,4 @@
+using Testo.Contracts.Identity;
 using Testo.Domain.Common;
 
 namespace Testo.Domain.Identity;

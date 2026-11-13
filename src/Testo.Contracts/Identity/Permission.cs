@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace Testo.Domain.Identity;
+namespace Testo.Contracts.Identity;
 
 /// <summary>
 /// One row of the permission table in <c>docs/identity-and-access.md</c> §2.

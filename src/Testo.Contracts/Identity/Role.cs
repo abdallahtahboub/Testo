@@ -1,4 +1,4 @@
-namespace Testo.Domain.Identity;
+namespace Testo.Contracts.Identity;
 
 /// <summary>
 /// What a person may do in one organization (<c>docs/identity-and-access.md</c> §2).

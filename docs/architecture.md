@@ -49,11 +49,11 @@ src/
   Testo.Modules.Defects
   Testo.Modules.Reporting        // incl. monitoring & control, release readiness, completion
   Testo.Modules.Settings         // NEW: integrations, team, capability settings host
-  Testo.Capabilities.E2EWeb      // first capability plug-in
-  Testo.Mocks                    // Mock* services, seed data, simulated live feed
-  Testo.Domain                   // PLANNED: entities and rules (ADR-0014)
-  Testo.Application              // PLANNED: use cases; implements the Contracts interfaces
-  Testo.Persistence              // PLANNED: EF Core, PostgreSQL, migrations
+  Testo.Capabilities.E2EWeb      // SHELL: an _Imports.razor and nothing else
+  Testo.Mocks                    // SHELL: options and a random source only. No services, no seed data
+  Testo.Domain                   // BUILT (M3): entities and rules (ADR-0014)
+  Testo.Application              // BUILT (M3): use cases; implements the Contracts interfaces
+  Testo.Persistence              // BUILT (M3): EF Core, PostgreSQL, migrations
   Testo.Api                      // PLANNED: REST host for CI integrations, over the same use cases
 tests/
   Testo.UI.Tests                 // bUnit: UI.Shared components + module components
@@ -136,6 +136,7 @@ Cross-module communication only happens through:
 - **routes** (a module links to another module's page by URL constants published in
   `Testo.Platform.Routes`, never by referencing its component types), and
 - **events** via `IAppEventBus` in `Platform` (e.g., `DefectCreated`) for in-app notifications.
+  *(Designed, not built: no such interface exists yet.)*
 
 ## 5. Module system
 
@@ -235,6 +236,11 @@ public interface ITestCapability
 
 All data comes from interfaces in `Testo.Contracts`, grouped per domain:
 
+> **None of the interfaces in this table exist yet.** They are the design for the testing-journey
+> milestones. `Testo.Contracts` currently defines six interfaces, all of them about identity:
+> `IAuthenticationService`, `ICurrentUser`, `IOrganizationContext`, `IMembershipService`,
+> `IInvitationService` and `IAuditLog`. Treat the rows below as a plan, not as an inventory.
+
 | Interface | Purpose |
 |---|---|
 | `IProjectService` | projects, releases, current project |
@@ -284,7 +290,11 @@ Seed: 3–4 believable projects (e.g., a retail web shop, an insurance customer 
 a logistics tracking app), each with releases, ~150 requirements, ~600 test cases,
 run history over 90 days, and ~120 defects with realistic lifecycles.
 
-## 8. Real-time: `ITestRunLiveFeed`
+## 8. Real-time: `ITestRunLiveFeed` *(designed, not built)*
+
+> This interface does not exist in the code. The shape below is the intent; whether it survives
+> contact with a real Playwright worker is one of the things the execution slice decides
+> (ADR-0017).
 
 ```csharp
 public interface ITestRunLiveFeed

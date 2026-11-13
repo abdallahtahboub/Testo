@@ -5,9 +5,14 @@ software testing journey, from requirements to release sign-off, following the
 [ISTQB test process](docs/testing-journey.md). The first automated capability is
 AI-driven end-to-end web testing with a live progress view.
 
-> **Status: frontend phase, with real accounts.** Most of the product still runs on mock data
-> behind clean interfaces. Identity, organizations and the data underneath them are real and
-> live in PostgreSQL, because they were the part that could not be faked.
+> **Status after Milestone 3.** Accounts, organizations, roles, invitations and the audit log are
+> real and live in PostgreSQL. The design system is real. **The testing journey itself — plans,
+> requirements, test cases, runs, defects — does not exist yet**, not even as mock data: the seven
+> module projects are shells. The next work proves one real test execution end to end before
+> building screens over it (ADR-0017).
+>
+> `docs/roadmap.md` §Inventory is the authoritative list of what is built, and
+> `docs/security-register.md` is the honest list of what is not yet safe.
 > `Testo` is a working name.
 
 ## Getting started

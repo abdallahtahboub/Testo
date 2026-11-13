@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Entities and the rules that are true regardless of storage (ADR-0014).
+       References nothing: no EF Core, no ASP.NET Core Identity, no UI. -->
+
+</Project>

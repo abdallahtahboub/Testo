@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/Testo.Capabilities.E2EWeb/Testo.Capabilities.E2EWeb.csproj" />
     <Project Path="src/Testo.Contracts/Testo.Contracts.csproj" />
+    <Project Path="src/Testo.Domain/Testo.Domain.csproj" />
     <Project Path="src/Testo.Mocks/Testo.Mocks.csproj" />
     <Project Path="src/Testo.Modules.Analysis/Testo.Modules.Analysis.csproj" />
     <Project Path="src/Testo.Modules.Defects/Testo.Modules.Defects.csproj" />

@@ -14,7 +14,8 @@ AI-driven end-to-end web testing with a live progress view.
 
 You need the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) and a
 **PostgreSQL 16** to point it at. The product keeps accounts, organizations and roles in a
-database, so it will not start without one.
+database, so it will not start without one — and if it cannot reach the server it says which
+one it tried and how to get one running, rather than printing a connection error.
 
 The quickest way to get one:
 
@@ -22,9 +23,25 @@ The quickest way to get one:
 docker run --name testo-db -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16
 ```
 
-Or install PostgreSQL locally (`brew install postgresql@16`, `apt install postgresql`) and
-make sure the `postgres` user has the password `postgres`. To use anything else, override the
-connection string:
+Or install PostgreSQL locally. Note that Homebrew and apt create a superuser named after your
+account rather than `postgres`, so the defaults will not fit until you add one:
+
+```bash
+brew install postgresql@16 && brew services start postgresql@16
+```
+
+```bash
+createuser -s postgres
+```
+
+```bash
+psql -d postgres -c "ALTER USER postgres WITH PASSWORD 'postgres';"
+```
+
+(`postgresql@16` is keg-only, so add `/opt/homebrew/opt/postgresql@16/bin` to your `PATH` —
+`/usr/local/...` on an Intel Mac.)
+
+To use a different server or account instead, override the connection string:
 
 ```bash
 export ConnectionStrings__Testo="Host=localhost;Database=testo_dev;Username=me;Password=secret"

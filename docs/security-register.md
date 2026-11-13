@@ -78,7 +78,7 @@ Tests: the write is refused; the other organization gains nothing, which is the 
 matters; a declared write succeeds; and the permission stops working once its block ends — a
 permission that outlived its block would be worse than no guard, because it would read like one.
 
-### D-3 · Invitation and password-reset tokens are written to the log — **Critical on first deployment**
+### D-3 · Invitation and password-reset tokens are written to the log — **Critical** · *Fixed 2026-11-13, Milestone 3.1*
 
 `Testo.Application/ApplicationServiceCollectionExtensions.cs` registers `LoggingInvitationNotifier`
 unconditionally, including in production. It logs the raw token at `Warning`.
@@ -86,8 +86,11 @@ unconditionally, including in production. It logs the raw token at `Warning`.
 Anyone who can read the logs can accept any invitation or reset any password. The severity is
 zero while nothing is deployed and total the day something is.
 
-**Fix.** Refuse to start outside Development unless a real notifier is registered. That converts a
-silent credential leak into a loud startup failure.
+**Fixed.** `NotifierStartup.EnsureLinksReachPeople` refuses to start outside development unless a
+real sender is registered, and says why. A silent credential leak is now a loud startup failure.
+
+The browser tests run the application as a deployed site, so they had to register a sender of their
+own — which is the check proving itself rather than a workaround.
 
 ### D-4 · No rate limiting of any kind — **High**
 

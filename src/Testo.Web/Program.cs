@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.FeatureManagement;
 using Testo.Application;
+using Testo.Application.Identity;
 using Testo.Mocks;
 using Testo.Modules.Analysis;
 using Testo.Modules.Defects;
@@ -88,6 +89,9 @@ var app = builder.Build();
 // Before anything touches the database, so that a server which is not running is answered with
 // a sentence rather than with Entity Framework's connection error.
 await DatabaseStartup.EnsureReachableAsync(app.Services);
+
+// A deployed application that writes invitation tokens to its log should not start (D-3).
+NotifierStartup.EnsureLinksReachPeople(app.Services, app.Environment.IsDevelopment());
 
 // A developer who cannot sign in reaches for a shortcut that is worse than a seeded database.
 if (app.Environment.IsDevelopment())

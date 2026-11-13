@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Testo.Application.Identity;
 using Testo.Web.Components;
 using Testo.Web.Identity;
 
@@ -48,7 +49,14 @@ internal class TestoWebApplication(string connectionString) : WebApplicationFact
         // failure a test is actually reporting.
         builder.UseSetting("Logging:LogLevel:Microsoft.EntityFrameworkCore.Database.Command", "Warning");
 
-        builder.ConfigureServices(services => services.AddSingleton<IStartupFilter, FailingPathFilter>());
+        builder.ConfigureServices(services =>
+        {
+            services.AddSingleton<IStartupFilter, FailingPathFilter>();
+
+            // This application runs as a deployed site, and a deployed site refuses to start if
+            // invitation links would go to its log (D-3). So it gets a sender.
+            services.AddScoped<IInvitationNotifier, SilentNotifier>();
+        });
     }
 
     /// <summary>Adds a last step to the request pipeline that throws for <see cref="FailingPath"/>.</summary>

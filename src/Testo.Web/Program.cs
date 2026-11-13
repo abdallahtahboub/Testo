@@ -85,6 +85,10 @@ builder.Services.AddSingleton<RoutableAssemblies>();
 
 var app = builder.Build();
 
+// Before anything touches the database, so that a server which is not running is answered with
+// a sentence rather than with Entity Framework's connection error.
+await DatabaseStartup.EnsureReachableAsync(app.Services);
+
 // A developer who cannot sign in reaches for a shortcut that is worse than a seeded database.
 if (app.Environment.IsDevelopment())
 {

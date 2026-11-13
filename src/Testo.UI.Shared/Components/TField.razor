@@ -1,0 +1,91 @@
+@inject IStringLocalizer<SharedResources> L
+
+@*
+    The frame every form control shares: a visible label above it, an optional hint, and
+    an error underneath (ux/patterns.md §2).
+
+    It owns the ids, so the control it wraps is always described by its hint and its error
+    without each control having to remember to do that.
+*@
+<div class="t-field @(HasError ? "t-field--invalid" : null)" @attributes="AdditionalAttributes">
+    <label class="t-field__label" for="@ControlId">
+        @Label
+        @if (Required)
+        {
+            <span class="t-field__required" aria-hidden="true">*</span>
+            <span class="t-visually-hidden">@L["Field_Required"]</span>
+        }
+    </label>
+
+    @if (!string.IsNullOrWhiteSpace(Hint))
+    {
+        <p class="t-field__hint" id="@HintId">@Hint</p>
+    }
+
+    @ChildContent(new TFieldContext(ControlId, DescribedBy, HasError))
+
+    @if (HasError)
+    {
+        @* Announced politely so a screen reader hears it without losing the typing position. *@
+        <p class="t-field__error" id="@ErrorId" aria-live="polite">
+            <TIcon Name="IconName.Warning" Size="IconSize.Small" />
+            @Error
+        </p>
+    }
+</div>
+
+@code {
+    /// <summary>The visible label. Never a placeholder instead of this.</summary>
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = "";
+
+    /// <summary>What the field is for, or what a valid value looks like. Shown before anything goes wrong.</summary>
+    [Parameter]
+    public string? Hint { get; set; }
+
+    /// <summary>What is wrong, in words that say what to do. Shown under the control.</summary>
+    [Parameter]
+    public string? Error { get; set; }
+
+    /// <summary>Marks the field as one that must be filled in.</summary>
+    [Parameter]
+    public bool Required { get; set; }
+
+    /// <summary>The control. It receives the id and the description it must carry.</summary>
+    [Parameter, EditorRequired]
+    public RenderFragment<TFieldContext> ChildContent { get; set; } = default!;
+
+    /// <summary>Any other attribute is passed on to the wrapper.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private readonly string _id = "f" + Guid.NewGuid().ToString("N")[..8];
+
+    private string ControlId => _id;
+
+    private string HintId => _id + "-hint";
+
+    private string ErrorId => _id + "-error";
+
+    private bool HasError => !string.IsNullOrWhiteSpace(Error);
+
+    /// <summary>The hint and the error together, so a screen reader reads both.</summary>
+    private string? DescribedBy
+    {
+        get
+        {
+            var parts = new List<string>(2);
+            if (!string.IsNullOrWhiteSpace(Hint))
+            {
+                parts.Add(HintId);
+            }
+
+            if (HasError)
+            {
+                parts.Add(ErrorId);
+            }
+
+            return parts.Count == 0 ? null : string.Join(' ', parts);
+        }
+    }
+}

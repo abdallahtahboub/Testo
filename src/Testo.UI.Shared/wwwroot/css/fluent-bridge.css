@@ -1,0 +1,202 @@
+/*
+ * Fluent UI, in our brand.
+ *
+ * The Fluent UI components take every colour, font and measurement from their own CSS
+ * variables. Pointing those at our design tokens makes them part of our design system
+ * instead of a second one sitting next to it (ADR-0007).
+ *
+ * Our tokens already carry both themes through light-dark(), so a single mapping covers
+ * light and dark. Nothing here invents a value: every declaration is var(--token).
+ *
+ * Loaded on app pages only — public pages never download Fluent UI.
+ */
+
+.app-root {
+  /* ---------- Surfaces ---------- */
+  --colorNeutralBackground1: var(--color-surface);
+  --colorNeutralBackground1Hover: var(--color-surface-subtle);
+  --colorNeutralBackground1Pressed: var(--color-surface-subtle);
+  --colorNeutralBackground1Selected: var(--color-brand-subtle);
+  --colorNeutralBackground2: var(--color-surface-subtle);
+  --colorNeutralBackground3: var(--color-surface-subtle);
+  --colorNeutralBackground4: var(--color-surface-subtle);
+  --colorNeutralBackground4Hover: var(--color-surface);
+  --colorNeutralBackground5: var(--color-surface-subtle);
+  --colorNeutralBackground5Hover: var(--color-surface);
+  --colorNeutralBackground6: var(--color-surface-subtle);
+  --colorNeutralBackgroundDisabled: var(--color-surface-subtle);
+  --colorNeutralBackgroundInverted: var(--color-text);
+  --colorSubtleBackground: transparent;
+  --colorSubtleBackgroundHover: var(--color-surface-subtle);
+  --colorSubtleBackgroundPressed: var(--color-surface-subtle);
+  --colorSubtleBackgroundSelected: var(--color-brand-subtle);
+  --colorTransparentBackground: transparent;
+
+  /* ---------- Text ---------- */
+  --colorNeutralForeground1: var(--color-text);
+  --colorNeutralForeground1Hover: var(--color-text);
+  --colorNeutralForeground1Pressed: var(--color-text);
+  --colorNeutralForeground1Selected: var(--color-text);
+  --colorNeutralForeground2: var(--color-text-muted);
+  --colorNeutralForeground2Hover: var(--color-text);
+  --colorNeutralForeground2Pressed: var(--color-text);
+  --colorNeutralForeground2Selected: var(--color-text);
+  --colorNeutralForeground3: var(--color-text-muted);
+  --colorNeutralForeground4: var(--color-text-muted);
+  --colorNeutralForegroundDisabled: var(--color-text-muted);
+  --colorNeutralForegroundInverted: var(--color-bg);
+  --colorNeutralForegroundInverted2: var(--color-bg);
+  --colorNeutralForegroundOnBrand: var(--color-on-brand);
+  --colorNeutralForegroundStaticInverted: var(--color-bg);
+
+  /* ---------- Lines ---------- */
+  --colorNeutralStroke1: var(--color-border);
+  --colorNeutralStroke1Hover: var(--color-border-strong);
+  --colorNeutralStroke1Pressed: var(--color-border-strong);
+  --colorNeutralStroke1Selected: var(--color-brand);
+  --colorNeutralStroke2: var(--color-border);
+  --colorNeutralStroke3: var(--color-border);
+  --colorNeutralStrokeAccessible: var(--color-border-strong);
+  --colorNeutralStrokeAccessibleHover: var(--color-text-muted);
+  --colorNeutralStrokeAccessiblePressed: var(--color-text-muted);
+  --colorNeutralStrokeAccessibleSelected: var(--color-brand);
+  --colorNeutralStrokeDisabled: var(--color-border);
+  --colorNeutralStrokeOnBrand: var(--color-on-brand);
+  --colorNeutralStrokeOnBrand2: var(--color-on-brand);
+  --colorStrokeFocus1: var(--color-bg);
+  --colorStrokeFocus2: var(--color-focus);
+
+  /* ---------- Brand ---------- */
+  --colorBrandBackground: var(--color-brand);
+  --colorBrandBackgroundHover: var(--color-brand-hover);
+  --colorBrandBackgroundPressed: var(--color-brand-hover);
+  --colorBrandBackgroundSelected: var(--color-brand-hover);
+  --colorBrandBackground2: var(--color-brand-subtle);
+  --colorBrandBackground2Hover: var(--color-brand-subtle);
+  --colorBrandBackground2Pressed: var(--color-brand-subtle);
+  --colorBrandBackgroundInverted: var(--color-surface);
+  --colorBrandBackgroundInvertedHover: var(--color-brand-subtle);
+  --colorBrandBackgroundInvertedSelected: var(--color-brand-subtle);
+  --colorBrandBackgroundStatic: var(--color-brand);
+  --colorBrandForeground1: var(--color-brand);
+  --colorBrandForeground2: var(--color-brand);
+  --colorBrandForegroundLink: var(--color-link);
+  --colorBrandForegroundLinkHover: var(--color-brand-hover);
+  --colorBrandForegroundLinkPressed: var(--color-brand-hover);
+  --colorBrandForegroundLinkSelected: var(--color-link);
+  --colorBrandForegroundInverted: var(--color-brand);
+  --colorBrandForegroundOnLight: var(--color-brand);
+  --colorBrandStroke1: var(--color-brand);
+  --colorBrandStroke2: var(--color-brand-subtle);
+  --colorCompoundBrandBackground: var(--color-brand);
+  --colorCompoundBrandBackgroundHover: var(--color-brand-hover);
+  --colorCompoundBrandBackgroundPressed: var(--color-brand-hover);
+  --colorCompoundBrandForeground1: var(--color-brand);
+  --colorCompoundBrandForeground1Hover: var(--color-brand-hover);
+  --colorCompoundBrandForeground1Pressed: var(--color-brand-hover);
+  --colorCompoundBrandStroke: var(--color-brand);
+  --colorCompoundBrandStrokeHover: var(--color-brand-hover);
+
+  /* ---------- Meaning. Status is never colour alone; these are the colours it pairs with. ---------- */
+  --colorStatusSuccessBackground1: var(--color-surface);
+  --colorStatusSuccessBackground3: var(--color-success);
+  --colorStatusSuccessForeground1: var(--color-success);
+  --colorStatusSuccessForeground3: var(--color-success);
+  --colorStatusSuccessForegroundInverted: var(--color-bg);
+  --colorStatusSuccessBorder1: var(--color-success);
+  --colorStatusWarningBackground1: var(--color-surface);
+  --colorStatusWarningBackground3: var(--color-warning);
+  --colorStatusWarningForeground1: var(--color-warning);
+  --colorStatusWarningForeground3: var(--color-warning);
+  --colorStatusWarningForegroundInverted: var(--color-bg);
+  --colorStatusWarningBorder1: var(--color-warning);
+  --colorStatusDangerBackground1: var(--color-surface);
+  --colorStatusDangerBackground3: var(--color-danger);
+  --colorStatusDangerForeground1: var(--color-danger);
+  --colorStatusDangerForeground3: var(--color-danger);
+  --colorStatusDangerBorder1: var(--color-danger);
+  --colorPaletteRedBackground1: var(--color-surface);
+  --colorPaletteRedBackground3: var(--color-danger);
+  --colorPaletteRedForeground1: var(--color-danger);
+  --colorPaletteRedForeground3: var(--color-danger);
+  --colorPaletteRedForegroundInverted: var(--color-bg);
+  --colorPaletteRedBorder1: var(--color-danger);
+  --colorPaletteRedBorder2: var(--color-danger);
+  --colorPaletteGreenBackground3: var(--color-success);
+  --colorPaletteGreenForeground1: var(--color-success);
+  --colorPaletteGreenForeground3: var(--color-success);
+  --colorPaletteYellowBackground3: var(--color-warning);
+  --colorPaletteYellowForeground1: var(--color-warning);
+  --colorPaletteMarigoldBackground3: var(--color-warning);
+  --colorPaletteDarkOrangeBackground3: var(--color-warning);
+  --colorPaletteLightGreenForeground3: var(--color-success);
+  --colorPaletteBerryForeground3: var(--color-info);
+
+  /* ---------- Type ---------- */
+  --fontFamilyBase: var(--font-sans);
+  --fontFamilyMonospace: var(--font-mono);
+  --fontFamilyNumeric: var(--font-sans);
+  --fontSizeBase100: var(--text-caption);
+  --fontSizeBase200: var(--text-body-sm);
+  --fontSizeBase300: var(--text-body-sm);
+  --fontSizeBase400: var(--text-body);
+  --fontSizeBase500: var(--text-h4);
+  --fontSizeBase600: var(--text-h3);
+  --fontSizeHero700: var(--text-h3);
+  --fontSizeHero800: var(--text-h2);
+  --fontSizeHero900: var(--text-h1);
+  --lineHeightBase100: var(--leading-caption);
+  --lineHeightBase200: var(--leading-body-sm);
+  --lineHeightBase300: var(--leading-body-sm);
+  --lineHeightBase400: var(--leading-body);
+  --lineHeightBase500: var(--leading-h4);
+  --lineHeightBase600: var(--leading-h3);
+  --lineHeightHero700: var(--leading-h3);
+  --lineHeightHero800: var(--leading-h2);
+  --lineHeightHero900: var(--leading-h1);
+  --fontWeightRegular: var(--weight-regular);
+  --fontWeightMedium: var(--weight-medium);
+  --fontWeightSemibold: var(--weight-semibold);
+  --fontWeightBold: var(--weight-bold);
+
+  /* ---------- Shape ---------- */
+  --borderRadiusNone: 0;
+  --borderRadiusSmall: var(--radius-sm);
+  --borderRadiusMedium: var(--radius-md);
+  --borderRadiusLarge: var(--radius-lg);
+  --borderRadiusXLarge: var(--radius-xl);
+  --borderRadiusCircular: var(--radius-full);
+  --strokeWidthThin: 1px;
+  --strokeWidthThick: var(--focus-ring-width);
+  --strokeWidthThicker: var(--focus-ring-width);
+
+  /* ---------- Depth ---------- */
+  --shadow2: var(--shadow-1);
+  --shadow4: var(--shadow-1);
+  --shadow8: var(--shadow-2);
+  --shadow16: var(--shadow-2);
+  --shadow28: var(--shadow-3);
+  --shadow64: var(--shadow-3);
+
+  /* ---------- Motion ---------- */
+  --durationFaster: var(--duration-fast);
+  --durationNormal: var(--duration-base);
+  --durationSlow: var(--duration-slow);
+  --curveEasyEase: var(--ease-standard);
+  --curveDecelerateMid: var(--ease-standard);
+  --curveAccelerateMid: var(--ease-exit);
+
+  /* ---------- Spacing ---------- */
+  --spacingVerticalXS: var(--space-1);
+  --spacingVerticalS: var(--space-2);
+  --spacingVerticalM: var(--space-3);
+  --spacingVerticalL: var(--space-4);
+  --spacingVerticalXL: var(--space-5);
+  --spacingVerticalXXL: var(--space-6);
+  --spacingHorizontalXS: var(--space-1);
+  --spacingHorizontalS: var(--space-2);
+  --spacingHorizontalM: var(--space-3);
+  --spacingHorizontalL: var(--space-4);
+  --spacingHorizontalXL: var(--space-5);
+  --spacingHorizontalXXL: var(--space-6);
+}

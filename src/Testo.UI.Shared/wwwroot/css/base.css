@@ -90,7 +90,7 @@ a {
 
 a:hover {
   color: var(--color-brand-hover);
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: var(--indicator-width);
 }
 
 strong,
@@ -197,7 +197,37 @@ h1[tabindex="-1"]:focus {
   max-width: var(--container-narrow);
 }
 
-/* Type styles that are not tied to an element. */
+/*
+ * Type styles that are not tied to an element, for the times when the appearance and the
+ * outline have to be decided separately: a card title that is an h3 but should read as
+ * body text, or a sample of the scale that must not become a heading in the document.
+ */
+.t-h1 {
+  font-size: var(--text-h1);
+  line-height: var(--leading-h1);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.t-h2 {
+  font-size: var(--text-h2);
+  line-height: var(--leading-h2);
+  font-weight: var(--weight-heading);
+  letter-spacing: var(--tracking-tight);
+}
+
+.t-h3 {
+  font-size: var(--text-h3);
+  line-height: var(--leading-h3);
+  font-weight: var(--weight-semibold);
+}
+
+.t-h4 {
+  font-size: var(--text-h4);
+  line-height: var(--leading-h4);
+  font-weight: var(--weight-semibold);
+}
+
 .t-display {
   font-size: var(--text-display);
   line-height: var(--leading-display);

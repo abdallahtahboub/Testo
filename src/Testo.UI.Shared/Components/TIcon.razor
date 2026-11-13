@@ -1,0 +1,42 @@
+@*
+    One icon from our own set (ADR-0015). Decorative unless it is given a Label, because
+    an icon next to a word it repeats is noise to a screen reader.
+*@
+<svg class="t-icon @SizeClass"
+     viewBox="0 0 20 20"
+     role="@(Label is null ? null : "img")"
+     aria-hidden="@(Label is null ? "true" : null)"
+     aria-label="@Label"
+     focusable="false"
+     data-spin="@(Name == IconName.Spinner ? "" : null)"
+     @attributes="AdditionalAttributes">
+    @((MarkupString)IconPaths.For(Name))
+</svg>
+
+@code {
+    /// <summary>Which icon.</summary>
+    [Parameter, EditorRequired]
+    public IconName Name { get; set; }
+
+    /// <summary>
+    /// What the icon means. Leave it empty when a label next to the icon already says it;
+    /// set it when the icon stands alone and carries the meaning.
+    /// </summary>
+    [Parameter]
+    public string? Label { get; set; }
+
+    /// <summary>The size. Defaults to <see cref="IconSize.Medium"/> (20px).</summary>
+    [Parameter]
+    public IconSize Size { get; set; } = IconSize.Medium;
+
+    /// <summary>Any other attribute is passed on to the svg element.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string SizeClass => Size switch
+    {
+        IconSize.Small => "t-icon--sm",
+        IconSize.Large => "t-icon--lg",
+        _ => "t-icon--md",
+    };
+}

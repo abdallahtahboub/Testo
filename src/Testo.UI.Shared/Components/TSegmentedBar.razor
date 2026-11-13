@@ -1,0 +1,98 @@
+@*
+    One whole, split into parts: a run's tests by outcome, a release's requirements by
+    coverage.
+
+    A bar rather than a donut, because parts laid along a line are easier to compare than
+    slices of a circle, and because the shares can be printed on them. The parts are
+    separated by a gap in the surface colour, so two touching segments never blur into
+    one even when their colours are close — which ours deliberately are for failed and
+    blocked.
+*@
+<figure class="t-segmented t-segmented--@SizeName" @attributes="AdditionalAttributes">
+    <figcaption class="t-segmented__title">@Title</figcaption>
+
+    <div class="t-segmented__bar" aria-hidden="true">
+        @foreach (var point in Visible)
+        {
+            <div class="t-segmented__part t-segmented__part--@ToneName(point)"
+                 style="flex-grow:@Share(point).ToString(Invariant)">
+                @if (Size == SegmentedBarSize.Tall && Share(point) >= MinimumShareForText)
+                {
+                    <span class="t-segmented__part-value">@Percent(point)</span>
+                }
+            </div>
+        }
+    </div>
+
+    @if (ShowLegend)
+    {
+        <ul class="t-segmented__legend" role="list">
+            @foreach (var point in Visible)
+            {
+                <li class="t-segmented__legend-item">
+                    <span class="t-segmented__swatch t-segmented__swatch--@ToneName(point)" aria-hidden="true"></span>
+                    <span>@point.Label</span>
+                    <span class="t-segmented__legend-value">@Format(point.Value)</span>
+                </li>
+            }
+        </ul>
+    }
+
+    <TChartTable Caption="@Title" Points="Points" CategoryHeader="@CategoryHeader" ValueHeader="@ValueHeader" ValueFormat="@ValueFormat" />
+</figure>
+
+@code {
+    private static readonly System.Globalization.CultureInfo Invariant = System.Globalization.CultureInfo.InvariantCulture;
+
+    /// <summary>A part smaller than this share has no room for its number printed on it.</summary>
+    private const double MinimumShareForText = 0.08;
+
+    /// <summary>What the whole is. Also the caption of the data table.</summary>
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    /// <summary>The parts. Six at most; fold a tail nobody reads into one "Other".</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<ChartPoint> Points { get; set; } = [];
+
+    /// <summary>The heading of the category column in the data table.</summary>
+    [Parameter, EditorRequired]
+    public string CategoryHeader { get; set; } = "";
+
+    /// <summary>The heading of the value column in the data table.</summary>
+    [Parameter, EditorRequired]
+    public string ValueHeader { get; set; } = "";
+
+    /// <summary>A .NET number format for the values.</summary>
+    [Parameter]
+    public string ValueFormat { get; set; } = "N0";
+
+    /// <summary>How tall the bar is drawn.</summary>
+    [Parameter]
+    public SegmentedBarSize Size { get; set; } = SegmentedBarSize.Tall;
+
+    /// <summary>
+    /// Names the parts beside the bar. Leave it off where the rows next to the bar
+    /// already name them.
+    /// </summary>
+    [Parameter]
+    public bool ShowLegend { get; set; } = true;
+
+    /// <summary>Any other attribute is passed on to the figure.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string SizeName => Size.ToString().ToLowerInvariant();
+
+    private IReadOnlyList<ChartPoint> Visible => [.. Points.Where(point => point.Value > 0)];
+
+    private double Total => Points.Sum(point => point.Value);
+
+    private double Share(ChartPoint point) => Total <= 0 ? 0 : point.Value / Total;
+
+    private string Percent(ChartPoint point) => Share(point).ToString("P0", System.Globalization.CultureInfo.CurrentCulture);
+
+    private static string ToneName(ChartPoint point) => (point.Tone ?? Components.Tone.Brand).ToString().ToLowerInvariant();
+
+    private string Format(double value) => value.ToString(ValueFormat, System.Globalization.CultureInfo.CurrentCulture);
+}

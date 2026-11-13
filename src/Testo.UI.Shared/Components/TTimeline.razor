@@ -1,0 +1,22 @@
+@*
+    A sequence of steps, each with an outcome: the steps of a test run, the history of a
+    defect, the stages of a release.
+
+    An ordered list, because the order is the meaning. The live run view in Milestone 7
+    is this component with steps arriving over time.
+*@
+<ol class="t-timeline" @attributes="AdditionalAttributes">
+    <CascadingValue Value="this" IsFixed="true">
+        @ChildContent
+    </CascadingValue>
+</ol>
+
+@code {
+    /// <summary>The steps, as <c>TTimelineItem</c> components.</summary>
+    [Parameter, EditorRequired]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>Any other attribute is passed on to the list.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+}

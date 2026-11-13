@@ -1,0 +1,81 @@
+@inject IStringLocalizer<SharedResources> L
+
+@*
+    Confirming something that cannot be undone (ux/patterns.md §6).
+
+    Names the thing rather than asking "Are you sure?", states what else is affected, and
+    labels the button with the verb. Where an action can be undone instead, use a toast
+    with Undo and do not ask at all — a dialog people see often stops being read.
+*@
+<div class="t-confirm" role="alertdialog" aria-modal="true" aria-labelledby="@TitleId" aria-describedby="@BodyId" @attributes="AdditionalAttributes">
+    <h2 class="t-confirm__title" id="@TitleId">@Title</h2>
+
+    <div class="t-confirm__body" id="@BodyId">
+        @ChildContent
+        @if (!string.IsNullOrWhiteSpace(Consequence))
+        {
+            <p class="t-confirm__consequence">
+                <TIcon Name="IconName.Warning" Size="IconSize.Small" />
+                <span>@Consequence</span>
+            </p>
+        }
+    </div>
+
+    <div class="t-confirm__actions">
+        <TButton Variant="ButtonVariant.Secondary" OnClick="OnCancel">@(CancelLabel ?? L["Confirm_Cancel"])</TButton>
+        <TButton Variant="@(Destructive ? ButtonVariant.Danger : ButtonVariant.Primary)" OnClick="OnConfirm" Loading="Working">
+            @ConfirmLabel
+        </TButton>
+    </div>
+</div>
+
+@code {
+    /// <summary>The question, naming the thing: "Delete test suite Checkout — regression?".</summary>
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    /// <summary>
+    /// The label of the confirming button, which is the verb: "Delete suite". Never "OK",
+    /// so a person reading only the buttons still knows what happens.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public string ConfirmLabel { get; set; } = "";
+
+    /// <summary>What else this affects: "47 test cases stay; their membership of this suite is removed."</summary>
+    [Parameter]
+    public string? Consequence { get; set; }
+
+    /// <summary>Anything more the person needs before deciding.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>Whether this destroys something, which makes the confirming button a danger button.</summary>
+    [Parameter]
+    public bool Destructive { get; set; } = true;
+
+    /// <summary>The label of the way out. Defaults to "Cancel".</summary>
+    [Parameter]
+    public string? CancelLabel { get; set; }
+
+    /// <summary>The action is running. The confirming button shows a spinner and stops further clicks.</summary>
+    [Parameter]
+    public bool Working { get; set; }
+
+    /// <summary>Raised when the person confirms.</summary>
+    [Parameter]
+    public EventCallback OnConfirm { get; set; }
+
+    /// <summary>Raised when the person backs out.</summary>
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    /// <summary>Any other attribute is passed on to the dialog.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private readonly string _id = "d" + Guid.NewGuid().ToString("N")[..8];
+
+    private string TitleId => _id + "-title";
+
+    private string BodyId => _id + "-body";
+}

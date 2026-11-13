@@ -1,0 +1,19 @@
+.t-sparkline {
+  width: 100%;
+  height: 1.75rem;
+  overflow: visible;
+}
+
+.t-sparkline__line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /* The line is scaled horizontally by preserveAspectRatio; this keeps it an even weight. */
+  vector-effect: non-scaling-stroke;
+}
+
+.t-sparkline__last {
+  fill: currentColor;
+}

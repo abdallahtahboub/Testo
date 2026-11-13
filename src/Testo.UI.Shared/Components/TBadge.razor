@@ -1,0 +1,39 @@
+@*
+    A short label with a meaning: a status, a count, a category.
+
+    An icon is optional and decorative — the badge always carries its word, because
+    status is never conveyed by colour alone (ux/patterns.md §4).
+*@
+<span class="t-badge t-badge--@ToneName t-badge--@AppearanceName" @attributes="AdditionalAttributes">
+    @if (Icon is { } icon)
+    {
+        <TIcon Name="icon" Size="IconSize.Small" />
+    }
+    <span class="t-badge__text">@ChildContent</span>
+</span>
+
+@code {
+    /// <summary>What the badge means. Defaults to <see cref="Tone.Neutral"/>.</summary>
+    [Parameter]
+    public Tone Tone { get; set; } = Tone.Neutral;
+
+    /// <summary>How strongly it is drawn. Defaults to <see cref="BadgeAppearance.Subtle"/>.</summary>
+    [Parameter]
+    public BadgeAppearance Appearance { get; set; } = BadgeAppearance.Subtle;
+
+    /// <summary>An optional icon before the text.</summary>
+    [Parameter]
+    public IconName? Icon { get; set; }
+
+    /// <summary>The text. A badge always has one.</summary>
+    [Parameter, EditorRequired]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>Any other attribute is passed on to the element.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string ToneName => Tone.ToString().ToLowerInvariant();
+
+    private string AppearanceName => Appearance.ToString().ToLowerInvariant();
+}

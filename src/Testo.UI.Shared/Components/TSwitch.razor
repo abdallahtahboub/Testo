@@ -1,0 +1,60 @@
+@*
+    An immediate on/off setting, such as "Require a second factor".
+
+    Different from a checkbox: a switch takes effect at once, a checkbox is part of a form
+    that gets submitted. A real checkbox underneath, because that is what assistive
+    technology and the keyboard already understand.
+*@
+<div class="t-switch" @attributes="AdditionalAttributes">
+    <input class="t-switch__control"
+           id="@Id"
+           type="checkbox"
+           role="switch"
+           checked="@Checked"
+           disabled="@Disabled"
+           aria-describedby="@DescribedBy"
+           @onchange="OnChangeAsync" />
+    <label class="t-switch__label" for="@Id">
+        @Label
+        @if (!string.IsNullOrWhiteSpace(Hint))
+        {
+            <span class="t-switch__hint" id="@HintId">@Hint</span>
+        }
+    </label>
+</div>
+
+@code {
+    /// <summary>What the switch turns on.</summary>
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = "";
+
+    /// <summary>What switching it does, and anything it affects.</summary>
+    [Parameter]
+    public string? Hint { get; set; }
+
+    /// <summary>Whether it is on.</summary>
+    [Parameter]
+    public bool Checked { get; set; }
+
+    /// <summary>Raised when it is switched. The change takes effect immediately.</summary>
+    [Parameter]
+    public EventCallback<bool> CheckedChanged { get; set; }
+
+    /// <summary>Switches the control off.</summary>
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    /// <summary>Any other attribute is passed on to the wrapper.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private readonly string _id = "s" + Guid.NewGuid().ToString("N")[..8];
+
+    private string Id => _id;
+
+    private string HintId => _id + "-hint";
+
+    private string? DescribedBy => string.IsNullOrWhiteSpace(Hint) ? null : HintId;
+
+    private Task OnChangeAsync(ChangeEventArgs args) => CheckedChanged.InvokeAsync(args.Value is true);
+}

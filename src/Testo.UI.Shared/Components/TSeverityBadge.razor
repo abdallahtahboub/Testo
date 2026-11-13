@@ -1,0 +1,22 @@
+@using Testo.Contracts.Testing
+@inject IStringLocalizer<SharedResources> L
+
+@*
+    How badly a defect affects the product. Severity is a fact about the defect; priority
+    is a decision about when to fix it, and is shown separately.
+*@
+<TBadge Tone="DefectSeverityVisuals.ToneFor(Severity)"
+        Appearance="DefectSeverityVisuals.AppearanceFor(Severity)"
+        @attributes="AdditionalAttributes">
+    @L[DefectSeverityVisuals.ResourceKeyFor(Severity)]
+</TBadge>
+
+@code {
+    /// <summary>The severity to show.</summary>
+    [Parameter, EditorRequired]
+    public DefectSeverity Severity { get; set; }
+
+    /// <summary>Any other attribute is passed on to the badge.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+}

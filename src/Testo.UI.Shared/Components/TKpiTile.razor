@@ -1,0 +1,83 @@
+@inject IStringLocalizer<SharedResources> L
+
+@*
+    One number that matters, with where it is heading.
+
+    Every figure can be traced to what it is made of (ux/users.md, Mara): giving the tile
+    an Href makes the whole thing a link to the runs or defects behind the number.
+*@
+<TCard Href="@Href" class="t-kpi" @attributes="AdditionalAttributes">
+    <div class="t-kpi__label">@Label</div>
+    <div class="t-kpi__value">@Value</div>
+
+    @if (Delta is { } delta)
+    {
+        <div class="t-kpi__delta t-kpi__delta--@DeltaToneName">
+            @if (delta != 0)
+            {
+                <TIcon Name="@(delta > 0 ? IconName.ArrowUp : IconName.ArrowDown)" Size="IconSize.Small" />
+            }
+            <span>@FormattedDelta</span>
+            @if (!string.IsNullOrWhiteSpace(DeltaLabel))
+            {
+                <span class="t-kpi__delta-label">@DeltaLabel</span>
+            }
+        </div>
+    }
+
+    @if (Trend is { Count: >= 2 })
+    {
+        <div class="t-kpi__trend t-kpi__trend--@DeltaToneName">
+            <TSparkline Values="Trend" />
+        </div>
+    }
+</TCard>
+
+@code {
+    /// <summary>What the number is: "Open defects", "Pass rate".</summary>
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = "";
+
+    /// <summary>The number, already formatted for the reader's language.</summary>
+    [Parameter, EditorRequired]
+    public string Value { get; set; } = "";
+
+    /// <summary>The change since last time, as a proportion: 0.12 is twelve per cent up.</summary>
+    [Parameter]
+    public double? Delta { get; set; }
+
+    /// <summary>What the change is measured against: "vs. last release".</summary>
+    [Parameter]
+    public string? DeltaLabel { get; set; }
+
+    /// <summary>
+    /// Whether going up is good. False for open defects, true for pass rate. Without this
+    /// the tile would colour every rise green, which would be wrong half the time.
+    /// </summary>
+    [Parameter]
+    public bool HigherIsBetter { get; set; } = true;
+
+    /// <summary>Recent values, oldest first, drawn as a sparkline.</summary>
+    [Parameter]
+    public IReadOnlyList<double>? Trend { get; set; }
+
+    /// <summary>Where the number comes from. Makes the whole tile a link.</summary>
+    [Parameter]
+    public string? Href { get; set; }
+
+    /// <summary>Any other attribute is passed on to the card.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string FormattedDelta => Delta is { } delta
+        ? Math.Abs(delta).ToString("P0", System.Globalization.CultureInfo.CurrentCulture)
+        : "";
+
+    /// <summary>Whether this movement is good news, which is not the same as which way it points.</summary>
+    private string DeltaToneName => Delta switch
+    {
+        null or 0 => "neutral",
+        > 0 => HigherIsBetter ? "good" : "bad",
+        _ => HigherIsBetter ? "bad" : "good",
+    };
+}

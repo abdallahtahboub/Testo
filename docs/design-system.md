@@ -178,7 +178,28 @@ works without JavaScript), `TThemeSwitch`, `TLanguageSwitch`, and the two layout
 `SiteLayout` and `AppLayout`. Global helper classes: `.t-container`, `.t-visually-hidden`,
 `.t-display`, `.t-lead`, `.t-overline`, `.t-muted`, `.t-tabular`.
 
-**Milestone 2 scope:**
+**Built in Milestone 2** — 35 components, every one with bUnit tests:
+
+| Group | Components |
+|---|---|
+| Primitives | `TButton` (button or link, 4 variants, 3 sizes, icon-only, loading), `TIcon` (34 icons), `TBadge`, `TStatusBadge`, `TSeverityBadge`, `TCard`, `TAvatar` |
+| Forms | `TField` (label, hint, error, ids), `TInput`, `TTextArea`, `TSelect`, `TCheckbox`, `TSwitch`, `TRadioGroup` |
+| States | `TSkeleton`, `TEmptyState`, `TErrorState`, `TAsyncView` |
+| Data | `TKpiTile`, `TSparkline`, `TTimeline`, `TTimelineItem`, `TDataTable`, `TBarChart`, `TSegmentedBar`, `TChartTable` |
+| Navigation | `TTabs`, `TBreadcrumbs`, `TPagination`, `TConfirm` |
+
+Two things learned while building them, which apply to every component from here:
+
+- **A class cannot cross a component boundary.** CSS isolation scopes every selector to the
+  component that declares it, so `.t-input` declared by `TInput` never matched the textarea
+  rendered by `TTextArea`. Styles shared by several components live in
+  `wwwroot/css/controls.css`, beside the tokens, and `ComponentStyleTests` covers it.
+  For the same reason, a class passed *to* a child component does not reach it: wrap the
+  child in an element the parent owns.
+- **The mega menu, site header and footer move to Milestone 4**, with the public website
+  they belong to. Building a mega menu before the pages it points at exists would be guesswork.
+
+**Milestone 2 remaining scope, now in Milestone 4:**
 
 All in `Testo.UI.Shared`, prefixed `T` (e.g., `TButton`) so they don't clash with Fluent's `Fluent*` names.
 
@@ -196,7 +217,7 @@ All in `Testo.UI.Shared`, prefixed `T` (e.g., `TButton`) so they don't clash wit
 | `TTimeline` | vertical steps with status, current step, timestamps, expandable details | own |
 | `TSkeleton`, `TEmptyState`, `TErrorState` | standard states | own |
 | `TDialog`, `TDrawer`, `TMenu`, `TTooltip`, `TToast` | app only | wrap Fluent |
-| `TChart` (line, bar, donut) | simple charts as accessible inline SVG with a data-table fallback | own (no JS chart lib) |
+| `TBarChart`, `TSegmentedBar`, `TSparkline` | accessible inline SVG, each carrying its numbers as a table | own (no JS chart library) |
 | `TAvatar`, `TBreadcrumbs`, `TPagination`, `TSection`, `TContainer`, `TGrid` | layout + misc | own |
 
 ### Fluent UI theming *(ADR-0007)*
@@ -205,6 +226,25 @@ variables at **our** tokens, so its components follow our brand and both themes 
 second theme definition. Milestone 1 maps the brand color, font, corner radius and focus
 color (a Fluent button is already exactly our indigo). Milestone 2 completes the mapping
 for neutrals, strokes, type ramp and shadows. Fluent UI is loaded on app pages only.
+
+### Charts
+
+Charts follow the project's data-visualization guidance, which replaced the planned donut:
+**part-to-whole is a segmented bar**, because parts laid along a line compare more exactly
+than slices of a circle and can carry their own labels.
+
+Running that guidance's palette validator against our status colours found something worth
+recording: as chart fills, **failed (`#B42318`) and blocked (`#AD4407`) are too close to
+tell apart** — ΔE 5.5 under normal vision against a floor of 15, and 2.1 under
+deuteranopia. That is acceptable only because a status chart never relies on colour:
+
+- every part is named in a legend and, where it fits, labelled with its share;
+- a 2px gap in the surface colour (`--chart-gap`) separates touching parts;
+- every chart renders its numbers as a table for screen readers.
+
+There is deliberately **no categorical palette yet**. Nothing needs one: a comparison of
+like things takes a single hue, and a breakdown by status takes the status colours. One
+gets designed and validated when a chart genuinely shows two or more non-status series.
 
 ## 9. Iconography and imagery
 

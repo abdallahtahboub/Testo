@@ -1,0 +1,80 @@
+<ShowcaseSection Id="data" Title="Showing data"
+                 Description="Figures a person has to defend. Every number can be traced to what it is made of, and every chart carries its numbers as a table for anyone who cannot see it.">
+
+    <ShowcaseExample Caption="Headline figures" Stacked="true"
+                     Note="The delta is coloured by whether the news is good, not by which way it points: more open defects is a rise and bad. Giving a tile a target makes the whole tile a link to the rows behind the number.">
+        <div class="kpi-row">
+            <TKpiTile Label="Pass rate" Value="94%" Delta="0.03" HigherIsBetter="true" DeltaLabel="vs. last release"
+                      Trend="@PassRate" Href="/app" />
+            <TKpiTile Label="Open defects" Value="42" Delta="0.12" HigherIsBetter="false" DeltaLabel="vs. last week"
+                      Trend="@Defects" Href="/app" />
+            <TKpiTile Label="Tests run today" Value="1,284" Trend="@Runs" />
+            <TKpiTile Label="Flaky tests" Value="7" Delta="0" DeltaLabel="unchanged" />
+        </div>
+    </ShowcaseExample>
+
+    <ShowcaseExample Caption="One whole, split into parts" Stacked="true"
+                     Note="A segmented bar rather than a donut: parts along a line compare more exactly than slices of a circle. The gap between parts is the page showing through, which is what keeps two close colours apart.">
+        <div class="chart-row">
+            <TSegmentedBar Title="Tests in this run" Points="Outcomes" CategoryHeader="Outcome" ValueHeader="Tests" />
+            <TSegmentedBar Title="Requirement coverage" Points="Coverage" CategoryHeader="Coverage" ValueHeader="Requirements"
+                           Size="SegmentedBarSize.Thin" ShowLegend="false" />
+        </div>
+    </ShowcaseExample>
+
+    <ShowcaseExample Caption="Comparing magnitudes" Stacked="true"
+                     Note="Every bar is labelled with its value, so the chart is readable without counting gridlines. Bars with no meaning of their own all take one hue; spending a colour per bar would re-encode what length already shows.">
+        <div class="chart-row">
+            <TBarChart Title="Open defects by severity" Points="Severities" CategoryHeader="Severity" ValueHeader="Defects" />
+            <TBarChart Title="Runs per day" Points="RunsPerDay" CategoryHeader="Day" ValueHeader="Runs" />
+        </div>
+    </ShowcaseExample>
+
+    <ShowcaseExample Caption="Steps of a run" Stacked="true"
+                     Note="The backbone of the live run view. The step being executed carries a ring rather than a pulse, so it is just as clear with reduced motion and in a screenshot.">
+        <TTimeline>
+            <TTimelineItem Title="Open the home page" Status="TestStatus.Passed" Duration="TimeSpan.FromSeconds(1.4)" />
+            <TTimelineItem Title="Search for &quot;running shoes&quot;" Status="TestStatus.Passed" Duration="TimeSpan.FromSeconds(2.1)" />
+            <TTimelineItem Title="Add the first result to the basket" Status="TestStatus.Running" IsCurrent="true" />
+            <TTimelineItem Title="Check out as a guest" Status="TestStatus.NotRun" />
+            <TTimelineItem Title="Confirm the order" Status="TestStatus.NotRun" />
+        </TTimeline>
+    </ShowcaseExample>
+</ShowcaseSection>
+
+@code {
+    private static readonly double[] PassRate = [88, 90, 89, 92, 91, 94];
+    private static readonly double[] Defects = [30, 33, 31, 36, 38, 42];
+    private static readonly double[] Runs = [980, 1040, 1120, 1080, 1210, 1284];
+
+    private static readonly IReadOnlyList<ChartPoint> Outcomes =
+    [
+        new("Passed", 47, Tone.Success),
+        new("Failed", 3, Tone.Danger),
+        new("Blocked", 2, Tone.Warning),
+        new("Skipped", 1, Tone.Neutral),
+    ];
+
+    private static readonly IReadOnlyList<ChartPoint> Coverage =
+    [
+        new("Covered", 128, Tone.Success),
+        new("Not covered", 19, Tone.Neutral),
+    ];
+
+    private static readonly IReadOnlyList<ChartPoint> Severities =
+    [
+        new("Critical", 3, Tone.Danger),
+        new("Major", 11, Tone.Warning),
+        new("Minor", 24, Tone.Info),
+        new("Trivial", 4, Tone.Neutral),
+    ];
+
+    private static readonly IReadOnlyList<ChartPoint> RunsPerDay =
+    [
+        new("Monday", 182),
+        new("Tuesday", 240),
+        new("Wednesday", 211),
+        new("Thursday", 284),
+        new("Friday", 96),
+    ];
+}

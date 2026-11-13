@@ -1,0 +1,128 @@
+.t-segmented {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.t-segmented__title {
+  color: var(--color-text);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.t-segmented__bar {
+  display: flex;
+  /* The surface showing through is what separates two parts whose colours are close. */
+  gap: var(--chart-gap);
+  overflow: hidden;
+}
+
+.t-segmented--thin .t-segmented__bar {
+  height: var(--space-2);
+  border-radius: var(--radius-full);
+}
+
+.t-segmented--tall .t-segmented__bar {
+  height: 1.75rem;
+}
+
+.t-segmented__part {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  flex-basis: 0;
+  overflow: hidden;
+}
+
+.t-segmented--tall .t-segmented__part {
+  border-radius: var(--radius-sm);
+}
+
+.t-segmented__part-value {
+  color: var(--color-bg);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.t-segmented__part--brand {
+  background-color: var(--color-brand);
+}
+
+.t-segmented__part--success {
+  background-color: var(--color-success);
+}
+
+.t-segmented__part--warning {
+  background-color: var(--color-warning);
+}
+
+.t-segmented__part--danger {
+  background-color: var(--color-danger);
+}
+
+.t-segmented__part--info {
+  background-color: var(--color-info);
+}
+
+.t-segmented__part--neutral {
+  background-color: var(--color-text-muted);
+}
+
+.t-segmented__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.t-segmented__legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+}
+
+.t-segmented__legend-value {
+  color: var(--color-text);
+  font-weight: var(--weight-medium);
+  font-variant-numeric: tabular-nums;
+}
+
+.t-segmented__swatch {
+  width: var(--space-2);
+  height: var(--space-2);
+  flex: none;
+  border-radius: var(--radius-sm);
+}
+
+.t-segmented__swatch--brand {
+  background-color: var(--color-brand);
+}
+
+.t-segmented__swatch--success {
+  background-color: var(--color-success);
+}
+
+.t-segmented__swatch--warning {
+  background-color: var(--color-warning);
+}
+
+.t-segmented__swatch--danger {
+  background-color: var(--color-danger);
+}
+
+.t-segmented__swatch--info {
+  background-color: var(--color-info);
+}
+
+.t-segmented__swatch--neutral {
+  background-color: var(--color-text-muted);
+}

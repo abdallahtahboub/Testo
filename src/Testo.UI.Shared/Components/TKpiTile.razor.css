@@ -1,0 +1,54 @@
+.t-kpi {
+  gap: var(--space-1);
+}
+
+.t-kpi__label {
+  color: var(--color-text-muted);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body-sm);
+}
+
+.t-kpi__value {
+  color: var(--color-text);
+  font-size: var(--text-h2);
+  line-height: var(--leading-h2);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+  /* So a column of tiles lines up digit for digit. */
+  font-variant-numeric: tabular-nums;
+}
+
+.t-kpi__delta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: var(--weight-medium);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Good and bad, not up and down: more open defects is a rise and bad news. */
+.t-kpi__delta--good,
+.t-kpi__trend--good {
+  color: var(--color-success);
+}
+
+.t-kpi__delta--bad,
+.t-kpi__trend--bad {
+  color: var(--color-danger);
+}
+
+.t-kpi__delta--neutral,
+.t-kpi__trend--neutral {
+  color: var(--color-text-muted);
+}
+
+.t-kpi__delta-label {
+  color: var(--color-text-muted);
+  font-weight: var(--weight-regular);
+}
+
+.t-kpi__trend {
+  margin-block-start: var(--space-2);
+}

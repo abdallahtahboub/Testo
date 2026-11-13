@@ -1,5 +1,6 @@
 using System.Reflection;
 using Testo.Platform.Modules;
+using Testo.UI.Shared.Showcase;
 using Testo.Website.Pages;
 
 namespace Testo.Web.Routing;
@@ -13,6 +14,7 @@ internal sealed class RoutableAssemblies(IEnumerable<IFeatureModule> modules)
     public IReadOnlyList<Assembly> Additional { get; } =
     [
         typeof(HomePage).Assembly,
+        typeof(ShowcasePage).Assembly,
         .. modules.Select(module => module.Assembly).Distinct(),
     ];
 }

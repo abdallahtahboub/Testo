@@ -1,0 +1,30 @@
+/*
+ * Our conventions on top of the Fluent grid. The grid's own colours, fonts and radii
+ * already follow our tokens through css/fluent-bridge.css; this is about room and rhythm.
+ */
+
+.t-table {
+  /* A wide table scrolls inside its own region, never the whole page (patterns.md §3). */
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+}
+
+.t-table ::deep .fluent-data-grid {
+  width: 100%;
+}
+
+.t-table--comfortable ::deep .fluent-data-grid-cell {
+  padding-block: var(--space-3);
+}
+
+.t-table--compact ::deep .fluent-data-grid-cell {
+  padding-block: var(--space-1);
+  font-size: var(--text-body-sm);
+}
+
+/* Numbers and identifiers line up digit for digit. */
+.t-table ::deep .fluent-data-grid-cell {
+  font-variant-numeric: tabular-nums;
+}

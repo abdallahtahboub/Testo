@@ -1,7 +1,9 @@
 using System.Reflection;
 using Microsoft.AspNetCore.Components;
 using Testo.Platform;
+using Testo.Platform.Features;
 using Testo.Platform.Localization;
+using Testo.UI.Tests.Support;
 using Testo.Website.Pages;
 
 namespace Testo.UI.Tests.Architecture;
@@ -14,6 +16,13 @@ public class PageRouteTests
 {
     /// <summary>Pages that report a status. They are reached by re-executing a request, not by a link.</summary>
     private static readonly string[] StatusRoutes = [Routes.NotFound, Routes.Error];
+
+    /// <summary>
+    /// Pages that are not product UI and are deliberately not under <c>/app</c>. The
+    /// showcase is a development tool behind a feature flag, with a short address people
+    /// type by hand. Anything added here needs a reason as good as that one.
+    /// </summary>
+    private static readonly string[] ToolRoutes = [Routes.Showcase];
 
     private static readonly Assembly Website = typeof(HomePage).Assembly;
 
@@ -75,8 +84,21 @@ public class PageRouteTests
     public void AppPage_LivesBelowTheAppRootAndIsInteractive(Type page)
     {
         Assert.All(RoutesOf(page), route =>
-            Assert.True(route == Routes.App || route.StartsWith(Routes.App + "/", StringComparison.Ordinal), $"{page.Name}: the route '{route}' is not below {Routes.App}."));
+            Assert.True(
+                route == Routes.App || route.StartsWith(Routes.App + "/", StringComparison.Ordinal) || ToolRoutes.Contains(route),
+                $"{page.Name}: the route '{route}' is not below {Routes.App}."));
         Assert.Null(page.GetCustomAttribute<ExcludeFromInteractiveRoutingAttribute>());
+    }
+
+    [Fact]
+    public void ToolPages_AreBehindAFeatureFlag()
+    {
+        // A page outside /app is a tool, and a tool is never on by default in production.
+        var settings = File.ReadAllText(Path.Combine(RepositoryRoot.Source, "Testo.Web", "appsettings.json"));
+        using var document = System.Text.Json.JsonDocument.Parse(settings);
+        var flags = document.RootElement.GetProperty("FeatureManagement");
+
+        Assert.False(flags.GetProperty(FeatureFlags.Showcase).GetBoolean(), $"{FeatureFlags.Showcase} must be off by default.");
     }
 
     [Theory]

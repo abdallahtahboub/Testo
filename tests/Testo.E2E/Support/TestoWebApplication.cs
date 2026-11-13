@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,10 +18,18 @@ namespace Testo.E2E.Support;
 /// files of the class libraries (a published site has them in its web root) and one URL
 /// that fails on purpose.
 /// </remarks>
-internal sealed class TestoWebApplication : WebApplicationFactory<App>
+internal class TestoWebApplication : WebApplicationFactory<App>
 {
     /// <summary>A URL that makes the server throw, so the error page can be tested.</summary>
     public const string FailingPath = "/__e2e/fail";
+
+    /// <summary>The address this application listens on, once it has been started.</summary>
+    public string ServerAddress()
+    {
+        var addresses = Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()
+            ?? throw new InvalidOperationException("The server does not report its addresses.");
+        return addresses.Addresses.First().TrimEnd('/') + "/";
+    }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {

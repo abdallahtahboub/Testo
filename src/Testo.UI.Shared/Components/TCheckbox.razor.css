@@ -1,0 +1,39 @@
+.t-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.t-checkbox__control {
+  flex: none;
+  /* 20px, and the label beside it extends the clickable area past the 24px minimum. */
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  accent-color: var(--color-brand);
+  cursor: pointer;
+}
+
+.t-checkbox__control:disabled {
+  cursor: not-allowed;
+}
+
+.t-checkbox__label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body-sm);
+  cursor: pointer;
+}
+
+.t-checkbox__control:disabled + .t-checkbox__label {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.t-checkbox__hint {
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  color: var(--color-text-muted);
+}

@@ -1,0 +1,25 @@
+.t-select {
+  position: relative;
+  display: block;
+}
+
+.t-select__control {
+  /* Room for our own chevron, which replaces the browser's. */
+  padding-inline-end: var(--space-8);
+  appearance: none;
+  cursor: pointer;
+}
+
+.t-select__chevron {
+  display: flex;
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: var(--space-3);
+  translate: 0 -50%;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.t-select__control:disabled {
+  cursor: not-allowed;
+}

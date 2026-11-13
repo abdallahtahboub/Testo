@@ -27,9 +27,11 @@
     <link rel="stylesheet" href="@Assets["_content/Testo.UI.Shared/css/fonts.css"]" />
     <link rel="stylesheet" href="@Assets["_content/Testo.UI.Shared/css/tokens.css"]" />
     <link rel="stylesheet" href="@Assets["_content/Testo.UI.Shared/css/base.css"]" />
+    <link rel="stylesheet" href="@Assets["_content/Testo.UI.Shared/css/controls.css"]" />
     @if (IsAppPage)
     {
-        @* Component styles of the host, the modules and the Fluent UI library. *@
+        @* Fluent UI, pointed at our tokens, plus the component styles of the host and the modules. *@
+        <link rel="stylesheet" href="@Assets["_content/Testo.UI.Shared/css/fluent-bridge.css"]" />
         <link rel="stylesheet" href="@Assets["Testo.Web.styles.css"]" />
         @* The only inline script. The nonce tells the browser it is ours (see SecurityHeadersExtensions). *@
         <ImportMap nonce="@Nonce.Value" />

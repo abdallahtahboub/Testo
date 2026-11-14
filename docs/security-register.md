@@ -227,6 +227,32 @@ test host can be told apart another way.
 The only caller checks the environment; the method does not. A second caller added later would not
 have to.
 
+### R-9 · A hostile page can talk to the planner — **High, and permanent**
+
+The moment a model reads a page to decide what a test should do, the page is in the prompt and can
+ask for anything. Threat model §4.3 describes it; it is not a bug to be fixed but a condition of
+using a model on input we did not write.
+
+**Bounded — [ADR-0019](decisions/0019-the-planner-boundary.md).** The model plans once, before the
+browser opens, so there is no prompt to inject into while a run is under way; its output is a closed
+vocabulary with no field in which a selector or a script could be written; and the plan is validated
+against what the crawl actually observed, so an invented target or a foreign origin is refused. The
+prompt also says the page content is data, which is advisory and recorded as such: the things that
+hold are the type, the validator and the proxy, none of which depend on the model behaving.
+
+**What remains.** A hostile snapshot can still influence *which* valid plan is chosen — a worse test,
+never a different policy. Accepted, and the reason the vocabulary and the snapshot's fields both stay
+deliberately short.
+
+### R-10 · Model spend is a denial of service against ourselves — **Medium**
+
+A planner that loops, a retry that retries forever, a bill nobody reads. Threat model §4.7 asks for
+token and money budgets per run and per organization.
+
+**Partly addressed — ADR-0019 §6.** The per-run token and money ceilings end a run as
+`BudgetExceeded`, which is deliberately not `Failed`. **Not built:** per-organization monthly spend
+limits, which need billing to exist first.
+
 ### R-8 · Rate limiting needs forwarded headers behind a proxy — **Medium when deployed**
 
 `AccountRateLimiting` partitions on the connection's remote address. Behind a load balancer or a

@@ -3,12 +3,16 @@
 **Testo** (working name) is an AI-assisted QA platform covering the whole ISTQB testing
 journey.
 
-**Current state (2026-11-14, after Milestone 3.3).** Identity, organizations, memberships,
+**Current state (2026-11-14, during Milestone 3.4).** Identity, organizations, memberships,
 invitations, roles and the audit log are **real**, on PostgreSQL. The design system is real.
 **Test runs are real** for three scripted scenarios against our own demo target: `Testo.Worker`
 drives Chromium out of process behind an egress proxy, `test_runs`/`test_run_steps`/`artifacts`
-are persisted inside the tenant boundary, and `/app/runs` starts, stops and reruns them. There is
-**no AI** in it and no customer-supplied target. Everything else about the testing journey —
+are persisted inside the tenant boundary, and `/app/runs` starts, stops and reruns them. No
+customer-supplied target. **An AI planner exists and is unmeasured**: the interface, the closed
+action vocabulary, the validator, the Anthropic adapter and the benchmark are built (ADR-0019), the
+hand-written baseline is measured at 36/36 correct, and the planner's own column in
+`docs/ai-benchmark.md` is empty because no model key was available. Nothing in the product calls a
+model yet, and no claim about AI-found defects is supported. Everything else about the testing journey —
 plans, requirements, cases, suites, environments, defects, reporting — **does not exist yet, in
 any form, not even mocked**: six of the seven module projects are shells of one class each, and
 `Testo.Mocks` holds options and a random source, no services. `docs/roadmap.md` §Inventory is the

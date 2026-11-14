@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The AI benchmark: runs every controlled scenario against the deterministic baseline and
+       against the planner, and writes the table ADR-0019 §7 insists on before anybody claims the
+       product finds defects.
+
+       A tool rather than a test project, because it is a measurement, not a pass or a fail, and
+       because a full run takes minutes and costs money. CI runs it in smoke mode, which is one
+       scenario, baseline only, no model. -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Testo.Ai/Testo.Ai.csproj" />
+    <ProjectReference Include="../../src/Testo.Application/Testo.Application.csproj" />
+    <ProjectReference Include="../../src/Testo.Contracts/Testo.Contracts.csproj" />
+    <ProjectReference Include="../../src/Testo.DemoShop/Testo.DemoShop.csproj" />
+    <ProjectReference Include="../../src/Testo.Worker/Testo.Worker.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+</Project>

@@ -100,6 +100,27 @@ The worker drives Chromium through an egress proxy of its own that refuses every
 target. It needs the same browser the tests use, so install that first (below), or point
 `TESTO_BROWSER_PATH` at a Chromium you already have.
 
+### The AI benchmark
+
+The planner is measured rather than described. One command runs twelve controlled scenarios against
+the demo shop, half of them with a real defect switched on, and writes
+[`docs/ai-benchmark.md`](docs/ai-benchmark.md):
+
+```bash
+dotnet run --project tools/Testo.Benchmark
+```
+
+Without a key that measures the hand-written baseline only. To measure the planner as well:
+
+```bash
+PLANNER__APIKEY=sk-... dotnet run --project tools/Testo.Benchmark
+```
+
+The key is read from configuration and never stored in the repository, and it is never given to the
+worker, which is treated as already compromised (ADR-0018, ADR-0019 §4). A full run with a planner
+makes one model call per scenario and costs cents, not dollars; the per-run token and money budgets
+stop it going further than that.
+
 ### Tests
 
 ```bash

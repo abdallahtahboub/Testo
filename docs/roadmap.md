@@ -132,7 +132,8 @@ Found by opening it in a browser rather than by a test, and worth remembering:
 | Design system, 35 components | **Real** |
 | Public website | **One page** (home, EN + DE) plus not-found and error |
 | App area | **One placeholder page** at `/app`, plus the two execution pages. Signing in is required everywhere (D-1 closed in Milestone 3.1) |
-| Test runs: start, stop, rerun, steps, screenshots | **Real** for three scripted scenarios against our own demo target. No AI, no customer targets |
+| Test runs: start, stop, rerun, steps, screenshots | **Real** for three scripted scenarios against our own demo target. No customer targets |
+| AI planning: interface, vocabulary, validator, provider adapter, benchmark | **Built, unmeasured.** No model key was available, so the planner column of `ai-benchmark.md` is empty and no claim about AI is supported yet |
 | Browser execution: worker out of process, egress proxy, signed artifact links | **Real.** Not yet a container per run (R-1) |
 | The other six feature modules | **Shells.** One class each: an id and a feature flag. No pages, no services |
 | `Testo.Capabilities.E2EWeb` | **Empty.** An `_Imports.razor` |
@@ -236,6 +237,40 @@ vocabulary, hostile pages treated as untrusted data, never model-generated code.
 
 **Done when:** pass rate, false positives, flake rate, time and cost per run are measured and
 published next to the baseline. No claim of autonomy without those numbers.
+
+**Status: built, and NOT done (2026-11-14).** Everything the milestone asks for exists except the
+numbers it exists to produce, because the environment the work was done in has no model API key and
+cannot be given one. The planner column of [`ai-benchmark.md`](ai-benchmark.md) is empty, so
+**nothing here supports any claim about AI-found defects**, and the milestone stays open until a run
+with a key fills it in:
+
+```bash
+PLANNER__APIKEY=... dotnet run --project tools/Testo.Benchmark
+```
+
+What is real and measured:
+
+- **The boundary** ([ADR-0019](decisions/0019-the-planner-boundary.md)). The model plans once,
+  before the browser opens, and is not in the execution loop. The vocabulary is eight actions and a
+  target that is a test id or a role and a name — no field in which a selector or a script could be
+  written, and a test that fails if one is ever added. A second test refuses every way Playwright
+  offers to run a string as code, anywhere in the worker.
+- **The validator.** A plan is refused for an action nobody defined, a path that could name another
+  origin, a length over budget, or asserting nothing. Refused once with its errors, then the run
+  ends saying planning failed — never the valid prefix. One test is the whole injection written out:
+  a page whose heading is an instruction, and the plan a fully obedient model would produce, which
+  does not run.
+- **The baseline, measured.** Twelve controlled scenarios, six with a real defect behind a switch,
+  36 runs: 36 correct verdicts, 0 false positives, 0 flake, median 1.3 s. The hand-written plan
+  catches every defect and passes every sound run.
+- **The instrument, calibrated.** The benchmark includes a planner that writes a plan designed to
+  pass without testing anything, and CI insists the harness records it as a false positive. A report
+  claiming zero false positives means nothing unless a false positive is something it can see.
+
+What a key would still have to answer, and what the planner column is for: whether a model plans
+these twelve at all, how often it passes a shop that is broken, what one plan costs, and whether its
+plans are stable enough to be worth re-running. Until then the honest summary is that the *mechanism*
+is built and the *capability* is unmeasured.
 
 ---
 ## Milestone 4 — Public website

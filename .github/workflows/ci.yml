@@ -69,6 +69,13 @@ jobs:
       - name: Test
         run: dotnet test --solution Testo.slnx --configuration Release --no-build --report-xunit-trx --results-directory TestResults
 
+      # Not the benchmark itself: that costs money and minutes. This proves the instrument can
+      # see a false positive, by giving it a planner that writes a plan designed to pass without
+      # testing anything and insisting it is caught. A report that says "0 false positives" means
+      # nothing unless this holds.
+      - name: Check the benchmark can catch a planner that only pretends
+        run: dotnet run --project tools/Testo.Benchmark --configuration Release --no-build -- --self-check
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v5

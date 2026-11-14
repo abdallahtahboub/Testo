@@ -12,6 +12,7 @@ public class DependencyRulesTests
     private const string Domain = "Testo.Domain";
     private const string Persistence = "Testo.Persistence";
     private const string Application = "Testo.Application";
+    private const string Ai = "Testo.Ai";
     private const string Worker = "Testo.Worker";
     private const string DemoShop = "Testo.DemoShop";
     private const string Platform = "Testo.Platform";
@@ -25,6 +26,10 @@ public class DependencyRulesTests
         (Domain, [Contracts]),
         (Persistence, [Contracts, Domain]),
         (Application, [Contracts, Domain, Persistence]),
+
+        // The provider adapters. Contracts only, so that swapping provider cannot reach into the
+        // use cases and a wire format cannot leak out of here (ADR-0019 §4).
+        (Ai, [Contracts]),
         (Worker, [Contracts]),
 
         // Not part of the product: the application the execution slice runs against, so that a

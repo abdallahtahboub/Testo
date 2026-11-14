@@ -133,6 +133,13 @@ This is not exotic; it is the normal case for any model that reads untrusted inp
 - A genuine assertion failure is never "self-healed" away. If the model wants to change an
   assertion, that is a suggestion for a person, not an action.
 
+**Built in Milestone 3.4 — [ADR-0019](decisions/0019-the-planner-boundary.md).** The decision above
+is now code, with one choice made that this section left open: the model plans **once, before the
+browser opens**, and is not in the execution loop. So while a run is under way there is no prompt to
+inject into at all; a hostile page can only influence which plan was chosen beforehand, never the
+policy it runs under. The vocabulary is closed by the type rather than by a check, and a plan is
+validated against what a deterministic crawl actually observed.
+
 ### 4.4 Credentials
 
 Runs sign in to the customer's application, so the platform holds credentials for it.
@@ -176,6 +183,9 @@ noticed. Denial of service against ourselves, and the easiest of these to cause 
 **Decision.** Every run carries budgets — wall clock, steps, bytes downloaded, model tokens and
 money — and exceeding one ends the run with a status that says so. Per-organization limits on
 concurrent runs and monthly spend sit above that.
+
+**Partly built.** Wall clock, steps and bytes in Milestone 3.3; tokens and money in Milestone 3.4.
+The per-organization monthly limit waits for billing to exist (R-10).
 
 ### 4.8 Downloads
 

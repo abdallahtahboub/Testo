@@ -163,6 +163,18 @@ for both the planner and the deterministic baseline, over 10 to 20 controlled sc
 The demo target carries known defects behind switches, so the truth about every scenario is known
 and a false positive is a measured fact rather than an impression.
 
+**Amended 2026-11-14: a plan reports its own coverage, and a partial plan that passes is
+inconclusive.** The first measured run produced plans that said in their notes that they tested
+part of what was asked — and then passed that part, and were reported as passes. Notes are never
+acted on (§3), which is right for a suggestion and wrong for a fact about what was tested. So
+coverage is a field on the plan, `full` or `partial`, and `PlanOutcome.Reconcile` turns a passing
+partial plan into `RunStatus.Inconclusive`. Only a pass is affected: a partial plan that fails has
+found something real about the half it did test.
+
+Anything other than a recognized word is read as partial, so being unsure counts as not covered.
+The prompt says what the rule is, which removes the incentive to overclaim: there is nothing to
+gain by saying `full` and nothing to lose by admitting a gap.
+
 ## Consequences
 
 **Easier.** Execution stays deterministic, so Milestone 3.3's whole apparatus — proxy, budgets,

@@ -166,6 +166,29 @@ public class PlanJsonTests
         Assert.Null(PlanJson.Read(answer));
     }
 
+    [Theory]
+    [InlineData("\"coverage\": \"partial\",", PlanCoverage.Partial)]
+    [InlineData("\"coverage\": \"full\",", PlanCoverage.Full)]
+    [InlineData("", PlanCoverage.Full)]
+    [InlineData("\"coverage\": \"mostly, see notes\",", PlanCoverage.Partial)]
+    public void Read_Coverage_IsPartialUnlessTheAnswerSaysOtherwise(string line, PlanCoverage expected)
+    {
+        // An answer that says nothing is read as a full plan, which is the lenient reading of
+        // silence. Anything that is not a word we recognize is read as partial: being unsure that
+        // a scenario was covered is the same as not having covered it.
+        var plan = PlanJson.Read(
+            $$"""
+            {
+              {{line}}
+              "actions": [
+                { "kind": "assertUrl", "description": "We got there", "path": "/basket" }
+              ]
+            }
+            """);
+
+        Assert.Equal(expected, plan!.Coverage);
+    }
+
     [Fact]
     public void Read_AnAbsenceAssertion_IsUnderstood()
     {

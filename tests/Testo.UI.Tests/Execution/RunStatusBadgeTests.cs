@@ -20,6 +20,7 @@ public class RunStatusBadgeTests : DesignSystemTestContext
     [InlineData(RunStatus.TimedOut, "Out of time")]
     [InlineData(RunStatus.BudgetExceeded, "Over budget")]
     [InlineData(RunStatus.InfrastructureError, "Could not run")]
+    [InlineData(RunStatus.Inconclusive, "Inconclusive")]
     public void Render_EveryStatus_SaysItInWords(RunStatus status, string expected)
     {
         var badge = Render<RunStatusBadge>(parameters => parameters
@@ -33,7 +34,16 @@ public class RunStatusBadgeTests : DesignSystemTestContext
     {
         // The point of the distinction: out of time, over budget and could-not-run are warnings,
         // because calling them failures would be a lie about the application under test.
-        foreach (var status in new[] { RunStatus.TimedOut, RunStatus.BudgetExceeded, RunStatus.InfrastructureError })
+        RunStatus[] endings =
+        [
+            RunStatus.TimedOut, RunStatus.BudgetExceeded, RunStatus.InfrastructureError,
+
+            // Every step of an inconclusive run passed, which is exactly why it must not be shown
+            // in green: that is how a result answering half a question reads as answering all of it.
+            RunStatus.Inconclusive,
+        ];
+
+        foreach (var status in endings)
         {
             var badge = Render<RunStatusBadge>(parameters => parameters
                 .Add(component => component.Status, status)).Find(".t-badge");

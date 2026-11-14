@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using Testo.Contracts.Execution;
 using Testo.Contracts.Planning;
 
 namespace Testo.Benchmark;
@@ -57,6 +58,9 @@ public static class Report
         Row(text, "Correct verdicts", sources, measurements, group => Count(group, Verdict.Correct));
         Row(text, "Failed the broken shop *and* the sound one", sources, measurements, group => Count(group, Verdict.FailedRegardless));
         Row(text, "Never reached a verdict", sources, measurements, group => Count(group, Verdict.Inconclusive));
+        Row(text, "…of those, passed only the part they planned", sources, measurements, group =>
+            group.SelectMany(m => m.Attempts).Count(a => a.Status == RunStatus.Inconclusive)
+                .ToString(CultureInfo.InvariantCulture));
         Row(text, "Scenarios that flaked", sources, measurements, group => group.Count(m => m.Flaked).ToString(CultureInfo.InvariantCulture));
         Row(text, "Could not be planned", sources, measurements, group => group.Count(m => m.PlanningErrors.Count > 0).ToString(CultureInfo.InvariantCulture));
         Row(text, "Median execution", sources, measurements, Median);
@@ -142,6 +146,13 @@ public static class Report
         it fails at everything, and one of the things it fails at happens to be broken. Counting
         those as correct verdicts turned "one defect genuinely caught out of six" into "five of six",
         which is the sort of number a benchmark exists to prevent.
+
+        **A plan that covers part of a scenario and passes that part is inconclusive, not passed.**
+        The planner says how much it covered, in a field rather than in prose, and a partial plan
+        whose every step passes ends as inconclusive. The first real measurement had plans that
+        honestly reported testing half of what was asked and were then counted as passes, which is
+        an assurance wider than the evidence — the same mistake as a false positive, arrived at
+        politely.
 
         Flake is measured across repeated **executions** of the same plan, so it describes the
         application and our runner, not the model's variation between answers. That is a different

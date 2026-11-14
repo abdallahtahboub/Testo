@@ -126,7 +126,8 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
                 Switch(scenario, defectOn);
 
                 Report(measurements, await MeasureAsync(
-                    scenario, defectOn, "baseline", scenario.Baseline, PlanningCost.None, [], [], cancellationToken)
+                    scenario, defectOn, "baseline", scenario.Baseline, PlanCoverage.Full,
+                    PlanningCost.None, [], [], cancellationToken)
                     .ConfigureAwait(false));
 
                 if (_planning is null)
@@ -144,7 +145,8 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
 
                 var measured = planned.Plan is { } plan
                     ? await MeasureAsync(
-                        scenario, defectOn, model, plan.Actions, planned.Cost, [], planned.Notes, cancellationToken)
+                        scenario, defectOn, model, plan.Actions, plan.Coverage, planned.Cost, [], planned.Notes,
+                        cancellationToken)
                         .ConfigureAwait(false)
                     : new Measurement(scenario, defectOn, model, [], planned.Cost, planned.Errors, planned.Notes);
 
@@ -246,6 +248,7 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
         bool defectOn,
         string source,
         IReadOnlyList<PlannedAction> plan,
+        PlanCoverage coverage,
         PlanningCost planning,
         IReadOnlyList<string> planningErrors,
         IReadOnlyList<string> notes,
@@ -263,7 +266,11 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
 
             clock.Stop();
 
-            attempts.Add(new Attempt(Judge(result.Status, defectOn), result.Status, clock.Elapsed));
+            // A plan that said it covers part of the scenario, and passed that part, has not
+            // answered the scenario. The product applies the same rule; this is the same function.
+            var status = PlanOutcome.Reconcile(result.Status, coverage);
+
+            attempts.Add(new Attempt(Judge(status, defectOn), status, clock.Elapsed));
         }
 
         return new Measurement(scenario, defectOn, source, attempts, planning, planningErrors, notes);

@@ -25,6 +25,7 @@ public static class PlanPrompt
 
         {
           "scenarioName": "a short name for what this plan tests",
+          "coverage": "full or partial: partial if this plan tests less than the description asked for",
           "notes": ["anything a person should know: an assumption you made, or an assertion you think is wrong"],
           "actions": [
             { "kind": "goto",          "description": "why this step exists", "path": "/basket" },
@@ -50,8 +51,15 @@ public static class PlanPrompt
           another host; a plan that tries is refused before it runs.
         - Every plan must check something. A plan with no assert* action is refused, because a run
           that checks nothing and passes is worse than no run at all.
-        - Never type a password or any other secret as text. Use secretName, with one of the names
-          you are given; you are never told the values.
+        - Never type a *real* credential as text. When the scenario needs the genuine password, use
+          secretName with one of the names you are given; you are never told the values. A value
+          that is deliberately wrong — testing that a bad password is refused — is not a secret:
+          type it as text, because the name you were given holds the right one.
+        - Say "coverage": "partial" whenever the plan tests less than the description asked for, and
+          say in notes which part is missing. A partial plan that passes is reported as
+          inconclusive, never as a pass, so there is nothing to gain by claiming full coverage and
+          nothing to lose by admitting a gap: the alternative is an assurance covering less than it
+          appears to, which is the one outcome worse than no test at all.
         - Prefer a testId over a roleAndName when the page offers one: it survives wording changes.
         - Use assertNotVisible for what should be absent: a line gone from a basket, a button that
           should not be offered, an error that should no longer be shown. An absence is half of what

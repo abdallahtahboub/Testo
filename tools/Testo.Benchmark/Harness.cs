@@ -23,6 +23,17 @@ public enum Verdict
 
     /// <summary>It never reached a verdict: out of time, over budget, could not run, or could not be planned.</summary>
     Inconclusive = 4,
+
+    /// <summary>
+    /// It failed the broken shop, and it also failed the sound one. It detected nothing.
+    /// </summary>
+    /// <remarks>
+    /// Without this, such a run counts as a correct verdict and the table flatters the planner:
+    /// the first real measurement scored five of six defects "caught", and four of those five were
+    /// plans that fail against a working application too. A test that always fails is right about
+    /// a broken application for the same reason a stopped clock is right twice a day.
+    /// </remarks>
+    FailedRegardless = 5,
 }
 
 /// <summary>One execution of one plan.</summary>
@@ -131,16 +142,55 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
 
                 var planned = await PlanAsync(scenario, cancellationToken).ConfigureAwait(false);
 
-                Report(measurements, planned.Plan is { } plan
+                var measured = planned.Plan is { } plan
                     ? await MeasureAsync(
                         scenario, defectOn, model, plan.Actions, planned.Cost, [], planned.Notes, cancellationToken)
                         .ConfigureAwait(false)
-                    : new Measurement(scenario, defectOn, model, [], planned.Cost, planned.Errors, planned.Notes));
+                    : new Measurement(scenario, defectOn, model, [], planned.Cost, planned.Errors, planned.Notes);
+
+                Report(measurements, Honestly(measured, measurements));
             }
         }
 
         Defects.Set([]);
         return measurements;
+    }
+
+    /// <summary>
+    /// Downgrades a "correct" verdict on a broken shop when the same plan also failed the sound
+    /// one, because then it found nothing — it fails at everything, and one of the things it fails
+    /// at happened to be broken.
+    /// </summary>
+    /// <remarks>
+    /// The defect-off run always happens first, so by the time the defect is switched on the
+    /// evidence for this is already in hand.
+    /// </remarks>
+    private static Measurement Honestly(Measurement measurement, List<Measurement> earlier)
+    {
+        if (!measurement.DefectOn || measurement.Verdict != Verdict.Correct)
+        {
+            return measurement;
+        }
+
+        var sound = earlier.LastOrDefault(candidate =>
+            !candidate.DefectOn
+            && candidate.Scenario.Id == measurement.Scenario.Id
+            && string.Equals(candidate.Source, measurement.Source, StringComparison.Ordinal));
+
+        if (sound?.Verdict != Verdict.FalseNegative)
+        {
+            return measurement;
+        }
+
+        return measurement with
+        {
+            Attempts =
+            [
+                .. measurement.Attempts.Select(attempt => attempt.Verdict == Verdict.Correct
+                    ? attempt with { Verdict = Verdict.FailedRegardless }
+                    : attempt),
+            ],
+        };
     }
 
     /// <summary>Keeps a measurement and says so, so a long run is not a blank terminal.</summary>

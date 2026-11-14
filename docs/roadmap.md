@@ -133,7 +133,7 @@ Found by opening it in a browser rather than by a test, and worth remembering:
 | Public website | **Real.** 29 routes in English and German, with every placeholder page labeled as one |
 | App area | **One placeholder page** at `/app`, plus the two execution pages. Signing in is required everywhere (D-1 closed in Milestone 3.1) |
 | Test runs: start, stop, rerun, steps, screenshots | **Real** for three scripted scenarios against our own demo target. No customer targets |
-| AI planning: interface, vocabulary, validator, provider adapter, benchmark | **Built, unmeasured.** No model key was available, so the planner column of `ai-benchmark.md` is empty and no claim about AI is supported yet |
+| AI planning: interface, vocabulary, validator, provider adapter, benchmark | **Built and measured; the planner is not usable.** 5 of 12 plans work on a sound application, 1 of 6 defects genuinely caught, 1 missed. Nothing in the product calls a model |
 | Browser execution: worker out of process, egress proxy, signed artifact links | **Real.** Not yet a container per run (R-1) |
 | The other six feature modules | **Shells.** One class each: an id and a feature flag. No pages, no services |
 | `Testo.Capabilities.E2EWeb` | **Empty.** An `_Imports.razor` |
@@ -238,15 +238,36 @@ vocabulary, hostile pages treated as untrusted data, never model-generated code.
 **Done when:** pass rate, false positives, flake rate, time and cost per run are measured and
 published next to the baseline. No claim of autonomy without those numbers.
 
-**Status: built, and NOT done (2026-11-14).** Everything the milestone asks for exists except the
-numbers it exists to produce, because the environment the work was done in has no model API key and
-cannot be given one. The planner column of [`ai-benchmark.md`](ai-benchmark.md) is empty, so
-**nothing here supports any claim about AI-found defects**, and the milestone stays open until a run
-with a key fills it in:
+**Status: measured (2026-11-14). The planner is not usable, and that is the finding.**
 
-```bash
-PLANNER__APIKEY=... dotnet run --project tools/Testo.Benchmark
-```
+A run against `claude-sonnet-5-5`, twelve scenarios, six of them with a real defect switched on and
+off. Read carefully, because the obvious reading is wrong:
+
+| | |
+|---|---|
+| Plans that passed a **sound** shop | **5 of 12** |
+| Plans that failed a sound shop (false negatives) | **7 of 12** |
+| Defects **genuinely caught** | **1 of 6** |
+| Defects **missed** — passed a broken shop | **1 of 6** (`empty-basket-cannot-be-ordered`) |
+| Defects where nothing can be concluded | **4 of 6** |
+
+The four unknowable ones are the important part. For `checkout-matches-basket`, `quantity-counts`,
+`discount-applied-once` and `remove-takes-out-the-right-line`, the planner's plan failed the broken
+shop — and also failed the sound one. A plan that always fails is right about a broken application
+for the same reason a stopped clock is right twice a day. Counting those as correct verdicts would
+have reported **"five of six defects caught"** instead of one, which is exactly the flattering number
+this benchmark exists to prevent. The harness now classifies them as *detected nothing* rather than
+correct.
+
+So the honest summary: against a working application the planner writes a plan that runs correctly
+**five times out of twelve**, and of six real defects it credibly found **one**, missed **one**, and
+told us nothing about **four**. The hand-written baseline scored 36 of 36 on the same scenarios in
+the same run, so the scenarios, the executor and the defect switch are not what is failing.
+
+**This is not a reason to abandon the planner; it is the reason the benchmark was built first.** The
+next question is *why* the plans fail on a sound shop, which the report's notes and refusal reasons
+begin to answer. Nothing in the product calls a model, and no claim about AI-found defects is
+supported by this.
 
 What is real and measured:
 

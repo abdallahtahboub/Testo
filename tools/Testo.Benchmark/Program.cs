@@ -110,8 +110,7 @@ return falsePositives > 0 && options.FailOnFalsePositive ? 1 : 0;
 static string Explain(string error) => error switch
 {
     PlanningErrors.ProviderRefusedTheKey =>
-        "the provider refused the key (401 or 403). Check PLANNER__APIKEY: a console API key starts "
-        + "sk-ant-api, and a user or CLI token will not work with this API",
+        "the provider refused the key (401 or 403): it is wrong, truncated, expired or revoked",
     PlanningErrors.ProviderUnavailable => "the provider could not be reached",
     PlanningErrors.NoPlanner => "no planner is configured",
     PlanningErrors.Unreadable => "the answer was not a plan",

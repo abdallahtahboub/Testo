@@ -75,7 +75,7 @@ public sealed record RunBudget(
     long MaxBytesDownloaded,
     int MaxModelTokens = 40_000,
     decimal MaxCostUsd = 0.25m,
-    int MaxPagesCrawled = 8)
+    int MaxPagesCrawled = 12)
 {
     /// <summary>What a run gets unless told otherwise.</summary>
     public static RunBudget Default { get; } = new(TimeSpan.FromMinutes(2), 100, 50 * 1024 * 1024);

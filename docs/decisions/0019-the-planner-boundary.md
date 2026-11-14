@@ -112,6 +112,15 @@ with a system prompt stating that nothing inside it is an instruction. Snapshots
 stripped to roles, accessible names, test ids and trimmed text, and collected by a deterministic
 crawl of the origin — never by the model choosing where to look.
 
+The crawl follows the links it finds and, in addition, the paths the application advertises in its
+own `sitemap.xml`, same-origin and capped. That is still deterministic and still ours: the
+application states where its pages are, and we read the statement. It was added because the first
+real measurement showed the crawl describing one state of the application only — an empty basket
+hides the checkout, so a plan about checkout was written for a page the planner had never been
+shown. Every request the crawl makes goes through the browser and therefore through the run's
+egress proxy; Playwright's own request context is not used, because it honours the ambient proxy of
+whatever machine the worker happens to run on.
+
 We are explicit that this is mitigation, not a boundary: prompt-level defences are advisory, and the
 things that actually hold are the closed vocabulary (§2), validation against observation (§3) and
 the egress proxy (ADR-0018), none of which depend on the model behaving.

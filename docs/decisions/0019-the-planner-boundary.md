@@ -65,17 +65,30 @@ holds.
 
 ### 3. A plan that does not validate is a failed run, not an improvisation
 
-Validation is against the schema *and* against the application as actually observed:
+Validation refuses a plan outright for the things that are not the application's business to
+decide:
 
 - an action kind that is not in the vocabulary;
-- a target no page in the snapshot offers;
-- a `goto` outside the run's allowed origin;
+- a `goto` or a URL assertion whose path could name another origin — `//host`, `https://host`, a
+  backslash, a userinfo `@`;
 - more actions than the run's budget;
-- an assertion about something the scenario never mentioned.
+- a plan that asserts nothing, because a run that checks nothing and then passes is not a weak test
+  but a false assurance;
+- an action missing something it cannot run without.
 
-A plan that fails validation is sent back once, with the errors, because a model given its mistake
-usually fixes it. A second failure ends the run with a status that says planning failed. It does not
-fall back to "try something reasonable", and it does not run the valid prefix of an invalid plan.
+A plan that fails is sent back once, with the errors, because a model given its mistake usually
+fixes it. A second failure ends the run with a status that says planning failed. It does not fall
+back to "try something reasonable", and it does not run the valid prefix of an invalid plan.
+
+**A target the crawl never saw is a note, not a refusal**, and this is a correction to the first
+draft of this ADR, which said otherwise. Writing the validator made the reason obvious: a crawl
+sees an application in one state, and a test exists to put it in others. The basket line for a
+teapot does not exist until something adds a teapot, so refusing every target that was not already
+on screen would forbid nearly every real test and buy nothing — an element that is not there fails
+at its step, by name, with a screenshot, which is exactly what should happen. Nor is it a security
+boundary: what stops a hostile page is the closed vocabulary and the proxy, and neither depends on
+this check. So the plan runs, and the note is recorded on the run for a person to read, because the
+other explanation for an unseen target is a plan acting on hope.
 
 **A failing assertion is never self-healed.** If the planner would like an assertion changed, that is
 a suggestion for a person, recorded as such. A product that edits the test until it passes is a

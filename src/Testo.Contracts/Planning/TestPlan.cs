@@ -163,34 +163,3 @@ public sealed record PlanRequest(
     /// <summary>The same request again, with what was wrong last time.</summary>
     public PlanRequest Retry(IReadOnlyList<string> errors) => this with { PreviousErrors = errors };
 }
-
-/// <summary>A plan as it was stored, with what it cost and whether a person has looked at it.</summary>
-/// <param name="PlanId">The plan.</param>
-/// <param name="ScenarioName">What it is a plan for.</param>
-/// <param name="Model">Which model produced it.</param>
-/// <param name="Actions">The actions, in order.</param>
-/// <param name="Notes">What the planner wanted a person to know.</param>
-/// <param name="Cost">What it cost to produce.</param>
-/// <param name="CreatedAt">When it was produced.</param>
-public sealed record StoredPlan(
-    Guid PlanId,
-    string ScenarioName,
-    string Model,
-    IReadOnlyList<PlannedAction> Actions,
-    IReadOnlyList<string> Notes,
-    PlanningCost Cost,
-    DateTimeOffset CreatedAt);
-
-/// <summary>Reading and keeping plans.</summary>
-public interface IPlanService
-{
-    /// <summary>One plan, or <c>null</c> when there is no such plan in this organization.</summary>
-    Task<StoredPlan?> GetPlanAsync(Guid planId, CancellationToken cancellationToken = default);
-
-    /// <summary>The plans of a project, newest first.</summary>
-    Task<PagedResult<StoredPlan>> ListPlansAsync(
-        Guid projectId,
-        int page,
-        int pageSize,
-        CancellationToken cancellationToken = default);
-}

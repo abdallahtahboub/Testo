@@ -303,4 +303,250 @@
   <data name="Nav_Feature_Demo_Action" xml:space="preserve">
     <value>Demo anfragen</value>
   </data>
+  <data name="Card_More" xml:space="preserve">
+    <value>Mehr dazu</value>
+  </data>
+  <data name="Card_Placeholder" xml:space="preserve">
+    <value>Platzhalter</value>
+  </data>
+  <data name="Placeholder_Title" xml:space="preserve">
+    <value>Diese Seite ist ein Platzhalter.</value>
+  </data>
+  <data name="Placeholder_Text" xml:space="preserve">
+    <value>Sie zeigt die Struktur der fertigen Seite, nicht deren Inhalt. Nichts darauf sollte zitiert oder als verlässlich angesehen werden.</value>
+  </data>
+  <data name="Stage_Today_Title" xml:space="preserve">
+    <value>Wo das heute steht</value>
+  </data>
+  <data name="Stage_Today_Built" xml:space="preserve">
+    <value>Jetzt verfügbar</value>
+  </data>
+  <data name="Stage_Today_Planned" xml:space="preserve">
+    <value>Geplant</value>
+  </data>
+  <data name="Stage_Journey_Nav" xml:space="preserve">
+    <value>Die Phasen des Testprozesses</value>
+  </data>
+  <data name="Stage_Journey_Previous" xml:space="preserve">
+    <value>Davor</value>
+  </data>
+  <data name="Stage_Journey_Next" xml:space="preserve">
+    <value>Danach</value>
+  </data>
+  <data name="Stage_Planning_Overline" xml:space="preserve">
+    <value>Testprozess · 1</value>
+  </data>
+  <data name="Stage_Planning_Title" xml:space="preserve">
+    <value>Testplanung</value>
+  </data>
+  <data name="Stage_Planning_Lead" xml:space="preserve">
+    <value>Festlegen, was getestet wird, wie gründlich, und was gelten muss, bevor jemand von „fertig“ spricht.</value>
+  </data>
+  <data name="Stage_Planning_Why" xml:space="preserve">
+    <value>Die meisten Teams planen durchaus – in einem Dokument, das niemand wieder öffnet. Der Plan ist wichtig, weil nur dort dem Begriff „ausreichend getestet“ überhaupt eine Bedeutung gegeben wird. Steht diese Bedeutung nicht vor Beginn der Arbeit fest, wird sie am Ende unter Druck von der müdesten Person entschieden.</value>
+  </data>
+  <data name="Stage_Planning_Points" xml:space="preserve">
+    <value>Was die Testplanung umfasst</value>
+  </data>
+  <data name="Stage_Planning_Point1_Title" xml:space="preserve">
+    <value>Umfang und Vorgehen</value>
+  </data>
+  <data name="Stage_Planning_Point1_Text" xml:space="preserve">
+    <value>Was dazugehört, was bewusst nicht, und wie jeder Teil getestet wird. Die Hälfte „bewusst nicht“ erspart später die Diskussion.</value>
+  </data>
+  <data name="Stage_Planning_Point2_Title" xml:space="preserve">
+    <value>Risiken, bewertet</value>
+  </data>
+  <data name="Stage_Planning_Point2_Text" xml:space="preserve">
+    <value>Was schiefgehen kann, wie wahrscheinlich es ist und was es kosten würde. Der Testaufwand folgt dieser Bewertung statt der Gewohnheit.</value>
+  </data>
+  <data name="Stage_Planning_Point3_Title" xml:space="preserve">
+    <value>Eintritts- und Austrittskriterien</value>
+  </data>
+  <data name="Stage_Planning_Point3_Text" xml:space="preserve">
+    <value>Die Bedingungen für Beginn und Ende – vorab vereinbart und am Schluss mit der Realität abgeglichen.</value>
+  </data>
+  <data name="Stage_Planning_Today" xml:space="preserve">
+    <value>Nicht gebaut. Die Planung steht in der Roadmap, nicht im Produkt: Es gibt keinen Planeditor, kein Risikoregister und keine prüfbaren Kriterien. Die Beschreibung oben zeigt die Absicht, nicht den heutigen Stand.</value>
+  </data>
+  <data name="Stage_Analysis_Overline" xml:space="preserve">
+    <value>Testprozess · 2</value>
+  </data>
+  <data name="Stage_Analysis_Title" xml:space="preserve">
+    <value>Testanalyse und Nachvollziehbarkeit</value>
+  </data>
+  <data name="Stage_Analysis_Lead" xml:space="preserve">
+    <value>Anforderungen in wirklich prüfbare Aussagen überführen – und den Faden von jeder Anforderung zu den Tests behalten, die sie abdecken.</value>
+  </data>
+  <data name="Stage_Analysis_Why" xml:space="preserve">
+    <value>Eine Anforderung, die man nicht prüfen kann, ist keine Anforderung, sondern eine Hoffnung. Anforderungen auf Prüfbarkeit zu lesen, ist die günstigste Form der Fehlersuche: Sie kostet einen Nachmittag und findet Widersprüche, bevor jemand Code dagegen geschrieben hat.</value>
+  </data>
+  <data name="Stage_Analysis_Points" xml:space="preserve">
+    <value>Was die Analyse umfasst</value>
+  </data>
+  <data name="Stage_Analysis_Point1_Title" xml:space="preserve">
+    <value>Prüfbarkeitsanalyse</value>
+  </data>
+  <data name="Stage_Analysis_Point1_Text" xml:space="preserve">
+    <value>Jede Anforderung wird auf das geprüft, was sie unprüfbar macht: eine fehlende Zahl, ein undefiniertes „schnell“, zwei Sätze, die nicht beide gelten können.</value>
+  </data>
+  <data name="Stage_Analysis_Point2_Title" xml:space="preserve">
+    <value>Testbedingungen</value>
+  </data>
+  <data name="Stage_Analysis_Point2_Text" xml:space="preserve">
+    <value>Die einzelnen prüfwürdigen Aspekte einer Anforderung – benannt, bevor jemand einen Testschritt schreibt. Hier entscheidet sich die Abdeckung.</value>
+  </data>
+  <data name="Stage_Analysis_Point3_Title" xml:space="preserve">
+    <value>Eine Nachvollziehbarkeitsmatrix, die keine Tabelle ist</value>
+  </data>
+  <data name="Stage_Analysis_Point3_Text" xml:space="preserve">
+    <value>Anforderungen gegen Tests, mit sichtbaren Lücken – aktuell, weil sie abgeleitet und nicht von Hand gepflegt wird.</value>
+  </data>
+  <data name="Stage_Analysis_Today" xml:space="preserve">
+    <value>Nicht gebaut. Es gibt im Produkt noch keine Anforderung, keine Testbedingung und keine Matrix. Das Datenmodell dafür ist entworfen und dokumentiert, läuft aber nicht.</value>
+  </data>
+  <data name="Stage_Design_Overline" xml:space="preserve">
+    <value>Testprozess · 3</value>
+  </data>
+  <data name="Stage_Design_Title" xml:space="preserve">
+    <value>Testentwurf</value>
+  </data>
+  <data name="Stage_Design_Lead" xml:space="preserve">
+    <value>Die konkreten Testfälle erarbeiten: welche Eingaben, welche Grenzen, welche Kombinationen – und welche Daten sie brauchen.</value>
+  </data>
+  <data name="Stage_Design_Why" xml:space="preserve">
+    <value>Im Testentwurf hört Testen auf, ein Gefühl zu sein, und wird zur Methode. Grenzwerte, Äquivalenzklassen, Entscheidungstabellen und Zustandsübergänge sind nicht akademisch: Sie sind der Unterschied zwischen vierzig Tests, die alle dasselbe prüfen, und zwölf, die zwölf verschiedene Dinge prüfen.</value>
+  </data>
+  <data name="Stage_Design_Points" xml:space="preserve">
+    <value>Was der Entwurf umfasst</value>
+  </data>
+  <data name="Stage_Design_Point1_Title" xml:space="preserve">
+    <value>Verfahren, bewusst eingesetzt</value>
+  </data>
+  <data name="Stage_Design_Point1_Text" xml:space="preserve">
+    <value>Grenzwerte, Äquivalenzklassen, Entscheidungstabellen, Zustandsübergänge – passend zum Problem gewählt statt aus Gewohnheit verwendet.</value>
+  </data>
+  <data name="Stage_Design_Point2_Title" xml:space="preserve">
+    <value>Testfälle, die man lesen kann</value>
+  </data>
+  <data name="Stage_Design_Point2_Text" xml:space="preserve">
+    <value>Schritte, erwartete Ergebnisse und der Grund für den Testfall – versioniert, damit eine Teständerung so prüfbar ist wie eine Codeänderung.</value>
+  </data>
+  <data name="Stage_Design_Point3_Title" xml:space="preserve">
+    <value>Testdaten</value>
+  </data>
+  <data name="Stage_Design_Point3_Text" xml:space="preserve">
+    <value>Was jeder Testfall vor der Ausführung braucht – beim Testfall beschrieben statt am Testtag improvisiert.</value>
+  </data>
+  <data name="Stage_Design_Today" xml:space="preserve">
+    <value>Nicht gebaut. Es gibt im Produkt keine Testfallbibliothek und keinen KI-gestützten Entwurf. Ein Planer, der ein in Worten beschriebenes Szenario in ausführbare Schritte überführt, existiert und ist gemessen – siehe die Seite zur Testart –, aber er ist kein Testfallentwurf.</value>
+  </data>
+  <data name="Stage_Execution_Overline" xml:space="preserve">
+    <value>Testprozess · 4</value>
+  </data>
+  <data name="Stage_Execution_Title" xml:space="preserve">
+    <value>Testdurchführung</value>
+  </data>
+  <data name="Stage_Execution_Lead" xml:space="preserve">
+    <value>Tests gegen eine echte Anwendung in einem echten Browser ausführen – und so viele Belege behalten, dass man einen Fehler bearbeiten kann, ohne ihn erst nachstellen zu müssen.</value>
+  </data>
+  <data name="Stage_Execution_Why" xml:space="preserve">
+    <value>Ein Lauf, der nur „fehlgeschlagen“ sagt, schickt eine Person zurück zum Nachstellen – und dort entsteht der größte Teil der Fehlerkosten. Ein brauchbarer Lauf benennt den Schritt, behält das Bildschirmfoto des Moments und unterscheidet zwischen einer fehlerhaften Anwendung und einer fehlerhaften Testinfrastruktur.</value>
+  </data>
+  <data name="Stage_Execution_Points" xml:space="preserve">
+    <value>Was die Durchführung umfasst</value>
+  </data>
+  <data name="Stage_Execution_Point1_Title" xml:space="preserve">
+    <value>Jedes Ende hat seinen eigenen Namen</value>
+  </data>
+  <data name="Stage_Execution_Point1_Text" xml:space="preserve">
+    <value>Bestanden, fehlgeschlagen, gestoppt, Zeit abgelaufen, Budget überschritten, nicht lauffähig. Ein Lauf am Budgetlimit ist keine fehlerhafte Anwendung – ihn so zu nennen, würde die Fehlerquote zur Lüge machen.</value>
+  </data>
+  <data name="Stage_Execution_Point2_Title" xml:space="preserve">
+    <value>Belege, pro Schritt</value>
+  </data>
+  <data name="Stage_Execution_Point2_Text" xml:space="preserve">
+    <value>Ein Bildschirmfoto und ein Zeitstempel pro Schritt – der Fehler kommt also mit dem Bild dessen, was die Anwendung tatsächlich gezeigt hat.</value>
+  </data>
+  <data name="Stage_Execution_Point3_Title" xml:space="preserve">
+    <value>Der Browser läuft dort, wo er nichts erreichen kann</value>
+  </data>
+  <data name="Stage_Execution_Point3_Text" xml:space="preserve">
+    <value>Außerhalb des Prozesses, hinter einem Proxy, der jede Adresse außer der getesteten ablehnt – und dabei beurteilt, wohin eine Verbindung tatsächlich geht, nicht wie sie heißt.</value>
+  </data>
+  <data name="Stage_Execution_Today" xml:space="preserve">
+    <value>Gebaut – und die einzige Phase, die es ist. Ein Browser bedient eine echte Anwendung außerhalb des Prozesses, Läufe werden mit Schritten und Bildschirmfotos gespeichert, und keine Organisation sieht die Läufe einer anderen. Nicht gebaut: ein Container pro Lauf und jedes andere Ziel als unsere eigene Demo-Anwendung.</value>
+  </data>
+  <data name="Stage_Defects_Overline" xml:space="preserve">
+    <value>Testprozess · 5</value>
+  </data>
+  <data name="Stage_Defects_Title" xml:space="preserve">
+    <value>Fehlermanagement</value>
+  </data>
+  <data name="Stage_Defects_Lead" xml:space="preserve">
+    <value>Fehler so berichten, dass sie behoben werden können – und die Verbindung zum Test und zur Anforderung behalten, aus der sie stammen.</value>
+  </data>
+  <data name="Stage_Defects_Why" xml:space="preserve">
+    <value>Die meiste Zeit, die ein Fehler kostet, geht für die Schleife drauf: ein zu dünner Bericht, ein Entwickler, der ihn nicht nachstellen kann, ein Tester, der schon weitergezogen ist. Ein aus einem Lauf erzeugter Fehlerbericht enthält Schritte, Belege und Umgebung bereits – damit entfällt die Schleife, statt schneller zu werden.</value>
+  </data>
+  <data name="Stage_Defects_Points" xml:space="preserve">
+    <value>Was das Fehlermanagement umfasst</value>
+  </data>
+  <data name="Stage_Defects_Point1_Title" xml:space="preserve">
+    <value>Aus dem Lauf erzeugt</value>
+  </data>
+  <data name="Stage_Defects_Point1_Text" xml:space="preserve">
+    <value>Der fehlgeschlagene Schritt, sein Bildschirmfoto und seine Zeiten werden zum Bericht – nichts muss zweimal oder aus dem Gedächtnis beschrieben werden.</value>
+  </data>
+  <data name="Stage_Defects_Point2_Title" xml:space="preserve">
+    <value>Ein Lebenszyklus, dem jemand zugestimmt hat</value>
+  </data>
+  <data name="Stage_Defects_Point2_Text" xml:space="preserve">
+    <value>Bewertung, Schweregrad und Status, die für alle dasselbe bedeuten – mit nachvollziehbarer Historie, wer was geändert hat.</value>
+  </data>
+  <data name="Stage_Defects_Point3_Title" xml:space="preserve">
+    <value>Verweise in beide Richtungen</value>
+  </data>
+  <data name="Stage_Defects_Point3_Text" xml:space="preserve">
+    <value>Vom Fehler zum Test, zur Anforderung und zum Lauf – und von einer Anforderung zu jedem dort gefundenen Fehler.</value>
+  </data>
+  <data name="Stage_Defects_Today" xml:space="preserve">
+    <value>Nicht gebaut. Ein fehlgeschlagener Lauf behält Schritt, Meldung und Bildschirmfoto – das ist das Rohmaterial. Es gibt keinen Fehlerdatensatz, keine Bewertung und keinen Abgleich mit einem Ticketsystem.</value>
+  </data>
+  <data name="Stage_Reporting_Overline" xml:space="preserve">
+    <value>Testprozess · 6</value>
+  </data>
+  <data name="Stage_Reporting_Title" xml:space="preserve">
+    <value>Berichte und Release-Reife</value>
+  </data>
+  <data name="Stage_Reporting_Lead" xml:space="preserve">
+    <value>Sagen, was das Testen gefunden hat, was es nicht abgedeckt hat – und ob die eingangs vereinbarten Austrittskriterien tatsächlich erfüllt sind.</value>
+  </data>
+  <data name="Stage_Reporting_Why" xml:space="preserve">
+    <value>Am Ende steht immer dieselbe Frage: Liefern wir aus? Ein Bericht beantwortet sie schlecht, indem er Tests zählt, und gut, indem er das Gefundene mit dem Vereinbarten vergleicht – einschließlich der ungetesteten Teile, also genau der Zahl, die die meisten Berichte stillschweigend auslassen.</value>
+  </data>
+  <data name="Stage_Reporting_Points" xml:space="preserve">
+    <value>Was die Berichterstattung umfasst</value>
+  </data>
+  <data name="Stage_Reporting_Point1_Title" xml:space="preserve">
+    <value>Abdeckung, samt ihrer Lücken</value>
+  </data>
+  <data name="Stage_Reporting_Point1_Text" xml:space="preserve">
+    <value>Was getestet wurde gegenüber dem, was geplant war – mit benannten statt weggelassenen ungetesteten Teilen.</value>
+  </data>
+  <data name="Stage_Reporting_Point2_Title" xml:space="preserve">
+    <value>Verläufe statt Momentaufnahmen</value>
+  </data>
+  <data name="Stage_Reporting_Point2_Text" xml:space="preserve">
+    <value>Wie sich Ergebnisse, Instabilität und Fehleralter über Releases entwickeln – ein einzelner Lauf sagt fast nichts.</value>
+  </data>
+  <data name="Stage_Reporting_Point3_Title" xml:space="preserve">
+    <value>Eine Reifeentscheidung mit begründeten Kriterien</value>
+  </data>
+  <data name="Stage_Reporting_Point3_Text" xml:space="preserve">
+    <value>Die Austrittskriterien, welche davon erfüllt sind und wer freigegeben hat – aufbewahrt, damit die Entscheidung später nachvollziehbar bleibt.</value>
+  </data>
+  <data name="Stage_Reporting_Today" xml:space="preserve">
+    <value>Nicht gebaut. Läufe werden gespeichert, die Datengrundlage entsteht also gerade. Es gibt keine Dashboards, keine Verläufe und keinen Reifebericht.</value>
+  </data>
 </root>

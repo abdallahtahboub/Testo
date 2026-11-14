@@ -303,4 +303,250 @@
   <data name="Nav_Feature_Demo_Action" xml:space="preserve">
     <value>Request a demo</value>
   </data>
+  <data name="Card_More" xml:space="preserve">
+    <value>Read more</value>
+  </data>
+  <data name="Card_Placeholder" xml:space="preserve">
+    <value>Placeholder</value>
+  </data>
+  <data name="Placeholder_Title" xml:space="preserve">
+    <value>This page is a placeholder.</value>
+  </data>
+  <data name="Placeholder_Text" xml:space="preserve">
+    <value>It shows the shape of the finished page, not its content. Nothing on it should be quoted or relied on.</value>
+  </data>
+  <data name="Stage_Today_Title" xml:space="preserve">
+    <value>Where this is today</value>
+  </data>
+  <data name="Stage_Today_Built" xml:space="preserve">
+    <value>Available now</value>
+  </data>
+  <data name="Stage_Today_Planned" xml:space="preserve">
+    <value>Planned</value>
+  </data>
+  <data name="Stage_Journey_Nav" xml:space="preserve">
+    <value>The stages of the testing journey</value>
+  </data>
+  <data name="Stage_Journey_Previous" xml:space="preserve">
+    <value>Before this</value>
+  </data>
+  <data name="Stage_Journey_Next" xml:space="preserve">
+    <value>After this</value>
+  </data>
+  <data name="Stage_Planning_Overline" xml:space="preserve">
+    <value>Testing journey · 1</value>
+  </data>
+  <data name="Stage_Planning_Title" xml:space="preserve">
+    <value>Test planning</value>
+  </data>
+  <data name="Stage_Planning_Lead" xml:space="preserve">
+    <value>Decide what will be tested, how thoroughly, and what has to be true before anybody calls it done.</value>
+  </data>
+  <data name="Stage_Planning_Why" xml:space="preserve">
+    <value>Most teams do plan, in a document nobody opens again. The plan matters because it is the only place the words “enough testing” are ever given a meaning — and if that meaning is not written down before the work starts, it gets decided at the end, under pressure, by whoever is most tired.</value>
+  </data>
+  <data name="Stage_Planning_Points" xml:space="preserve">
+    <value>What test planning covers</value>
+  </data>
+  <data name="Stage_Planning_Point1_Title" xml:space="preserve">
+    <value>Scope and approach</value>
+  </data>
+  <data name="Stage_Planning_Point1_Text" xml:space="preserve">
+    <value>What is in, what is deliberately out, and how each part will be tested. The “deliberately out” half is the one that saves an argument later.</value>
+  </data>
+  <data name="Stage_Planning_Point2_Title" xml:space="preserve">
+    <value>Risks, rated</value>
+  </data>
+  <data name="Stage_Planning_Point2_Text" xml:space="preserve">
+    <value>What could go wrong, how likely it is and what it would cost. Testing effort follows that rating rather than following habit.</value>
+  </data>
+  <data name="Stage_Planning_Point3_Title" xml:space="preserve">
+    <value>Entry and exit criteria</value>
+  </data>
+  <data name="Stage_Planning_Point3_Text" xml:space="preserve">
+    <value>The conditions for starting and for stopping, agreed in advance and checked against reality at the end.</value>
+  </data>
+  <data name="Stage_Planning_Today" xml:space="preserve">
+    <value>Not built. Planning lives in the roadmap, not in the product: there is no plan editor, no risk register and no criteria to check against. The pages above describe what is intended, not what you can use.</value>
+  </data>
+  <data name="Stage_Analysis_Overline" xml:space="preserve">
+    <value>Testing journey · 2</value>
+  </data>
+  <data name="Stage_Analysis_Title" xml:space="preserve">
+    <value>Test analysis and traceability</value>
+  </data>
+  <data name="Stage_Analysis_Lead" xml:space="preserve">
+    <value>Turn requirements into things that can actually be checked, and keep the thread from each requirement to the tests that cover it.</value>
+  </data>
+  <data name="Stage_Analysis_Why" xml:space="preserve">
+    <value>A requirement that cannot be checked is not a requirement, it is a hope. Reading requirements for testability is the cheapest defect-finding there is: it costs an afternoon and it finds the contradictions before anybody has written code against them.</value>
+  </data>
+  <data name="Stage_Analysis_Points" xml:space="preserve">
+    <value>What analysis covers</value>
+  </data>
+  <data name="Stage_Analysis_Point1_Title" xml:space="preserve">
+    <value>Testability review</value>
+  </data>
+  <data name="Stage_Analysis_Point1_Text" xml:space="preserve">
+    <value>Each requirement read for the things that make it untestable: a missing number, an undefined “fast”, two sentences that cannot both be true.</value>
+  </data>
+  <data name="Stage_Analysis_Point2_Title" xml:space="preserve">
+    <value>Test conditions</value>
+  </data>
+  <data name="Stage_Analysis_Point2_Text" xml:space="preserve">
+    <value>The distinct things worth checking about a requirement, named before anybody writes a step. This is where coverage is decided.</value>
+  </data>
+  <data name="Stage_Analysis_Point3_Title" xml:space="preserve">
+    <value>A traceability matrix that is not a spreadsheet</value>
+  </data>
+  <data name="Stage_Analysis_Point3_Text" xml:space="preserve">
+    <value>Requirements against tests, with the gaps visible, kept current because it is derived rather than maintained by hand.</value>
+  </data>
+  <data name="Stage_Analysis_Today" xml:space="preserve">
+    <value>Not built. There is no requirement, no test condition and no matrix in the product yet. The data model for them is designed and written down; none of it is running.</value>
+  </data>
+  <data name="Stage_Design_Overline" xml:space="preserve">
+    <value>Testing journey · 3</value>
+  </data>
+  <data name="Stage_Design_Title" xml:space="preserve">
+    <value>Test design</value>
+  </data>
+  <data name="Stage_Design_Lead" xml:space="preserve">
+    <value>Work out the actual cases: which inputs, which boundaries, which combinations, and what data they need.</value>
+  </data>
+  <data name="Stage_Design_Why" xml:space="preserve">
+    <value>Test design is where testing stops being a feeling and becomes a technique. Boundary values, equivalence classes, decision tables and state transitions are not academic: they are the difference between forty tests that all check the same thing and twelve that check twelve different things.</value>
+  </data>
+  <data name="Stage_Design_Points" xml:space="preserve">
+    <value>What design covers</value>
+  </data>
+  <data name="Stage_Design_Point1_Title" xml:space="preserve">
+    <value>Techniques, applied deliberately</value>
+  </data>
+  <data name="Stage_Design_Point1_Text" xml:space="preserve">
+    <value>Boundaries, equivalence classes, decision tables, state transitions — chosen for the problem rather than used out of habit.</value>
+  </data>
+  <data name="Stage_Design_Point2_Title" xml:space="preserve">
+    <value>Cases a person can read</value>
+  </data>
+  <data name="Stage_Design_Point2_Text" xml:space="preserve">
+    <value>Steps, expected results and the reason the case exists, versioned, so a change to a test is as reviewable as a change to code.</value>
+  </data>
+  <data name="Stage_Design_Point3_Title" xml:space="preserve">
+    <value>Test data</value>
+  </data>
+  <data name="Stage_Design_Point3_Text" xml:space="preserve">
+    <value>What each case needs to exist before it runs, described with the case instead of being improvised on the day.</value>
+  </data>
+  <data name="Stage_Design_Today" xml:space="preserve">
+    <value>Not built. No test case library and no AI-assisted design exist in the product. A planner that turns a scenario in plain words into executable steps does exist and is measured — see the capability page — but it is not case design.</value>
+  </data>
+  <data name="Stage_Execution_Overline" xml:space="preserve">
+    <value>Testing journey · 4</value>
+  </data>
+  <data name="Stage_Execution_Title" xml:space="preserve">
+    <value>Test execution</value>
+  </data>
+  <data name="Stage_Execution_Lead" xml:space="preserve">
+    <value>Run the tests against a real application in a real browser, and keep enough evidence that a failure can be acted on without being reproduced first.</value>
+  </data>
+  <data name="Stage_Execution_Why" xml:space="preserve">
+    <value>A run that says “failed” and nothing else sends a person back to reproduce it, which is where most of the cost of a defect is. A run worth having names the step, keeps the screenshot of the moment it went wrong, and distinguishes the application being broken from the test infrastructure being broken.</value>
+  </data>
+  <data name="Stage_Execution_Points" xml:space="preserve">
+    <value>What execution covers</value>
+  </data>
+  <data name="Stage_Execution_Point1_Title" xml:space="preserve">
+    <value>Every ending has its own name</value>
+  </data>
+  <data name="Stage_Execution_Point1_Text" xml:space="preserve">
+    <value>Passed, failed, stopped, out of time, over budget, could not run. A run that hit its budget is not a failing application, and calling it one would make the failure rate a lie.</value>
+  </data>
+  <data name="Stage_Execution_Point2_Title" xml:space="preserve">
+    <value>Evidence, kept per step</value>
+  </data>
+  <data name="Stage_Execution_Point2_Text" xml:space="preserve">
+    <value>A screenshot and a timestamp for each step, so the failure arrives with the picture of what the application actually showed.</value>
+  </data>
+  <data name="Stage_Execution_Point3_Title" xml:space="preserve">
+    <value>The browser runs where it cannot reach anything</value>
+  </data>
+  <data name="Stage_Execution_Point3_Text" xml:space="preserve">
+    <value>Out of process, behind a proxy that refuses every address but the one being tested, judging where a connection actually goes rather than what it is called.</value>
+  </data>
+  <data name="Stage_Execution_Today" xml:space="preserve">
+    <value>Built, and the only stage that is. A browser is driven against a real application out of process, runs are stored with their steps and screenshots, and one organization cannot see another’s. What is not built: a container for each run, and any target other than our own demo application.</value>
+  </data>
+  <data name="Stage_Defects_Overline" xml:space="preserve">
+    <value>Testing journey · 5</value>
+  </data>
+  <data name="Stage_Defects_Title" xml:space="preserve">
+    <value>Defect management</value>
+  </data>
+  <data name="Stage_Defects_Lead" xml:space="preserve">
+    <value>Report what went wrong so that somebody can fix it, and keep the link back to the test and the requirement it came from.</value>
+  </data>
+  <data name="Stage_Defects_Why" xml:space="preserve">
+    <value>Most of the time lost to a defect is spent on the round trip: a report too thin to act on, a developer who cannot reproduce it, a tester who has moved on. A defect raised out of a run already carries the steps, the evidence and the environment, which removes the round trip rather than speeding it up.</value>
+  </data>
+  <data name="Stage_Defects_Points" xml:space="preserve">
+    <value>What defect management covers</value>
+  </data>
+  <data name="Stage_Defects_Point1_Title" xml:space="preserve">
+    <value>Raised from the run</value>
+  </data>
+  <data name="Stage_Defects_Point1_Text" xml:space="preserve">
+    <value>The failing step, its screenshot and its timings become the report, so nothing has to be described twice or from memory.</value>
+  </data>
+  <data name="Stage_Defects_Point2_Title" xml:space="preserve">
+    <value>A lifecycle somebody agreed to</value>
+  </data>
+  <data name="Stage_Defects_Point2_Text" xml:space="preserve">
+    <value>Triage, severity and status that mean the same thing to everyone, with the history of who changed what kept.</value>
+  </data>
+  <data name="Stage_Defects_Point3_Title" xml:space="preserve">
+    <value>Links in both directions</value>
+  </data>
+  <data name="Stage_Defects_Point3_Text" xml:space="preserve">
+    <value>From the defect to the test, the requirement and the run; and from a requirement to every defect found against it.</value>
+  </data>
+  <data name="Stage_Defects_Today" xml:space="preserve">
+    <value>Not built. A failed run keeps its step, message and screenshot, which is the raw material; there is no defect record, no triage and no synchronisation with an issue tracker.</value>
+  </data>
+  <data name="Stage_Reporting_Overline" xml:space="preserve">
+    <value>Testing journey · 6</value>
+  </data>
+  <data name="Stage_Reporting_Title" xml:space="preserve">
+    <value>Reporting and release readiness</value>
+  </data>
+  <data name="Stage_Reporting_Lead" xml:space="preserve">
+    <value>Say what the testing found, what it did not cover, and whether the exit criteria agreed at the start have actually been met.</value>
+  </data>
+  <data name="Stage_Reporting_Why" xml:space="preserve">
+    <value>The question at the end is always the same: do we ship? A report answers it badly by counting tests, and well by comparing what was found against what was agreed — including the parts nobody tested, which is the number most reports quietly leave out.</value>
+  </data>
+  <data name="Stage_Reporting_Points" xml:space="preserve">
+    <value>What reporting covers</value>
+  </data>
+  <data name="Stage_Reporting_Point1_Title" xml:space="preserve">
+    <value>Coverage, including its gaps</value>
+  </data>
+  <data name="Stage_Reporting_Point1_Text" xml:space="preserve">
+    <value>What was tested against what was planned, with the untested parts named rather than omitted.</value>
+  </data>
+  <data name="Stage_Reporting_Point2_Title" xml:space="preserve">
+    <value>Trends, not snapshots</value>
+  </data>
+  <data name="Stage_Reporting_Point2_Text" xml:space="preserve">
+    <value>How results, flake and defect ages move over releases, because one run tells you almost nothing.</value>
+  </data>
+  <data name="Stage_Reporting_Point3_Title" xml:space="preserve">
+    <value>A readiness decision with its reasons attached</value>
+  </data>
+  <data name="Stage_Reporting_Point3_Text" xml:space="preserve">
+    <value>The exit criteria, which of them hold, and who signed it off — kept, so the decision can be reviewed afterwards.</value>
+  </data>
+  <data name="Stage_Reporting_Today" xml:space="preserve">
+    <value>Not built. Runs are stored, so the data a report would draw on is beginning to exist; there are no dashboards, no trends and no readiness report.</value>
+  </data>
 </root>

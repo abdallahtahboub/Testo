@@ -27,3 +27,10 @@ Blazor types (component `Type`, `RenderFragment`), and the future backend must r
 ## Alternatives considered
 - Keep everything in `Contracts`: forces a Blazor dependency on the backend.
 - One project per ISTQB stage from day one (10 modules): several would be nearly empty.
+
+## Note, 2026-11-14 — the project prefix
+
+The company and the product became **Autestiq**, and every project moved from `Testo.*` to
+`Autestiq.*` with it. The structure, the dependency rules and the reasoning above are unchanged:
+only the prefix moved, as this ADR's own wording always allowed for. The project names in the text
+above have been updated so that they match the solution a reader is looking at.

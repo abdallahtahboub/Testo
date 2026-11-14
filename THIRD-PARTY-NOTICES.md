@@ -1,6 +1,6 @@
 # Third-party notices
 
-Testo includes the third-party material listed here. NuGet packages are not listed; their
+Autestiq includes the third-party material listed here. NuGet packages are not listed; their
 licenses are part of each package.
 
 ## Fonts

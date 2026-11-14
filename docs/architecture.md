@@ -117,7 +117,7 @@ project (ADR-0013).
 
 | Project | May reference | Must NOT reference |
 |---|---|---|
-| `Contracts` | BCL only | anything UI, any other Testo project |
+| `Contracts` | BCL only | anything UI, any other Autestiq project |
 | `Platform` | `Contracts`, ASP.NET Core Components | modules, mocks, UI.Shared |
 | `UI.Shared` | `Platform`, `Contracts`, Fluent UI | modules, capabilities, mocks |
 | `Website` | `UI.Shared`, `Platform`, `Contracts` | modules, mocks |

@@ -17,11 +17,13 @@
     <Project Path="src/Testo.UI.Shared/Testo.UI.Shared.csproj" />
     <Project Path="src/Testo.Web/Testo.Web.csproj" />
     <Project Path="src/Testo.Website/Testo.Website.csproj" />
+    <Project Path="src/Testo.Worker/Testo.Worker.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Testo.Application.Tests/Testo.Application.Tests.csproj" />
     <Project Path="tests/Testo.E2E/Testo.E2E.csproj" />
     <Project Path="tests/Testo.Mocks.Tests/Testo.Mocks.Tests.csproj" />
     <Project Path="tests/Testo.UI.Tests/Testo.UI.Tests.csproj" />
+    <Project Path="tests/Testo.Worker.Tests/Testo.Worker.Tests.csproj" />
   </Folder>
 </Solution>

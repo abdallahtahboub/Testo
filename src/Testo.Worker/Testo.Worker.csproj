@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The process that drives a browser (ADR-0018). One run, then it is destroyed.
+       It has no database, no cloud role and no way to name an organization: it receives a job
+       and returns a result naming its run. It references Testo.Contracts for that protocol and
+       nothing else of ours. -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Testo.Contracts/Testo.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Playwright" />
+  </ItemGroup>
+
+</Project>

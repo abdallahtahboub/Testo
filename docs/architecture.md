@@ -54,6 +54,7 @@ src/
   Testo.Domain                   // BUILT (M3): entities and rules (ADR-0014)
   Testo.Application              // BUILT (M3): use cases; implements the Contracts interfaces
   Testo.Persistence              // BUILT (M3): EF Core, PostgreSQL, migrations
+  Testo.Worker                   // BUILT (M3.3): drives a browser, out of process, in a container
   Testo.Api                      // PLANNED: REST host for CI integrations, over the same use cases
 tests/
   Testo.UI.Tests                 // bUnit: UI.Shared components + module components
@@ -119,6 +120,7 @@ project (ADR-0013).
 | `Domain` | `Contracts` | anything UI, EF Core, ASP.NET Core Identity |
 | `Persistence` | `Domain`, `Contracts`, EF Core, Identity stores | anything UI, the application layer |
 | `Application` | `Domain`, `Persistence`, `Contracts` | anything UI, ASP.NET Core Identity |
+| `Worker` | `Contracts`, Playwright | **everything else.** No database, no Identity, no UI, no Application. It is treated as already compromised (ADR-0018) |
 | `Api` *(planned)* | `Application`, `Contracts` | anything UI |
 | `Web` | everything (composition root only, no business UI) | — |
 

@@ -12,6 +12,7 @@ public class DependencyRulesTests
     private const string Domain = "Testo.Domain";
     private const string Persistence = "Testo.Persistence";
     private const string Application = "Testo.Application";
+    private const string Worker = "Testo.Worker";
     private const string Platform = "Testo.Platform";
     private const string UiShared = "Testo.UI.Shared";
     private const string Host = "Testo.Web";
@@ -23,6 +24,7 @@ public class DependencyRulesTests
         (Domain, [Contracts]),
         (Persistence, [Contracts, Domain]),
         (Application, [Contracts, Domain, Persistence]),
+        (Worker, [Contracts]),
         (Platform, [Contracts]),
         (UiShared, [Contracts, Platform]),
         ("Testo.Website", [Contracts, Platform, UiShared]),

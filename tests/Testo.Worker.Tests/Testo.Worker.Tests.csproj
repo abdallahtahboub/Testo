@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The egress policy is the single point of enforcement for everything the browser does
+       (ADR-0018), so a bug here is a full bypass. These are the address shapes of
+       docs/execution-threat-model.md §4.1, one test each. -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Testo.Worker\Testo.Worker.csproj" />
+  </ItemGroup>
+
+</Project>

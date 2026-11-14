@@ -165,6 +165,7 @@ public static class PlanJson
         "waitfor" => ActionKind.WaitFor,
         "asserttext" => ActionKind.AssertText,
         "assertvisible" => ActionKind.AssertVisible,
+        "assertnotvisible" => ActionKind.AssertNotVisible,
         "asserturl" => ActionKind.AssertUrl,
         _ => null,
     };

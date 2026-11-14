@@ -167,6 +167,24 @@ public class PlanJsonTests
     }
 
     [Fact]
+    public void Read_AnAbsenceAssertion_IsUnderstood()
+    {
+        var plan = PlanJson.Read(
+            """
+            {
+              "actions": [
+                { "kind": "assertNotVisible", "description": "The cup is gone", "target": { "kind": "testId", "value": "line-cup" } }
+              ]
+            }
+            """);
+
+        var action = Assert.Single(plan!.Actions);
+
+        Assert.Equal(ActionKind.AssertNotVisible, action.Kind);
+        Assert.True(action.IsAssertion);
+    }
+
+    [Fact]
     public void Read_ASecretByName_KeepsTheNameAndNoValue()
     {
         var plan = PlanJson.Read(

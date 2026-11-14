@@ -34,6 +34,19 @@ public enum ActionKind
 
     /// <summary>Check that the browser is on the expected path.</summary>
     AssertUrl = 8,
+
+    /// <summary>
+    /// Check that a target is <em>not</em> on the page, or is on it and not visible.
+    /// </summary>
+    /// <remarks>
+    /// Added after the first measured benchmark run, in which the planner asked for it three times
+    /// and said why each time: half of what a person wants checked is an absence. "The cup is gone
+    /// from the basket", "there is no way to place an order", "the error is no longer shown".
+    /// Without it a plan can only assert what is there, which cannot catch a defect whose symptom
+    /// is that something stayed. ADR-0019 §2 records the decision; it adds no new capability, since
+    /// the executor already has to locate the element either way.
+    /// </remarks>
+    AssertNotVisible = 9,
 }
 
 /// <summary>How a target is named. Two ways, both stable, neither of them a selector language.</summary>
@@ -94,5 +107,6 @@ public sealed record PlannedAction(
 {
     /// <summary>Whether this action checks something, as opposed to doing something.</summary>
     public bool IsAssertion =>
-        Kind is ActionKind.AssertText or ActionKind.AssertVisible or ActionKind.AssertUrl;
+        Kind is ActionKind.AssertText or ActionKind.AssertVisible or ActionKind.AssertUrl
+            or ActionKind.AssertNotVisible;
 }

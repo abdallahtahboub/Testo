@@ -72,6 +72,7 @@ public class PlanVocabularyTests
         string[] expected =
         [
             "Goto", "Click", "Type", "Press", "WaitFor", "AssertText", "AssertVisible", "AssertUrl",
+            "AssertNotVisible",
         ];
 
         Assert.Equal(expected.Order(StringComparer.Ordinal), Enum.GetNames<ActionKind>().Order(StringComparer.Ordinal));

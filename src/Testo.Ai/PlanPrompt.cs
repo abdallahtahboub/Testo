@@ -35,13 +35,14 @@ public static class PlanPrompt
             { "kind": "waitFor",       "description": "...", "target": { "kind": "roleAndName", "role": "heading", "value": "Basket" } },
             { "kind": "assertText",    "description": "...", "target": { "kind": "testId", "value": "basket-total" }, "text": "£53.25" },
             { "kind": "assertVisible", "description": "...", "target": { "kind": "testId", "value": "line-pot" } },
+            { "kind": "assertNotVisible", "description": "...", "target": { "kind": "testId", "value": "line-pot" } },
             { "kind": "assertUrl",     "description": "...", "path": "/checkout" }
           ]
         }
 
         Rules, all of which are enforced after you answer:
 
-        - Those nine kinds and no others. There is no action that runs code, evaluates an
+        - Those ten kinds and no others. There is no action that runs code, evaluates an
           expression, or takes a CSS or XPath selector, and no way to express one.
         - A target is either a testId or a roleAndName, with role one of: button, link, textbox,
           checkbox, radio, combobox, heading.
@@ -52,6 +53,9 @@ public static class PlanPrompt
         - Never type a password or any other secret as text. Use secretName, with one of the names
           you are given; you are never told the values.
         - Prefer a testId over a roleAndName when the page offers one: it survives wording changes.
+        - Use assertNotVisible for what should be absent: a line gone from a basket, a button that
+          should not be offered, an error that should no longer be shown. An absence is half of what
+          a person wants checked, and asserting the opposite presence instead is not the same test.
         - If the description asks for something the application plainly cannot do, write a plan for
           the part it can do and say the rest in notes. Do not invent a passing test.
 

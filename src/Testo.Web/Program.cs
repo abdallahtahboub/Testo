@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.FeatureManagement;
 using Testo.Application;
+using Testo.Application.Execution;
 using Testo.Application.Identity;
 using Testo.Mocks;
 using Testo.Modules.Analysis;
@@ -22,6 +23,7 @@ using Testo.UI.Shared.Identity;
 using Testo.UI.Shared.Theming;
 using Testo.Web.Antiforgery;
 using Testo.Web.Components;
+using Testo.Web.Execution;
 using Testo.Web.Features;
 using Testo.Web.Identity;
 using Testo.Web.Localization;
@@ -76,6 +78,11 @@ var connectionString = builder.Configuration.GetConnectionString("Testo")
         + "See README.md for how to get a PostgreSQL to point it at.");
 
 builder.Services.AddTestoApplication(connectionString);
+builder.Services.Configure<ExecutionOptions>(builder.Configuration.GetSection(ExecutionOptions.SectionName));
+builder.Services.Configure<ArtifactStoreOptions>(builder.Configuration.GetSection(ArtifactStoreOptions.SectionName));
+
+// Runs are carried out by a worker process, outside this one (ADR-0018).
+builder.Services.AddTestoRunDispatcher();
 
 // Feature modules: one line each. A module brings its own pages, services, navigation and widgets.
 builder.Services.AddTestoModule<PlanningModule>();
@@ -137,6 +144,7 @@ app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapPreferenceEndpoints();
+app.MapArtifactEndpoints();
 
 // The bare address leads to the home page in the visitor's language.
 app.MapGet("/", (HttpContext context) =>

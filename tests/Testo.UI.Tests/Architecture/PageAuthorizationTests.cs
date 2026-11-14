@@ -29,8 +29,7 @@ public class PageAuthorizationTests
 
     /// <summary>Every routable page, in the host, the website and every module.</summary>
     private static IEnumerable<Type> RoutablePages =>
-        SourceProjects.Names
-            .Select(Assembly.Load)
+        SourceProjects.LoadableAssemblies
             .SelectMany(assembly => assembly.GetExportedTypes())
             .Where(IsRoutable);
 

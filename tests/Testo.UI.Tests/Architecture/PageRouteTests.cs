@@ -44,9 +44,8 @@ public class PageRouteTests
 
     public static TheoryData<Type> AppPages =>
     [
-        .. SourceProjects.Names
-            .Where(name => name != "Testo.Website")
-            .Select(Assembly.Load)
+        .. SourceProjects.LoadableAssemblies
+            .Where(assembly => assembly != Website)
             .SelectMany(Pages),
     ];
 
@@ -111,9 +110,8 @@ public class PageRouteTests
     public void AccountPages_Exist()
     {
         // If these ever stop being found, the rule above would pass by never applying.
-        var accountPages = SourceProjects.Names
-            .Where(name => name != "Testo.Website")
-            .Select(Assembly.Load)
+        var accountPages = SourceProjects.LoadableAssemblies
+            .Where(assembly => assembly != Website)
             .SelectMany(Pages)
             .Where(page => RoutesOf(page).Any(IsAccountRoute))
             .ToList();

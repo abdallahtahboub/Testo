@@ -1,4 +1,5 @@
 using Microsoft.Playwright;
+using Testo.Contracts.Execution;
 
 namespace Testo.Worker.Scenarios;
 
@@ -13,13 +14,13 @@ namespace Testo.Worker.Scenarios;
 public static class DemoShopScenarios
 {
     /// <summary>A basket that adds up.</summary>
-    public const string HappyPath = "demo-shop.basket";
+    public const string HappyPath = Contracts.Execution.Scenarios.DemoShopBasket;
 
     /// <summary>A checkout that does not.</summary>
-    public const string KnownFailure = "demo-shop.checkout-total";
+    public const string KnownFailure = Contracts.Execution.Scenarios.DemoShopCheckoutTotal;
 
     /// <summary>A page trying to read cloud metadata, which must not reach it.</summary>
-    public const string EgressProbe = "demo-shop.egress-probe";
+    public const string EgressProbe = Contracts.Execution.Scenarios.DemoShopEgressProbe;
 
     /// <summary>Everything a run may be asked for.</summary>
     public static IReadOnlyList<Scenario> All { get; } =

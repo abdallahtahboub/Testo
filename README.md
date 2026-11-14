@@ -75,6 +75,30 @@ The site is served at `http://localhost:5080`:
 | `/en`, `/de` | Public website (static, fast, indexable per language) |
 | `/account/sign-in` | Signing in (static, posts a plain form — ADR-0016) |
 | `/app` | Product app (interactive, behind the app shell) |
+| `/app/runs` | Test runs: start a scripted scenario, watch it, stop it, run it again |
+
+### Running a test run
+
+A run needs two more things than the web application: something to run against, and the worker
+that drives the browser. Start the demo shop in one terminal and leave it there:
+
+```bash
+dotnet run --project src/Testo.DemoShop --urls http://127.0.0.1:5090
+```
+
+Build the worker once, so the dispatcher has an executable to launch:
+
+```bash
+dotnet build src/Testo.Worker
+```
+
+`appsettings.Development.json` points at both. Then start a run from `/app/runs`.
+`demo-shop-checkout-total` is the one that fails: the shop charges for the first item in the
+basket and forgets the rest, and the step that fails keeps the screenshot that shows it.
+
+The worker drives Chromium through an egress proxy of its own that refuses every address but the
+target. It needs the same browser the tests use, so install that first (below), or point
+`TESTO_BROWSER_PATH` at a Chromium you already have.
 
 ### Tests
 

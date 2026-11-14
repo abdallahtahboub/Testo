@@ -22,9 +22,15 @@ var catalogue = new (string Id, string Name, decimal Price)[]
     ("cup", "Porcelain cup", 11.25m),
 };
 
-app.MapGet("/", (HttpContext context) =>
+app.MapGet("/", (HttpContext context, string? q) =>
 {
-    var rows = string.Join("", catalogue.Select(item => $"""
+    // Search, so that the catalogue has something to type into. Case-insensitive, matching the
+    // name, and an empty query shows everything.
+    var shown = string.IsNullOrWhiteSpace(q)
+        ? catalogue
+        : [.. catalogue.Where(item => item.Name.Contains(q.Trim(), StringComparison.OrdinalIgnoreCase))];
+
+    var rows = string.Join("", shown.Select(item => $"""
         <li>
           <span data-testid="name-{item.Id}">{item.Name}</span>
           <span>{item.Price.ToString("C", CultureInfo.GetCultureInfo("en-GB"))}</span>
@@ -35,8 +41,23 @@ app.MapGet("/", (HttpContext context) =>
         </li>
         """));
 
-    return Html(Page("Catalogue", $"<h1>Catalogue</h1><ul class=\"catalogue\">{rows}</ul>"
-        + $"<p><a href=\"/basket\" data-testid=\"to-basket\">Basket ({Count(context)})</a></p>"));
+    var search = """
+        <form method="get" action="/" role="search">
+          <label for="q">Search the catalogue</label>
+          <input type="search" id="q" name="q" data-testid="search" placeholder="Search the catalogue" />
+          <button type="submit" data-testid="do-search">Search</button>
+        </form>
+        """;
+
+    var nothing = shown.Length == 0
+        ? "<p data-testid=\"no-results\">Nothing matches that.</p>"
+        : "";
+
+    return Html(Page("Catalogue", $"<h1>Catalogue</h1>{search}{nothing}<ul class=\"catalogue\">{rows}</ul>"
+        + $"<p><a href=\"/basket\" data-testid=\"to-basket\">Basket ({Count(context)})</a></p>"
+        // A link off the origin, so a test can watch the crawl not follow it. A real shop has
+        // several; one is enough to prove the rule.
+        + "<footer><a href=\"https://example.com/supplier\">Our supplier</a></footer>"));
 });
 
 app.MapPost("/basket/add", async (HttpContext context) =>

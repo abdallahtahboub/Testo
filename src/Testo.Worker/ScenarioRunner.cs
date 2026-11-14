@@ -26,11 +26,16 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
         ArgumentNullException.ThrowIfNull(job);
 
         var startedAt = timeProvider.GetUtcNow();
-        var scenario = DemoShopScenarios.Find(job.ScenarioId);
+        var scenario = ScenarioFor(job);
 
         if (scenario is null)
         {
-            return Infrastructure(job, startedAt, $"There is no scenario called '{job.ScenarioId}'.");
+            return Infrastructure(
+                job,
+                startedAt,
+                job.Task == WorkerTask.Planned
+                    ? "The job says it carries a plan and carries none."
+                    : $"There is no scenario called '{job.ScenarioId}'.");
         }
 
         var refusals = new List<string>();
@@ -59,6 +64,30 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
             return Infrastructure(job, startedAt, exception.Message, steps);
         }
     }
+
+    /// <summary>
+    /// What this job is a run of: one of ours, or a plan somebody else made.
+    /// </summary>
+    /// <remarks>
+    /// An explore job has no scenario at all — it is one step, "look at the application", and the
+    /// result it cares about is the snapshot rather than a verdict.
+    /// </remarks>
+    private static Scenario? ScenarioFor(WorkerJob job) => job.Task switch
+    {
+        WorkerTask.Planned => job.Plan is { Count: > 0 } plan ? PlannedScenario.From(job, plan) : null,
+        WorkerTask.Explore => ExploreScenario,
+        _ => DemoShopScenarios.Find(job.ScenarioId),
+    };
+
+    /// <summary>
+    /// A placeholder so an explore job has the shape of a run. Its step does nothing; the crawl
+    /// happens in <see cref="DriveAsync"/>, which is where the browser is.
+    /// </summary>
+    private static Scenario ExploreScenario { get; } = new(
+        "explore",
+        "Look at the application",
+        "Walks the target and describes what is on it, so a plan can be made against it.",
+        [new ScenarioStep("Walk the application", (_, _) => Task.CompletedTask)]);
 
     private async Task<WorkerResult> DriveAsync(
         WorkerJob job,
@@ -99,6 +128,11 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
         var page = await context.NewPageAsync().ConfigureAwait(false);
         var deadline = startedAt.Add(job.Budget.WallClock);
 
+        if (job.Task == WorkerTask.Explore)
+        {
+            return await LookAsync(job, page, steps, proxy, startedAt, budget).ConfigureAwait(false);
+        }
+
         for (var index = 0; index < scenario.Steps.Count; index++)
         {
             // Checked here as well as by the cancellation token. The token stops a step that is
@@ -138,6 +172,44 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
         }
 
         return Finish(job, RunStatus.Passed, startedAt, steps, proxy, failureReason: null);
+    }
+
+    /// <summary>
+    /// Walks the application and describes it. No verdict: an explore job is not a test, so it
+    /// passes when the crawl finished and reports what it found either way.
+    /// </summary>
+    private async Task<WorkerResult> LookAsync(
+        WorkerJob job,
+        IPage page,
+        List<WorkerStepResult> steps,
+        EgressProxy proxy,
+        DateTimeOffset startedAt,
+        CancellationToken budget)
+    {
+        var step = steps[0] with { Status = StepStatus.Running, StartedAt = timeProvider.GetUtcNow() };
+
+        try
+        {
+            var snapshot = await SiteExplorer.ExploreAsync(page, job, budget).ConfigureAwait(false);
+
+            steps[0] = step with
+            {
+                Status = StepStatus.Passed,
+                FinishedAt = timeProvider.GetUtcNow(),
+                Message = $"Described {snapshot.Pages.Count} page(s)"
+                    + (snapshot.Truncated ? $", stopping at the budget of {job.Budget.MaxPagesCrawled}." : "."),
+            };
+
+            return Finish(job, RunStatus.Passed, startedAt, steps, proxy, failureReason: null) with
+            {
+                Snapshot = snapshot,
+            };
+        }
+        catch (OperationCanceledException)
+        {
+            steps[0] = step with { Status = StepStatus.Failed, FinishedAt = timeProvider.GetUtcNow() };
+            return Finish(job, RunStatus.TimedOut, startedAt, steps, proxy, "Looking at the application ran out of time.");
+        }
     }
 
     /// <summary>Runs one step. Returns <c>null</c> when it passed, or how the run ends.</summary>
@@ -257,6 +329,11 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
         await page.ScreenshotAsync(new PageScreenshotOptions
         {
             Path = Path.Combine(job.ArtifactDirectory, file),
+
+            // A password typed into the application under test is, by necessity, in that
+            // application. It does not also have to be in evidence we keep for ninety days
+            // (threat model §4.4). The browser paints over these before the picture is taken.
+            Mask = [page.Locator("input[type=password]")],
         }).ConfigureAwait(false);
 
         return file;

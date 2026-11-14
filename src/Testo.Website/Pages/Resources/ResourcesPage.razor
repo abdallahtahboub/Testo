@@ -1,0 +1,35 @@
+@page "/en/resources"
+@page "/de/resources"
+@inject IStringLocalizer<WebsiteResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    The reading material.
+
+    Nothing is written yet, so the hub says so and points at the one thing here that is real: the
+    documents we write as we build, which are in the repository rather than on this site.
+*@
+<PageMeta Title="@L["Resources_Title"]"
+          Description="@L["Resources_MetaDescription"]"
+          Path="@PublicPages.Resources" />
+
+<PageHero Overline="@L["Nav_Resources"]" Title="@L["Resources_Title"]" Lead="@L["Resources_Lead"]" Narrow="true" />
+
+<PageSection>
+    <CardDeck Columns="3" Cards="@Sections" />
+</PageSection>
+
+<PageSection Narrow="true" Title="@L["Resources_Open_Title"]" Tone="PageSection.SectionTone.Subtle">
+    <p>@L["Resources_Open_Text"]</p>
+</PageSection>
+
+@code {
+    private IReadOnlyList<CardDeck.Card> Sections =>
+    [
+        new(L["Nav_Blog"], L["Resources_Blog_Text"], Href(PublicPages.Blog), IsPlaceholder: true),
+        new(L["Nav_Docs"], L["Resources_Docs_Text"], Href(PublicPages.Docs), IsPlaceholder: true),
+        new(L["Nav_CaseStudies"], L["Resources_CaseStudies_Text"], Href(PublicPages.CaseStudies), IsPlaceholder: true),
+    ];
+
+    private static string Href(string page) => LocalizedPath.For(SupportedCultures.Current, page);
+}

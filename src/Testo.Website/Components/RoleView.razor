@@ -1,0 +1,36 @@
+@inject IStringLocalizer<WebsiteResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    A page written for one role. Same shape three times: who you are, what your Tuesday looks like,
+    what would change, and which of that is real today.
+*@
+<PageMeta Title="@L[Role.TitleKey]"
+          Description="@L[Role.LeadKey]"
+          Path="@Role.Page" />
+
+<PageHero Overline="@L["Nav_Solutions"]" Title="@L[Role.TitleKey]" Lead="@L[Role.LeadKey]" Narrow="true" />
+
+<PageSection Narrow="true">
+    <p class="t-lead">@L[Role.DayKey]</p>
+</PageSection>
+
+<PageSection Title="@L[Role.PointsHeadingKey]" Tone="PageSection.SectionTone.Subtle">
+    <CardDeck Columns="3" Cards="@Points" />
+</PageSection>
+
+<PageSection Narrow="true" Title="@L["Stage_Today_Title"]">
+    <p>@L[Role.TodayKey]</p>
+    <p>
+        <a href="@LocalizedPath.For(SupportedCultures.Current, PublicPages.ProductCapabilityE2EWeb)">@L["Role_Today_Link"]</a>
+    </p>
+</PageSection>
+
+@code {
+    /// <summary>Which role this page is for.</summary>
+    [Parameter, EditorRequired]
+    public RolePage Role { get; set; } = null!;
+
+    private IReadOnlyList<CardDeck.Card> Points =>
+        [.. Role.Points.Select(point => new CardDeck.Card(L[point.TitleKey], L[point.TextKey]))];
+}

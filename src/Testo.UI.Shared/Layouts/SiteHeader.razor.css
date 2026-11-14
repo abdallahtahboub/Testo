@@ -1,0 +1,251 @@
+/* The public header. Breakpoints are the ones in docs/design-system.md §5, in rem:
+   sm 37.5rem, md 56.25rem, lg 75rem. */
+
+.site-header {
+  position: relative;
+  border-block-end: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+}
+
+.site-header__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-6);
+  padding-block: var(--space-3);
+}
+
+.site-header__brand {
+  display: inline-flex;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+}
+
+.site-header__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+}
+
+/* ---------- The menu bar ---------- */
+
+.site-nav {
+  flex: 1 1 100%;
+  order: 3;
+  min-inline-size: 0;
+}
+
+.site-nav__sections {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  /* On a narrow screen the five words scroll sideways rather than wrapping into a wall. */
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.site-nav__sections::-webkit-scrollbar {
+  display: none;
+}
+
+.site-nav__section {
+  flex: 0 0 auto;
+}
+
+.site-nav__link,
+.site-menu__summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.site-nav__link:hover,
+.site-menu__summary:hover {
+  background-color: var(--color-surface-subtle);
+}
+
+/* The browser's own marker, replaced by our chevron. */
+.site-menu__summary::-webkit-details-marker {
+  display: none;
+}
+
+.site-menu__summary {
+  list-style: none;
+}
+
+.site-menu[open] > .site-menu__summary {
+  background-color: var(--color-brand-subtle);
+  color: var(--color-brand);
+}
+
+.site-menu[open] > .site-menu__summary svg {
+  transform: rotate(180deg);
+}
+
+.site-menu__summary svg {
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+/* ---------- The panel ---------- */
+
+.site-menu__panel {
+  padding-block: var(--space-5);
+  border-block-start: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+}
+
+.site-menu__layout {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.site-menu__groups {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.site-menu__group ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-menu__heading {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.site-menu__link {
+  display: block;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.site-menu__link:hover {
+  background-color: var(--color-surface-subtle);
+}
+
+.site-menu__link-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--weight-medium);
+}
+
+.site-menu__link-text {
+  display: block;
+  margin-block-start: var(--space-1);
+  max-inline-size: 34ch;
+  color: var(--color-text-muted);
+  font-size: var(--text-body-sm);
+}
+
+/* Said in words, not by styling it differently: a visitor following this link should know
+   beforehand that the page is not written yet. */
+.site-menu__placeholder {
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-regular);
+}
+
+.site-menu__feature {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-brand-subtle);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.site-menu__feature-title {
+  font-size: var(--text-h4);
+  font-weight: var(--weight-heading);
+  line-height: var(--leading-h4);
+}
+
+.site-menu__feature-text {
+  color: var(--color-text-muted);
+  font-size: var(--text-body-sm);
+  max-inline-size: 40ch;
+}
+
+.site-menu__feature-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-block-start: auto;
+  color: var(--color-brand);
+  font-weight: var(--weight-semibold);
+}
+
+.site-menu__feature:hover .site-menu__feature-action {
+  text-decoration: underline;
+}
+
+/* ---------- Tablet and up ---------- */
+
+@media (min-width: 56.25rem) {
+  .site-menu__groups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ---------- Desktop: the panels drop out of the header ---------- */
+
+@media (min-width: 75rem) {
+  .site-nav {
+    flex: 1 1 auto;
+    order: 2;
+  }
+
+  .site-header__tools {
+    order: 3;
+  }
+
+  .site-menu__panel {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: 100%;
+    z-index: var(--z-dropdown);
+    box-shadow: var(--shadow-2);
+  }
+
+  .site-menu__layout {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-menu__summary svg {
+    transition: none;
+  }
+}

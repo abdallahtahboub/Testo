@@ -1,0 +1,38 @@
+@page "/en/solutions"
+@page "/de/solutions"
+@inject IStringLocalizer<WebsiteResources> L
+@inject IOptions<BrandOptions> Brand
+
+@* Where the role and industry pages start. *@
+<PageMeta Title="@L["Solutions_Title_Short"]"
+          Description="@L["Solutions_MetaDescription"]"
+          Path="@PublicPages.Solutions" />
+
+<PageHero Overline="@L["Nav_Solutions"]" Title="@L["Solutions_Title"]" Lead="@L["Solutions_Lead"]" Narrow="true" />
+
+<PageSection Title="@L["Solutions_Roles_Title"]" Intro="@L["Solutions_Roles_Intro"]">
+    <CardDeck Columns="3" Cards="@Roles" />
+</PageSection>
+
+<PageSection Title="@L["Solutions_Industries_Title"]" Intro="@L["Solutions_Industries_Intro"]" Tone="PageSection.SectionTone.Subtle">
+    <CardDeck Columns="3" Cards="@Industries" />
+</PageSection>
+
+@code {
+    private IReadOnlyList<CardDeck.Card> Roles =>
+    [
+        .. RolePages.All.Select(role => new CardDeck.Card(
+            L[role.TitleKey],
+            L[role.LeadKey],
+            LocalizedPath.For(SupportedCultures.Current, role.Page))),
+    ];
+
+    private IReadOnlyList<CardDeck.Card> Industries =>
+    [
+        .. IndustryPages.All.Select(industry => new CardDeck.Card(
+            L[industry.TitleKey],
+            L[industry.LeadKey],
+            LocalizedPath.For(SupportedCultures.Current, industry.Page),
+            IsPlaceholder: true)),
+    ];
+}

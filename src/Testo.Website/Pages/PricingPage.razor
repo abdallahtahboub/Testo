@@ -1,0 +1,143 @@
+@page "/en/pricing"
+@page "/de/pricing"
+@inject IStringLocalizer<WebsiteResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    Pricing, with no prices.
+
+    A number here would be invented, and an invented price is the one placeholder a visitor acts on:
+    they budget against it, or they rule us out. So the plans describe who each one is for and what
+    it would include, the prices say they are not set, and the page asks for the conversation
+    instead.
+*@
+<PageMeta Title="@L["Pricing_Title"]"
+          Description="@L["Pricing_MetaDescription"]"
+          Path="@PublicPages.Pricing" />
+
+<PlaceholderBanner Text="@L["Pricing_Placeholder"]" />
+
+<PageHero Overline="@L["Nav_Pricing"]" Title="@L["Pricing_Title"]" Lead="@L["Pricing_Lead"]" Narrow="true" />
+
+<PageSection>
+    <ul class="plans" role="list">
+        @foreach (var plan in Plans)
+        {
+            <li class="plan @(plan.Highlighted ? "plan--highlighted" : "")">
+                <h2 class="plan__name">@plan.Name</h2>
+                <p class="plan__price">
+                    <span class="plan__amount">@L["Pricing_NoPrice"]</span>
+                    <span class="plan__period">@L["Pricing_NoPrice_Note"]</span>
+                </p>
+                <p class="plan__who">@plan.Who</p>
+                <ul class="plan__includes" role="list">
+                    @foreach (var line in plan.Includes)
+                    {
+                        <li>@line</li>
+                    }
+                </ul>
+                <TButton Href="@Href(PublicPages.RequestDemo)"
+                         Variant="@(plan.Highlighted ? ButtonVariant.Primary : ButtonVariant.Secondary)"
+                         FullWidth="true">
+                    @L["Pricing_Action"]
+                </TButton>
+            </li>
+        }
+    </ul>
+</PageSection>
+
+<PageSection Title="@L["Pricing_Compare_Title"]" Intro="@L["Pricing_Compare_Intro"]" Tone="PageSection.SectionTone.Subtle">
+    <div class="compare__scroll">
+        <table class="compare">
+            <caption class="t-visually-hidden">@L["Pricing_Compare_Title"]</caption>
+            <thead>
+                <tr>
+                    <th scope="col">@L["Pricing_Compare_Feature"]</th>
+                    @foreach (var plan in Plans)
+                    {
+                        <th scope="col">@plan.Name</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Comparison)
+                {
+                    <tr>
+                        <th scope="row">
+                            @row.Feature
+                            @if (!row.ExistsToday)
+                            {
+                                <span class="compare__planned">@L["Pricing_Compare_Planned"]</span>
+                            }
+                        </th>
+                        @foreach (var cell in row.Cells)
+                        {
+                            <td>@cell</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</PageSection>
+
+<PageSection Narrow="true" Title="@L["Pricing_Faq_Title"]">
+    <dl class="faq">
+        @foreach (var entry in Faq)
+        {
+            <dt>@entry.Question</dt>
+            <dd>@entry.Answer</dd>
+        }
+    </dl>
+</PageSection>
+
+@code {
+    private sealed record Plan(string Name, string Who, IReadOnlyList<string> Includes, bool Highlighted);
+
+    private sealed record ComparisonRow(string Feature, IReadOnlyList<string> Cells, bool ExistsToday);
+
+    private IReadOnlyList<Plan> Plans =>
+    [
+        new(
+            L["Pricing_Starter_Name"],
+            L["Pricing_Starter_Who"],
+            [L["Pricing_Starter_Line1"], L["Pricing_Starter_Line2"], L["Pricing_Starter_Line3"]],
+            Highlighted: false),
+        new(
+            L["Pricing_Team_Name"],
+            L["Pricing_Team_Who"],
+            [L["Pricing_Team_Line1"], L["Pricing_Team_Line2"], L["Pricing_Team_Line3"]],
+            Highlighted: true),
+        new(
+            L["Pricing_Enterprise_Name"],
+            L["Pricing_Enterprise_Who"],
+            [L["Pricing_Enterprise_Line1"], L["Pricing_Enterprise_Line2"], L["Pricing_Enterprise_Line3"]],
+            Highlighted: false),
+    ];
+
+    /// <summary>
+    /// The matrix. Every row that does not exist today is marked, so the table describes a product
+    /// rather than implying one.
+    /// </summary>
+    private IReadOnlyList<ComparisonRow> Comparison =>
+    [
+        new(L["Pricing_Row_Execution"], [L["Pricing_Yes"], L["Pricing_Yes"], L["Pricing_Yes"]], ExistsToday: true),
+        new(L["Pricing_Row_Evidence"], [L["Pricing_Yes"], L["Pricing_Yes"], L["Pricing_Yes"]], ExistsToday: true),
+        new(L["Pricing_Row_Roles"], [L["Pricing_Yes"], L["Pricing_Yes"], L["Pricing_Yes"]], ExistsToday: true),
+        new(L["Pricing_Row_Audit"], [L["Pricing_No"], L["Pricing_Yes"], L["Pricing_Yes"]], ExistsToday: true),
+        new(L["Pricing_Row_Planner"], [L["Pricing_No"], L["Pricing_Yes"], L["Pricing_Yes"]], ExistsToday: false),
+        new(L["Pricing_Row_Journey"], [L["Pricing_No"], L["Pricing_Yes"], L["Pricing_Yes"]], ExistsToday: false),
+        new(L["Pricing_Row_Integrations"], [L["Pricing_No"], L["Pricing_No"], L["Pricing_Yes"]], ExistsToday: false),
+        new(L["Pricing_Row_Sso"], [L["Pricing_No"], L["Pricing_No"], L["Pricing_Yes"]], ExistsToday: false),
+    ];
+
+    private IReadOnlyList<(string Question, string Answer)> Faq =>
+    [
+        (L["Pricing_Faq_Why_Q"], L["Pricing_Faq_Why_A"]),
+        (L["Pricing_Faq_When_Q"], L["Pricing_Faq_When_A"]),
+        (L["Pricing_Faq_Today_Q"], L["Pricing_Faq_Today_A"]),
+        (L["Pricing_Faq_Free_Q"], L["Pricing_Faq_Free_A"]),
+    ];
+
+    private static string Href(string page) => LocalizedPath.For(SupportedCultures.Current, page);
+}

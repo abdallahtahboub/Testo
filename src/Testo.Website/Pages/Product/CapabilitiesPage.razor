@@ -1,0 +1,43 @@
+@page "/en/product/capabilities"
+@page "/de/product/capabilities"
+@inject IStringLocalizer<WebsiteResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    What a capability is, and which ones exist.
+
+    One of them is real and four are not, and the cards say which is which rather than listing five
+    as though they were equivalent.
+*@
+<PageMeta Title="@L["Capabilities_Title_Short"]"
+          Description="@L["Capabilities_MetaDescription"]"
+          Path="@PublicPages.ProductCapabilities" />
+
+<PageHero Overline="@L["Nav_Product"]" Title="@L["Capabilities_Title"]" Lead="@L["Capabilities_Lead"]" Narrow="true" />
+
+<PageSection Narrow="true">
+    <p class="t-lead">@L["Capabilities_What_Text"]</p>
+    <p>@L["Capabilities_Why_Text"]</p>
+</PageSection>
+
+<PageSection Title="@L["Capabilities_List_Title"]" Tone="PageSection.SectionTone.Subtle">
+    <CardDeck Columns="2" Cards="@Kinds" />
+</PageSection>
+
+@code {
+    private IReadOnlyList<CardDeck.Card> Kinds =>
+    [
+        new(
+            L["Capabilities_Web_Title"],
+            L["Capabilities_Web_Text"],
+            LocalizedPath.For(SupportedCultures.Current, PublicPages.ProductCapabilityE2EWeb),
+            L["Capabilities_Web_Action"]),
+
+        // Four kinds that do not exist. Named because the shape of the product is a plug-in point,
+        // and marked because naming them without marking them would be a promise.
+        new(L["Capabilities_Api_Title"], L["Capabilities_Api_Text"], IsPlaceholder: true),
+        new(L["Capabilities_Performance_Title"], L["Capabilities_Performance_Text"], IsPlaceholder: true),
+        new(L["Capabilities_Security_Title"], L["Capabilities_Security_Text"], IsPlaceholder: true),
+        new(L["Capabilities_Accessibility_Title"], L["Capabilities_Accessibility_Text"], IsPlaceholder: true),
+    ];
+}

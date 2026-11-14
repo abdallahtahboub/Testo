@@ -1,0 +1,72 @@
+@inject IStringLocalizer<WebsiteResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    One stage of the testing journey, as a page.
+
+    Six pages share this because they share a shape: what the stage is for, why it is usually done
+    badly, what it covers, what exists today, and where to go next. Writing it six times would mean
+    six places to fix the next time the shape changes.
+
+    "What exists today" is not optional. Five of the six stages are a plan, and a page that
+    describes a plan in the present tense is a page that misleads a buyer.
+*@
+<PageMeta Title="@L[Stage.TitleKey]"
+          Description="@L[Stage.LeadKey]"
+          Path="@Stage.Page" />
+
+<PageHero Overline="@L[Stage.OverlineKey]" Title="@L[Stage.TitleKey]" Lead="@L[Stage.LeadKey]" Narrow="true" />
+
+<PageSection Narrow="true">
+    <p class="t-lead">@L[Stage.WhyKey]</p>
+</PageSection>
+
+<PageSection Title="@L[Stage.PointsHeadingKey]" Tone="PageSection.SectionTone.Subtle">
+    <CardDeck Columns="3" Cards="@Points" />
+</PageSection>
+
+<PageSection Narrow="true" Title="@L["Stage_Today_Title"]">
+    <div class="stage-today @(Stage.IsBuilt ? "stage-today--built" : "stage-today--planned")" data-testid="stage-today">
+        <p class="stage-today__state">
+            <TBadge Tone="@(Stage.IsBuilt ? Tone.Success : Tone.Neutral)">
+                @(Stage.IsBuilt ? L["Stage_Today_Built"] : L["Stage_Today_Planned"])
+            </TBadge>
+        </p>
+        <p>@L[Stage.TodayKey]</p>
+    </div>
+
+    <nav class="stage-journey" aria-label="@L["Stage_Journey_Nav"]">
+        @if (JourneyStages.Previous(Stage) is { } previous)
+        {
+            <a class="stage-journey__link" href="@Href(previous.Page)">
+                <TIcon Name="IconName.ChevronLeft" Size="IconSize.Small" />
+                <span>
+                    <span class="stage-journey__direction">@L["Stage_Journey_Previous"]</span>
+                    <span class="stage-journey__name">@L[previous.TitleKey]</span>
+                </span>
+            </a>
+        }
+
+        @if (JourneyStages.Next(Stage) is { } next)
+        {
+            <a class="stage-journey__link stage-journey__link--next" href="@Href(next.Page)">
+                <span>
+                    <span class="stage-journey__direction">@L["Stage_Journey_Next"]</span>
+                    <span class="stage-journey__name">@L[next.TitleKey]</span>
+                </span>
+                <TIcon Name="IconName.ChevronRight" Size="IconSize.Small" />
+            </a>
+        }
+    </nav>
+</PageSection>
+
+@code {
+    /// <summary>Which stage this page is about.</summary>
+    [Parameter, EditorRequired]
+    public StagePage Stage { get; set; } = null!;
+
+    private IReadOnlyList<CardDeck.Card> Points =>
+        [.. Stage.Points.Select(point => new CardDeck.Card(L[point.TitleKey], L[point.TextKey]))];
+
+    private static string Href(string page) => LocalizedPath.For(SupportedCultures.Current, page);
+}

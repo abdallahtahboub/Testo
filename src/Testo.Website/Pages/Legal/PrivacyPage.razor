@@ -1,0 +1,53 @@
+@page "/en/privacy"
+@page "/de/privacy"
+@inject IStringLocalizer<WebsiteResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    The privacy notice.
+
+    Not a complete GDPR notice — that needs a controller, a legal basis per purpose, retention
+    periods and a data-protection contact, and it needs a lawyer to check it. What this page can do
+    honestly is state the facts we do know about what the software does, because those are
+    verifiable from the code, and mark the rest as missing.
+*@
+<PageMeta Title="@L["Privacy_Title"]"
+          Description="@L["Privacy_Lead"]"
+          Path="@PublicPages.Privacy"
+          NoIndex="true" />
+
+<PlaceholderBanner Text="@L["Privacy_Placeholder"]" />
+
+<PageHero Title="@L["Privacy_Title"]" Lead="@L["Privacy_Lead"]" Narrow="true" />
+
+<PageSection Narrow="true" Title="@L["Privacy_Known_Title"]">
+    <p>@L["Privacy_Known_Intro"]</p>
+
+    <h3>@L["Privacy_Cookies_Title"]</h3>
+    <ul class="legal-list">
+        <li>@L["Privacy_Cookie_Culture"]</li>
+        <li>@L["Privacy_Cookie_Theme"]</li>
+        <li>@L["Privacy_Cookie_Session"]</li>
+    </ul>
+    <p>@L["Privacy_Cookies_None"]</p>
+
+    <h3>@L["Privacy_Account_Title"]</h3>
+    <p>@L["Privacy_Account_Text"]</p>
+
+    <h3>@L["Privacy_Evidence_Title"]</h3>
+    <p>@L["Privacy_Evidence_Text"]</p>
+
+    <h3>@L["Privacy_Model_Title"]</h3>
+    <p>@L["Privacy_Model_Text"]</p>
+</PageSection>
+
+<PageSection Narrow="true" Title="@L["Privacy_Missing_Title"]" Tone="PageSection.SectionTone.Subtle">
+    <p>@L["Privacy_Missing_Intro"]</p>
+    <ul class="legal-list">
+        <li>@L["Privacy_Missing_Controller"]</li>
+        <li>@L["Privacy_Missing_Basis"]</li>
+        <li>@L["Privacy_Missing_Retention"]</li>
+        <li>@L["Privacy_Missing_Processors"]</li>
+        <li>@L["Privacy_Missing_Rights"]</li>
+    </ul>
+</PageSection>

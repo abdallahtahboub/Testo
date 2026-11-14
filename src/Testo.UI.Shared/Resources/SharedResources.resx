@@ -81,9 +81,6 @@
   <data name="Site_Header_Home" xml:space="preserve">
     <value>{0} home page</value>
   </data>
-  <data name="Site_Header_OpenApp" xml:space="preserve">
-    <value>Open app</value>
-  </data>
   <data name="SkipLink_Text" xml:space="preserve">
     <value>Skip to main content</value>
   </data>
@@ -131,5 +128,44 @@
   </data>
   <data name="App_Header_SignedInAs" xml:space="preserve">
     <value>Signed in as {0}</value>
+  </data>
+  <data name="Site_Header_Nav" xml:space="preserve">
+    <value>Main navigation</value>
+  </data>
+  <data name="Site_Header_SignIn" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
+  <data name="Site_Header_RequestDemo" xml:space="preserve">
+    <value>Request a demo</value>
+  </data>
+  <data name="Site_Placeholder" xml:space="preserve">
+    <value>Placeholder</value>
+  </data>
+  <data name="Site_Footer_Nav" xml:space="preserve">
+    <value>Footer navigation</value>
+  </data>
+  <data name="Site_Footer_Pitch" xml:space="preserve">
+    <value>{0} covers the whole testing journey, from a requirement to a release you can defend.</value>
+  </data>
+  <data name="Site_Footer_Newsletter_Label" xml:space="preserve">
+    <value>Product news</value>
+  </data>
+  <data name="Site_Footer_Newsletter_Placeholder" xml:space="preserve">
+    <value>you@company.example</value>
+  </data>
+  <data name="Site_Footer_Newsletter_Action" xml:space="preserve">
+    <value>Keep me posted</value>
+  </data>
+  <data name="Site_Footer_Newsletter_Note" xml:space="preserve">
+    <value>This field is part of the design and is not connected to anything yet, so nothing is stored and nothing is sent.</value>
+  </data>
+  <data name="Cookie_Label" xml:space="preserve">
+    <value>About cookies on this site</value>
+  </data>
+  <data name="Cookie_Text" xml:space="preserve">
+    <value>This site sets three cookies and no others: your language, your theme, and — once you sign in — your session. All three are necessary for the site to work, so there is nothing here to agree to.</value>
+  </data>
+  <data name="Cookie_More" xml:space="preserve">
+    <value>Read the privacy notice</value>
   </data>
 </root>

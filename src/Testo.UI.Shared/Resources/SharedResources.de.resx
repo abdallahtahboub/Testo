@@ -81,9 +81,6 @@
   <data name="Site_Header_Home" xml:space="preserve">
     <value>{0} Startseite</value>
   </data>
-  <data name="Site_Header_OpenApp" xml:space="preserve">
-    <value>App öffnen</value>
-  </data>
   <data name="SkipLink_Text" xml:space="preserve">
     <value>Zum Hauptinhalt springen</value>
   </data>
@@ -131,5 +128,44 @@
   </data>
   <data name="App_Header_SignedInAs" xml:space="preserve">
     <value>Angemeldet als {0}</value>
+  </data>
+  <data name="Site_Header_Nav" xml:space="preserve">
+    <value>Hauptnavigation</value>
+  </data>
+  <data name="Site_Header_SignIn" xml:space="preserve">
+    <value>Anmelden</value>
+  </data>
+  <data name="Site_Header_RequestDemo" xml:space="preserve">
+    <value>Demo anfragen</value>
+  </data>
+  <data name="Site_Placeholder" xml:space="preserve">
+    <value>Platzhalter</value>
+  </data>
+  <data name="Site_Footer_Nav" xml:space="preserve">
+    <value>Navigation im Fußbereich</value>
+  </data>
+  <data name="Site_Footer_Pitch" xml:space="preserve">
+    <value>{0} begleitet den gesamten Testprozess – von der Anforderung bis zu einem Release, das Sie vertreten können.</value>
+  </data>
+  <data name="Site_Footer_Newsletter_Label" xml:space="preserve">
+    <value>Produktneuigkeiten</value>
+  </data>
+  <data name="Site_Footer_Newsletter_Placeholder" xml:space="preserve">
+    <value>sie@firma.example</value>
+  </data>
+  <data name="Site_Footer_Newsletter_Action" xml:space="preserve">
+    <value>Informiert bleiben</value>
+  </data>
+  <data name="Site_Footer_Newsletter_Note" xml:space="preserve">
+    <value>Dieses Feld gehört zum Entwurf und ist noch mit nichts verbunden: Es wird nichts gespeichert und nichts versendet.</value>
+  </data>
+  <data name="Cookie_Label" xml:space="preserve">
+    <value>Über Cookies auf dieser Website</value>
+  </data>
+  <data name="Cookie_Text" xml:space="preserve">
+    <value>Diese Website setzt drei Cookies und keine weiteren: Ihre Sprache, Ihr Design und – sobald Sie sich anmelden – Ihre Sitzung. Alle drei sind für den Betrieb notwendig, es gibt hier also nichts zuzustimmen.</value>
+  </data>
+  <data name="Cookie_More" xml:space="preserve">
+    <value>Datenschutzerklärung lesen</value>
   </data>
 </root>

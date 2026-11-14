@@ -37,13 +37,13 @@ public class LanguageTests(AppFixture app) : BrowserTest(app)
     public async Task SwitchingLanguage_OnAPublicPage_MovesToTheSamePageInTheOtherLanguage()
     {
         var page = await OpenAsync("/en");
-        await Expect(page.Page.SwitchButton("English")).ToHaveAttributeAsync("aria-current", "true");
+        await Expect(page.Page.LanguageButton("English")).ToHaveAttributeAsync("aria-current", "true");
 
-        await page.Page.SwitchButton("Deutsch").ClickAsync();
+        await page.Page.LanguageButton("Deutsch").ClickAsync();
 
         await Expect(page.Page).ToHaveURLAsync(App.Url("/de"));
         await Expect(page.Page.Locator("html")).ToHaveAttributeAsync("lang", "de");
-        await Expect(page.Page.SwitchButton("Deutsch")).ToHaveAttributeAsync("aria-current", "true");
+        await Expect(page.Page.LanguageButton("Deutsch")).ToHaveAttributeAsync("aria-current", "true");
 
         var cookie = await page.Page.CookieAsync(CultureCookie);
         Assert.Equal("c=de|uic=de", Uri.UnescapeDataString(cookie?.Value ?? ""));
@@ -61,7 +61,7 @@ public class LanguageTests(AppFixture app) : BrowserTest(app)
     {
         var page = await OpenAsync("/en/no-such-page?from=test");
 
-        await page.Page.SwitchButton("Deutsch").ClickAsync();
+        await page.Page.LanguageButton("Deutsch").ClickAsync();
 
         await Expect(page.Page).ToHaveURLAsync(App.Url("/de/no-such-page?from=test"));
         await Expect(page.Page.Locator("h1")).ToHaveTextAsync("Seite nicht gefunden");
@@ -88,6 +88,8 @@ public class LanguageTests(AppFixture app) : BrowserTest(app)
         await page.Page.WaitUntilInteractiveAsync();
         await Expect(page.Page.GetByTestId("formats")).ToContainTextAsync("1,234,567.89");
 
+        // Page-wide, not the header-scoped locator the public tests use: an app page has its own
+        // chrome and one language switch, so there is nothing here to be ambiguous with.
         await page.Page.SwitchButton("Deutsch").ClickAsync();
 
         await Expect(page.Page.Locator("h1")).ToHaveTextAsync("Vorschau der App-Shell");
@@ -103,11 +105,28 @@ public class LanguageTests(AppFixture app) : BrowserTest(app)
     }
 
     [Fact]
+    public async Task TheFooterSwitch_WorksAsWellAsTheHeaderOne()
+    {
+        // A public page carries the switch twice, which is what made three tests ambiguous when
+        // the footer arrived. Scoping those to the header would have quietly dropped the footer
+        // from coverage, so this covers it: the second switch is a real control, not decoration.
+        var page = await OpenAsync("/en/pricing");
+
+        await Expect(page.Page.FooterLanguageButton("English")).ToHaveAttributeAsync("aria-current", "true");
+
+        await page.Page.FooterLanguageButton("Deutsch").ClickAsync();
+
+        await Expect(page.Page).ToHaveURLAsync(App.Url("/de/pricing"));
+        await Expect(page.Page.Locator("html")).ToHaveAttributeAsync("lang", "de");
+        page.AssertNoProblems();
+    }
+
+    [Fact]
     public async Task LanguageButtons_AreNamedInTheirOwnLanguage()
     {
         var page = await OpenAsync("/en");
 
-        await Expect(page.Page.SwitchButton("English")).ToHaveAttributeAsync("lang", "en");
-        await Expect(page.Page.SwitchButton("Deutsch")).ToHaveAttributeAsync("lang", "de");
+        await Expect(page.Page.LanguageButton("English")).ToHaveAttributeAsync("lang", "en");
+        await Expect(page.Page.LanguageButton("Deutsch")).ToHaveAttributeAsync("lang", "de");
     }
 }

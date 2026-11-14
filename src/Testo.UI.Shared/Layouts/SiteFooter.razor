@@ -1,0 +1,82 @@
+@inject IStringLocalizer<SharedResources> L
+@inject IOptions<BrandOptions> Brand
+@inject LocalizedTextLookup Text
+@inject ISiteMenu Menu
+@inject TimeProvider Time
+
+@*
+    The footer. Columns from ISiteMenu, then a row that holds the things a German site must have
+    within one click: the imprint and the privacy notice.
+
+    The newsletter field is deliberately marked as going nowhere. A field that looks like it signs
+    somebody up and does not is worse than no field: it collects an address and a false
+    expectation.
+*@
+<footer class="site-footer" data-testid="site-footer">
+    <div class="t-container">
+        <div class="site-footer__top">
+            <div class="site-footer__brand">
+                <TBrand />
+                <p class="site-footer__pitch">@L["Site_Footer_Pitch", Brand.Value.ProductName]</p>
+
+                <form class="site-footer__newsletter" method="post" action="#">
+                    <label for="site-footer-newsletter">@L["Site_Footer_Newsletter_Label"]</label>
+                    <div class="site-footer__newsletter-row">
+                        <input type="email"
+                               id="site-footer-newsletter"
+                               name="email"
+                               class="t-input"
+                               autocomplete="email"
+                               aria-describedby="site-footer-newsletter-note"
+                               placeholder="@L["Site_Footer_Newsletter_Placeholder"]" />
+                        <TButton Type="submit" Variant="ButtonVariant.Secondary">@L["Site_Footer_Newsletter_Action"]</TButton>
+                    </div>
+                    <p id="site-footer-newsletter-note" class="site-footer__note">@L["Site_Footer_Newsletter_Note"]</p>
+                </form>
+            </div>
+
+            <nav class="site-footer__columns" aria-label="@L["Site_Footer_Nav"]">
+                @foreach (var group in Menu.FooterGroups)
+                {
+                    <div class="site-footer__column">
+                        @if (Text.Resolve(group.Heading) is { } heading)
+                        {
+                            <p class="site-footer__heading">@heading</p>
+                        }
+                        <ul role="list">
+                            @foreach (var link in group.Links)
+                            {
+                                <li>
+                                    <a href="@Href(link.Page)">@Text[link.Label]</a>
+                                    @if (link.IsPlaceholder)
+                                    {
+                                        <span class="site-footer__placeholder">@L["Site_Placeholder"]</span>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </nav>
+        </div>
+
+        <div class="site-footer__bottom">
+            <p class="site-footer__copyright">@L["Site_Footer_Copyright", Time.GetUtcNow().Year, Brand.Value.ProductName]</p>
+
+            <ul class="site-footer__legal" role="list">
+                @foreach (var link in Menu.LegalLinks)
+                {
+                    <li><a href="@Href(link.Page)">@Text[link.Label]</a></li>
+                }
+            </ul>
+
+            <div class="site-footer__tools">
+                <TLanguageSwitch />
+            </div>
+        </div>
+    </div>
+</footer>
+
+@code {
+    private static string Href(string page) => LocalizedPath.For(SupportedCultures.Current, page);
+}

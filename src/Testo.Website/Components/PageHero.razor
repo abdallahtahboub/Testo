@@ -1,0 +1,61 @@
+@*
+    The top of a public page: what this is, in one line, and the one or two things to do next.
+
+    Used by every page so that the first screen of the site is consistent, and so that a new page
+    cannot forget to say what it is about.
+*@
+<section class="page-hero @(Narrow ? "page-hero--narrow" : "")">
+    <div class="t-container page-hero__inner">
+        <div class="page-hero__copy">
+            @if (Overline is { Length: > 0 })
+            {
+                <p class="t-overline page-hero__overline">@Overline</p>
+            }
+
+            <h1 class="@(Narrow ? "" : "t-display")">@Title</h1>
+
+            @if (Lead is { Length: > 0 })
+            {
+                <p class="t-lead t-muted page-hero__lead">@Lead</p>
+            }
+
+            @if (Actions is not null)
+            {
+                <div class="page-hero__actions">@Actions</div>
+            }
+        </div>
+
+        @if (Art is not null)
+        {
+            <div class="page-hero__art">@Art</div>
+        }
+    </div>
+</section>
+
+@code {
+    /// <summary>A short label above the heading, such as the section this page belongs to.</summary>
+    [Parameter]
+    public string? Overline { get; set; }
+
+    /// <summary>The page's one heading.</summary>
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    /// <summary>One or two sentences saying what the page is about.</summary>
+    [Parameter]
+    public string? Lead { get; set; }
+
+    /// <summary>What to do next. Usually one primary and one quieter link.</summary>
+    [Parameter]
+    public RenderFragment? Actions { get; set; }
+
+    /// <summary>An illustration beside the copy, on the pages that have one.</summary>
+    [Parameter]
+    public RenderFragment? Art { get; set; }
+
+    /// <summary>
+    /// A quieter hero for a page deep in the site. The home page shouts; a sub-page should not.
+    /// </summary>
+    [Parameter]
+    public bool Narrow { get; set; }
+}

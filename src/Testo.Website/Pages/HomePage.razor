@@ -3,45 +3,98 @@
 @inject IStringLocalizer<WebsiteResources> L
 @inject IOptions<BrandOptions> Brand
 
-@* Placeholder home page for Milestone 1. Milestone 3 replaces it with the real one. *@
-<PageTitle>@L["Home_PageTitle", Brand.Value.ProductName]</PageTitle>
-<HeadContent>
-    <meta name="description" content="@L["Home_MetaDescription", Brand.Value.ProductName]" />
-</HeadContent>
+@*
+    The home page.
 
-<section class="home-hero">
-    <div class="t-container home-hero__inner">
-        <div class="home-hero__copy">
-            <p class="t-overline home-hero__overline">@L["Home_Hero_Overline"]</p>
-            <h1 class="t-display">@L["Home_Hero_Title"]</h1>
-            <p class="t-lead t-muted">@L["Home_Hero_Lead", Brand.Value.ProductName]</p>
-            <div class="home-hero__actions">
-                <TButton Href="@Routes.App" Variant="ButtonVariant.Primary" Size="ButtonSize.Large">@L["Home_Hero_OpenApp"]</TButton>
-            </div>
+    It has one job that every other page depends on: say what this is, and say honestly how much of
+    it exists, before a visitor invests ten minutes finding out. The "what is real today" band sits
+    above the fold on a laptop for that reason — it is not a disclaimer at the bottom.
+
+    There are no customer logos. A row of logos belonging to companies that have not used this
+    would be the single most dishonest thing on the site, and the section that would hold them says
+    so instead.
+*@
+<PageMeta Title="@L["Home_PageTitle_Short"]"
+          Description="@L["Home_MetaDescription", Brand.Value.ProductName]"
+          Path="@PublicPages.Home" />
+
+<PageHero Overline="@L["Home_Hero_Overline"]" Title="@L["Home_Hero_Title"]" Lead="@L["Home_Hero_Lead", Brand.Value.ProductName]">
+    <Actions>
+        <TButton Href="@Href(PublicPages.ProductCapabilityE2EWeb)" Variant="ButtonVariant.Primary" Size="ButtonSize.Large">
+            @L["Home_Hero_SeeARun"]
+        </TButton>
+        <TButton Href="@Href(PublicPages.RequestDemo)" Variant="ButtonVariant.Secondary" Size="ButtonSize.Large">
+            @L["Nav_RequestDemo"]
+        </TButton>
+    </Actions>
+    <Art>
+        <JourneyIllustration />
+    </Art>
+</PageHero>
+
+@* Said early, where it cannot be mistaken for small print. *@
+<PageSection Tone="PageSection.SectionTone.Subtle">
+    <div class="home-state" data-testid="home-state">
+        <div class="home-state__now">
+            <p class="home-state__label">@L["Home_State_Now_Label"]</p>
+            <p class="home-state__text">@L["Home_State_Now_Text"]</p>
+            <a href="@Href(PublicPages.ProductCapabilityE2EWeb)">@L["Home_State_Now_Link"]</a>
         </div>
-        <div class="home-hero__art">
-            <JourneyIllustration />
+        <div class="home-state__next">
+            <p class="home-state__label">@L["Home_State_Next_Label"]</p>
+            <p class="home-state__text">@L["Home_State_Next_Text"]</p>
+            <a href="@Href(PublicPages.Product)">@L["Home_State_Next_Link"]</a>
         </div>
     </div>
-</section>
+</PageSection>
 
-<section class="home-foundation" aria-labelledby="home-foundation-title">
-    <div class="t-container">
-        <h2 id="home-foundation-title">@L["Home_Foundation_Title"]</h2>
-        <p class="t-lead t-muted home-foundation__intro">@L["Home_Foundation_Intro"]</p>
-        <ul class="home-foundation__cards" role="list">
-            <li class="home-card">
-                <h3>@L["Home_Card_Tokens_Title"]</h3>
-                <p>@L["Home_Card_Tokens_Text"]</p>
-            </li>
-            <li class="home-card">
-                <h3>@L["Home_Card_Languages_Title"]</h3>
-                <p>@L["Home_Card_Languages_Text"]</p>
-            </li>
-            <li class="home-card">
-                <h3>@L["Home_Card_Themes_Title"]</h3>
-                <p>@L["Home_Card_Themes_Text"]</p>
-            </li>
-        </ul>
+<PageSection Title="@L["Home_Why_Title"]" Intro="@L["Home_Why_Intro"]">
+    <CardDeck Columns="3" Cards="@Pillars" />
+</PageSection>
+
+<PageSection Title="@L["Home_Journey_Title"]" Intro="@L["Home_Journey_Intro"]" Tone="PageSection.SectionTone.Subtle">
+    <CardDeck Columns="3" Cards="@Stages" />
+</PageSection>
+
+<PageSection Narrow="true" Title="@L["Home_Proof_Title"]">
+    @*
+        Where the customer logos would go. They are not here because there are no customers, and a
+        row of borrowed logos is the kind of thing a buyer checks.
+    *@
+    <p class="t-lead">@L["Home_Proof_Lead"]</p>
+    <p>@L["Home_Proof_Text"]</p>
+    <p>
+        <a href="@Href(PublicPages.About)">@L["Home_Proof_Link"]</a>
+    </p>
+</PageSection>
+
+<PageSection Title="@L["Home_Cta_Title"]" Intro="@L["Home_Cta_Intro"]" Tone="PageSection.SectionTone.Subtle">
+    <div class="home-cta">
+        <TButton Href="@Href(PublicPages.RequestDemo)" Variant="ButtonVariant.Primary" Size="ButtonSize.Large">
+            @L["Nav_RequestDemo"]
+        </TButton>
+        <TButton Href="@Href(PublicPages.Contact)" Variant="ButtonVariant.Secondary" Size="ButtonSize.Large">
+            @L["Home_Cta_Contact"]
+        </TButton>
     </div>
-</section>
+</PageSection>
+
+@code {
+    private IReadOnlyList<CardDeck.Card> Pillars =>
+    [
+        new(L["Home_Pillar_Evidence_Title"], L["Home_Pillar_Evidence_Text"]),
+        new(L["Home_Pillar_Journey_Title"], L["Home_Pillar_Journey_Text"]),
+        new(L["Home_Pillar_Bounded_Title"], L["Home_Pillar_Bounded_Text"]),
+    ];
+
+    private IReadOnlyList<CardDeck.Card> Stages =>
+    [
+        .. JourneyStages.All.Select(stage => new CardDeck.Card(
+            L[stage.TitleKey],
+            L[stage.LeadKey],
+            Href(stage.Page),
+            L[stage.IsBuilt ? "Product_Stage_Available" : "Product_Stage_Planned"])),
+    ];
+
+    private static string Href(string page) => LocalizedPath.For(SupportedCultures.Current, page);
+}

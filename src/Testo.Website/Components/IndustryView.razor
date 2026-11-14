@@ -1,0 +1,29 @@
+@inject IStringLocalizer<WebsiteResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    An industry page: a real URL, a real heading, and an unmistakable statement that the content is
+    not written. It is excluded from search engines, because a placeholder that ranks is a
+    placeholder a stranger reads first.
+*@
+<PageMeta Title="@L[Industry.TitleKey]"
+          Description="@L[Industry.LeadKey]"
+          Path="@Industry.Page"
+          NoIndex="true" />
+
+<PlaceholderBanner Text="@L["Industry_Placeholder"]" />
+
+<PageHero Overline="@L["Nav_Solutions_ByIndustry"]" Title="@L[Industry.TitleKey]" Lead="@L[Industry.LeadKey]" Narrow="true" />
+
+<PageSection Narrow="true">
+    <p>@L["Industry_Body"]</p>
+    <p>
+        <a href="@LocalizedPath.For(SupportedCultures.Current, PublicPages.Contact)">@L["Industry_Contact"]</a>
+    </p>
+</PageSection>
+
+@code {
+    /// <summary>Which industry.</summary>
+    [Parameter, EditorRequired]
+    public IndustryPage Industry { get; set; } = null!;
+}

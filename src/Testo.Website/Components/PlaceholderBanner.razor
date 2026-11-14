@@ -1,0 +1,23 @@
+@inject IStringLocalizer<WebsiteResources> L
+
+@*
+    Says, at the top of the page and before anything else, that what follows is not real yet.
+
+    The rule is in CLAUDE.md — placeholders are visibly labeled — and the reason is that a
+    convincing-looking page of invented facts is worse than an empty one: somebody quotes it.
+*@
+<aside class="placeholder-banner" data-testid="placeholder-banner">
+    <div class="t-container placeholder-banner__inner">
+        <TIcon Name="IconName.Info" />
+        <p>
+            <strong>@L["Placeholder_Title"]</strong>
+            @(Text ?? L["Placeholder_Text"].Value)
+        </p>
+    </div>
+</aside>
+
+@code {
+    /// <summary>What specifically is missing, when the page can say something more useful.</summary>
+    [Parameter]
+    public string? Text { get; set; }
+}

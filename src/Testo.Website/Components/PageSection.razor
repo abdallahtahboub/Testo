@@ -1,0 +1,91 @@
+@*
+    One band of a page: an optional heading, an optional intro, and whatever the page puts in it.
+
+    Every section gets its own heading id so the landmark is labelled, because a page of unlabelled
+    regions is a page a screen-reader user has to read in full to navigate.
+*@
+<section class="page-section page-section--@(Tone.ToString().ToLowerInvariant())"
+         aria-labelledby="@(Title is { Length: > 0 } ? HeadingId : null)">
+    <div class="t-container @(Narrow ? "t-container--narrow" : "")">
+        @if (Title is { Length: > 0 })
+        {
+            <div class="page-section__head">
+                @if (Overline is { Length: > 0 })
+                {
+                    <p class="t-overline">@Overline</p>
+                }
+                <h2 id="@HeadingId">@Title</h2>
+                @if (Intro is { Length: > 0 })
+                {
+                    <p class="t-lead t-muted page-section__intro">@Intro</p>
+                }
+            </div>
+        }
+
+        @ChildContent
+    </div>
+</section>
+
+@code {
+    /// <summary>How the band is shaded, so long pages do not read as one wall.</summary>
+    public enum SectionTone
+    {
+        /// <summary>The page background.</summary>
+        Plain,
+
+        /// <summary>A slightly recessed band.</summary>
+        Subtle,
+    }
+
+    /// <summary>The section's heading. Leave it out for a band with no heading of its own.</summary>
+    [Parameter]
+    public string? Title { get; set; }
+
+    /// <summary>A short label above the heading.</summary>
+    [Parameter]
+    public string? Overline { get; set; }
+
+    /// <summary>One or two sentences under the heading.</summary>
+    [Parameter]
+    public string? Intro { get; set; }
+
+    /// <summary>The section's content.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>Shading.</summary>
+    [Parameter]
+    public SectionTone Tone { get; set; } = SectionTone.Plain;
+
+    /// <summary>Constrains the content to a readable measure, for text-heavy pages.</summary>
+    [Parameter]
+    public bool Narrow { get; set; }
+
+    /// <summary>
+    /// A stable id per section, so that two sections on one page do not label each other. Derived
+    /// from the heading rather than a counter, because a counter changes when a section moves.
+    /// </summary>
+    private string HeadingId => "section-" + Slug(Title ?? "");
+
+    private static string Slug(string text)
+    {
+        var slug = new System.Text.StringBuilder(text.Length);
+        var dash = false;
+
+        foreach (var character in text.ToLowerInvariant())
+        {
+            if (char.IsAsciiLetterOrDigit(character))
+            {
+                slug.Append(character);
+                dash = false;
+            }
+            else if (!dash && slug.Length > 0)
+            {
+                slug.Append('-');
+                dash = true;
+            }
+        }
+
+        return slug.ToString().Trim('-');
+    }
+}

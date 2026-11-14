@@ -70,6 +70,11 @@
         <script src="@Assets["_framework/blazor.web.js"]"></script>
     }
     <script type="module" src="@Assets["_content/Testo.UI.Shared/js/theme.js"]"></script>
+    @if (!IsAppPage)
+    {
+        @* Polish for the public header's mega menu. The menu works without it (ADR-0004). *@
+        <script type="module" src="@Assets["_content/Testo.UI.Shared/js/menu.js"]"></script>
+    }
 </body>
 
 </html>

@@ -1,0 +1,74 @@
+.e2e-steps {
+  display: grid;
+  gap: var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.e2e-steps__item {
+  counter-increment: step;
+  padding-inline-start: var(--space-12);
+  position: relative;
+}
+
+.e2e-steps__item::before {
+  content: counter(step);
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 0;
+  display: grid;
+  place-items: center;
+  inline-size: var(--space-8);
+  block-size: var(--space-8);
+  border-radius: var(--radius-full);
+  background-color: var(--color-brand-subtle);
+  color: var(--color-brand);
+  font-weight: var(--weight-semibold);
+}
+
+.e2e-steps__title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-h4);
+}
+
+.e2e-steps__text {
+  margin: 0;
+  max-inline-size: 70ch;
+  color: var(--color-text-muted);
+}
+
+/* The claim we are most tempted to overstate gets the most visible frame. */
+.e2e-honesty {
+  margin-block-start: var(--space-6);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-inline-start: var(--ring-width) solid var(--color-info);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-subtle);
+}
+
+.e2e-honesty__title {
+  margin: 0 0 var(--space-2);
+  font-weight: var(--weight-semibold);
+}
+
+.e2e-honesty p:last-child {
+  margin: 0;
+}
+
+.e2e-notyet {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-6);
+  padding-inline-start: var(--space-5);
+  max-inline-size: 70ch;
+}
+
+@media (min-width: 56.25rem) {
+  .e2e-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-8);
+  }
+}

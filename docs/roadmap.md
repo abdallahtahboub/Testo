@@ -27,9 +27,9 @@
 - Base public layout and base app layout (empty shells), skip link, landmarks.
 - Theme switch (light / dark / system) persisted in a cookie, no flash on load.
 - Localization (en/de) with culture switch; resx parity test.
-- `Testo.Platform` contracts: `IFeatureModule`, registries, `ITestCapability` (no implementations yet).
+- `Autestiq.Platform` contracts: `IFeatureModule`, registries, `ITestCapability` (no implementations yet).
 - Feature management wired up.
-- Test projects: `Testo.UI.Tests` (bUnit), `Testo.Mocks.Tests`, `Testo.E2E` (Playwright) with one smoke test each.
+- Test projects: `Autestiq.UI.Tests` (bUnit), `Autestiq.Mocks.Tests`, `Autestiq.E2E` (Playwright) with one smoke test each.
 - Architecture dependency-rules test.
 - GitHub Actions CI: restore, build, unit tests, Playwright (headless Chromium), test result upload.
 
@@ -72,12 +72,12 @@ Already built in Milestone 1 and extended here: `TLinkButton`, the theme and lan
 decisions in ADR-0011 to ADR-0014.
 
 **Scope**
-- `Testo.Domain`, `Testo.Application`, `Testo.Persistence`; EF Core on PostgreSQL, migrations, a seeded development database
+- `Autestiq.Domain`, `Autestiq.Application`, `Autestiq.Persistence`; EF Core on PostgreSQL, migrations, a seeded development database
 - Organizations, users, memberships, roles, invitations, the audit log
 - Tenant isolation: the global query filter, assignment on write, the indexes — and the two-organization leak test
 - Sign in, sign out, password reset, optional TOTP; the session cookie and its protections
 - Invite, accept, change role, remove a person, with sessions ended immediately
-- `AddTestoApplication()` replacing `AddTestoMocks()` in the host; mocks kept for tests and a demo mode
+- `AddAutestiqApplication()` replacing `AddAutestiqMocks()` in the host; mocks kept for tests and a demo mode
 - CI runs the tests against a real PostgreSQL in a container
 
 **Done when:** a person can be invited, accept, sign in and see only their organization's data; the permission table in `identity-and-access.md` §2 is asserted cell by cell by a test; the tenant leak test passes across every entity; every access change appears in the audit log; the general Definition of Done is met.
@@ -136,8 +136,8 @@ Found by opening it in a browser rather than by a test, and worth remembering:
 | AI planning: interface, vocabulary, validator, provider adapter, benchmark | **Built and measured; the planner is not usable.** 5 of 12 plans work on a sound application, 1 of 6 defects genuinely caught, 1 missed. Four faults the measurement exposed are fixed and **not yet re-measured**. Nothing in the product calls a model |
 | Browser execution: worker out of process, egress proxy, signed artifact links | **Real.** Not yet a container per run (R-1) |
 | The other six feature modules | **Shells.** One class each: an id and a feature flag. No pages, no services |
-| `Testo.Capabilities.E2EWeb` | **Empty.** An `_Imports.razor` |
-| `Testo.Mocks` | **Shell.** Options and a random source. No services, no seed data |
+| `Autestiq.Capabilities.E2EWeb` | **Empty.** An `_Imports.razor` |
+| `Autestiq.Mocks` | **Shell.** Options and a random source. No services, no seed data |
 | Plans, requirements, test cases, suites, environments, defects, reporting | **Do not exist**, in any form, not even mocked |
 | Email delivery | **Deferred.** Invitation and reset links go to the log, and the application refuses to start that way outside development (D-3 closed in Milestone 3.1) |
 | Authenticator enrollment | **Deferred.** Signing in with a code works; setting one up does not |
@@ -200,8 +200,8 @@ persistence, artifacts, cancel and rerun. A worker outside the Blazor process. *
 carries replayable steps, a screenshot and timestamps; cross-tenant access is refused in adversarial
 tests; it all passes in CI.
 
-**Status: built (2026-11-14), waiting for review.** What is real: `Testo.DemoShop`, a small shop
-with a deliberate bug in its checkout; `Testo.Worker`, a separate process that drives Chromium
+**Status: built (2026-11-14), waiting for review.** What is real: `Autestiq.DemoShop`, a small shop
+with a deliberate bug in its checkout; `Autestiq.Worker`, a separate process that drives Chromium
 through an egress proxy of its own and prints a result; `test_runs`, `test_run_steps` and
 `artifacts` on PostgreSQL inside the tenant boundary; `RunDispatcher`, which claims a queued run,
 launches the worker and writes back under `TenantWriteScope`; and two pages, `/app/runs` and
@@ -313,7 +313,7 @@ a second run replaces them:
    tests a *wrong* password; it now distinguishes a real credential from a deliberately wrong one.
 
 **Still open:** the re-run. It needs a model key, which this environment cannot hold, so it is a
-command for a developer machine (`PLANNER__APIKEY=… dotnet run --project tools/Testo.Benchmark`) and
+command for a developer machine (`PLANNER__APIKEY=… dotnet run --project tools/Autestiq.Benchmark`) and
 the numbers above are what the product claims until it has been done.
 
 ---
@@ -380,7 +380,7 @@ A run against a deployed instance is still worth doing before anybody quotes the
 publicly.
 
 ## Milestone 5 — App shell + module registry
-**Scope:** the app shell on the real sign-in from Milestone 3; app shell (registry-driven left nav, top bar with project switcher, search, notifications, user menu); `Testo.Mocks` with the seed data generator and all `Mock*` services (with configurable latency/failure); dashboard rendering registered widgets: quality KPIs, run trends, open defects by severity, release readiness, recent runs; feature flags hiding unfinished modules; "module not available" page.
+**Scope:** the app shell on the real sign-in from Milestone 3; app shell (registry-driven left nav, top bar with project switcher, search, notifications, user menu); `Autestiq.Mocks` with the seed data generator and all `Mock*` services (with configurable latency/failure); dashboard rendering registered widgets: quality KPIs, run trends, open defects by severity, release readiness, recent runs; feature flags hiding unfinished modules; "module not available" page.
 
 **Done when:** each module registers its nav entry with one line and appears in the nav; turning a flag off hides its nav entry, widgets and routes (tested); dashboard widgets show loading, empty, error and data states (bUnit); seed-data consistency tests pass; E2E covers sign-in → dashboard → switch project.
 
@@ -400,7 +400,7 @@ Delivered **one stage at a time**, each as its own reviewable sub-milestone:
 **Done when (per module):** pages from `sitemap.md` exist with realistic mock data; bUnit tests for module components; Playwright smoke test per page; module only references `Contracts`, `Platform`, `UI.Shared` (dependency test passes); EN + DE complete.
 
 ## Milestone 7 — Live E2E Test Run view (showpiece)
-**Scope:** `Testo.Capabilities.E2EWeb` implementing `ITestCapability` (settings, run setup, live view, results); `MockTestRunLiveFeed` with scripted scenarios (passing run, failure at step 7, self-healed locator); live view with step timeline, highlighted current step, per-step status, screenshot panel (mock screenshots as generated SVGs of a fake web shop), log console with level filters and auto-scroll lock, elapsed time, stop / rerun; polite screen-reader announcements; reconnect/gap handling via `Sequence`.
+**Scope:** `Autestiq.Capabilities.E2EWeb` implementing `ITestCapability` (settings, run setup, live view, results); `MockTestRunLiveFeed` with scripted scenarios (passing run, failure at step 7, self-healed locator); live view with step timeline, highlighted current step, per-step status, screenshot panel (mock screenshots as generated SVGs of a fake web shop), log console with level filters and auto-scroll lock, elapsed time, stop / rerun; polite screen-reader announcements; reconnect/gap handling via `Sequence`.
 
 **Done when:** adding the capability required only the new project + one registration line (verified in the PR diff); reducer and component tests run with a fake `TimeProvider` (no real waiting); E2E watches a mock run to completion and asserts the final status; stop and rerun work; reduced-motion mode verified.
 
@@ -412,7 +412,7 @@ Delivered **one stage at a time**, each as its own reviewable sub-milestone:
 ---
 
 ## Later (out of scope for the frontend phase)
-- `Testo.Api`: the REST host for CI integrations, over the same use cases (ADR-0014).
+- `Autestiq.Api`: the REST host for CI integrations, over the same use cases (ADR-0014).
 - SignalR for the live run feed, replacing the simulated one.
 - Per-organization single sign-on (OpenID Connect), behind the interfaces of ADR-0013.
 - More capabilities: API, performance, security, accessibility testing.

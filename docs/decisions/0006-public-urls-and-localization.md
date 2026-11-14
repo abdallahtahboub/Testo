@@ -17,7 +17,7 @@ must be indexable per language. The app is behind sign-in and is not indexed.
   (`.AspNetCore.Culture`), then `Accept-Language`, then English.
 - **The cookie is only written on an explicit user action** (the language switch). A plain
   visit never sets it, which keeps it a "user preference" cookie that needs no consent banner.
-- Supported cultures are `en` (default) and `de`, defined once in `Testo.Platform`.
+- Supported cultures are `en` (default) and `de`, defined once in `Autestiq.Platform`.
 
 ## Consequences
 - Search engines see two separate, linked versions of every public page.

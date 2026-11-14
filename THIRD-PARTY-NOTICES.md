@@ -5,7 +5,7 @@ licenses are part of each package.
 
 ## Fonts
 
-The fonts are served from our own origin (`src/Testo.UI.Shared/wwwroot/fonts/`). No font CDN
+The fonts are served from our own origin (`src/Autestiq.UI.Shared/wwwroot/fonts/`). No font CDN
 is used, so no visitor data goes to a third party.
 
 | Family | Version | Files | License |

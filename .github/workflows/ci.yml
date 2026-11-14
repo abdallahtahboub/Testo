@@ -30,7 +30,7 @@ jobs:
       DOTNET_NOLOGO: true
       DOTNET_CLI_TELEMETRY_OPTOUT: true
       # Where the tests create a database of their own for each run.
-      TESTO_TEST_DB: "Host=localhost;Port=5432;Username=postgres;Password=postgres"
+      AUTESTIQ_TEST_DB: "Host=localhost;Port=5432;Username=postgres;Password=postgres"
 
     services:
       postgres:
@@ -56,25 +56,25 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Restore
-        run: dotnet restore Testo.slnx
+        run: dotnet restore Autestiq.slnx
 
       - name: Build
-        run: dotnet build Testo.slnx --configuration Release --no-restore
+        run: dotnet build Autestiq.slnx --configuration Release --no-restore
 
       - name: Install the browser for the Playwright tests
         run: >
-          dotnet build tests/Testo.E2E --configuration Release --no-restore
+          dotnet build tests/Autestiq.E2E --configuration Release --no-restore
           -t:InstallTestBrowser -p:PlaywrightInstallArguments="--with-deps chromium"
 
       - name: Test
-        run: dotnet test --solution Testo.slnx --configuration Release --no-build --report-xunit-trx --results-directory TestResults
+        run: dotnet test --solution Autestiq.slnx --configuration Release --no-build --report-xunit-trx --results-directory TestResults
 
       # Not the benchmark itself: that costs money and minutes. This proves the instrument can
       # see a false positive, by giving it a planner that writes a plan designed to pass without
       # testing anything and insisting it is caught. A report that says "0 false positives" means
       # nothing unless this holds.
       - name: Check the benchmark can catch a planner that only pretends
-        run: dotnet run --project tools/Testo.Benchmark --configuration Release --no-build -- --self-check
+        run: dotnet run --project tools/Autestiq.Benchmark --configuration Release --no-build -- --self-check
 
       - name: Upload test results
         if: always()

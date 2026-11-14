@@ -46,7 +46,7 @@ the ordinary case is entirely benign. The hostile parties are:
 ```
    ┌─────────────────────────────── our trust ───────────────────────────────┐
    │                                                                          │
-   │   Testo.Web ──► Testo.Application ──► PostgreSQL                        │
+   │   Autestiq.Web ──► Autestiq.Application ──► PostgreSQL                        │
    │        │                  │                                              │
    │        │                  └──► run queue                                 │
    │        │                            │                                    │

@@ -15,7 +15,7 @@ does to a static page:
 
 ## Decision
 - A page is public when it has `[ExcludeFromInteractiveRouting]`; all pages of
-  `Testo.Website` have it. `App.razor` renders public pages without `blazor.web.js`,
+  `Autestiq.Website` have it. `App.razor` renders public pages without `blazor.web.js`,
   without the import map and without the app's style bundle.
 - Public pages therefore have no enhanced navigation. Links are normal page loads.
 - `PublicPageAntiforgery` wraps the framework's antiforgery service and issues no token for

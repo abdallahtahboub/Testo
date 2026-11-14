@@ -10,11 +10,11 @@ Blazor types (component `Type`, `RenderFragment`), and the future backend must r
 `Contracts` without depending on Blazor.
 
 ## Decision
-- `Testo.Contracts`: DTOs + data service interfaces only, no UI dependencies.
-- `Testo.Platform` (new): `IFeatureModule`, `ITestCapability`, registries, route constants, event bus.
-- `Testo.Website` (new): all public marketing pages as a static-SSR Razor class library.
-- `Testo.Modules.Settings` (new): settings area that hosts capability settings UIs.
-- `Testo.Web` is only the composition root.
+- `Autestiq.Contracts`: DTOs + data service interfaces only, no UI dependencies.
+- `Autestiq.Platform` (new): `IFeatureModule`, `ITestCapability`, registries, route constants, event bus.
+- `Autestiq.Website` (new): all public marketing pages as a static-SSR Razor class library.
+- `Autestiq.Modules.Settings` (new): settings area that hosts capability settings UIs.
+- `Autestiq.Web` is only the composition root.
 - Monitoring & control and test completion live in `Modules.Reporting`; test implementation
   and regression/maintenance live in `Modules.Execution`, until they are big enough to split.
 - Dependency rules are enforced by an automated test.

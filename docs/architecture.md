@@ -26,92 +26,92 @@
 | Test runner | Microsoft.Testing.Platform, through `dotnet test` *(ADR-0010)* |
 | CI | GitHub Actions: restore → build → all tests, including Playwright |
 | Central package versions | `Directory.Packages.props`; shared settings in `Directory.Build.props` |
-| Solution file | `Testo.slnx` (the XML solution format, the default of the .NET 10 SDK) |
+| Solution file | `Autestiq.slnx` (the XML solution format, the default of the .NET 10 SDK) |
 
 ## 3. Solution structure
 
 The suggested structure is kept, with **three changes** (reasons below):
 
 ```
-Testo.slnx
+Autestiq.slnx
 Directory.Build.props            // nullable, warnings-as-errors, analyzers
 Directory.Packages.props         // central package management
 src/
-  Testo.Web                      // Blazor Web App host: Program.cs, DI composition, routing, App.razor
-  Testo.Website                  // NEW: public marketing pages (Razor class library, static SSR)
-  Testo.UI.Shared                // design system: tokens, layouts, components, icons, theme
-  Testo.Platform                 // NEW: module + capability contracts, registries (UI-side abstractions)
-  Testo.Contracts                // DTOs + data service interfaces (no UI deps; backend reuses it)
-  Testo.Modules.Planning
-  Testo.Modules.Analysis
-  Testo.Modules.Design
-  Testo.Modules.Execution        // PARTLY BUILT (M3.3): run list + one run. Suites,
+  Autestiq.Web                      // Blazor Web App host: Program.cs, DI composition, routing, App.razor
+  Autestiq.Website                  // NEW: public marketing pages (Razor class library, static SSR)
+  Autestiq.UI.Shared                // design system: tokens, layouts, components, icons, theme
+  Autestiq.Platform                 // NEW: module + capability contracts, registries (UI-side abstractions)
+  Autestiq.Contracts                // DTOs + data service interfaces (no UI deps; backend reuses it)
+  Autestiq.Modules.Planning
+  Autestiq.Modules.Analysis
+  Autestiq.Modules.Design
+  Autestiq.Modules.Execution        // PARTLY BUILT (M3.3): run list + one run. Suites,
                                  // environments and regression still to come
-  Testo.Modules.Defects
-  Testo.Modules.Reporting        // incl. monitoring & control, release readiness, completion
-  Testo.Modules.Settings         // NEW: integrations, team, capability settings host
-  Testo.Capabilities.E2EWeb      // SHELL: an _Imports.razor and nothing else
-  Testo.Mocks                    // SHELL: options and a random source only. No services, no seed data
-  Testo.Domain                   // BUILT (M3): entities and rules (ADR-0014)
-  Testo.Application              // BUILT (M3): use cases; implements the Contracts interfaces
-  Testo.Persistence              // BUILT (M3): EF Core, PostgreSQL, migrations
-  Testo.Ai                       // BUILT (M3.4): the provider adapters. Contracts only
-  Testo.DemoShop                 // BUILT (M3.3): the website the slice runs against. Not the product
-  Testo.Worker                   // BUILT (M3.3): drives a browser, out of process, in a container
+  Autestiq.Modules.Defects
+  Autestiq.Modules.Reporting        // incl. monitoring & control, release readiness, completion
+  Autestiq.Modules.Settings         // NEW: integrations, team, capability settings host
+  Autestiq.Capabilities.E2EWeb      // SHELL: an _Imports.razor and nothing else
+  Autestiq.Mocks                    // SHELL: options and a random source only. No services, no seed data
+  Autestiq.Domain                   // BUILT (M3): entities and rules (ADR-0014)
+  Autestiq.Application              // BUILT (M3): use cases; implements the Contracts interfaces
+  Autestiq.Persistence              // BUILT (M3): EF Core, PostgreSQL, migrations
+  Autestiq.Ai                       // BUILT (M3.4): the provider adapters. Contracts only
+  Autestiq.DemoShop                 // BUILT (M3.3): the website the slice runs against. Not the product
+  Autestiq.Worker                   // BUILT (M3.3): drives a browser, out of process, in a container
 
 tools/
-  Testo.Benchmark                // BUILT (M3.4): measures the planner against the baseline.
+  Autestiq.Benchmark                // BUILT (M3.4): measures the planner against the baseline.
                                  // Not shipped; run by hand, and in CI for its self-check
-  Testo.Api                      // PLANNED: REST host for CI integrations, over the same use cases
+  Autestiq.Api                      // PLANNED: REST host for CI integrations, over the same use cases
 tests/
-  Testo.UI.Tests                 // bUnit: UI.Shared components + module components
-  Testo.Mocks.Tests              // xUnit: seed data consistency, mock feed timing
-  Testo.E2E                      // Playwright: smoke per page + main flows; raw HTTP tests of the host
+  Autestiq.UI.Tests                 // bUnit: UI.Shared components + module components
+  Autestiq.Mocks.Tests              // xUnit: seed data consistency, mock feed timing
+  Autestiq.E2E                      // Playwright: smoke per page + main flows; raw HTTP tests of the host
 ```
 
 **Why the changes:**
 
 | Change | Reason |
 |---|---|
-| `Testo.Platform` split from `Contracts` | `ITestCapability` and the registries reference Blazor types (`RenderFragment`, component `Type`). `Contracts` must stay free of UI dependencies so the future ASP.NET Core backend can reference it without pulling in Blazor. |
-| `Testo.Website` split from `Web` | Keeps the host thin (composition only) and keeps all marketing pages in one static-SSR library, separate from the interactive app. Marketing can evolve independently. |
-| `Testo.Modules.Settings` | Settings is its own area and hosts capability settings UIs contributed by plug-ins. |
+| `Autestiq.Platform` split from `Contracts` | `ITestCapability` and the registries reference Blazor types (`RenderFragment`, component `Type`). `Contracts` must stay free of UI dependencies so the future ASP.NET Core backend can reference it without pulling in Blazor. |
+| `Autestiq.Website` split from `Web` | Keeps the host thin (composition only) and keeps all marketing pages in one static-SSR library, separate from the interactive app. Marketing can evolve independently. |
+| `Autestiq.Modules.Settings` | Settings is its own area and hosts capability settings UIs contributed by plug-ins. |
 | Monitoring, implementation, completion, maintenance merged into existing modules | Avoids 4 near-empty projects now. Each can be split out later; it's cheap because modules only depend on `Contracts` and `Platform`. |
 
-The app **Dashboard** and the **app shell** (left nav, top bar) live in `Testo.UI.Shared`
-(layouts) and `Testo.Web` (dashboard page that renders registered widgets).
+The app **Dashboard** and the **app shell** (left nav, top bar) live in `Autestiq.UI.Shared`
+(layouts) and `Autestiq.Web` (dashboard page that renders registered widgets).
 
 ## 4. Dependency rules
 
 ```
-                     Testo.Web (host, composition root)
+                     Autestiq.Web (host, composition root)
           ┌────────────┬────────┴─────────┬──────────────┬──────────────┐
           ▼            ▼                  ▼              ▼              ▼
-     Testo.Website  Testo.Modules.*  Testo.Capabilities.*  Testo.Mocks   (later: Testo.Client.Http)
+     Autestiq.Website  Autestiq.Modules.*  Autestiq.Capabilities.*  Autestiq.Mocks   (later: Autestiq.Client.Http)
           │            │                  │              │
           └────────────┴───────┬──────────┘              │
                                ▼                         │
-                  Testo.UI.Shared  ──►  Testo.Platform   │
+                  Autestiq.UI.Shared  ──►  Autestiq.Platform   │
                                │              │          │
                                └──────┬───────┘          │
                                       ▼                  │
-                              Testo.Contracts  ◄─────────┘
+                              Autestiq.Contracts  ◄─────────┘
                                       ▲
                                       │
-     Testo.Web ──► Testo.Application ─┴─► Testo.Domain
+     Autestiq.Web ──► Autestiq.Application ─┴─► Autestiq.Domain
                           │
-                          └──────────► Testo.Persistence ──► PostgreSQL
+                          └──────────► Autestiq.Persistence ──► PostgreSQL
 ```
 
 The host calls the application layer in process: the app pages already render on the server,
 so an HTTP hop to our own API would add latency and a failure mode for nothing (ADR-0014).
-`Testo.Api`, a later milestone, is a second host over the same use cases.
+`Autestiq.Api`, a later milestone, is a second host over the same use cases.
 
 `Domain` references `Contracts` rather than the other way round, because `Role` and `Permission`
 are vocabulary the interface, the application and the future backend all share, and one
 definition is better than two that agree by hand. `Contracts` still references nothing at all.
 
-ASP.NET Core Identity is reached only through `Testo.Persistence.Identity.CredentialService`, so
+ASP.NET Core Identity is reached only through `Autestiq.Persistence.Identity.CredentialService`, so
 the whole of that dependency is one class and swapping to an external provider changes one
 project (ADR-0013).
 
@@ -132,19 +132,19 @@ project (ADR-0013).
 | `Api` *(planned)* | `Application`, `Contracts` | anything UI |
 | `Web` | everything (composition root only, no business UI) | — |
 
-These rules are **enforced by a test** (`tests/Testo.UI.Tests/Architecture/DependencyRulesTests.cs`).
+These rules are **enforced by a test** (`tests/Autestiq.UI.Tests/Architecture/DependencyRulesTests.cs`).
 It reads the project references from the `.csproj` files, so a forbidden reference fails
 the build pipeline even before any code uses it. A project without a rule fails too, so
 every new project gets a conscious place in this table.
 
-Only `Testo.Web` references the ASP.NET Core **server** framework. All libraries use the
+Only `Autestiq.Web` references the ASP.NET Core **server** framework. All libraries use the
 portable component packages and are marked for the `browser` platform, so they cannot
 call server-only APIs by accident. That keeps WebAssembly possible later (§9).
 
 Cross-module communication only happens through:
 - **Contracts** (shared DTOs + service interfaces), and
 - **routes** (a module links to another module's page by URL constants published in
-  `Testo.Platform.Routes`, never by referencing its component types), and
+  `Autestiq.Platform.Routes`, never by referencing its component types), and
 - **events** via `IAppEventBus` in `Platform` (e.g., `DefectCreated`) for in-app notifications.
   *(Designed, not built: no such interface exists yet.)*
 
@@ -153,7 +153,7 @@ Cross-module communication only happens through:
 Each module has exactly one public entry point:
 
 ```csharp
-// Testo.Platform
+// Autestiq.Platform
 public interface IFeatureModule
 {
     string Id { get; }                          // "planning"
@@ -170,11 +170,11 @@ The three `Register…` methods do nothing by default, so a module only writes w
 Host registration (one line per module):
 
 ```csharp
-builder.Services.AddTestoModule<PlanningModule>();
-builder.Services.AddTestoModule<DefectsModule>();
+builder.Services.AddAutestiqModule<PlanningModule>();
+builder.Services.AddAutestiqModule<DefectsModule>();
 ```
 
-`AddTestoModule` registers the module (all modules are available as
+`AddAutestiqModule` registers the module (all modules are available as
 `IEnumerable<IFeatureModule>`), calls its `RegisterServices`, and rejects a second module
 with the same id. The host collects the module assemblies in `RoutableAssemblies` and
 passes them to the router and to `MapRazorComponents<App>().AddAdditionalAssemblies(...)`,
@@ -218,7 +218,7 @@ Each widget component loads its own data through service interfaces.
 ## 6. Capability plug-ins
 
 ```csharp
-// Testo.Platform
+// Autestiq.Platform
 public interface ITestCapability
 {
     string Id { get; }                      // "e2e-web"
@@ -234,20 +234,20 @@ public interface ITestCapability
 }
 ```
 
-- Registered via DI: `builder.Services.AddTestoCapability<E2EWebCapability>();` — **one line** (Milestone 6).
+- Registered via DI: `builder.Services.AddAutestiqCapability<E2EWebCapability>();` — **one line** (Milestone 6).
 - `ICapabilityRegistry` exposes all enabled capabilities.
 - Execution pages, Settings and the public "Capabilities" listing are **generic**: they
   list registered capabilities and render the capability's components with `DynamicComponent`.
-  Adding "API testing" = new `Testo.Capabilities.Api` project + one registration line.
+  Adding "API testing" = new `Autestiq.Capabilities.Api` project + one registration line.
 - Each capability may also register its own nav items/widgets through the same registries
   (it implements `IFeatureModule` too, optionally).
 
 ## 7. Data access: interfaces now, HTTP later
 
-All data comes from interfaces in `Testo.Contracts`, grouped per domain:
+All data comes from interfaces in `Autestiq.Contracts`, grouped per domain:
 
 > **Almost none of the interfaces in this table exist yet.** They are the design for the
-> testing-journey milestones. `Testo.Contracts` defines six about identity —
+> testing-journey milestones. `Autestiq.Contracts` defines six about identity —
 > `IAuthenticationService`, `ICurrentUser`, `IOrganizationContext`, `IMembershipService`,
 > `IInvitationService`, `IAuditLog` — and, since Milestone 3.3, `IExecutionService`, which is the
 > row below named `ITestRunService`: it was built under the name of the module it serves, and
@@ -285,13 +285,13 @@ Composition (later swap):
 
 ```csharp
 // now
-builder.Services.AddTestoMocks();          // Testo.Mocks, in memory
+builder.Services.AddAutestiqMocks();          // Autestiq.Mocks, in memory
 // after the identity and data milestone
-builder.Services.AddTestoApplication();    // Testo.Application, over PostgreSQL
+builder.Services.AddAutestiqApplication();    // Autestiq.Application, over PostgreSQL
 ```
 
 The user interface does not change when that line changes: it is why every service is an
-interface in `Contracts`. `Testo.Mocks` stays afterwards, for component tests and for a
+interface in `Contracts`. `Autestiq.Mocks` stays afterwards, for component tests and for a
 demo mode that needs no database (ADR-0014).
 
 Persistence, tenancy and identity are specified in [`domain-model.md`](domain-model.md)
@@ -343,7 +343,7 @@ public sealed record LogEntryWritten(...)    : TestRunEvent(...);   // level, me
 
 How a page gets its mode:
 
-- A page is **public** when it carries `[ExcludeFromInteractiveRouting]`. `Testo.Website`
+- A page is **public** when it carries `[ExcludeFromInteractiveRouting]`. `Autestiq.Website`
   applies it to all of its pages in `Pages/_Imports.razor`. Every other page is an **app page**.
 - `App.razor` asks the framework (`HttpContext.AcceptsInteractiveRouting()`) and renders
   the router either statically or with `InteractiveServer`. App pages therefore need no
@@ -388,7 +388,7 @@ There is no flash of the wrong theme even without JavaScript: the server renders
 `<html data-theme="…">` from the cookie, and "same as system" is handled by CSS alone
 (`color-scheme` and `light-dark()`, ADR-0008).
 
-All JavaScript in the repository: `Testo.UI.Shared/wwwroot/js/theme.js` (ours) and
+All JavaScript in the repository: `Autestiq.UI.Shared/wwwroot/js/theme.js` (ours) and
 `ReconnectModal.razor.js` (the reconnect dialog, unchanged from the .NET project template).
 
 ## 10. Localization
@@ -397,7 +397,7 @@ All JavaScript in the repository: `Testo.UI.Shared/wwwroot/js/theme.js` (ours) a
   so modules stay self-contained. Each project has a small marker class next to its
   resource files (for example `Resources/SharedResources.cs` + `SharedResources.resx` +
   `SharedResources.de.resx`) and injects `IStringLocalizer<SharedResources>` as `L`.
-- Cultures: `en` (default) and `de`, defined once in `Testo.Platform.Localization.SupportedCultures`.
+- Cultures: `en` (default) and `de`, defined once in `Autestiq.Platform.Localization.SupportedCultures`.
   Dates and numbers use the current culture.
 - **Public website:** the language is the first URL segment (`/en/pricing`, `/de/pricing`).
   Every page declares one literal route per language; `/` redirects to the visitor's
@@ -414,7 +414,7 @@ All JavaScript in the repository: `Testo.UI.Shared/wwwroot/js/theme.js` (ours) a
 
 - `Microsoft.FeatureManagement` with flags in `appsettings.json` (`FeatureManagement` section).
 - Naming: `Module.<Name>`, `Capability.<Name>`, `Feature.<Name>` (e.g., `Feature.AiSuggestions`).
-- UI code asks through `Testo.Platform.Features.IFeatureFlags`, not through the library.
+- UI code asks through `Autestiq.Platform.Features.IFeatureFlags`, not through the library.
   The host implements it with Microsoft.FeatureManagement today; a WebAssembly client or
   the backend can supply the flags differently later without touching UI code.
 - From Milestone 4: registries filter nav items, widgets and capabilities by flag, and a

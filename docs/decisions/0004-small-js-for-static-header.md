@@ -25,7 +25,7 @@ switch without a flash of the wrong theme, and a mobile menu with a focus trap.
   touch and screen-reader users; not good enough for WCAG 2.2 AA quality.
 
 ## Update (Milestone 1)
-The theme part is built: `Testo.UI.Shared/wwwroot/js/theme.js` (1.9 KB, no dependencies).
+The theme part is built: `Autestiq.UI.Shared/wwwroot/js/theme.js` (1.9 KB, no dependencies).
 The no-JavaScript baseline did not need the planned "no flash" script at all: the server
 renders the theme from the cookie (ADR-0008). The mega menu and mobile menu parts follow
 with the header in Milestones 2 and 3.

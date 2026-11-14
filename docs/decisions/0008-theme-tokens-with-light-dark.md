@@ -9,7 +9,7 @@ never flash (first the wrong one, then the right one), also not on static pages 
 JavaScript, and the two themes must not drift apart.
 
 ## Decision
-- All design tokens live in `Testo.UI.Shared/wwwroot/css/tokens.css`.
+- All design tokens live in `Autestiq.UI.Shared/wwwroot/css/tokens.css`.
 - A color token carries both values side by side: `--color-bg: light-dark(#FFFFFF, #0E1124)`.
   Which one applies follows the CSS `color-scheme`:
   - default: `light dark`, so the browser follows the operating system;

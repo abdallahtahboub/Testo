@@ -133,7 +133,7 @@ Found by opening it in a browser rather than by a test, and worth remembering:
 | Public website | **Real.** 29 routes in English and German, with every placeholder page labeled as one |
 | App area | **One placeholder page** at `/app`, plus the two execution pages. Signing in is required everywhere (D-1 closed in Milestone 3.1) |
 | Test runs: start, stop, rerun, steps, screenshots | **Real** for three scripted scenarios against our own demo target. No customer targets |
-| AI planning: interface, vocabulary, validator, provider adapter, benchmark | **Built and measured; the planner is not usable.** 5 of 12 plans work on a sound application, 1 of 6 defects genuinely caught, 1 missed. Nothing in the product calls a model |
+| AI planning: interface, vocabulary, validator, provider adapter, benchmark | **Built and measured; the planner is not usable.** 5 of 12 plans work on a sound application, 1 of 6 defects genuinely caught, 1 missed. Four faults the measurement exposed are fixed and **not yet re-measured**. Nothing in the product calls a model |
 | Browser execution: worker out of process, egress proxy, signed artifact links | **Real.** Not yet a container per run (R-1) |
 | The other six feature modules | **Shells.** One class each: an id and a feature flag. No pages, no services |
 | `Testo.Capabilities.E2EWeb` | **Empty.** An `_Imports.razor` |
@@ -272,7 +272,7 @@ supported by this.
 What is real and measured:
 
 - **The boundary** ([ADR-0019](decisions/0019-the-planner-boundary.md)). The model plans once,
-  before the browser opens, and is not in the execution loop. The vocabulary is eight actions and a
+  before the browser opens, and is not in the execution loop. The vocabulary is nine actions and a
   target that is a test id or a role and a name — no field in which a selector or a script could be
   written, and a test that fails if one is ever added. A second test refuses every way Playwright
   offers to run a string as code, anywhere in the worker.
@@ -288,10 +288,33 @@ What is real and measured:
   pass without testing anything, and CI insists the harness records it as a false positive. A report
   claiming zero false positives means nothing unless a false positive is something it can see.
 
-What a key would still have to answer, and what the planner column is for: whether a model plans
-these twelve at all, how often it passes a shop that is broken, what one plan costs, and whether its
-plans are stable enough to be worth re-running. Until then the honest summary is that the *mechanism*
-is built and the *capability* is unmeasured.
+**What the measurement changed, and what it has not yet proved.** Reading the planner's own notes
+made it clear that most of the seven failures were ours, not the model's. Four fixes followed, and
+none of them has been re-measured yet — the numbers above still stand as the published result until
+a second run replaces them:
+
+1. **The crawl was blind to text.** It reported roles, names and test ids, but not what an element
+   said, so a plan asked to check a price was written against a page where no price was visible. The
+   snapshot now carries the text of anything with a `data-testid`.
+2. **The crawl saw one state.** It starts with an empty basket, so the basket showed its empty
+   state, so there was no checkout link, so `/checkout`, `/account` and `/order/placed` were never
+   described at all — and plans about checkout were written for pages the planner had never seen. It
+   now also follows the paths the application advertises in its own `sitemap.xml`.
+3. **The vocabulary could not express an absence.** The planner asked three times for a way to say
+   "the cup is gone", "there is no way to place an order", "the error is no longer shown". Half of
+   what a person wants checked is an absence, and without it a plan asserts some *other* presence
+   instead, which passes either way. `assert-not-visible` was added under an
+   [ADR-0019 §2 amendment](decisions/0019-the-planner-boundary.md).
+4. **A partial plan could report a pass.** Plans said in their notes that they tested part of what
+   was asked, passed that part, and were reported as passed. Coverage is now a field on the plan,
+   and a passing partial plan ends as `Inconclusive`
+   ([ADR-0019 §7 amendment](decisions/0019-the-planner-boundary.md)). The prompt rule that told a
+   planner never to type a password also made it leave the field empty in the one scenario that
+   tests a *wrong* password; it now distinguishes a real credential from a deliberately wrong one.
+
+**Still open:** the re-run. It needs a model key, which this environment cannot hold, so it is a
+command for a developer machine (`PLANNER__APIKEY=… dotnet run --project tools/Testo.Benchmark`) and
+the numbers above are what the product claims until it has been done.
 
 ---
 ## Milestone 4 — Public website

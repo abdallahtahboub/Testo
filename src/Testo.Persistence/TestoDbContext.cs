@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Testo.Contracts.Identity;
 using Testo.Domain.Audit;
 using Testo.Domain.Common;
+using Testo.Domain.Execution;
 using Testo.Domain.Identity;
 using Testo.Domain.Projects;
 
@@ -60,6 +61,15 @@ public class TestoDbContext(DbContextOptions<TestoDbContext> options, IOrganizat
 
     /// <summary>The products under test.</summary>
     public DbSet<Project> Projects => Set<Project>();
+
+    /// <summary>Executions of scenarios.</summary>
+    public DbSet<TestRun> TestRuns => Set<TestRun>();
+
+    /// <summary>The steps of those executions.</summary>
+    public DbSet<TestRunStep> TestRunSteps => Set<TestRunStep>();
+
+    /// <summary>The files those executions produced. The bytes are in the artifact store.</summary>
+    public DbSet<Artifact> Artifacts => Set<Artifact>();
 
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)

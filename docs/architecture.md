@@ -45,7 +45,8 @@ src/
   Testo.Modules.Planning
   Testo.Modules.Analysis
   Testo.Modules.Design
-  Testo.Modules.Execution        // incl. implementation (suites, environments) + regression
+  Testo.Modules.Execution        // PARTLY BUILT (M3.3): run list + one run. Suites,
+                                 // environments and regression still to come
   Testo.Modules.Defects
   Testo.Modules.Reporting        // incl. monitoring & control, release readiness, completion
   Testo.Modules.Settings         // NEW: integrations, team, capability settings host
@@ -240,10 +241,13 @@ public interface ITestCapability
 
 All data comes from interfaces in `Testo.Contracts`, grouped per domain:
 
-> **None of the interfaces in this table exist yet.** They are the design for the testing-journey
-> milestones. `Testo.Contracts` currently defines six interfaces, all of them about identity:
+> **Almost none of the interfaces in this table exist yet.** They are the design for the
+> testing-journey milestones. `Testo.Contracts` defines six about identity —
 > `IAuthenticationService`, `ICurrentUser`, `IOrganizationContext`, `IMembershipService`,
-> `IInvitationService` and `IAuditLog`. Treat the rows below as a plan, not as an inventory.
+> `IInvitationService`, `IAuditLog` — and, since Milestone 3.3, `IExecutionService`, which is the
+> row below named `ITestRunService`: it was built under the name of the module it serves, and
+> carries the current project with it until the app shell has a project switcher (Milestone 5).
+> Treat the other rows as a plan, not as an inventory.
 
 | Interface | Purpose |
 |---|---|
@@ -251,7 +255,7 @@ All data comes from interfaces in `Testo.Contracts`, grouped per domain:
 | `IRequirementService` | requirements, test conditions, traceability matrix |
 | `ITestPlanService` | test plans, risks, entry/exit criteria |
 | `ITestCaseService` | test cases, versions, suites |
-| `ITestRunService` | run list, run details, start/stop/rerun |
+| `ITestRunService` | run list, run details, start/stop/rerun — **built** as `IExecutionService` (M3.3) |
 | `ITestRunLiveFeed` | live run updates (see §8) |
 | `IDefectService` | defects, lifecycle transitions, links |
 | `IReportingService` | metrics, trends, release readiness, summary reports |

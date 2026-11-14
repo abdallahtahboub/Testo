@@ -11,6 +11,17 @@ public interface IExecutionService
     /// <summary>The scenarios a person may start. Scripted and fixed in this milestone.</summary>
     Task<IReadOnlyList<ScenarioSummary>> ListScenariosAsync(CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// The project the run pages work with: the organization's first by name, or <c>null</c> when
+    /// the organization has none.
+    /// </summary>
+    /// <remarks>
+    /// A project switcher arrives with the app shell in Milestone 5. Until then a page still needs
+    /// somewhere to ask which project it is looking at, and asking here keeps that one question in
+    /// one place instead of spreading a guess across pages.
+    /// </remarks>
+    Task<Guid?> GetCurrentProjectAsync(CancellationToken cancellationToken = default);
+
     /// <summary>The runs of a project, newest first.</summary>
     Task<PagedResult<TestRunSummary>> ListRunsAsync(
         Guid projectId,

@@ -27,8 +27,12 @@ public partial class FeatureFlagTests(AppFixture app)
 
         var states = ModuleRow().Matches(html).ToDictionary(row => row.Groups["id"].Value, row => row.Groups["state"].Value);
         Assert.Equal(7, states.Count);
-        Assert.Equal("On", states["planning"]);
-        Assert.All(states.Where(state => state.Key != "planning"), state => Assert.Equal("Off", state.Value));
+
+        // Planning, because this copy of the application was told to; execution, because
+        // Milestone 3.3 built it and appsettings.json has it on. Everything else is still a shell.
+        string[] on = ["planning", "execution"];
+        Assert.All(on, module => Assert.Equal("On", states[module]));
+        Assert.All(states.Where(state => !on.Contains(state.Key)), state => Assert.Equal("Off", state.Value));
     }
 
     [GeneratedRegex(@"<th[^>]*><code[^>]*>(?<id>[a-z]+)</code></th>\s*<td[^>]*><code[^>]*>[^<]+</code></td>\s*<td[^>]*>(?<state>[^<]+)</td>")]

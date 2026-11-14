@@ -1,6 +1,19 @@
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.Extensions.Localization
+@using Microsoft.Extensions.Options
 @using Testo.Platform
+@using Testo.UI.Shared.Branding
 @using Testo.UI.Shared.Components
+@using Testo.Contracts.Common
+@using Testo.Contracts.Execution
+@using Testo.Modules.Execution.Components
+@using Testo.Modules.Execution.Resources
+
+@*
+    Product pages, so a signed-in person is required. PageAuthorizationTests fails the build for
+    any routable page that declares neither this nor [AllowAnonymous] (D-1).
+*@
+@attribute [Authorize]

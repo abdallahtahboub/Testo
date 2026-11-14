@@ -1,0 +1,81 @@
+@page "/app/runs"
+@inject IStringLocalizer<ExecutionResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    Every run, newest first, and the scenarios a person may start.
+
+    The project is the organization's first: a project switcher arrives with the app shell in
+    Milestone 5, and inventing one here would be a thing to undo.
+*@
+<PageTitle>@L["RunList_PageTitle", Brand.Value.ProductName]</PageTitle>
+
+<div class="runs">
+    <header class="runs__header">
+        <h1>@L["RunList_Title"]</h1>
+        <p class="t-muted">@L["RunList_Intro"]</p>
+    </header>
+
+    <section class="runs__scenarios" aria-labelledby="runs-start">
+        <h2 id="runs-start" class="t-h4">@L["RunList_Start"]</h2>
+
+        <ul class="runs__scenario-list">
+            @foreach (var scenario in Scenarios)
+            {
+                <li class="runs__scenario">
+                    <div class="runs__scenario-text">
+                        <p class="runs__scenario-name">@scenario.Name</p>
+                        <p class="t-muted">@scenario.Description</p>
+                    </div>
+                    <TButton Variant="ButtonVariant.Primary"
+                             Disabled="Busy"
+                             OnClick="() => StartAsync(scenario.ScenarioId)"
+                             data-testid="@($"start-{scenario.ScenarioId}")">
+                        @L["RunList_StartScenario"]
+                    </TButton>
+                </li>
+            }
+        </ul>
+    </section>
+
+    @if (Problem is not null)
+    {
+        <p class="runs__problem" role="alert">@Problem</p>
+    }
+
+    <TAsyncView Loading="Loading" IsEmpty="Runs.Items.Count == 0">
+        <EmptyContent>
+            <TEmptyState Title="@L["RunList_Empty_Title"]">@L["RunList_Empty_Text"]</TEmptyState>
+        </EmptyContent>
+        <ChildContent>
+            <table class="runs__table" data-testid="runs">
+                <caption class="t-visually-hidden">@L["RunList_Title"]</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">@L["RunList_Column_Run"]</th>
+                        <th scope="col">@L["RunList_Column_Scenario"]</th>
+                        <th scope="col">@L["RunList_Column_Status"]</th>
+                        <th scope="col">@L["RunList_Column_Queued"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var run in Runs.Items)
+                    {
+                        <tr>
+                            <th scope="row">
+                                <a href="@Routes.Run(run.RunId)" data-testid="@($"run-{run.Number}")">#@run.Number</a>
+                                @if (run.Attempt > 1)
+                                {
+                                    <span class="t-muted runs__attempt">@L["RunList_Attempt", run.Attempt]</span>
+                                }
+                            </th>
+                            <td>@run.ScenarioName</td>
+                            <td><RunStatusBadge Status="run.Status" /></td>
+                            <td class="t-tabular">@run.QueuedAt.ToLocalTime().ToString("g")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </ChildContent>
+    </TAsyncView>
+</div>

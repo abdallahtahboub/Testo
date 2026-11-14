@@ -22,6 +22,16 @@ public class PageSmokeTests(AppFixture app) : BrowserTest(app)
                 pages.Add("/en", "en", "Testo – AI-assisted QA platform", "Quality you can see, from requirement to release", scheme);
                 pages.Add("/de", "de", "Testo – KI-gestützte QA-Plattform", "Qualität, die man sieht – von der Anforderung bis zum Release", scheme);
                 pages.Add("/app", "en", "App preview – Testo", "App shell preview", scheme);
+                pages.Add(Routes.Runs, "en", "Test runs – Testo", "Test runs", scheme);
+
+                // A run that is not this organization's. The page still has a title and one
+                // heading, because "no such run" is a page like any other.
+                pages.Add(
+                    Routes.Run(Guid.Parse("77777777-7777-7777-7777-777777777777")),
+                    "en",
+                    "Run … – Testo",
+                    "No such run",
+                    scheme);
             }
 
             return pages;

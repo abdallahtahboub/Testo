@@ -5,6 +5,7 @@ using Testo.Contracts.Common;
 using Testo.Contracts.Execution;
 using Testo.Contracts.Identity;
 using Testo.Domain.Execution;
+using Testo.Domain.Projects;
 using Testo.Persistence;
 
 namespace Testo.Application.Execution;
@@ -27,6 +28,23 @@ internal sealed class ExecutionService(
     /// <inheritdoc />
     public Task<IReadOnlyList<ScenarioSummary>> ListScenariosAsync(CancellationToken cancellationToken = default) =>
         Task.FromResult(Contracts.Execution.Scenarios.All);
+
+    /// <inheritdoc />
+    public async Task<Guid?> GetCurrentProjectAsync(CancellationToken cancellationToken = default)
+    {
+        if (!currentUser.Can(Permission.Read))
+        {
+            return null;
+        }
+
+        // Through the tenant filter, so this is the organization's own project and no other.
+        return await database.Projects
+            .Where(project => project.Status == ProjectStatus.Active)
+            .OrderBy(project => project.Name)
+            .Select(project => (Guid?)project.Id)
+            .FirstOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
 
     /// <inheritdoc />
     public async Task<PagedResult<TestRunSummary>> ListRunsAsync(

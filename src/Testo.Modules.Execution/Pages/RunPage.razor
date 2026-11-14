@@ -1,0 +1,138 @@
+@page "/app/runs/{RunId:guid}"
+@inject IStringLocalizer<ExecutionResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    One run: how it ended, every step in order, and the screenshot each step left behind.
+
+    While the run is still going the page refreshes itself, because a person who has just pressed
+    Start is watching this page and should not have to reload it to find out what happened.
+*@
+<PageTitle>@L["Run_PageTitle", Number, Brand.Value.ProductName]</PageTitle>
+
+<TAsyncView Loading="Loading" IsEmpty="Run is null">
+    <EmptyContent>
+        @*
+            Not an empty state: a run that is not there is not a collection with nothing in it. It
+            gets the page's own h1, so this page has exactly one heading however it turns out.
+        *@
+        <div class="run run--missing" data-testid="not-found">
+            <nav class="run__breadcrumb" aria-label="@L["Run_BackToList"]">
+                <a href="@Routes.Runs">@L["Run_BackToList"]</a>
+            </nav>
+            <h1>@L["Run_NotFound_Title"]</h1>
+            <p>@L["Run_NotFound_Text"]</p>
+            <div class="run__back">
+                <TButton Href="@Routes.Runs">@L["Run_BackToList"]</TButton>
+            </div>
+        </div>
+    </EmptyContent>
+    <ChildContent>
+        @if (Run is { } run)
+        {
+            <div class="run">
+                <nav class="run__breadcrumb" aria-label="@L["Run_BackToList"]">
+                    <a href="@Routes.Runs">@L["Run_BackToList"]</a>
+                </nav>
+
+                <header class="run__header">
+                    <h1>@L["Run_Title", run.Summary.Number, run.Summary.ScenarioName]</h1>
+
+                    <div class="run__status">
+                        <RunStatusBadge Status="run.Summary.Status" />
+                        @if (run.Summary.Attempt > 1)
+                        {
+                            <span class="t-muted">@L["RunList_Attempt", run.Summary.Attempt]</span>
+                        }
+                    </div>
+
+                    <p class="t-muted">@L["Run_Target", run.TargetOrigin]</p>
+                </header>
+
+                <div class="run__actions">
+                    @if (run.Summary.Status.IsActive())
+                    {
+                        <TButton Variant="ButtonVariant.Danger"
+                                 Loading="Busy"
+                                 OnClick="CancelAsync"
+                                 data-testid="cancel">
+                            @L["Run_Cancel"]
+                        </TButton>
+                    }
+                    else
+                    {
+                        <TButton Variant="ButtonVariant.Primary"
+                                 Loading="Busy"
+                                 OnClick="RerunAsync"
+                                 data-testid="rerun">
+                            @L["Run_Rerun"]
+                        </TButton>
+                    }
+
+                    <TButton Variant="ButtonVariant.Ghost" OnClick="LoadAsync" data-testid="refresh">
+                        @L["Run_Refresh"]
+                    </TButton>
+                </div>
+
+                @if (Problem is not null)
+                {
+                    <p class="run__problem" role="alert">@Problem</p>
+                }
+
+                <dl class="run__timings">
+                    <dt>@L["Run_Timing_Queued"]</dt>
+                    <dd class="t-tabular">@Moment(run.Summary.QueuedAt)</dd>
+                    <dt>@L["Run_Timing_Started"]</dt>
+                    <dd class="t-tabular">@Moment(run.Summary.StartedAt)</dd>
+                    <dt>@L["Run_Timing_Finished"]</dt>
+                    <dd class="t-tabular">@Moment(run.Summary.FinishedAt)</dd>
+                </dl>
+
+                @if (run.FailureReason is { Length: > 0 } reason)
+                {
+                    @*
+                        The worker's own words, or a resource key from the application. Either way it
+                        is shown, because a run that stopped and will not say why is not evidence.
+                    *@
+                    <section class="run__failure" aria-labelledby="run-failure">
+                        <h2 id="run-failure" class="t-h4">@L["Run_Failure_Title"]</h2>
+                        <p>@Describe(reason)</p>
+                    </section>
+                }
+
+                <section class="run__steps" aria-labelledby="run-steps">
+                    <h2 id="run-steps" class="t-h4">@L["Run_Steps_Title"]</h2>
+
+                    <ol class="run__step-list" data-testid="steps">
+                        @foreach (var step in run.Steps)
+                        {
+                            <li class="run__step" data-testid="@($"step-{step.Order}")">
+                                <div class="run__step-head">
+                                    <span class="run__step-order t-tabular">@step.Order</span>
+                                    <span class="run__step-description">@step.Description</span>
+                                    <TBadge Tone="StepTone(step.Status)">@L[StepKey(step.Status)]</TBadge>
+                                    <span class="t-muted t-tabular">@Took(step)</span>
+                                </div>
+
+                                @if (step.Message is { Length: > 0 } message)
+                                {
+                                    <p class="run__step-message">@message</p>
+                                }
+
+                                @if (step.Screenshot is { } screenshot)
+                                {
+                                    <img class="run__screenshot"
+                                         src="@screenshot.Url"
+                                         alt="@L["Run_Steps_Screenshot", step.Order]"
+                                         loading="lazy"
+                                         width="1280"
+                                         height="800" />
+                                }
+                            </li>
+                        }
+                    </ol>
+                </section>
+            </div>
+        }
+    </ChildContent>
+</TAsyncView>

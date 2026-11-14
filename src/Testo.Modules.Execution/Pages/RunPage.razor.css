@@ -1,0 +1,134 @@
+/* One run: how it ended, its steps, and the screenshot each step left behind. */
+
+.run {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.run__breadcrumb {
+  font-size: var(--text-body-sm);
+}
+
+.run__header h1 {
+  margin-block-end: var(--space-3);
+}
+
+.run__header p {
+  margin: var(--space-2) 0 0;
+}
+
+.run__status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.run__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.run__problem {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  color: var(--color-danger);
+}
+
+.run__timings {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+}
+
+.run__timings dt {
+  color: var(--color-text-muted);
+  font-size: var(--text-body-sm);
+}
+
+.run__timings dd {
+  margin: 0;
+}
+
+.run__failure {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-inline-start: var(--ring-width) solid var(--color-warning);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-subtle);
+}
+
+.run__failure h2 {
+  margin: 0 0 var(--space-2);
+}
+
+.run__failure p {
+  margin: 0;
+  max-inline-size: var(--measure);
+}
+
+.run__step-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.run__step {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.run__step-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.run__step-order {
+  min-inline-size: var(--space-6);
+  color: var(--color-text-muted);
+}
+
+.run__step-description {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  font-weight: var(--weight-medium);
+}
+
+.run__step-message {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-body-sm);
+  color: var(--color-danger);
+}
+
+/* The evidence. Scaled down so a run of twenty steps is still readable as a list. */
+.run__screenshot {
+  display: block;
+  inline-size: 100%;
+  max-inline-size: var(--container-narrow);
+  block-size: auto;
+  margin-block-start: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.run__back {
+  margin-block-start: var(--space-4);
+}
+
+.run--missing p {
+  margin: 0;
+  max-inline-size: var(--measure);
+}

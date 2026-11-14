@@ -79,6 +79,19 @@ public sealed record Measurement(
 /// </remarks>
 public sealed class Harness(string origin, IScenarioPlanner? planner, int repetitions, string? recordingDirectory)
 {
+    /// <summary>
+    /// Told what is happening as it happens.
+    /// </summary>
+    /// <remarks>
+    /// A full run is ninety browser launches and eighteen model calls, which is ten minutes of
+    /// nothing if the results are only printed at the end. The first person to run it with a
+    /// planner watched a blank terminal and reasonably assumed it had hung.
+    /// </remarks>
+    public Action<string>? Say { get; set; }
+
+    /// <summary>Called as each measurement finishes, so a long run reports itself.</summary>
+    public Action<Measurement>? Measured { get; set; }
+
     private readonly PlanningService? _planning =
         planner is null ? null : new PlanningService(planner, NullLogger<PlanningService>.Instance);
 
@@ -101,7 +114,7 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
             {
                 Switch(scenario, defectOn);
 
-                measurements.Add(await MeasureAsync(
+                Report(measurements, await MeasureAsync(
                     scenario, defectOn, "baseline", scenario.Baseline, PlanningCost.None, [], [], cancellationToken)
                     .ConfigureAwait(false));
 
@@ -110,18 +123,31 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
                     continue;
                 }
 
+                // _planning is not null, so neither is the planner it was built from.
+                var model = planner!.Model;
+
+                Say?.Invoke($"  {scenario.Id,-34} defect={(defectOn ? "on " : "off")} "
+                    + $"{model,-18} looking at the application, then planning…");
+
                 var planned = await PlanAsync(scenario, cancellationToken).ConfigureAwait(false);
 
-                measurements.Add(planned.Plan is { } plan
+                Report(measurements, planned.Plan is { } plan
                     ? await MeasureAsync(
-                        scenario, defectOn, planner!.Model, plan.Actions, planned.Cost, [], planned.Notes, cancellationToken)
+                        scenario, defectOn, model, plan.Actions, planned.Cost, [], planned.Notes, cancellationToken)
                         .ConfigureAwait(false)
-                    : new Measurement(scenario, defectOn, planner!.Model, [], planned.Cost, planned.Errors, planned.Notes));
+                    : new Measurement(scenario, defectOn, model, [], planned.Cost, planned.Errors, planned.Notes));
             }
         }
 
         Defects.Set([]);
         return measurements;
+    }
+
+    /// <summary>Keeps a measurement and says so, so a long run is not a blank terminal.</summary>
+    private void Report(List<Measurement> measurements, Measurement measurement)
+    {
+        measurements.Add(measurement);
+        Measured?.Invoke(measurement);
     }
 
     /// <summary>

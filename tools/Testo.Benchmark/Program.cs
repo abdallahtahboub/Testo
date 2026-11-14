@@ -43,23 +43,44 @@ Console.WriteLine(planner is null
 
 Console.WriteLine($"{scenarios.Count} scenario(s), {options.Repetitions} execution(s) each.");
 
-var harness = new Harness(origin, planner, options.Repetitions, options.RecordingDirectory);
+if (planner is not null)
+{
+    // Said before the silence rather than after it: a planned run crawls the application and asks
+    // a model for every scenario, and ten quiet minutes look exactly like a hang.
+    Console.WriteLine(
+        $"This takes a while: {scenarios.Count * 2} crawls, {scenarios.Count * 2} model calls and "
+        + $"about {scenarios.Count * 4 * options.Repetitions} browser runs. Lines appear as each one finishes.");
+}
+
+Console.WriteLine();
+
+var clock = System.Diagnostics.Stopwatch.StartNew();
+
+var harness = new Harness(origin, planner, options.Repetitions, options.RecordingDirectory)
+{
+    Say = Console.WriteLine,
+    Measured = measurement =>
+    {
+        // The reason, not just "no plan". Somebody watching lines scroll past should not have to
+        // open a markdown file to find out that their key was refused.
+        var outcome = measurement.PlanningErrors.Count > 0
+            ? "no plan — " + string.Join(", ", measurement.PlanningErrors.Select(Explain))
+            : measurement.Verdict.ToString();
+
+        var cost = measurement.Planning.TotalTokens > 0
+            ? $"  {measurement.Planning.TotalTokens} tokens, ${measurement.Planning.Cost:0.0000}"
+            : "";
+
+        Console.WriteLine(
+            $"  {measurement.Scenario.Id,-34} defect={(measurement.DefectOn ? "on " : "off")} "
+            + $"{measurement.Source,-18} {outcome}{cost}");
+    },
+};
 
 using var stopping = new CancellationTokenSource(TimeSpan.FromMinutes(options.Smoke ? 5 : 60));
 var measurements = await harness.RunAsync(scenarios, stopping.Token);
 
-foreach (var measurement in measurements)
-{
-    // The reason, not just "no plan". Somebody watching a run of thirty-six lines scroll past
-    // should not have to open a markdown file to find out that their key was refused.
-    var outcome = measurement.PlanningErrors.Count > 0
-        ? "no plan — " + string.Join(", ", measurement.PlanningErrors.Select(Explain))
-        : measurement.Verdict.ToString();
-
-    Console.WriteLine(
-        $"  {measurement.Scenario.Id,-34} defect={(measurement.DefectOn ? "on " : "off")} "
-        + $"{measurement.Source,-18} {outcome}");
-}
+Console.WriteLine($"\nFinished in {clock.Elapsed.TotalMinutes:0.0} minutes.");
 
 var report = Report.Write(measurements, options.Repetitions, DateTimeOffset.UtcNow);
 

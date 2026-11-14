@@ -15,31 +15,38 @@
   color-scheme: light dark;
 
   /* ---------- Color: surfaces and text ---------- */
-  --color-bg: light-dark(#FFFFFF, #0E1124);
-  --color-surface: light-dark(#FFFFFF, #161A33);
-  --color-surface-subtle: light-dark(#F5F6FA, #1B2040);
-  --color-border: light-dark(#D0D4E4, #2C3258);
-  --color-border-strong: light-dark(#7B8199, #6B7290);
-  --color-text: light-dark(#1A1D2E, #EEF0F8);
-  --color-text-muted: light-dark(#5B6178, #A3A9BF);
+  --color-bg: light-dark(#FFFFFF, #0B1220);
+  --color-surface: light-dark(#FFFFFF, #11192B);
+  --color-surface-subtle: light-dark(#F4F7FA, #162B42);
+  --color-border: light-dark(#D3DCE6, #24374F);
+  --color-border-strong: light-dark(#6E7D8E, #7E90A4);
+  --color-text: light-dark(#0B1220, #EEF3F8);
+  --color-text-muted: light-dark(#4F5E6E, #A7B7C7);
 
-  /* ---------- Color: brand "Indigo & Teal" (ADR-0005) ---------- */
-  --color-brand: light-dark(#2E3192, #8B93FF);
-  --color-brand-hover: light-dark(#1F2170, #A5ABFF);
-  --color-on-brand: light-dark(#FFFFFF, #0E1124);
-  --color-brand-subtle: light-dark(#E8E9FB, #1C1F4A);
-  --color-accent: light-dark(#0F766E, #5EEAD4);
-  --color-on-accent: light-dark(#FFFFFF, #0E1124);
-  --color-accent-decorative: #14B8A6;
+  /* ---------- Color: brand "Navy & Electric Cyan" (ADR-0005) ---------- */
+  /*
+   * The brand colour swaps role between the themes, which the indigo palette did not have to do.
+   * Deep navy carries the brand on a light background; on a dark one it IS the background, so the
+   * cyan carries it there. The cyan is 1.7 : 1 on white, so it can never hold light-theme text:
+   * where the light theme needs an accent a person reads, it uses the darkened cyan below, and the
+   * electric value stays decorative.
+   */
+  --color-brand: light-dark(#162B42, #55DCE0);
+  --color-brand-hover: light-dark(#0B1220, #8CE8EB);
+  --color-on-brand: light-dark(#FFFFFF, #0B1220);
+  --color-brand-subtle: light-dark(#E7F0F7, #162B42);
+  --color-accent: light-dark(#0A6A70, #55DCE0);
+  --color-on-accent: light-dark(#FFFFFF, #0B1220);
+  --color-accent-decorative: #55DCE0;
   --color-link: var(--color-brand);
   --color-focus: var(--color-brand);
-  --color-backdrop: rgb(14 17 36 / 0.5);
+  --color-backdrop: rgb(11 18 32 / 0.5);
 
-  /* Hero areas keep their deep indigo in both themes. */
-  --color-hero-start: #1F2170;
-  --color-hero-end: #2E3192;
+  /* Hero areas keep the deep navy in both themes. */
+  --color-hero-start: #0B1220;
+  --color-hero-end: #162B42;
   --color-on-hero: #FFFFFF;
-  --color-on-hero-muted: #C7CBFF;
+  --color-on-hero-muted: #A9DFE4;
 
   /* ---------- Color: meaning ---------- */
   --color-success: light-dark(#13753A, #4ADE80);

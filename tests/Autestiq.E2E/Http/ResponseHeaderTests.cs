@@ -142,7 +142,7 @@ public class ResponseHeaderTests(AppFixture app) : HttpTest(app)
     {
         using var page = await GetAsync("/en");
         var html = await page.Content.ReadAsStringAsync(Cancellation);
-        var styleSheetUrl = System.Text.RegularExpressions.Regex.Match(html, "href=\"(_content/Testo\\.UI\\.Shared/css/fonts[^\"]*\\.css)\"").Groups[1].Value;
+        var styleSheetUrl = System.Text.RegularExpressions.Regex.Match(html, "href=\"(_content/Autestiq\\.UI\\.Shared/css/fonts[^\"]*\\.css)\"").Groups[1].Value;
         using var styleSheet = await GetAsync("/" + styleSheetUrl);
         var css = await styleSheet.Content.ReadAsStringAsync(Cancellation);
 

@@ -144,6 +144,9 @@
   <data name="Site_Footer_Nav" xml:space="preserve">
     <value>Footer navigation</value>
   </data>
+  <data name="Brand_Tagline" xml:space="preserve">
+    <value>Autonomous Testing. Intelligent Quality.</value>
+  </data>
   <data name="Site_Footer_Pitch" xml:space="preserve">
     <value>{0} covers the whole testing journey, from a requirement to a release you can defend.</value>
   </data>

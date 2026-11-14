@@ -37,13 +37,13 @@ public class PublicSiteTests(AppFixture app) : BrowserTest(app)
         await Expect(page.Page.Locator("link[rel=alternate][hreflang=en]")).ToHaveAttributeAsync("href", App.Url("/en"));
         await Expect(page.Page.Locator("link[rel=alternate][hreflang=de]")).ToHaveAttributeAsync("href", App.Url("/de"));
         await Expect(page.Page.Locator("link[rel=alternate][hreflang=x-default]")).ToHaveAttributeAsync("href", App.Url("/en"));
-        await Expect(page.Page.Locator("meta[name=description]")).ToHaveAttributeAsync("content", new System.Text.RegularExpressions.Regex("^Testo begleitet"));
+        await Expect(page.Page.Locator("meta[name=description]")).ToHaveAttributeAsync("content", new System.Text.RegularExpressions.Regex("^Autestiq begleitet"));
     }
 
     [Theory]
-    [InlineData("/en/no-such-page", "en", "Page not found – Testo", "Page not found", ColorScheme.Light)]
-    [InlineData("/de/no-such-page", "de", "Seite nicht gefunden – Testo", "Seite nicht gefunden", ColorScheme.Dark)]
-    [InlineData("/no-such-page", "en", "Page not found – Testo", "Page not found", ColorScheme.Dark)]
+    [InlineData("/en/no-such-page", "en", "Page not found – Autestiq", "Page not found", ColorScheme.Light)]
+    [InlineData("/de/no-such-page", "de", "Seite nicht gefunden – Autestiq", "Seite nicht gefunden", ColorScheme.Dark)]
+    [InlineData("/no-such-page", "en", "Page not found – Autestiq", "Page not found", ColorScheme.Dark)]
     public async Task UnknownAddress_ShowsTheNotFoundPageInTheRightLanguage(string path, string language, string title, string heading, ColorScheme scheme)
     {
         var page = await NewPageAsync(options => options.ColorScheme = scheme);
@@ -61,8 +61,8 @@ public class PublicSiteTests(AppFixture app) : BrowserTest(app)
     }
 
     [Theory]
-    [InlineData("en-US", "en", "Something went wrong – Testo", "Something went wrong", "Request ID:")]
-    [InlineData("de-DE", "de", "Etwas ist schiefgelaufen – Testo", "Etwas ist schiefgelaufen", "Anfrage-ID:")]
+    [InlineData("en-US", "en", "Something went wrong – Autestiq", "Something went wrong", "Request ID:")]
+    [InlineData("de-DE", "de", "Etwas ist schiefgelaufen – Autestiq", "Etwas ist schiefgelaufen", "Anfrage-ID:")]
     public async Task ServerError_ShowsTheFriendlyErrorPageWithoutDetails(string locale, string language, string title, string heading, string requestIdLabel)
     {
         var page = await NewPageAsync(options => options.Locale = locale);

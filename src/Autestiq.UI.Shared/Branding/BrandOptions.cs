@@ -10,5 +10,5 @@ public sealed class BrandOptions
     public const string SectionName = "Brand";
 
     /// <summary>The product name shown in the UI.</summary>
-    public string ProductName { get; set; } = "Testo";
+    public string ProductName { get; set; } = "Autestiq";
 }

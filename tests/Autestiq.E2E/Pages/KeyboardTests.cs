@@ -50,7 +50,7 @@ public class KeyboardTests(AppFixture app) : BrowserTest(app)
         Assert.Equal(
             [
                 "Skip to main content",
-                "Testo home page",
+                "Autestiq home page",
                 "Product",
                 "Solutions",
                 "Resources",

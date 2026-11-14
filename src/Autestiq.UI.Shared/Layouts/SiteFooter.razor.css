@@ -13,8 +13,14 @@
   padding-block-end: var(--space-8);
 }
 
+.site-footer__tagline {
+  margin: var(--space-3) 0 0;
+  color: var(--color-accent);
+  font-weight: var(--weight-medium);
+}
+
 .site-footer__pitch {
-  margin: var(--space-4) 0 var(--space-6);
+  margin: var(--space-2) 0 var(--space-6);
   max-inline-size: 38ch;
   color: var(--color-text-muted);
 }

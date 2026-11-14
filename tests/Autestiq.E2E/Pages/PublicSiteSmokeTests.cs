@@ -73,7 +73,7 @@ public class PublicSiteSmokeTests(AppFixture app) : BrowserTest(app)
 
         var title = await visit.Page.TitleAsync();
         Assert.False(string.IsNullOrWhiteSpace(title), $"{path} has no title.");
-        Assert.EndsWith("Testo", title, StringComparison.Ordinal);
+        Assert.EndsWith("Autestiq", title, StringComparison.Ordinal);
 
         var description = visit.Page.Locator("head meta[name='description']");
         await Expect(description).ToHaveCountAsync(1);

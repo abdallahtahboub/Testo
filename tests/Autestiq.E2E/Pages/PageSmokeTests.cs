@@ -25,15 +25,15 @@ public class PageSmokeTests(AppFixture app) : BrowserTest(app)
             {
                 // The public website is covered page by page, in both languages, by
                 // PublicSiteSmokeTests. What is left here is the product behind the sign-in.
-                pages.Add("/app", "en", "App preview – Testo", "App shell preview", scheme);
-                pages.Add(Routes.Runs, "en", "Test runs – Testo", "Test runs", scheme);
+                pages.Add("/app", "en", "App preview – Autestiq", "App shell preview", scheme);
+                pages.Add(Routes.Runs, "en", "Test runs – Autestiq", "Test runs", scheme);
 
                 // A run that is not this organization's. The page still has a title and one
                 // heading, because "no such run" is a page like any other.
                 pages.Add(
                     Routes.Run(Guid.Parse("77777777-7777-7777-7777-777777777777")),
                     "en",
-                    "Run … – Testo",
+                    "Run … – Autestiq",
                     "No such run",
                     scheme);
             }

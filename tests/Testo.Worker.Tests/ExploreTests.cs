@@ -27,6 +27,44 @@ public class ExploreTests(DemoShopFixture shop)
     }
 
     [Fact]
+    public async Task Explore_SeesThePricesAndNamesThatTheTestsAreAbout()
+    {
+        // The fault the first real benchmark exposed. The crawl collected only interactive roles
+        // and headings, so every value these scenarios assert on — a price, a product name, a
+        // basket total — was invisible, and the planner was asked to check a total against a price
+        // while being shown four buttons that all read "Add to basket".
+        var result = await Jobs.ExploreAsync(shop.Origin);
+        var snapshot = Assert.IsType<SiteSnapshot>(result.Snapshot);
+
+        Assert.Contains("name-pot", snapshot.TestIds);
+        Assert.Contains("price-pot", snapshot.TestIds);
+
+        var price = snapshot.Pages
+            .SelectMany(page => page.Elements)
+            .First(element => element.TestId == "price-pot");
+
+        // And it reads what it says, because "what does it currently say" is most of what an
+        // assertion needs to be written against.
+        Assert.Contains("42", price.Text ?? price.Name, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Explore_ReachesThePagesHiddenBehindState()
+    {
+        // The checkout is behind a basket with something in it, so following links from an empty
+        // basket never reaches it. Six of the first benchmark's twelve scenarios were about pages
+        // the planner had never been shown. The shop publishes a sitemap, as a real one does.
+        var result = await Jobs.ExploreAsync(shop.Origin);
+        var snapshot = Assert.IsType<SiteSnapshot>(result.Snapshot);
+
+        var paths = snapshot.Pages.Select(page => page.Path).ToList();
+
+        Assert.Contains("/checkout", paths);
+        Assert.Contains("/sign-in", paths);
+        Assert.Contains("/order/placed", paths);
+    }
+
+    [Fact]
     public async Task Explore_TwiceOverTheSameApplication_DescribesItTheSameWay()
     {
         // The property the whole measurement rests on. If the description varied, the plan would

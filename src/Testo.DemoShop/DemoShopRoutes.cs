@@ -10,6 +10,10 @@ namespace Testo.DemoShop;
 /// </remarks>
 public static class DemoShopRoutes
 {
+    /// <summary>What the shop tells a crawler it has.</summary>
+    private static readonly string[] Pages =
+        ["/", "/basket", "/checkout", "/sign-in", "/account", "/order/placed"];
+
     /// <summary>Adds every page.</summary>
     public static void Map(IEndpointRouteBuilder endpoints)
     {
@@ -236,6 +240,19 @@ public static class DemoShopRoutes
     // Sends the browser somewhere it must not go. Nothing links to it; it exists so a test can prove
     // that a redirect is judged at the hop it redirects to, not only at the address first asked for.
     endpoints.MapGet("/redirect", (string? to) => Results.Redirect(to ?? "http://169.254.169.254/latest/meta-data/"));
+
+    // Every real shop publishes one, and a crawler that only follows links never reaches a page
+    // that is hidden behind state — our checkout is behind a basket with something in it.
+    endpoints.MapGet("/sitemap.xml", (HttpContext context) =>
+    {
+        var origin = $"{context.Request.Scheme}://{context.Request.Host}";
+
+        var locations = string.Join("", Pages.Select(path => $"<url><loc>{origin}{path}</loc></url>"));
+
+        return Results.Content(
+            $"""<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{locations}</urlset>""",
+            "application/xml; charset=utf-8");
+    });
 
     endpoints.MapGet("/health", () => Results.Text("ok"));
     }

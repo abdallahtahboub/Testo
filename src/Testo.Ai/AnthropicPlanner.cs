@@ -170,14 +170,17 @@ public sealed class AnthropicPlanner(HttpClient client, PlannerOptions options, 
 /// </summary>
 /// <remarks>
 /// <para>
-/// This is what lets the tests and CI exercise the whole path — prompt, parsing, validation,
-/// execution — for nothing and with the same answer every time. A test whose input comes from a
-/// live model is not a test; it is a sample.
+/// The point of it is to let the whole path — prompt, parsing, validation, execution — be exercised
+/// for nothing and with the same answer every time. A test whose input comes from a live model is
+/// not a test; it is a sample.
 /// </para>
 /// <para>
-/// The recordings are real answers, saved when the benchmark last ran against a provider. So the
-/// JSON a model actually produces is what the parser is held to, rather than JSON we imagined it
-/// would produce.
+/// <strong>No recordings are committed yet, and nothing replays them.</strong> The benchmark writes
+/// one per scenario when it runs against a provider, but the only run so far happened on a
+/// developer machine and its answers were not kept. CI runs <c>--self-check</c> and not
+/// <c>--recorded</c>. So this class works and is tested, and the claim that the parser is held to
+/// JSON a model actually produced is not true yet — it becomes true when a run's recordings are
+/// committed.
 /// </para>
 /// </remarks>
 public sealed class RecordedPlanner(IReadOnlyDictionary<string, string> answers, string model = "recorded")

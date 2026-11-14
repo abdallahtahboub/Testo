@@ -175,8 +175,9 @@ internal sealed record BenchmarkOptions(
             repetitions,
             Value(args, "--report") ?? Path.Combine(root, "docs", "ai-benchmark.md"),
 
-            // Recordings live beside the tool, in the repository: they are real answers, and CI
-            // replays them so that the whole path is exercised for nothing.
+            // Where a run against a provider writes its answers, so that a later --recorded run
+            // can replay them for nothing. Nothing is committed here yet and CI does not replay
+            // them: it runs --self-check only.
             Value(args, "--recordings") ?? Path.Combine(root, "tools", "Testo.Benchmark", "recordings"),
             args.Contains("--fail-on-false-positive", StringComparer.Ordinal));
     }

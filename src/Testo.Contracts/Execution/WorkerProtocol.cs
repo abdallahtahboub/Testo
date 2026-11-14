@@ -1,4 +1,22 @@
+using Testo.Contracts.Planning;
+
 namespace Testo.Contracts.Execution;
+
+/// <summary>What a worker has been asked to do.</summary>
+public enum WorkerTask
+{
+    /// <summary>Run one of the scenarios we wrote in C#. The deterministic baseline.</summary>
+    Scripted = 1,
+
+    /// <summary>
+    /// Walk the target and describe what is there, so that something can be planned against it.
+    /// No model is involved, which is what makes the input to planning reproducible (ADR-0019 §5).
+    /// </summary>
+    Explore = 2,
+
+    /// <summary>Carry out a plan, action by action, with no model in the loop.</summary>
+    Planned = 3,
+}
 
 /// <summary>
 /// What the application hands a worker. Deliberately the whole of what the worker knows.
@@ -18,6 +36,17 @@ namespace Testo.Contracts.Execution;
 /// </param>
 /// <param name="Budget">What the run may spend before it is stopped.</param>
 /// <param name="ArtifactDirectory">Where to write screenshots. The application collects them afterwards.</param>
+/// <param name="Task">What kind of work this is. Scripted unless said otherwise.</param>
+/// <param name="Plan">
+/// The actions to carry out, for <see cref="WorkerTask.Planned"/>. Produced before the browser
+/// opened and validated before it was sent, so the worker neither calls a model nor holds the key
+/// to one: ADR-0018 treats the worker as already compromised, and ADR-0019 §4 keeps our model
+/// account out of its reach.
+/// </param>
+/// <param name="Secrets">
+/// The values this one run may type, by name, so that a plan can say "type the password" without
+/// containing one. Never logged, never put in a step's message, and masked out of screenshots.
+/// </param>
 public sealed record WorkerJob(
     Guid RunId,
     string ScenarioId,
@@ -25,13 +54,28 @@ public sealed record WorkerJob(
     IReadOnlyList<string> AllowedOrigins,
     IReadOnlyList<string> TrustedLocalOrigins,
     RunBudget Budget,
-    string ArtifactDirectory);
+    string ArtifactDirectory,
+    WorkerTask Task = WorkerTask.Scripted,
+    IReadOnlyList<PlannedAction>? Plan = null,
+    IReadOnlyDictionary<string, string>? Secrets = null);
 
 /// <summary>What a run may spend. Exceeding any one of these ends the run with a status that says which.</summary>
 /// <param name="WallClock">How long the whole run may take.</param>
 /// <param name="MaxSteps">How many steps it may execute.</param>
 /// <param name="MaxBytesDownloaded">How much the browser may fetch in total.</param>
-public sealed record RunBudget(TimeSpan WallClock, int MaxSteps, long MaxBytesDownloaded)
+/// <param name="MaxModelTokens">
+/// How many tokens planning may spend. A planner that loops is a denial of service against
+/// ourselves, and the easiest one to cause by accident (threat model §4.7).
+/// </param>
+/// <param name="MaxCostUsd">What planning may cost, in US dollars, by the provider's price list.</param>
+/// <param name="MaxPagesCrawled">How many pages the explore step may visit before it stops and says so.</param>
+public sealed record RunBudget(
+    TimeSpan WallClock,
+    int MaxSteps,
+    long MaxBytesDownloaded,
+    int MaxModelTokens = 40_000,
+    decimal MaxCostUsd = 0.25m,
+    int MaxPagesCrawled = 8)
 {
     /// <summary>What a run gets unless told otherwise.</summary>
     public static RunBudget Default { get; } = new(TimeSpan.FromMinutes(2), 100, 50 * 1024 * 1024);
@@ -45,6 +89,10 @@ public sealed record RunBudget(TimeSpan WallClock, int MaxSteps, long MaxBytesDo
 /// <param name="FinishedAt">When it stopped.</param>
 /// <param name="Steps">Every step, in order, including the ones skipped after a failure.</param>
 /// <param name="BytesDownloaded">What the browser fetched, for the budget and the record.</param>
+/// <param name="Snapshot">
+/// What the crawl found, for a <see cref="WorkerTask.Explore"/> job. Untrusted input: every string
+/// in it was written by whoever wrote the application under test.
+/// </param>
 public sealed record WorkerResult(
     Guid RunId,
     RunStatus Status,
@@ -52,7 +100,8 @@ public sealed record WorkerResult(
     DateTimeOffset StartedAt,
     DateTimeOffset FinishedAt,
     IReadOnlyList<WorkerStepResult> Steps,
-    long BytesDownloaded);
+    long BytesDownloaded,
+    SiteSnapshot? Snapshot = null);
 
 /// <summary>One step, as the worker saw it.</summary>
 /// <param name="Order">Position, from 1.</param>

@@ -4,11 +4,10 @@
 @inject IOptions<BrandOptions> Brand
 
 @* Nothing here is built. The banner says so before anything else on the page. *@
-<PageTitle>@L["Integrations_PageTitle", Brand.Value.ProductName]</PageTitle>
-<HeadContent>
-    <meta name="description" content="@L["Integrations_MetaDescription"]" />
-    <meta name="robots" content="noindex" />
-</HeadContent>
+<PageMeta Title="@L["Integrations_Title"]"
+          Description="@L["Integrations_MetaDescription"]"
+          Path="@PublicPages.ProductIntegrations"
+          NoIndex="true" />
 
 <PlaceholderBanner Text="@L["Integrations_Placeholder"]" />
 

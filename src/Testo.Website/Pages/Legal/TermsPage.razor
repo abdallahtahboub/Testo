@@ -4,10 +4,10 @@
 @inject IOptions<BrandOptions> Brand
 
 @* Nothing here. Writing terms of use without a lawyer would be pretending to do law. *@
-<PageTitle>@L["Terms_PageTitle", Brand.Value.ProductName]</PageTitle>
-<HeadContent>
-    <meta name="robots" content="noindex" />
-</HeadContent>
+<PageMeta Title="@L["Terms_Title"]"
+          Description="@L["Terms_Lead"]"
+          Path="@PublicPages.Terms"
+          NoIndex="true" />
 
 <PlaceholderBanner Text="@L["Terms_Placeholder"]" />
 

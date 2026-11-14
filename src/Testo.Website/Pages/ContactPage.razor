@@ -15,10 +15,9 @@
     Static SSR with a plain form post, which is what a public page can do without the Blazor script
     (ADR-0003). [HasForm] gets it the antiforgery token it would otherwise lack (ADR-0009).
 *@
-<PageTitle>@L["Contact_PageTitle", Brand.Value.ProductName]</PageTitle>
-<HeadContent>
-    <meta name="description" content="@L["Contact_MetaDescription"]" />
-</HeadContent>
+<PageMeta Title="@L["Contact_Title"]"
+          Description="@L["Contact_MetaDescription"]"
+          Path="@PublicPages.Contact" />
 
 <PageHero Overline="@L["Nav_Company"]" Title="@L["Contact_Title"]" Lead="@L["Contact_Lead"]" Narrow="true" />
 

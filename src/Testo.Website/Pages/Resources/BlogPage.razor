@@ -3,7 +3,8 @@
 @inject IStringLocalizer<WebsiteResources> L
 
 @* An empty shelf that says it is empty. *@
-<EmptyListing Title="@L["Nav_Blog"]"
+<EmptyListing Path="@PublicPages.Blog"
+              Title="@L["Nav_Blog"]"
               Lead="@L["Listing_Blog_Lead"]"
               Placeholder="@L["Listing_Blog_Placeholder"]"
               EmptyTitle="@L["Listing_Blog_Empty_Title"]"

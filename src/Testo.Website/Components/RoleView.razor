@@ -5,10 +5,9 @@
     A page written for one role. Same shape three times: who you are, what your Tuesday looks like,
     what would change, and which of that is real today.
 *@
-<PageTitle>@L[Role.TitleKey] – @Brand.Value.ProductName</PageTitle>
-<HeadContent>
-    <meta name="description" content="@L[Role.LeadKey]" />
-</HeadContent>
+<PageMeta Title="@L[Role.TitleKey]"
+          Description="@L[Role.LeadKey]"
+          Path="@Role.Page" />
 
 <PageHero Overline="@L["Nav_Solutions"]" Title="@L[Role.TitleKey]" Lead="@L[Role.LeadKey]" Narrow="true" />
 

@@ -4,10 +4,9 @@
 @inject IOptions<BrandOptions> Brand
 
 @* The platform at a glance: the six stages, and the three principles the whole thing rests on. *@
-<PageTitle>@L["Product_PageTitle", Brand.Value.ProductName]</PageTitle>
-<HeadContent>
-    <meta name="description" content="@L["Product_MetaDescription"]" />
-</HeadContent>
+<PageMeta Title="@L["Product_Title_Short"]"
+          Description="@L["Product_MetaDescription"]"
+          Path="@PublicPages.Product" />
 
 <PageHero Overline="@L["Product_Overline"]" Title="@L["Product_Title"]" Lead="@L["Product_Lead", Brand.Value.ProductName]">
     <Actions>

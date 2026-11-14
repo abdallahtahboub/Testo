@@ -66,9 +66,6 @@
   <data name="Home_MetaDescription" xml:space="preserve">
     <value>{0} supports the whole software testing journey, from requirements to release sign-off.</value>
   </data>
-  <data name="Home_PageTitle" xml:space="preserve">
-    <value>{0} – AI-assisted QA platform</value>
-  </data>
   <data name="NotFound_App" xml:space="preserve">
     <value>Open the app</value>
   </data>
@@ -549,9 +546,6 @@
   <data name="Stage_Reporting_Today" xml:space="preserve">
     <value>Not built. Runs are stored, so the data a report would draw on is beginning to exist; there are no dashboards, no trends and no readiness report.</value>
   </data>
-  <data name="Product_PageTitle" xml:space="preserve">
-    <value>Product – {0}</value>
-  </data>
   <data name="Product_MetaDescription" xml:space="preserve">
     <value>One platform for the whole testing journey: planning, analysis, design, execution, defects and reporting.</value>
   </data>
@@ -615,9 +609,6 @@
   <data name="Product_State_Link" xml:space="preserve">
     <value>See what execution does, in detail</value>
   </data>
-  <data name="Capabilities_PageTitle" xml:space="preserve">
-    <value>Capabilities – {0}</value>
-  </data>
   <data name="Capabilities_MetaDescription" xml:space="preserve">
     <value>What the platform can test, and how a new kind of testing is added to it.</value>
   </data>
@@ -668,9 +659,6 @@
   </data>
   <data name="Capabilities_Accessibility_Text" xml:space="preserve">
     <value>Automated WCAG checks inside a run. We do this to our own site on every change; it is not a capability you can use yet.</value>
-  </data>
-  <data name="E2E_PageTitle" xml:space="preserve">
-    <value>Web end-to-end testing – {0}</value>
   </data>
   <data name="E2E_MetaDescription" xml:space="preserve">
     <value>A real browser driven against a web application, with a screenshot of every step and a failure you can act on.</value>
@@ -768,9 +756,6 @@
   <data name="E2E_NotYet_Why" xml:space="preserve">
     <value>These are on the list in that order, and the first of them is the reason a customer-supplied target is not offered yet.</value>
   </data>
-  <data name="Integrations_PageTitle" xml:space="preserve">
-    <value>Integrations – {0}</value>
-  </data>
   <data name="Integrations_MetaDescription" xml:space="preserve">
     <value>Planned connections to Git, issue trackers and CI systems. Nothing here is built yet.</value>
   </data>
@@ -812,9 +797,6 @@
   </data>
   <data name="Integrations_Api_Text" xml:space="preserve">
     <value>Everything the interface can do, available to a script. The service interfaces are already separated from the UI with this in mind.</value>
-  </data>
-  <data name="Security_PageTitle" xml:space="preserve">
-    <value>Security and trust – {0}</value>
   </data>
   <data name="Security_MetaDescription" xml:space="preserve">
     <value>How one customer is kept apart from another, where the browser is allowed to go, and what is not in place yet.</value>
@@ -920,9 +902,6 @@
   </data>
   <data name="Security_NotYet_Contact" xml:space="preserve">
     <value>Ask us a security question directly</value>
-  </data>
-  <data name="Solutions_PageTitle" xml:space="preserve">
-    <value>Solutions – {0}</value>
   </data>
   <data name="Solutions_MetaDescription" xml:space="preserve">
     <value>What the platform changes for a QA lead, a developer and an engineering manager.</value>
@@ -1086,9 +1065,6 @@
   <data name="Industry_PublicSector_Lead" xml:space="preserve">
     <value>Accessibility is a legal requirement, not a preference, and the user cannot go elsewhere.</value>
   </data>
-  <data name="Pricing_PageTitle" xml:space="preserve">
-    <value>Pricing – {0}</value>
-  </data>
   <data name="Pricing_MetaDescription" xml:space="preserve">
     <value>What the plans would include. Prices are not set yet, and this page says so rather than inventing one.</value>
   </data>
@@ -1224,9 +1200,6 @@
   <data name="Pricing_Faq_Free_A" xml:space="preserve">
     <value>Not decided. If you want to try it while it is this early, that is a conversation rather than a sign-up form, and it will probably teach us more than it teaches you.</value>
   </data>
-  <data name="Resources_PageTitle" xml:space="preserve">
-    <value>Resources – {0}</value>
-  </data>
   <data name="Resources_MetaDescription" xml:space="preserve">
     <value>Where the writing will be. Nothing is published yet.</value>
   </data>
@@ -1290,9 +1263,6 @@
   <data name="Listing_Cases_Empty_Text" xml:space="preserve">
     <value>A case study about a customer who does not exist is the most damaging thing a page like this can carry, so this one stays empty until it is earned.</value>
   </data>
-  <data name="About_PageTitle" xml:space="preserve">
-    <value>About us – {0}</value>
-  </data>
   <data name="About_MetaDescription" xml:space="preserve">
     <value>Why this product exists, what it refuses to do, and who is behind it.</value>
   </data>
@@ -1353,9 +1323,6 @@
   <data name="About_Team_Link" xml:space="preserve">
     <value>Ask us anything directly</value>
   </data>
-  <data name="Careers_PageTitle" xml:space="preserve">
-    <value>Careers – {0}</value>
-  </data>
   <data name="Careers_Placeholder" xml:space="preserve">
     <value>There are no open roles, and this page exists so the link in the footer leads somewhere honest.</value>
   </data>
@@ -1376,9 +1343,6 @@
   </data>
   <data name="Legal_Missing" xml:space="preserve">
     <value>To be supplied</value>
-  </data>
-  <data name="Imprint_PageTitle" xml:space="preserve">
-    <value>Imprint – {0}</value>
   </data>
   <data name="Imprint_Placeholder" xml:space="preserve">
     <value>This Impressum is incomplete and therefore not yet legally compliant. German law requires every item below before this site may be operated commercially. Each one needs the real legal entity, which this page cannot invent.</value>
@@ -1439,9 +1403,6 @@
   </data>
   <data name="Imprint_Who" xml:space="preserve">
     <value>These are details only the operating company can supply, and the text should be checked by a lawyer before this site goes live. It is not something a developer should write.</value>
-  </data>
-  <data name="Privacy_PageTitle" xml:space="preserve">
-    <value>Privacy – {0}</value>
   </data>
   <data name="Privacy_Placeholder" xml:space="preserve">
     <value>This is not a complete privacy notice and must not be relied on as one. What it does contain is accurate: the facts below are taken from what the software actually does. What is missing is listed at the bottom, and a lawyer has to write that part.</value>
@@ -1512,9 +1473,6 @@
   <data name="Privacy_Missing_Rights" xml:space="preserve">
     <value>Your rights under Articles 15 to 22 and how to exercise them.</value>
   </data>
-  <data name="Terms_PageTitle" xml:space="preserve">
-    <value>Terms – {0}</value>
-  </data>
   <data name="Terms_Placeholder" xml:space="preserve">
     <value>There are no terms of use yet. This page exists so the footer link leads somewhere that says so.</value>
   </data>
@@ -1529,9 +1487,6 @@
   </data>
   <data name="Terms_Contact" xml:space="preserve">
     <value>Ask us what we would commit to</value>
-  </data>
-  <data name="Access_PageTitle" xml:space="preserve">
-    <value>Accessibility – {0}</value>
   </data>
   <data name="Access_MetaDescription" xml:space="preserve">
     <value>What we commit to, how it is tested on every change, what is still missing, and how to tell us we have failed.</value>
@@ -1629,9 +1584,6 @@
   <data name="Form_Done_Home" xml:space="preserve">
     <value>Back to the home page</value>
   </data>
-  <data name="Contact_PageTitle" xml:space="preserve">
-    <value>Contact – {0}</value>
-  </data>
   <data name="Contact_MetaDescription" xml:space="preserve">
     <value>Ask us about the product, about security, or about accessibility.</value>
   </data>
@@ -1667,9 +1619,6 @@
   </data>
   <data name="Contact_Done_Text" xml:space="preserve">
     <value>Everything you filled in was valid, and this is the point at which a real message would be on its way to us.</value>
-  </data>
-  <data name="Demo_PageTitle" xml:space="preserve">
-    <value>Request a demo – {0}</value>
   </data>
   <data name="Demo_MetaDescription" xml:space="preserve">
     <value>See a test run against a real application, and hear plainly what is not built yet.</value>
@@ -1715,5 +1664,23 @@
   </data>
   <data name="Demo_Done_Action" xml:space="preserve">
     <value>Read what the run actually does</value>
+  </data>
+  <data name="Home_PageTitle_Short" xml:space="preserve">
+    <value>AI-assisted QA platform</value>
+  </data>
+  <data name="Product_Title_Short" xml:space="preserve">
+    <value>Product</value>
+  </data>
+  <data name="Capabilities_Title_Short" xml:space="preserve">
+    <value>Capabilities</value>
+  </data>
+  <data name="E2E_Title_Short" xml:space="preserve">
+    <value>Web end-to-end testing</value>
+  </data>
+  <data name="Solutions_Title_Short" xml:space="preserve">
+    <value>Solutions</value>
+  </data>
+  <data name="Social_Card_Alt" xml:space="preserve">
+    <value>The {0} logo beside the words “Quality you can see, from requirement to release”.</value>
   </data>
 </root>

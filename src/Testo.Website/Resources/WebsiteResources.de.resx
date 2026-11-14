@@ -66,9 +66,6 @@
   <data name="Home_MetaDescription" xml:space="preserve">
     <value>{0} begleitet den gesamten Softwaretest – von den Anforderungen bis zur Release-Freigabe.</value>
   </data>
-  <data name="Home_PageTitle" xml:space="preserve">
-    <value>{0} – KI-gestützte QA-Plattform</value>
-  </data>
   <data name="NotFound_App" xml:space="preserve">
     <value>App öffnen</value>
   </data>
@@ -549,9 +546,6 @@
   <data name="Stage_Reporting_Today" xml:space="preserve">
     <value>Nicht gebaut. Läufe werden gespeichert, die Datengrundlage entsteht also gerade. Es gibt keine Dashboards, keine Verläufe und keinen Reifebericht.</value>
   </data>
-  <data name="Product_PageTitle" xml:space="preserve">
-    <value>Produkt – {0}</value>
-  </data>
   <data name="Product_MetaDescription" xml:space="preserve">
     <value>Eine Plattform für den gesamten Testprozess: Planung, Analyse, Entwurf, Durchführung, Fehler und Berichte.</value>
   </data>
@@ -615,9 +609,6 @@
   <data name="Product_State_Link" xml:space="preserve">
     <value>Im Detail: was die Durchführung leistet</value>
   </data>
-  <data name="Capabilities_PageTitle" xml:space="preserve">
-    <value>Testarten – {0}</value>
-  </data>
   <data name="Capabilities_MetaDescription" xml:space="preserve">
     <value>Was die Plattform testen kann und wie eine neue Testart hinzukommt.</value>
   </data>
@@ -668,9 +659,6 @@
   </data>
   <data name="Capabilities_Accessibility_Text" xml:space="preserve">
     <value>Automatisierte WCAG-Prüfungen im Lauf. Wir machen das bei jeder Änderung mit unserer eigenen Website; als nutzbare Testart existiert es noch nicht.</value>
-  </data>
-  <data name="E2E_PageTitle" xml:space="preserve">
-    <value>End-to-End-Tests im Web – {0}</value>
   </data>
   <data name="E2E_MetaDescription" xml:space="preserve">
     <value>Ein echter Browser, der eine Webanwendung bedient – mit einem Bildschirmfoto zu jedem Schritt und einem Fehler, mit dem man arbeiten kann.</value>
@@ -768,9 +756,6 @@
   <data name="E2E_NotYet_Why" xml:space="preserve">
     <value>Diese Punkte stehen in dieser Reihenfolge auf der Liste, und der erste ist der Grund, warum ein eigenes Testziel noch nicht angeboten wird.</value>
   </data>
-  <data name="Integrations_PageTitle" xml:space="preserve">
-    <value>Integrationen – {0}</value>
-  </data>
   <data name="Integrations_MetaDescription" xml:space="preserve">
     <value>Geplante Verbindungen zu Git, Ticketsystemen und CI-Systemen. Nichts davon ist bislang gebaut.</value>
   </data>
@@ -812,9 +797,6 @@
   </data>
   <data name="Integrations_Api_Text" xml:space="preserve">
     <value>Alles, was die Oberfläche kann, auch für ein Skript verfügbar. Die Service-Schnittstellen sind dafür bereits von der UI getrennt.</value>
-  </data>
-  <data name="Security_PageTitle" xml:space="preserve">
-    <value>Sicherheit und Vertrauen – {0}</value>
   </data>
   <data name="Security_MetaDescription" xml:space="preserve">
     <value>Wie Kunden voneinander getrennt werden, wohin der Browser darf und was noch fehlt.</value>
@@ -920,9 +902,6 @@
   </data>
   <data name="Security_NotYet_Contact" xml:space="preserve">
     <value>Stellen Sie uns eine Sicherheitsfrage direkt</value>
-  </data>
-  <data name="Solutions_PageTitle" xml:space="preserve">
-    <value>Lösungen – {0}</value>
   </data>
   <data name="Solutions_MetaDescription" xml:space="preserve">
     <value>Was die Plattform für Testmanager, Entwickler und Engineering Manager ändert.</value>
@@ -1086,9 +1065,6 @@
   <data name="Industry_PublicSector_Lead" xml:space="preserve">
     <value>Barrierefreiheit ist gesetzliche Pflicht, keine Vorliebe – und die Nutzer können nicht ausweichen.</value>
   </data>
-  <data name="Pricing_PageTitle" xml:space="preserve">
-    <value>Preise – {0}</value>
-  </data>
   <data name="Pricing_MetaDescription" xml:space="preserve">
     <value>Was die Pakete enthalten würden. Die Preise stehen noch nicht fest – und diese Seite sagt das, statt einen zu erfinden.</value>
   </data>
@@ -1224,9 +1200,6 @@
   <data name="Pricing_Faq_Free_A" xml:space="preserve">
     <value>Nicht entschieden. Wenn Sie es in diesem frühen Stadium ausprobieren möchten, ist das ein Gespräch und kein Anmeldeformular – und es bringt uns wahrscheinlich mehr als Ihnen.</value>
   </data>
-  <data name="Resources_PageTitle" xml:space="preserve">
-    <value>Material – {0}</value>
-  </data>
   <data name="Resources_MetaDescription" xml:space="preserve">
     <value>Wo die Texte stehen werden. Veröffentlicht ist noch nichts.</value>
   </data>
@@ -1290,9 +1263,6 @@
   <data name="Listing_Cases_Empty_Text" xml:space="preserve">
     <value>Eine Fallstudie über einen Kunden, den es nicht gibt, ist das Schädlichste, was eine solche Seite tragen kann – diese bleibt leer, bis sie verdient ist.</value>
   </data>
-  <data name="About_PageTitle" xml:space="preserve">
-    <value>Über uns – {0}</value>
-  </data>
   <data name="About_MetaDescription" xml:space="preserve">
     <value>Warum dieses Produkt existiert, was es nicht tut und wer dahintersteht.</value>
   </data>
@@ -1353,9 +1323,6 @@
   <data name="About_Team_Link" xml:space="preserve">
     <value>Fragen Sie uns direkt</value>
   </data>
-  <data name="Careers_PageTitle" xml:space="preserve">
-    <value>Karriere – {0}</value>
-  </data>
   <data name="Careers_Placeholder" xml:space="preserve">
     <value>Es gibt keine offenen Stellen. Diese Seite existiert, damit der Link im Fußbereich zu etwas Ehrlichem führt.</value>
   </data>
@@ -1376,9 +1343,6 @@
   </data>
   <data name="Legal_Missing" xml:space="preserve">
     <value>Nachzutragen</value>
-  </data>
-  <data name="Imprint_PageTitle" xml:space="preserve">
-    <value>Impressum – {0}</value>
   </data>
   <data name="Imprint_Placeholder" xml:space="preserve">
     <value>Dieses Impressum ist unvollständig und damit noch nicht rechtskonform. Das deutsche Recht verlangt jede der folgenden Angaben, bevor diese Website gewerblich betrieben werden darf. Jede Angabe erfordert die tatsächliche juristische Person, die diese Seite nicht erfinden kann.</value>
@@ -1439,9 +1403,6 @@
   </data>
   <data name="Imprint_Who" xml:space="preserve">
     <value>Diese Angaben kann nur das betreibende Unternehmen liefern, und der Text sollte vor dem Livegang juristisch geprüft werden. Das ist nichts, was ein Entwickler schreiben sollte.</value>
-  </data>
-  <data name="Privacy_PageTitle" xml:space="preserve">
-    <value>Datenschutz – {0}</value>
   </data>
   <data name="Privacy_Placeholder" xml:space="preserve">
     <value>Dies ist keine vollständige Datenschutzerklärung und darf nicht als solche herangezogen werden. Der enthaltene Teil ist jedoch zutreffend: Die folgenden Angaben stammen aus dem, was die Software tatsächlich tut. Was fehlt, steht unten – und dieser Teil muss juristisch verfasst werden.</value>
@@ -1512,9 +1473,6 @@
   <data name="Privacy_Missing_Rights" xml:space="preserve">
     <value>Ihre Rechte nach Artikel 15 bis 22 und wie Sie sie ausüben.</value>
   </data>
-  <data name="Terms_PageTitle" xml:space="preserve">
-    <value>AGB – {0}</value>
-  </data>
   <data name="Terms_Placeholder" xml:space="preserve">
     <value>Es gibt noch keine Nutzungsbedingungen. Diese Seite existiert, damit der Link im Fußbereich dorthin führt, wo das steht.</value>
   </data>
@@ -1529,9 +1487,6 @@
   </data>
   <data name="Terms_Contact" xml:space="preserve">
     <value>Fragen Sie uns, was wir zusagen würden</value>
-  </data>
-  <data name="Access_PageTitle" xml:space="preserve">
-    <value>Barrierefreiheit – {0}</value>
   </data>
   <data name="Access_MetaDescription" xml:space="preserve">
     <value>Was wir zusagen, wie es bei jeder Änderung geprüft wird, was noch fehlt und wie Sie uns Mängel melden.</value>
@@ -1629,9 +1584,6 @@
   <data name="Form_Done_Home" xml:space="preserve">
     <value>Zurück zur Startseite</value>
   </data>
-  <data name="Contact_PageTitle" xml:space="preserve">
-    <value>Kontakt – {0}</value>
-  </data>
   <data name="Contact_MetaDescription" xml:space="preserve">
     <value>Fragen Sie uns zum Produkt, zur Sicherheit oder zur Barrierefreiheit.</value>
   </data>
@@ -1667,9 +1619,6 @@
   </data>
   <data name="Contact_Done_Text" xml:space="preserve">
     <value>Alle Ihre Eingaben waren gültig – an dieser Stelle wäre eine echte Nachricht auf dem Weg zu uns.</value>
-  </data>
-  <data name="Demo_PageTitle" xml:space="preserve">
-    <value>Demo anfragen – {0}</value>
   </data>
   <data name="Demo_MetaDescription" xml:space="preserve">
     <value>Sehen Sie einen Testlauf gegen eine echte Anwendung – und hören Sie klar, was noch nicht gebaut ist.</value>
@@ -1715,5 +1664,23 @@
   </data>
   <data name="Demo_Done_Action" xml:space="preserve">
     <value>Lesen, was der Lauf tatsächlich tut</value>
+  </data>
+  <data name="Home_PageTitle_Short" xml:space="preserve">
+    <value>KI-gestützte QA-Plattform</value>
+  </data>
+  <data name="Product_Title_Short" xml:space="preserve">
+    <value>Produkt</value>
+  </data>
+  <data name="Capabilities_Title_Short" xml:space="preserve">
+    <value>Testarten</value>
+  </data>
+  <data name="E2E_Title_Short" xml:space="preserve">
+    <value>End-to-End-Tests im Web</value>
+  </data>
+  <data name="Solutions_Title_Short" xml:space="preserve">
+    <value>Lösungen</value>
+  </data>
+  <data name="Social_Card_Alt" xml:space="preserve">
+    <value>Das Logo von {0} neben den Worten „Qualität, die man sieht – von der Anforderung bis zum Release“.</value>
   </data>
 </root>

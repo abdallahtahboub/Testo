@@ -157,6 +157,32 @@ public static class PublicPages
     public static IReadOnlyList<string> WithForms { get; } = [Contact, RequestDemo];
 
     /// <summary>
+    /// The pages that ask search engines to leave them alone.
+    /// </summary>
+    /// <remarks>
+    /// All of them are placeholders. A placeholder that ranks is a placeholder a stranger reads
+    /// first, and the first impression of this product should not be an empty page — so these are
+    /// served with <c>noindex</c> and left out of <c>sitemap.xml</c>. A test holds the pages
+    /// themselves to this list, because two descriptions of the same thing always drift.
+    /// </remarks>
+    public static IReadOnlyList<string> NotIndexed { get; } =
+    [
+        ProductIntegrations,
+        .. Industries.Select(Industry),
+        Blog,
+        Docs,
+        CaseStudies,
+        Careers,
+        Imprint,
+        Privacy,
+        Terms,
+    ];
+
+    /// <summary>The pages that belong in <c>sitemap.xml</c>: everything that is actually written.</summary>
+    public static IReadOnlyList<string> Indexed { get; } =
+        [.. All.Where(page => !NotIndexed.Contains(page, StringComparer.Ordinal))];
+
+    /// <summary>
     /// How important a page is, for <c>sitemap.xml</c>. Not a ranking promise — a hint, and a way
     /// of saying out loud which pages we think matter.
     /// </summary>

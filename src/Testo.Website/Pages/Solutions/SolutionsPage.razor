@@ -4,10 +4,9 @@
 @inject IOptions<BrandOptions> Brand
 
 @* Where the role and industry pages start. *@
-<PageTitle>@L["Solutions_PageTitle", Brand.Value.ProductName]</PageTitle>
-<HeadContent>
-    <meta name="description" content="@L["Solutions_MetaDescription"]" />
-</HeadContent>
+<PageMeta Title="@L["Solutions_Title_Short"]"
+          Description="@L["Solutions_MetaDescription"]"
+          Path="@PublicPages.Solutions" />
 
 <PageHero Overline="@L["Nav_Solutions"]" Title="@L["Solutions_Title"]" Lead="@L["Solutions_Lead"]" Narrow="true" />
 

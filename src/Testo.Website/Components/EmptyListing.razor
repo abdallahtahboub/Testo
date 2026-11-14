@@ -8,10 +8,10 @@
     and an empty shelf should say it is empty rather than show three invented articles — a fake
     case study is the single most damaging placeholder a B2B site can carry.
 *@
-<PageTitle>@Title – @Brand.Value.ProductName</PageTitle>
-<HeadContent>
-    <meta name="robots" content="noindex" />
-</HeadContent>
+<PageMeta Title="@Title"
+          Description="@Lead"
+          Path="@Path"
+          NoIndex="true" />
 
 <PlaceholderBanner Text="@Placeholder" />
 
@@ -34,6 +34,10 @@
     /// <summary>What would be here.</summary>
     [Parameter, EditorRequired]
     public string Lead { get; set; } = "";
+
+    /// <summary>This page's own path, for the social tags.</summary>
+    [Parameter, EditorRequired]
+    public string Path { get; set; } = "";
 
     /// <summary>What the banner says is missing.</summary>
     [Parameter, EditorRequired]

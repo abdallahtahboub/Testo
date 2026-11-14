@@ -13,10 +13,10 @@
     So the page lists exactly what the law requires, marks every line as missing, and says who has
     to supply it. That is more useful than an empty page and more honest than invented details.
 *@
-<PageTitle>@L["Imprint_PageTitle", Brand.Value.ProductName]</PageTitle>
-<HeadContent>
-    <meta name="robots" content="noindex" />
-</HeadContent>
+<PageMeta Title="@L["Imprint_Title"]"
+          Description="@L["Imprint_Lead"]"
+          Path="@PublicPages.Imprint"
+          NoIndex="true" />
 
 <PlaceholderBanner Text="@L["Imprint_Placeholder"]" />
 

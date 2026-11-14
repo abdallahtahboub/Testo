@@ -25,6 +25,7 @@ using Testo.UI.Shared.Theming;
 using Testo.Web.Antiforgery;
 using Testo.Web.Components;
 using Testo.Web.Execution;
+using Testo.Web.Seo;
 using Testo.Website;
 using Testo.Web.Features;
 using Testo.Web.Identity;
@@ -151,6 +152,9 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapPreferenceEndpoints();
 app.MapArtifactEndpoints();
+
+// sitemap.xml and robots.txt, generated from the page catalogue so they cannot go stale.
+app.MapSiteMap();
 
 // The bare address leads to the home page in the visitor's language.
 app.MapGet("/", (HttpContext context) =>

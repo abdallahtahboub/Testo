@@ -4,10 +4,9 @@
 @inject IOptions<BrandOptions> Brand
 
 @* Placeholder home page for Milestone 1. Milestone 3 replaces it with the real one. *@
-<PageTitle>@L["Home_PageTitle", Brand.Value.ProductName]</PageTitle>
-<HeadContent>
-    <meta name="description" content="@L["Home_MetaDescription", Brand.Value.ProductName]" />
-</HeadContent>
+<PageMeta Title="@L["Home_PageTitle_Short"]"
+          Description="@L["Home_MetaDescription", Brand.Value.ProductName]"
+          Path="@PublicPages.Home" />
 
 <section class="home-hero">
     <div class="t-container home-hero__inner">

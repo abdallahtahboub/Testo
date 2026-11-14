@@ -11,10 +11,9 @@
     "What exists today" is not optional. Five of the six stages are a plan, and a page that
     describes a plan in the present tense is a page that misleads a buyer.
 *@
-<PageTitle>@L[Stage.TitleKey] – @Brand.Value.ProductName</PageTitle>
-<HeadContent>
-    <meta name="description" content="@L[Stage.LeadKey]" />
-</HeadContent>
+<PageMeta Title="@L[Stage.TitleKey]"
+          Description="@L[Stage.LeadKey]"
+          Path="@Stage.Page" />
 
 <PageHero Overline="@L[Stage.OverlineKey]" Title="@L[Stage.TitleKey]" Lead="@L[Stage.LeadKey]" Narrow="true" />
 

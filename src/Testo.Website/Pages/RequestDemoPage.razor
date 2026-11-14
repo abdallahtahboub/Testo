@@ -11,10 +11,9 @@
     says so before and after, and the page is honest about what a demonstration would actually
     show, which today is one stage of six.
 *@
-<PageTitle>@L["Demo_PageTitle", Brand.Value.ProductName]</PageTitle>
-<HeadContent>
-    <meta name="description" content="@L["Demo_MetaDescription"]" />
-</HeadContent>
+<PageMeta Title="@L["Demo_Title"]"
+          Description="@L["Demo_MetaDescription"]"
+          Path="@PublicPages.RequestDemo" />
 
 <PageHero Overline="@L["Nav_Company"]" Title="@L["Demo_Title"]" Lead="@L["Demo_Lead"]" Narrow="true" />
 

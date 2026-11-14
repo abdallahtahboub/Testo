@@ -4,10 +4,10 @@
 @inject IOptions<BrandOptions> Brand
 
 @* No roles are open, and inventing some would waste a stranger's afternoon. *@
-<PageTitle>@L["Careers_PageTitle", Brand.Value.ProductName]</PageTitle>
-<HeadContent>
-    <meta name="robots" content="noindex" />
-</HeadContent>
+<PageMeta Title="@L["Careers_Title"]"
+          Description="@L["Careers_Lead"]"
+          Path="@PublicPages.Careers"
+          NoIndex="true" />
 
 <PlaceholderBanner Text="@L["Careers_Placeholder"]" />
 

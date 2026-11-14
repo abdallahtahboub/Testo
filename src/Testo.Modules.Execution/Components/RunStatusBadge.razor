@@ -28,6 +28,7 @@
         RunStatus.TimedOut => "Status_TimedOut",
         RunStatus.BudgetExceeded => "Status_BudgetExceeded",
         RunStatus.InfrastructureError => "Status_InfrastructureError",
+        RunStatus.Inconclusive => "Status_Inconclusive",
         _ => "Status_Queued",
     };
 
@@ -38,8 +39,11 @@
         RunStatus.Running => Tone.Info,
         RunStatus.Queued => Tone.Neutral,
 
-        // Not failures of the application under test, and not successes either.
-        RunStatus.TimedOut or RunStatus.BudgetExceeded or RunStatus.InfrastructureError => Tone.Warning,
+        // Not failures of the application under test, and not successes either. "Inconclusive" is
+        // here rather than beside Passed on purpose: every step of it passed, and showing it in
+        // green is how a result that answers half a question gets read as answering all of it.
+        RunStatus.TimedOut or RunStatus.BudgetExceeded or RunStatus.InfrastructureError
+            or RunStatus.Inconclusive => Tone.Warning,
         _ => Tone.Neutral,
     };
 

@@ -1,0 +1,69 @@
+@page "/en/product/security"
+@page "/de/product/security"
+@inject IStringLocalizer<WebsiteResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    Security and trust.
+
+    A buyer's security questionnaire will ask these questions, and the answers here are the ones we
+    could defend in that questionnaire: what is enforced, where, and what is not enforced yet. Each
+    "not yet" is here because leaving it out would make this page a sales document rather than an
+    answer.
+*@
+<PageTitle>@L["Security_PageTitle", Brand.Value.ProductName]</PageTitle>
+<HeadContent>
+    <meta name="description" content="@L["Security_MetaDescription"]" />
+</HeadContent>
+
+<PageHero Overline="@L["Nav_Product"]" Title="@L["Security_Title"]" Lead="@L["Security_Lead"]" Narrow="true" />
+
+<PageSection Title="@L["Security_Tenancy_Title"]" Intro="@L["Security_Tenancy_Intro"]">
+    <CardDeck Columns="3" Cards="@Tenancy" />
+</PageSection>
+
+<PageSection Title="@L["Security_Browser_Title"]" Intro="@L["Security_Browser_Intro"]" Tone="PageSection.SectionTone.Subtle">
+    <CardDeck Columns="3" Cards="@Browser" />
+</PageSection>
+
+<PageSection Narrow="true" Title="@L["Security_Data_Title"]">
+    <dl class="security-facts">
+        <dt>@L["Security_Data_Where_Label"]</dt>
+        <dd>@L["Security_Data_Where_Text"]</dd>
+        <dt>@L["Security_Data_Evidence_Label"]</dt>
+        <dd>@L["Security_Data_Evidence_Text"]</dd>
+        <dt>@L["Security_Data_Credentials_Label"]</dt>
+        <dd>@L["Security_Data_Credentials_Text"]</dd>
+        <dt>@L["Security_Data_Model_Label"]</dt>
+        <dd>@L["Security_Data_Model_Text"]</dd>
+    </dl>
+</PageSection>
+
+<PageSection Narrow="true" Title="@L["Security_NotYet_Title"]">
+    <p>@L["Security_NotYet_Intro"]</p>
+    <ul class="security-notyet">
+        <li>@L["Security_NotYet_Container"]</li>
+        <li>@L["Security_NotYet_Hosting"]</li>
+        <li>@L["Security_NotYet_Certification"]</li>
+        <li>@L["Security_NotYet_Audit"]</li>
+    </ul>
+    <p>
+        <a href="@LocalizedPath.For(SupportedCultures.Current, PublicPages.Contact)">@L["Security_NotYet_Contact"]</a>
+    </p>
+</PageSection>
+
+@code {
+    private IReadOnlyList<CardDeck.Card> Tenancy =>
+    [
+        new(L["Security_Tenancy_Filter_Title"], L["Security_Tenancy_Filter_Text"]),
+        new(L["Security_Tenancy_Write_Title"], L["Security_Tenancy_Write_Text"]),
+        new(L["Security_Tenancy_Keys_Title"], L["Security_Tenancy_Keys_Text"]),
+    ];
+
+    private IReadOnlyList<CardDeck.Card> Browser =>
+    [
+        new(L["Security_Browser_Process_Title"], L["Security_Browser_Process_Text"]),
+        new(L["Security_Browser_Egress_Title"], L["Security_Browser_Egress_Text"]),
+        new(L["Security_Browser_Model_Title"], L["Security_Browser_Model_Text"]),
+    ];
+}

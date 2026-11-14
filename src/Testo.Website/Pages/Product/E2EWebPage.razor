@@ -1,0 +1,78 @@
+@page "/en/product/capabilities/e2e-web"
+@page "/de/product/capabilities/e2e-web"
+@inject IStringLocalizer<WebsiteResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    The one capability that is real, described in detail and without embellishment.
+
+    This page is the test of whether the whole site is honest: it is the flagship, so it is the page
+    most tempting to overstate. It therefore gives numbers that were measured, says which number is
+    missing, and names the boundary that is not built yet.
+*@
+<PageTitle>@L["E2E_PageTitle", Brand.Value.ProductName]</PageTitle>
+<HeadContent>
+    <meta name="description" content="@L["E2E_MetaDescription"]" />
+</HeadContent>
+
+<PageHero Overline="@L["E2E_Overline"]" Title="@L["E2E_Title"]" Lead="@L["E2E_Lead"]">
+    <Actions>
+        <TButton Href="@Href(PublicPages.RequestDemo)" Variant="ButtonVariant.Primary" Size="ButtonSize.Large">
+            @L["Nav_RequestDemo"]
+        </TButton>
+    </Actions>
+</PageHero>
+
+<PageSection Title="@L["E2E_How_Title"]" Intro="@L["E2E_How_Intro"]">
+    <ol class="e2e-steps">
+        @foreach (var step in Steps)
+        {
+            <li class="e2e-steps__item">
+                <h3 class="e2e-steps__title">@step.Title</h3>
+                <p class="e2e-steps__text">@step.Text</p>
+            </li>
+        }
+    </ol>
+</PageSection>
+
+<PageSection Title="@L["E2E_Boundary_Title"]" Intro="@L["E2E_Boundary_Intro"]" Tone="PageSection.SectionTone.Subtle">
+    <CardDeck Columns="3" Cards="@Boundary" />
+</PageSection>
+
+<PageSection Narrow="true" Title="@L["E2E_Ai_Title"]">
+    <p class="t-lead">@L["E2E_Ai_Lead"]</p>
+    <p>@L["E2E_Ai_Text"]</p>
+
+    <div class="e2e-honesty" data-testid="e2e-honesty">
+        <p class="e2e-honesty__title">@L["E2E_Ai_Measured_Title"]</p>
+        <p>@L["E2E_Ai_Measured_Text"]</p>
+    </div>
+</PageSection>
+
+<PageSection Narrow="true" Title="@L["E2E_NotYet_Title"]">
+    <ul class="e2e-notyet">
+        <li>@L["E2E_NotYet_Container"]</li>
+        <li>@L["E2E_NotYet_Targets"]</li>
+        <li>@L["E2E_NotYet_Storage"]</li>
+    </ul>
+    <p>@L["E2E_NotYet_Why"]</p>
+</PageSection>
+
+@code {
+    private IReadOnlyList<(string Title, string Text)> Steps =>
+    [
+        (L["E2E_How_Step1_Title"], L["E2E_How_Step1_Text"]),
+        (L["E2E_How_Step2_Title"], L["E2E_How_Step2_Text"]),
+        (L["E2E_How_Step3_Title"], L["E2E_How_Step3_Text"]),
+        (L["E2E_How_Step4_Title"], L["E2E_How_Step4_Text"]),
+    ];
+
+    private IReadOnlyList<CardDeck.Card> Boundary =>
+    [
+        new(L["E2E_Boundary_Process_Title"], L["E2E_Boundary_Process_Text"]),
+        new(L["E2E_Boundary_Proxy_Title"], L["E2E_Boundary_Proxy_Text"]),
+        new(L["E2E_Boundary_Tenant_Title"], L["E2E_Boundary_Tenant_Text"]),
+    ];
+
+    private static string Href(string page) => LocalizedPath.For(SupportedCultures.Current, page);
+}

@@ -549,4 +549,541 @@
   <data name="Stage_Reporting_Today" xml:space="preserve">
     <value>Nicht gebaut. Läufe werden gespeichert, die Datengrundlage entsteht also gerade. Es gibt keine Dashboards, keine Verläufe und keinen Reifebericht.</value>
   </data>
+  <data name="Product_PageTitle" xml:space="preserve">
+    <value>Produkt – {0}</value>
+  </data>
+  <data name="Product_MetaDescription" xml:space="preserve">
+    <value>Eine Plattform für den gesamten Testprozess: Planung, Analyse, Entwurf, Durchführung, Fehler und Berichte.</value>
+  </data>
+  <data name="Product_Overline" xml:space="preserve">
+    <value>Die Plattform</value>
+  </data>
+  <data name="Product_Title" xml:space="preserve">
+    <value>Testen, das von der Anforderung bis zum Release zusammenhält</value>
+  </data>
+  <data name="Product_Lead" xml:space="preserve">
+    <value>{0} folgt den sechs Phasen eines Testprozesses und behält den Faden dazwischen – damit Geplantes, Getestetes und Gefundenes eine Geschichte sind und nicht drei.</value>
+  </data>
+  <data name="Product_Action_SeeARun" xml:space="preserve">
+    <value>Wie ein Lauf funktioniert</value>
+  </data>
+  <data name="Product_Journey_Title" xml:space="preserve">
+    <value>Die sechs Phasen</value>
+  </data>
+  <data name="Product_Journey_Intro" xml:space="preserve">
+    <value>Jede Phase hat ihre eigene Seite, und jede Seite sagt, was heute existiert – nicht, was vorgesehen ist.</value>
+  </data>
+  <data name="Product_Stage_Available" xml:space="preserve">
+    <value>Jetzt verfügbar</value>
+  </data>
+  <data name="Product_Stage_Planned" xml:space="preserve">
+    <value>Geplant</value>
+  </data>
+  <data name="Product_Principles_Title" xml:space="preserve">
+    <value>Drei Dinge, die nicht verhandelbar sind</value>
+  </data>
+  <data name="Product_Principles_Intro" xml:space="preserve">
+    <value>Jedes Produkt macht Kompromisse. Diese hier sind vorab entschieden, dokumentiert und durch Tests abgesichert.</value>
+  </data>
+  <data name="Product_Principle_Traceability_Title" xml:space="preserve">
+    <value>Ein Ergebnis, das sich zurückverfolgen lässt</value>
+  </data>
+  <data name="Product_Principle_Traceability_Text" xml:space="preserve">
+    <value>Ein Urteil ist nur etwas wert, wenn nachvollziehbar ist, worauf es beruht: welche Schritte liefen, gegen was, und was die Anwendung tatsächlich gezeigt hat.</value>
+  </data>
+  <data name="Product_Principle_Bounded_Title" xml:space="preserve">
+    <value>Ein Modell, das plant – und nie frei handelt</value>
+  </data>
+  <data name="Product_Principle_Bounded_Text" xml:space="preserve">
+    <value>Wo KI eingesetzt wird, wählt sie aus einer festen Menge von Browser-Aktionen, und ihre Ausgabe wird vor jeder Ausführung geprüft. Modellausgaben werden nie als Code ausgeführt.</value>
+  </data>
+  <data name="Product_Principle_Evidence_Title" xml:space="preserve">
+    <value>Zahlen vor Behauptungen</value>
+  </data>
+  <data name="Product_Principle_Evidence_Text" xml:space="preserve">
+    <value>Wir veröffentlichen, was wir gemessen haben – einschließlich dessen, was wir noch nicht gemessen haben. Eine Fähigkeit ohne Zahlen wird als Plan bezeichnet.</value>
+  </data>
+  <data name="Product_State_Title" xml:space="preserve">
+    <value>Was heute nutzbar ist</value>
+  </data>
+  <data name="Product_State_Lead" xml:space="preserve">
+    <value>Eine der sechs Phasen ist gebaut: die Testdurchführung.</value>
+  </data>
+  <data name="Product_State_Text" xml:space="preserve">
+    <value>Konten, Organisationen, Rollen und das Prüfprotokoll sind echt. Die Durchführung bedient einen Browser gegen eine Anwendung und bewahrt die Belege. Die anderen fünf Phasen sind entworfen und dokumentiert, aber keine läuft. Das sagen wir lieber hier als in einer Vorführung.</value>
+  </data>
+  <data name="Product_State_Link" xml:space="preserve">
+    <value>Im Detail: was die Durchführung leistet</value>
+  </data>
+  <data name="Capabilities_PageTitle" xml:space="preserve">
+    <value>Testarten – {0}</value>
+  </data>
+  <data name="Capabilities_MetaDescription" xml:space="preserve">
+    <value>Was die Plattform testen kann und wie eine neue Testart hinzukommt.</value>
+  </data>
+  <data name="Capabilities_Title" xml:space="preserve">
+    <value>Testarten: was ein Lauf tatsächlich prüft</value>
+  </data>
+  <data name="Capabilities_Lead" xml:space="preserve">
+    <value>Der Prozess ist derselbe, was auch getestet wird. Was sich ändert, ist die Art des Tests – und jede Art ist ein Plug-in.</value>
+  </data>
+  <data name="Capabilities_What_Text" xml:space="preserve">
+    <value>Eine Testart ist eine Art des Testens: Sie weiß, wie ein Lauf startet, was während des Laufs zu sehen ist und wie das Ergebnis dargestellt wird. Alles darum herum – Pläne, Anforderungen, Testfälle, Fehler, Berichte – ist gemeinsam.</value>
+  </data>
+  <data name="Capabilities_Why_Text" xml:space="preserve">
+    <value>Dieser Aufbau lohnt sich, weil die schwierigen Teile nicht web-spezifisch sind: Nachvollziehbarkeit, Belege, Mandantentrennung und ehrliche Berichte sind bei API- oder Lasttests dieselben Probleme. Sie einmal richtig zu lösen, ist der Zweck dieser Struktur.</value>
+  </data>
+  <data name="Capabilities_List_Title" xml:space="preserve">
+    <value>Was existiert und was nicht</value>
+  </data>
+  <data name="Capabilities_Web_Title" xml:space="preserve">
+    <value>End-to-End-Tests im Web</value>
+  </data>
+  <data name="Capabilities_Web_Text" xml:space="preserve">
+    <value>Ein echter Browser, der eine Webanwendung bedient – außerhalb des Prozesses, hinter einem Proxy, der jede Adresse außer der getesteten ablehnt. Gebaut, mit einer eigenen Detailseite.</value>
+  </data>
+  <data name="Capabilities_Web_Action" xml:space="preserve">
+    <value>Wie es funktioniert</value>
+  </data>
+  <data name="Capabilities_Api_Title" xml:space="preserve">
+    <value>API-Tests</value>
+  </data>
+  <data name="Capabilities_Api_Text" xml:space="preserve">
+    <value>Anfragen, Schemata und Verträge. Als Testart entworfen, nicht geschrieben.</value>
+  </data>
+  <data name="Capabilities_Performance_Title" xml:space="preserve">
+    <value>Lasttests</value>
+  </data>
+  <data name="Capabilities_Performance_Text" xml:space="preserve">
+    <value>Lastprofile und Antwortzeit-Budgets. Als Testart entworfen, nicht geschrieben.</value>
+  </data>
+  <data name="Capabilities_Security_Title" xml:space="preserve">
+    <value>Sicherheitstests</value>
+  </data>
+  <data name="Capabilities_Security_Text" xml:space="preserve">
+    <value>Prüfungen auf bekannte Schwachstellen und Fehlkonfigurationen. Als Testart entworfen, nicht geschrieben.</value>
+  </data>
+  <data name="Capabilities_Accessibility_Title" xml:space="preserve">
+    <value>Barrierefreiheitstests</value>
+  </data>
+  <data name="Capabilities_Accessibility_Text" xml:space="preserve">
+    <value>Automatisierte WCAG-Prüfungen im Lauf. Wir machen das bei jeder Änderung mit unserer eigenen Website; als nutzbare Testart existiert es noch nicht.</value>
+  </data>
+  <data name="E2E_PageTitle" xml:space="preserve">
+    <value>End-to-End-Tests im Web – {0}</value>
+  </data>
+  <data name="E2E_MetaDescription" xml:space="preserve">
+    <value>Ein echter Browser, der eine Webanwendung bedient – mit einem Bildschirmfoto zu jedem Schritt und einem Fehler, mit dem man arbeiten kann.</value>
+  </data>
+  <data name="E2E_Overline" xml:space="preserve">
+    <value>Testart</value>
+  </data>
+  <data name="E2E_Title" xml:space="preserve">
+    <value>Ein Browser, der Ihre Anwendung bedient – und sonst nichts erreichen kann</value>
+  </data>
+  <data name="E2E_Lead" xml:space="preserve">
+    <value>Dies ist der fertige Teil des Produkts. Er öffnet einen echten Browser, führt eine Folge von Schritten gegen eine Webanwendung aus und bewahrt zu jedem Schritt ein Bildschirmfoto und einen Zeitstempel.</value>
+  </data>
+  <data name="E2E_How_Title" xml:space="preserve">
+    <value>Was passiert, wenn ein Lauf startet</value>
+  </data>
+  <data name="E2E_How_Intro" xml:space="preserve">
+    <value>Vier Dinge, in dieser Reihenfolge, jedes Mal.</value>
+  </data>
+  <data name="E2E_How_Step1_Title" xml:space="preserve">
+    <value>Der Lauf wird eingereiht und übernommen</value>
+  </data>
+  <data name="E2E_How_Step1_Text" xml:space="preserve">
+    <value>Der Lauf ist zuerst ein Datensatz in der Datenbank – er übersteht also einen Neustart, und zwei Maschinen können ihn nicht doppelt übernehmen.</value>
+  </data>
+  <data name="E2E_How_Step2_Title" xml:space="preserve">
+    <value>Ein Worker startet und weiß fast nichts</value>
+  </data>
+  <data name="E2E_How_Step2_Text" xml:space="preserve">
+    <value>Er erhält eine Lauf-ID, ein Ziel, ein Budget und ein Verzeichnis. Er erfährt nie, zu welcher Organisation der Lauf gehört – ein von einer bösartigen Seite übernommener Worker kennt also einen Lauf und nichts von anderen Kunden.</value>
+  </data>
+  <data name="E2E_How_Step3_Title" xml:space="preserve">
+    <value>Jeder Schritt läuft und hinterlässt seinen Beleg</value>
+  </data>
+  <data name="E2E_How_Step3_Text" xml:space="preserve">
+    <value>Ein Bildschirmfoto am Ende jedes Schritts, mit Start- und Endzeit. Passwortfelder werden vor der Aufnahme überdeckt.</value>
+  </data>
+  <data name="E2E_How_Step4_Title" xml:space="preserve">
+    <value>Das Ergebnis wird unter dem richtigen Mandanten gespeichert</value>
+  </data>
+  <data name="E2E_How_Step4_Text" xml:space="preserve">
+    <value>Der Worker liefert ein Ergebnis mit seiner Lauf-ID; die Anwendung sucht den Lauf, nimmt die Organisation aus dem gespeicherten Datensatz und schreibt darunter. Ein Ergebnis mit abweichender Lauf-ID wird als Infrastrukturfehler vermerkt, nicht geglaubt.</value>
+  </data>
+  <data name="E2E_Boundary_Title" xml:space="preserve">
+    <value>Wohin der Browser gehen darf</value>
+  </data>
+  <data name="E2E_Boundary_Intro" xml:space="preserve">
+    <value>Ein Browser führt Inhalte aus, die jemand anderes geschrieben hat. Genau dafür sind Browser da – und deshalb wurde dieser Teil entworfen, bevor etwas davon gebaut wurde.</value>
+  </data>
+  <data name="E2E_Boundary_Process_Title" xml:space="preserve">
+    <value>Außerhalb der Anwendung</value>
+  </data>
+  <data name="E2E_Boundary_Process_Text" xml:space="preserve">
+    <value>Der Browser läuft in einem eigenen Prozess – ohne Datenbankverbindung und ohne Zugangsdaten außer denen des einen Laufs.</value>
+  </data>
+  <data name="E2E_Boundary_Proxy_Title" xml:space="preserve">
+    <value>Ein Weg nach außen, der standardmäßig ablehnt</value>
+  </data>
+  <data name="E2E_Boundary_Proxy_Text" xml:space="preserve">
+    <value>Jede Verbindung läuft über einen Proxy, der die tatsächlich aufgelöste Adresse prüft – bei jedem Schritt einer Weiterleitung. Das verhindert Namen, die auf interne Adressen zeigen.</value>
+  </data>
+  <data name="E2E_Boundary_Tenant_Title" xml:space="preserve">
+    <value>Belege gehören einer Organisation</value>
+  </data>
+  <data name="E2E_Boundary_Tenant_Text" xml:space="preserve">
+    <value>Bildschirmfotos werden pro Organisation gespeichert und nur über einen kurzlebigen, signierten Link erreicht, der nach der normalen Berechtigungsprüfung ausgegeben wird. Belege einer anderen Organisation werden nicht abgelehnt – sie existieren nicht.</value>
+  </data>
+  <data name="E2E_Ai_Title" xml:space="preserve">
+    <value>Wo KI ins Spiel kommt</value>
+  </data>
+  <data name="E2E_Ai_Lead" xml:space="preserve">
+    <value>Ein Modell kann ein in Ihren Worten beschriebenes Szenario in die Schritte eines Laufs überführen. Es plant einmal, bevor der Browser öffnet, und ist während des Laufs nicht beteiligt.</value>
+  </data>
+  <data name="E2E_Ai_Text" xml:space="preserve">
+    <value>Seine Ausgabe ist eine Liste von Aktionen aus einem festen Vokabular – klicken, tippen, warten, prüfen und einige mehr – und es gibt kein Feld, in das ein Skript oder ein Selektor geschrieben werden könnte. Der Plan wird dann geprüft: eine nicht existierende Aktion, ein Pfad, der eine andere Website benennen könnte, oder ein Plan ohne Prüfungen wird abgelehnt, bevor der Browser startet.</value>
+  </data>
+  <data name="E2E_Ai_Measured_Title" xml:space="preserve">
+    <value>Was wir gemessen haben und was nicht</value>
+  </data>
+  <data name="E2E_Ai_Measured_Text" xml:space="preserve">
+    <value>Die handgeschriebene Vergleichsbasis ist gemessen: zwölf kontrollierte Szenarien, die Hälfte gegen eine absichtlich fehlerhafte Anwendung, 36 Läufe, jedes Urteil korrekt und kein Lauf, der eine fehlerhafte Anwendung bestanden hätte. Die Zahlen des Planers selbst existieren noch nicht, daher behaupten wir nichts darüber, was ein Modell findet. Sobald sie existieren, werden sie neben der Vergleichsbasis veröffentlicht – einschließlich der wichtigsten Zahl: wie oft er „bestanden“ zu einer nicht funktionierenden Anwendung sagt.</value>
+  </data>
+  <data name="E2E_NotYet_Title" xml:space="preserve">
+    <value>Was noch nicht gebaut ist</value>
+  </data>
+  <data name="E2E_NotYet_Container" xml:space="preserve">
+    <value>Ein Container pro Lauf. Der Browser läuft in einem eigenen Prozess – die richtige Form, aber keine Isolationsgrenze: Ein Prozess ist keine Sandbox.</value>
+  </data>
+  <data name="E2E_NotYet_Targets" xml:space="preserve">
+    <value>Jedes andere Ziel als unsere eigene Demo-Anwendung. Bevor ein Lauf auf Ihre Website zeigen darf, muss nachweisbar sein, dass sie Ihnen gehört.</value>
+  </data>
+  <data name="E2E_NotYet_Storage" xml:space="preserve">
+    <value>Objektspeicher, Aufbewahrungsfristen und Anonymisierung für Belege. Bildschirmfotos liegen heute in einem Verzeichnis.</value>
+  </data>
+  <data name="E2E_NotYet_Why" xml:space="preserve">
+    <value>Diese Punkte stehen in dieser Reihenfolge auf der Liste, und der erste ist der Grund, warum ein eigenes Testziel noch nicht angeboten wird.</value>
+  </data>
+  <data name="Integrations_PageTitle" xml:space="preserve">
+    <value>Integrationen – {0}</value>
+  </data>
+  <data name="Integrations_MetaDescription" xml:space="preserve">
+    <value>Geplante Verbindungen zu Git, Ticketsystemen und CI-Systemen. Nichts davon ist bislang gebaut.</value>
+  </data>
+  <data name="Integrations_Placeholder" xml:space="preserve">
+    <value>Keine Integration ist gebaut. Diese Seite listet das Vorgesehene, damit die Struktur des Produkts erkennbar ist – nichts davon funktioniert heute.</value>
+  </data>
+  <data name="Integrations_Title" xml:space="preserve">
+    <value>Integrationen</value>
+  </data>
+  <data name="Integrations_Lead" xml:space="preserve">
+    <value>Testen ist keine eigenständige Tätigkeit, also darf das Werkzeug keine eigene Insel sein. Dies sind die wichtigen Verbindungen und die erwartete Reihenfolge.</value>
+  </data>
+  <data name="Integrations_Planned_Title" xml:space="preserve">
+    <value>Was geplant ist</value>
+  </data>
+  <data name="Integrations_Planned_Intro" xml:space="preserve">
+    <value>Jeder dieser Punkte ist ein Plan, hinter dem noch nichts steht.</value>
+  </data>
+  <data name="Integrations_Git_Title" xml:space="preserve">
+    <value>Git</value>
+  </data>
+  <data name="Integrations_Git_Text" xml:space="preserve">
+    <value>Einen Lauf mit dem getesteten Commit verknüpfen, damit ein Ergebnis auch sechs Wochen später etwas bedeutet.</value>
+  </data>
+  <data name="Integrations_Issues_Title" xml:space="preserve">
+    <value>Ticketsysteme</value>
+  </data>
+  <data name="Integrations_Issues_Text" xml:space="preserve">
+    <value>Einen Fehler dort anlegen, wo Ihr Team ohnehin arbeitet – mit Belegen – und beide Seiten synchron halten.</value>
+  </data>
+  <data name="Integrations_Ci_Title" xml:space="preserve">
+    <value>CI-Systeme</value>
+  </data>
+  <data name="Integrations_Ci_Text" xml:space="preserve">
+    <value>Einen Lauf aus einer Pipeline starten und das Ergebnis zurückmelden – samt Belegen für einen Fehler.</value>
+  </data>
+  <data name="Integrations_Api_Title" xml:space="preserve">
+    <value>Eine öffentliche API</value>
+  </data>
+  <data name="Integrations_Api_Text" xml:space="preserve">
+    <value>Alles, was die Oberfläche kann, auch für ein Skript verfügbar. Die Service-Schnittstellen sind dafür bereits von der UI getrennt.</value>
+  </data>
+  <data name="Security_PageTitle" xml:space="preserve">
+    <value>Sicherheit und Vertrauen – {0}</value>
+  </data>
+  <data name="Security_MetaDescription" xml:space="preserve">
+    <value>Wie Kunden voneinander getrennt werden, wohin der Browser darf und was noch fehlt.</value>
+  </data>
+  <data name="Security_Title" xml:space="preserve">
+    <value>Sicherheit und Vertrauen</value>
+  </data>
+  <data name="Security_Lead" xml:space="preserve">
+    <value>Eine Testplattform verwahrt Bildschirmfotos Ihrer Anwendung, Zugangsdaten dafür und das Recht, einen Browser darauf zu richten. Diese Seite sagt, was jedes davon schützt – und was noch nicht.</value>
+  </data>
+  <data name="Security_Tenancy_Title" xml:space="preserve">
+    <value>Kunden voneinander trennen</value>
+  </data>
+  <data name="Security_Tenancy_Intro" xml:space="preserve">
+    <value>Drei voneinander unabhängige Schichten – denn ein Fehler in einer davon soll nicht genügen.</value>
+  </data>
+  <data name="Security_Tenancy_Filter_Title" xml:space="preserve">
+    <value>Jeder Lesezugriff ist gefiltert</value>
+  </data>
+  <data name="Security_Tenancy_Filter_Text" xml:space="preserve">
+    <value>Abfragen werden von der Datenschicht selbst auf die angemeldete Organisation eingeschränkt – nicht davon, dass jede Abfrage daran denkt. Ein Datensatz einer anderen Organisation wird nicht abgelehnt: Er existiert nicht.</value>
+  </data>
+  <data name="Security_Tenancy_Write_Title" xml:space="preserve">
+    <value>Jeder Schreibzugriff wird geprüft</value>
+  </data>
+  <data name="Security_Tenancy_Write_Text" xml:space="preserve">
+    <value>Ein Speichern, das einen Datensatz in eine andere Organisation schreiben würde, wird von einem Interceptor abgelehnt, der nicht auf die Korrektheit des darüberliegenden Codes vertraut.</value>
+  </data>
+  <data name="Security_Tenancy_Keys_Title" xml:space="preserve">
+    <value>Auch die Datenbank lehnt es ab</value>
+  </data>
+  <data name="Security_Tenancy_Keys_Text" xml:space="preserve">
+    <value>Verknüpfte Datensätze tragen die Organisation im Fremdschlüssel. Ein Kinddatensatz kann also nicht auf einen Elterndatensatz einer anderen Organisation zeigen – selbst wenn alles darüber falsch ist.</value>
+  </data>
+  <data name="Security_Browser_Title" xml:space="preserve">
+    <value>Der Browser, der Ihre Tests ausführt</value>
+  </data>
+  <data name="Security_Browser_Intro" xml:space="preserve">
+    <value>Er führt Inhalte aus, die von den Autoren der getesteten Anwendung stammen – genau die Bedingung, für die Browser-Ausbrüche geschrieben werden.</value>
+  </data>
+  <data name="Security_Browser_Process_Title" xml:space="preserve">
+    <value>Keine Datenbank, keine Cloud-Rolle</value>
+  </data>
+  <data name="Security_Browser_Process_Text" xml:space="preserve">
+    <value>Der Worker hat keine Verbindung zu unseren Daten und keine impliziten Zugangsdaten. Er erhält einen Auftrag und liefert ein Ergebnis.</value>
+  </data>
+  <data name="Security_Browser_Egress_Title" xml:space="preserve">
+    <value>Adressen, nicht Namen</value>
+  </data>
+  <data name="Security_Browser_Egress_Text" xml:space="preserve">
+    <value>Der Proxy prüft jedes Mal, wohin eine Verbindung tatsächlich aufgelöst wird – auch nach einer Weiterleitung. Eine Hostnamen-Liste kann das nicht.</value>
+  </data>
+  <data name="Security_Browser_Model_Title" xml:space="preserve">
+    <value>Der Worker hält keinen Modell-Schlüssel</value>
+  </data>
+  <data name="Security_Browser_Model_Text" xml:space="preserve">
+    <value>Die Planung findet auf unserer Seite statt, bevor der Browser öffnet. Wer einen Lauf übernimmt, könnte nicht unser Modellbudget für alle anderen verbrauchen.</value>
+  </data>
+  <data name="Security_Data_Title" xml:space="preserve">
+    <value>Was gespeichert wird und wo</value>
+  </data>
+  <data name="Security_Data_Where_Label" xml:space="preserve">
+    <value>Ihre Daten</value>
+  </data>
+  <data name="Security_Data_Where_Text" xml:space="preserve">
+    <value>Eine PostgreSQL-Datenbank, in der die Datensätze jeder Organisation getrennt gefiltert werden. Wer physische Trennung benötigt, sollte uns fragen: Das ist ein bewusst getroffener und dokumentierter Kompromiss.</value>
+  </data>
+  <data name="Security_Data_Evidence_Label" xml:space="preserve">
+    <value>Bildschirmfotos</value>
+  </data>
+  <data name="Security_Data_Evidence_Text" xml:space="preserve">
+    <value>Ein Bildschirmfoto Ihrer Anwendung kann echte Namen und Bestellungen enthalten und wird daher als personenbezogenes Datum behandelt: pro Organisation gespeichert, nie öffentlich, nur über einen kurzlebigen signierten Link erreichbar. Passwortfelder werden vor der Aufnahme überdeckt.</value>
+  </data>
+  <data name="Security_Data_Credentials_Label" xml:space="preserve">
+    <value>Zugangsdaten für Ihre Anwendung</value>
+  </data>
+  <data name="Security_Data_Credentials_Text" xml:space="preserve">
+    <value>Ein Lauf, der sich anmeldet, muss ein Passwort in Ihre Anwendung eingeben – es ist dieser Anwendung also notwendigerweise bekannt. Sonst nirgends: Ein Plan verweist auf Zugangsdaten nur per Namen und enthält sie nie.</value>
+  </data>
+  <data name="Security_Data_Model_Label" xml:space="preserve">
+    <value>Was ein Modell sieht</value>
+  </data>
+  <data name="Security_Data_Model_Text" xml:space="preserve">
+    <value>Wenn geplant wird, erhält das Modell das Szenario und eine Beschreibung der gefundenen Seiten – Rollen, Namen und sichtbarer Text. Es erhält nie Zugangsdaten, eine Organisation oder einen Lauf.</value>
+  </data>
+  <data name="Security_NotYet_Title" xml:space="preserve">
+    <value>Was noch nicht vorhanden ist</value>
+  </data>
+  <data name="Security_NotYet_Intro" xml:space="preserve">
+    <value>Eine Sicherheitsseite, die nur Stärken auflistet, ist ein Verkaufsdokument. Dies sind die bekannten Lücken, die wir in einem Fragebogen selbst nennen würden.</value>
+  </data>
+  <data name="Security_NotYet_Container" xml:space="preserve">
+    <value>Ein Container pro Lauf. Der Browser ist ein eigener Prozess – das ist nicht dasselbe wie eine Sandbox.</value>
+  </data>
+  <data name="Security_NotYet_Hosting" xml:space="preserve">
+    <value>Eine zugesagte Hosting-Region. Wir beabsichtigen EU-Hosting, können aber noch nichts belegen – und behaupten es daher nicht.</value>
+  </data>
+  <data name="Security_NotYet_Certification" xml:space="preserve">
+    <value>Jede Zertifizierung. Kein ISO 27001, kein SOC 2, kein Audit. Wir sagen es, wenn sich das ändert.</value>
+  </data>
+  <data name="Security_NotYet_Audit" xml:space="preserve">
+    <value>Eine Unveränderbarkeits-Garantie für das Prüfprotokoll, die auch außerhalb der Anwendung gilt. Über das Produkt ist es nicht änderbar; Datenbankzugriff ist eine andere Frage.</value>
+  </data>
+  <data name="Security_NotYet_Contact" xml:space="preserve">
+    <value>Stellen Sie uns eine Sicherheitsfrage direkt</value>
+  </data>
+  <data name="Solutions_PageTitle" xml:space="preserve">
+    <value>Lösungen – {0}</value>
+  </data>
+  <data name="Solutions_MetaDescription" xml:space="preserve">
+    <value>Was die Plattform für Testmanager, Entwickler und Engineering Manager ändert.</value>
+  </data>
+  <data name="Solutions_Title" xml:space="preserve">
+    <value>Dasselbe Testen, von drei verschiedenen Schreibtischen aus gelesen</value>
+  </data>
+  <data name="Solutions_Lead" xml:space="preserve">
+    <value>Testmanager, Entwickler und Manager wollen drei verschiedene Dinge vom selben Lauf. Diese Seiten beginnen beim Alltag jeder dieser Rollen.</value>
+  </data>
+  <data name="Solutions_Roles_Title" xml:space="preserve">
+    <value>Nach Rolle</value>
+  </data>
+  <data name="Solutions_Roles_Intro" xml:space="preserve">
+    <value>Geschrieben für die Person, nicht für den Titel.</value>
+  </data>
+  <data name="Solutions_Industries_Title" xml:space="preserve">
+    <value>Nach Branche</value>
+  </data>
+  <data name="Solutions_Industries_Intro" xml:space="preserve">
+    <value>Diese fünf Seiten existieren als Struktur und sind nicht geschrieben. Lieber sichtbar leer als gefüllt mit Branchenfloskeln, für die wir nicht einstehen können.</value>
+  </data>
+  <data name="Role_Today_Link" xml:space="preserve">
+    <value>Was heute tatsächlich gebaut ist</value>
+  </data>
+  <data name="Role_QaLead_Title" xml:space="preserve">
+    <value>Für Testmanager</value>
+  </data>
+  <data name="Role_QaLead_Lead" xml:space="preserve">
+    <value>Sie müssen die Frage „ist ausreichend getestet?“ beantworten – und die Antwort danach vertreten.</value>
+  </data>
+  <data name="Role_QaLead_Day" xml:space="preserve">
+    <value>Die Arbeit ist selten das Testen. Sie ist das Abgleichen einer Testfall-Tabelle mit einem CI-Lauf und einer Fehlerliste, drei Tage vor dem Release, um einen Satz zu formulieren, den man Ihnen zitiert, falls er sich als falsch erweist.</value>
+  </data>
+  <data name="Role_QaLead_Points" xml:space="preserve">
+    <value>Was sich ändern würde</value>
+  </data>
+  <data name="Role_QaLead_Point1_Title" xml:space="preserve">
+    <value>Der Abgleich ist nicht mehr Handarbeit</value>
+  </data>
+  <data name="Role_QaLead_Point1_Text" xml:space="preserve">
+    <value>Pläne, Testfälle, Läufe und Fehler sind dieselben Daten – die Abdeckung wird abgeleitet, nicht in der Nacht davor zusammengetragen.</value>
+  </data>
+  <data name="Role_QaLead_Point2_Title" xml:space="preserve">
+    <value>Lücken sind sichtbar, nicht erschlossen</value>
+  </data>
+  <data name="Role_QaLead_Point2_Text" xml:space="preserve">
+    <value>Was ungetestet ist, steht auf demselben Bildschirm wie das Bestandene – denn genau daran hängt die Release-Entscheidung.</value>
+  </data>
+  <data name="Role_QaLead_Point3_Title" xml:space="preserve">
+    <value>Ein Urteil mit begründeten Kriterien</value>
+  </data>
+  <data name="Role_QaLead_Point3_Text" xml:space="preserve">
+    <value>Austrittskriterien, am Anfang vereinbart, am Ende geprüft und aufbewahrt – die Entscheidung wird nachvollziehbar statt erinnert.</value>
+  </data>
+  <data name="Role_QaLead_Today" xml:space="preserve">
+    <value>Heute existiert nichts von diesem Abgleich. Es existiert die Durchführung: Läufe, die Schritte und Belege bewahren – das Rohmaterial für alles Weitere.</value>
+  </data>
+  <data name="Role_Developer_Title" xml:space="preserve">
+    <value>Für Entwickler</value>
+  </data>
+  <data name="Role_Developer_Lead" xml:space="preserve">
+    <value>Sie wollen wissen, was kaputt ist, wo – und was die Anwendung tatsächlich getan hat, ohne es erst nachzustellen.</value>
+  </data>
+  <data name="Role_Developer_Day" xml:space="preserve">
+    <value>Ein Ticket sagt „Checkout fehlerhaft“. Sie brauchen vierzig Minuten, um die Anwendung in diesen Zustand zu bringen, stellen fest, dass es funktioniert, fragen nach der Umgebung – und erfahren, dass der Tester Feierabend hat. Der Großteil der Kosten lag in der Schleife, nicht in der Behebung.</value>
+  </data>
+  <data name="Role_Developer_Points" xml:space="preserve">
+    <value>Was sich ändern würde</value>
+  </data>
+  <data name="Role_Developer_Point1_Title" xml:space="preserve">
+    <value>Der Fehler kommt mit seinem Bild</value>
+  </data>
+  <data name="Role_Developer_Point1_Text" xml:space="preserve">
+    <value>Der fehlgeschlagene Schritt, das Erwartete, das Vorgefundene – und ein Bildschirmfoto des Moments. Unser eigener Demo-Fehler liest sich so: Warenkorb 53,25 £, Kasse verlangt 42,00 £.</value>
+  </data>
+  <data name="Role_Developer_Point2_Title" xml:space="preserve">
+    <value>Nachspielbar statt beschrieben</value>
+  </data>
+  <data name="Role_Developer_Point2_Text" xml:space="preserve">
+    <value>Die Schritte sind Daten – derselbe Lauf lässt sich exakt wiederholen, statt aus einem Ticket angenähert zu werden.</value>
+  </data>
+  <data name="Role_Developer_Point3_Title" xml:space="preserve">
+    <value>Infrastrukturfehler sind nicht Ihr Fehler</value>
+  </data>
+  <data name="Role_Developer_Point3_Text" xml:space="preserve">
+    <value>Ein Lauf, der in eine Zeitüberschreitung lief oder nicht starten konnte, sagt das mit eigenen Worten – Sie untersuchen also keinen Fehler, der nie in Ihrem Code war.</value>
+  </data>
+  <data name="Role_Developer_Today" xml:space="preserve">
+    <value>Das ist der gebaute Teil. Ein fehlgeschlagener Lauf behält Schritt, Meldung, Zeiten und Bildschirmfoto. Es fehlen der Fehlerdatensatz und die Verbindung zu Ihrem Ticketsystem.</value>
+  </data>
+  <data name="Role_Manager_Title" xml:space="preserve">
+    <value>Für Engineering Manager</value>
+  </data>
+  <data name="Role_Manager_Lead" xml:space="preserve">
+    <value>Sie müssen über Qualität berichten, die Sie nicht beobachtet haben – an Menschen, die aufgrund der Zahl handeln.</value>
+  </data>
+  <data name="Role_Manager_Day" xml:space="preserve">
+    <value>Jemand fragt, ob das Release sicher ist. Die ehrliche Antwort braucht vier Werkzeuge und eine Einschätzung; die bequeme ist eine Bestehensquote, die vor allem misst, wie viele Tests existieren. Um den Unterschied zwischen diesen Antworten geht es in diesem Produkt.</value>
+  </data>
+  <data name="Role_Manager_Points" xml:space="preserve">
+    <value>Was sich ändern würde</value>
+  </data>
+  <data name="Role_Manager_Point1_Title" xml:space="preserve">
+    <value>Zahlen, die sich nicht durch mehr Tests schönen lassen</value>
+  </data>
+  <data name="Role_Manager_Point1_Text" xml:space="preserve">
+    <value>Abdeckung gegenüber dem Geplanten, Instabilität getrennt von Fehlschlägen, Infrastrukturprobleme getrennt von Fehlern.</value>
+  </data>
+  <data name="Role_Manager_Point2_Title" xml:space="preserve">
+    <value>Verläufe, denn ein Lauf sagt fast nichts</value>
+  </data>
+  <data name="Role_Manager_Point2_Text" xml:space="preserve">
+    <value>Wie sich Ergebnisse und Fehleralter über Releases entwickeln – nur diese Form der Daten trägt eine Entscheidung.</value>
+  </data>
+  <data name="Role_Manager_Point3_Title" xml:space="preserve">
+    <value>Eine Antwort, deren Rechenweg Sie zeigen können</value>
+  </data>
+  <data name="Role_Manager_Point3_Text" xml:space="preserve">
+    <value>Jede Zahl führt zu den Läufen zurück, auf denen sie beruht – eine Frage dazu hat eine Antwort und keine Verteidigung.</value>
+  </data>
+  <data name="Role_Manager_Today" xml:space="preserve">
+    <value>Von dieser Berichterstattung ist nichts gebaut. Läufe werden mit Ergebnissen gespeichert – daher kämen die Daten. Es gibt kein Dashboard und keinen Verlauf.</value>
+  </data>
+  <data name="Industry_Placeholder" xml:space="preserve">
+    <value>Diese Branchenseite ist nicht geschrieben. Die Struktur ist echt, damit die URL stabil bleibt; der Inhalt fehlt noch.</value>
+  </data>
+  <data name="Industry_Body" xml:space="preserve">
+    <value>Lieber lassen wir diese Seite sichtbar leer, als sie mit Branchenfloskeln zu füllen, für die wir nicht einstehen können. Wenn Sie in dieser Branche Software testen und uns sagen, was es tatsächlich schwierig macht, prägt dieses Gespräch die Seite besser, als wir es allein könnten.</value>
+  </data>
+  <data name="Industry_Contact" xml:space="preserve">
+    <value>Erzählen Sie uns, wie Testen in Ihrer Branche aussieht</value>
+  </data>
+  <data name="Industry_Finance_Title" xml:space="preserve">
+    <value>Finanzwesen</value>
+  </data>
+  <data name="Industry_Finance_Lead" xml:space="preserve">
+    <value>Reguliert, auditiert und unversöhnlich gegenüber einer falschen Zahl.</value>
+  </data>
+  <data name="Industry_Insurance_Title" xml:space="preserve">
+    <value>Versicherung</value>
+  </data>
+  <data name="Industry_Insurance_Lead" xml:space="preserve">
+    <value>Langlaufende Verträge, tiefe Regelwerke und Berechnungen, die auch in zwanzig Jahren stimmen müssen.</value>
+  </data>
+  <data name="Industry_Retail_Title" xml:space="preserve">
+    <value>Handel</value>
+  </data>
+  <data name="Industry_Retail_Lead" xml:space="preserve">
+    <value>Eine Kasse, die auf jedem Gerät, in jeder Währung und in der wichtigsten Woche funktionieren muss.</value>
+  </data>
+  <data name="Industry_Automotive_Title" xml:space="preserve">
+    <value>Automobil</value>
+  </data>
+  <data name="Industry_Automotive_Lead" xml:space="preserve">
+    <value>Software in einem Produkt, das sich nicht so einfach aktualisieren lässt wie eine Website.</value>
+  </data>
+  <data name="Industry_PublicSector_Title" xml:space="preserve">
+    <value>Öffentlicher Sektor</value>
+  </data>
+  <data name="Industry_PublicSector_Lead" xml:space="preserve">
+    <value>Barrierefreiheit ist gesetzliche Pflicht, keine Vorliebe – und die Nutzer können nicht ausweichen.</value>
+  </data>
 </root>

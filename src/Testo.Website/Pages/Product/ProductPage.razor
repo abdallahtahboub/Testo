@@ -1,0 +1,60 @@
+@page "/en/product"
+@page "/de/product"
+@inject IStringLocalizer<WebsiteResources> L
+@inject IOptions<BrandOptions> Brand
+
+@* The platform at a glance: the six stages, and the three principles the whole thing rests on. *@
+<PageTitle>@L["Product_PageTitle", Brand.Value.ProductName]</PageTitle>
+<HeadContent>
+    <meta name="description" content="@L["Product_MetaDescription"]" />
+</HeadContent>
+
+<PageHero Overline="@L["Product_Overline"]" Title="@L["Product_Title"]" Lead="@L["Product_Lead", Brand.Value.ProductName]">
+    <Actions>
+        <TButton Href="@Href(PublicPages.ProductCapabilityE2EWeb)" Variant="ButtonVariant.Primary" Size="ButtonSize.Large">
+            @L["Product_Action_SeeARun"]
+        </TButton>
+        <TButton Href="@Href(PublicPages.RequestDemo)" Variant="ButtonVariant.Secondary" Size="ButtonSize.Large">
+            @L["Nav_RequestDemo"]
+        </TButton>
+    </Actions>
+    <Art>
+        <JourneyIllustration />
+    </Art>
+</PageHero>
+
+<PageSection Title="@L["Product_Journey_Title"]" Intro="@L["Product_Journey_Intro"]" Tone="PageSection.SectionTone.Subtle">
+    <CardDeck Columns="3" Cards="@Stages" />
+</PageSection>
+
+<PageSection Title="@L["Product_Principles_Title"]" Intro="@L["Product_Principles_Intro"]">
+    <CardDeck Columns="3" Cards="@Principles" />
+</PageSection>
+
+<PageSection Narrow="true" Title="@L["Product_State_Title"]">
+    <p class="t-lead">@L["Product_State_Lead"]</p>
+    <p>@L["Product_State_Text"]</p>
+    <p>
+        <a href="@Href(PublicPages.ProductCapabilityE2EWeb)">@L["Product_State_Link"]</a>
+    </p>
+</PageSection>
+
+@code {
+    private IReadOnlyList<CardDeck.Card> Stages =>
+    [
+        .. JourneyStages.All.Select(stage => new CardDeck.Card(
+            L[stage.TitleKey],
+            L[stage.LeadKey],
+            Href(stage.Page),
+            L[stage.IsBuilt ? "Product_Stage_Available" : "Product_Stage_Planned"])),
+    ];
+
+    private IReadOnlyList<CardDeck.Card> Principles =>
+    [
+        new(L["Product_Principle_Traceability_Title"], L["Product_Principle_Traceability_Text"]),
+        new(L["Product_Principle_Bounded_Title"], L["Product_Principle_Bounded_Text"]),
+        new(L["Product_Principle_Evidence_Title"], L["Product_Principle_Evidence_Text"]),
+    ];
+
+    private static string Href(string page) => LocalizedPath.For(SupportedCultures.Current, page);
+}

@@ -1,0 +1,29 @@
+@page "/en/product/integrations"
+@page "/de/product/integrations"
+@inject IStringLocalizer<WebsiteResources> L
+@inject IOptions<BrandOptions> Brand
+
+@* Nothing here is built. The banner says so before anything else on the page. *@
+<PageTitle>@L["Integrations_PageTitle", Brand.Value.ProductName]</PageTitle>
+<HeadContent>
+    <meta name="description" content="@L["Integrations_MetaDescription"]" />
+    <meta name="robots" content="noindex" />
+</HeadContent>
+
+<PlaceholderBanner Text="@L["Integrations_Placeholder"]" />
+
+<PageHero Overline="@L["Nav_Product"]" Title="@L["Integrations_Title"]" Lead="@L["Integrations_Lead"]" Narrow="true" />
+
+<PageSection Title="@L["Integrations_Planned_Title"]" Intro="@L["Integrations_Planned_Intro"]">
+    <CardDeck Columns="2" Cards="@Planned" />
+</PageSection>
+
+@code {
+    private IReadOnlyList<CardDeck.Card> Planned =>
+    [
+        new(L["Integrations_Git_Title"], L["Integrations_Git_Text"], IsPlaceholder: true),
+        new(L["Integrations_Issues_Title"], L["Integrations_Issues_Text"], IsPlaceholder: true),
+        new(L["Integrations_Ci_Title"], L["Integrations_Ci_Text"], IsPlaceholder: true),
+        new(L["Integrations_Api_Title"], L["Integrations_Api_Text"], IsPlaceholder: true),
+    ];
+}

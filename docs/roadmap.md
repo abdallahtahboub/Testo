@@ -314,10 +314,26 @@ Three faults found by building it rather than by review:
 - The home page was still the Milestone 1 placeholder, and its hero claimed present-tense support
   for all six stages.
 
-**Not done in this milestone:** the Lighthouse run. It needs the application running against
-PostgreSQL, and this environment has neither a database nor Chrome's Lighthouse — so the two
-numbers the milestone asks for are outstanding and the milestone is not closed until somebody runs
-them.
+**Lighthouse, measured 2026-11-14** on a Release build, mobile profile, Lighthouse 13.6.0:
+
+| | Performance | Accessibility | Best practices | SEO |
+|---|---|---|---|---|
+| Home (`/en`) | **100** | **100** | 100 | 100 |
+| Pricing (`/en/pricing`) | **100** | **100** | 100 | 100 |
+
+First contentful paint 1.2–1.3 s, largest contentful paint the same, total blocking time 0–10 ms,
+cumulative layout shift 0.
+
+Two things that number does not include, and which will lower it in the real world: the pages were
+served from localhost, so there is no DNS, no TLS handshake and no distance to a server — Lighthouse
+simulates a slow mobile network and a slow CPU, but it cannot simulate where the server is. And the
+application was started with its database-reachability check patched out locally, because this
+environment has no PostgreSQL the session can authenticate to. That patch was not committed and
+affects nothing that was measured: a public page issues no query, which is why the pages served
+correctly with no database at all.
+
+A run against a deployed instance is still worth doing before anybody quotes these numbers
+publicly.
 
 ## Milestone 5 — App shell + module registry
 **Scope:** the app shell on the real sign-in from Milestone 3; app shell (registry-driven left nav, top bar with project switcher, search, notifications, user menu); `Testo.Mocks` with the seed data generator and all `Mock*` services (with configurable latency/failure); dashboard rendering registered widgets: quality KPIs, run trends, open defects by severity, release readiness, recent runs; feature flags hiding unfinished modules; "module not available" page.

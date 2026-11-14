@@ -13,6 +13,7 @@ public class DependencyRulesTests
     private const string Persistence = "Testo.Persistence";
     private const string Application = "Testo.Application";
     private const string Worker = "Testo.Worker";
+    private const string DemoShop = "Testo.DemoShop";
     private const string Platform = "Testo.Platform";
     private const string UiShared = "Testo.UI.Shared";
     private const string Host = "Testo.Web";
@@ -25,6 +26,10 @@ public class DependencyRulesTests
         (Persistence, [Contracts, Domain]),
         (Application, [Contracts, Domain, Persistence]),
         (Worker, [Contracts]),
+
+        // Not part of the product: the application the execution slice runs against, so that a
+        // browser is never pointed at anybody else's website to build it (ADR-0018).
+        (DemoShop, []),
         (Platform, [Contracts]),
         (UiShared, [Contracts, Platform]),
         ("Testo.Website", [Contracts, Platform, UiShared]),

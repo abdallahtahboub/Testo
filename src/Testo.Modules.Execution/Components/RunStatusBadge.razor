@@ -1,0 +1,52 @@
+@inject IStringLocalizer<ExecutionResources> L
+
+@*
+    A run's status, in words and colour. Never colour alone: the word is the status and the tone
+    only reinforces it (docs/design-system.md §10).
+
+    Each ending has its own word, because they mean different things. A run that ran out of time
+    is not a failing application, and saying so would be a lie about the application.
+*@
+<TBadge Tone="Tone" Icon="Icon">@L[Key(Status)]</TBadge>
+
+@code {
+    /// <summary>The status to show.</summary>
+    [Parameter, EditorRequired]
+    public RunStatus Status { get; set; }
+
+    /// <summary>
+    /// The text for a status, spelled out rather than built from the enum's name: a key that is
+    /// written in full is one the resource tests can find, and one a translator can look up.
+    /// </summary>
+    private static string Key(RunStatus status) => status switch
+    {
+        RunStatus.Queued => "Status_Queued",
+        RunStatus.Running => "Status_Running",
+        RunStatus.Passed => "Status_Passed",
+        RunStatus.Failed => "Status_Failed",
+        RunStatus.Cancelled => "Status_Cancelled",
+        RunStatus.TimedOut => "Status_TimedOut",
+        RunStatus.BudgetExceeded => "Status_BudgetExceeded",
+        RunStatus.InfrastructureError => "Status_InfrastructureError",
+        _ => "Status_Queued",
+    };
+
+    private Tone Tone => Status switch
+    {
+        RunStatus.Passed => Tone.Success,
+        RunStatus.Failed => Tone.Danger,
+        RunStatus.Running => Tone.Info,
+        RunStatus.Queued => Tone.Neutral,
+
+        // Not failures of the application under test, and not successes either.
+        RunStatus.TimedOut or RunStatus.BudgetExceeded or RunStatus.InfrastructureError => Tone.Warning,
+        _ => Tone.Neutral,
+    };
+
+    private IconName? Icon => Status switch
+    {
+        RunStatus.Passed => IconName.Check,
+        RunStatus.Failed => IconName.Warning,
+        _ => null,
+    };
+}

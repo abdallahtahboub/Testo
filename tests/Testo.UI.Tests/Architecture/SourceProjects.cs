@@ -14,6 +14,32 @@ internal static class SourceProjects
     public static IReadOnlyList<string> Modules { get; } =
         [.. Names.Where(name => name.StartsWith("Testo.Modules.", StringComparison.Ordinal))];
 
+    /// <summary>
+    /// The projects whose assemblies these tests can actually load: the ones this test project
+    /// references, directly or not.
+    /// </summary>
+    /// <remarks>
+    /// Not every project is one of them. The worker and the demo shop are deliberately not
+    /// referenced by the user interface tests — the worker is treated as untrusted and the demo
+    /// shop is a target, not part of the product (ADR-0018) — so a test that reflects over types
+    /// has to skip them rather than fail on them. The rule tests read the project files instead,
+    /// so they still cover every project.
+    /// </remarks>
+    public static IReadOnlyList<System.Reflection.Assembly> LoadableAssemblies { get; } =
+        [.. Names.Select(TryLoad).OfType<System.Reflection.Assembly>()];
+
+    private static System.Reflection.Assembly? TryLoad(string project)
+    {
+        try
+        {
+            return System.Reflection.Assembly.Load(project);
+        }
+        catch (Exception exception) when (exception is FileNotFoundException or BadImageFormatException)
+        {
+            return null;
+        }
+    }
+
     public static string FilePath(string project) => Path.Combine(RepositoryRoot.Source, project, project + ".csproj");
 
     public static XDocument Load(string project) => XDocument.Load(FilePath(project));

@@ -20,4 +20,12 @@ public sealed record OperationResult(bool Succeeded, IReadOnlyList<string> Error
 
     /// <summary>It did not work, for the given reasons.</summary>
     public static OperationResult Failure(params string[] errors) => new(false, errors);
+
+    /// <summary>It worked, and produced this.</summary>
+    /// <typeparam name="T">What it produced.</typeparam>
+    public static OperationResult<T> With<T>(T value) => new(true, value, []);
+
+    /// <summary>It did not work, for the given reasons, and so produced nothing.</summary>
+    /// <typeparam name="T">What it would have produced.</typeparam>
+    public static OperationResult<T> Failure<T>(params string[] errors) => new(false, default, errors);
 }

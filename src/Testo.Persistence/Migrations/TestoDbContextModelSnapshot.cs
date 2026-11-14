@@ -112,6 +112,260 @@ namespace Testo.Persistence.Migrations
                     b.ToTable("audit_entries");
                 });
 
+            modelBuilder.Entity("Testo.Domain.Execution.Artifact", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CapturedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("captured_at");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("content_type");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("kind");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint")
+                        .HasColumnName("size_bytes");
+
+                    b.Property<string>("StorageKey")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("storage_key");
+
+                    b.Property<Guid>("TestRunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("test_run_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_artifacts");
+
+                    b.HasIndex("OrganizationId", "CapturedAt")
+                        .HasDatabaseName("ix_artifacts_organization_id_captured_at");
+
+                    b.HasIndex("OrganizationId", "TestRunId")
+                        .HasDatabaseName("ix_artifacts_organization_id_test_run_id");
+
+                    b.ToTable("artifacts");
+                });
+
+            modelBuilder.Entity("Testo.Domain.Execution.TestRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("Attempt")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt");
+
+                    b.Property<long>("BytesDownloaded")
+                        .HasColumnType("bigint")
+                        .HasColumnName("bytes_downloaded");
+
+                    b.Property<bool>("CancellationRequested")
+                        .HasColumnType("boolean")
+                        .HasColumnName("cancellation_requested");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("FailureReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("failure_reason");
+
+                    b.Property<DateTimeOffset?>("FinishedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("finished_at");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("integer")
+                        .HasColumnName("number");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<DateTimeOffset>("QueuedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("queued_at");
+
+                    b.Property<Guid?>("RerunOf")
+                        .HasColumnType("uuid")
+                        .HasColumnName("rerun_of");
+
+                    b.Property<string>("ScenarioId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("scenario_id");
+
+                    b.Property<DateTimeOffset?>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TargetOrigin")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("target_origin");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id")
+                        .HasName("pk_test_runs");
+
+                    b.HasAlternateKey("OrganizationId", "Id")
+                        .HasName("ak_test_runs_organization_id_id");
+
+                    b.HasIndex("OrganizationId", "Status")
+                        .HasDatabaseName("ix_test_runs_organization_id_status");
+
+                    b.HasIndex("OrganizationId", "ProjectId", "Number")
+                        .IsUnique()
+                        .HasDatabaseName("ix_test_runs_organization_id_project_id_number");
+
+                    b.HasIndex("OrganizationId", "ProjectId", "QueuedAt")
+                        .HasDatabaseName("ix_test_runs_organization_id_project_id_queued_at");
+
+                    b.ToTable("test_runs");
+                });
+
+            modelBuilder.Entity("Testo.Domain.Execution.TestRunStep", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
+
+                    b.Property<DateTimeOffset?>("FinishedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("finished_at");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("message");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer")
+                        .HasColumnName("order");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<Guid?>("ScreenshotArtifactId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("screenshot_artifact_id");
+
+                    b.Property<DateTimeOffset?>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TestRunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("test_run_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_test_run_steps");
+
+                    b.HasIndex("OrganizationId", "TestRunId", "Order")
+                        .IsUnique()
+                        .HasDatabaseName("ix_test_run_steps_organization_id_test_run_id_order");
+
+                    b.ToTable("test_run_steps");
+                });
+
             modelBuilder.Entity("Testo.Domain.Identity.Invitation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -582,6 +836,39 @@ namespace Testo.Persistence.Migrations
                     b.ToTable("projects");
                 });
 
+            modelBuilder.Entity("Testo.Domain.Execution.Artifact", b =>
+                {
+                    b.HasOne("Testo.Domain.Execution.TestRun", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId", "TestRunId")
+                        .HasPrincipalKey("OrganizationId", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_artifacts_test_runs_organization_id_test_run_id");
+                });
+
+            modelBuilder.Entity("Testo.Domain.Execution.TestRun", b =>
+                {
+                    b.HasOne("Testo.Domain.Projects.Project", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId", "ProjectId")
+                        .HasPrincipalKey("OrganizationId", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_test_runs_projects_organization_id_project_id");
+                });
+
+            modelBuilder.Entity("Testo.Domain.Execution.TestRunStep", b =>
+                {
+                    b.HasOne("Testo.Domain.Execution.TestRun", null)
+                        .WithMany("Steps")
+                        .HasForeignKey("OrganizationId", "TestRunId")
+                        .HasPrincipalKey("OrganizationId", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_test_run_steps_test_runs_organization_id_test_run_id");
+                });
+
             modelBuilder.Entity("Testo.Domain.Identity.Invitation", b =>
                 {
                     b.HasOne("Testo.Domain.Identity.Organization", "Organization")
@@ -635,6 +922,11 @@ namespace Testo.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_projects_organizations_organization_id");
+                });
+
+            modelBuilder.Entity("Testo.Domain.Execution.TestRun", b =>
+                {
+                    b.Navigation("Steps");
                 });
 
             modelBuilder.Entity("Testo.Domain.Identity.Organization", b =>

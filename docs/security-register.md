@@ -157,6 +157,15 @@ resolved address rather than the URL, which is what closes DNS rebinding and red
 target must be proved before it may be one. Milestone 3.3 builds it and carries the refusals as
 tests.
 
+**Partly built (2026-11-14, Milestone 3.3.)** The proxy exists and refuses by default, judging
+every resolved address of every connection, including each hop of a redirect chain; 45 tests in
+`tests/Testo.Worker.Tests/Egress` cover loopback, private ranges, link-local, carrier NAT, IPv4
+mapped into IPv6, NAT64 and cloud metadata, over real sockets. A page's own `fetch()` to
+`169.254.169.254` is refused. **Not yet built:** the container per run. The worker is a separate
+process with no database connection and no cloud role, which is the shape ADR-0018 asks for but
+not the boundary — a process is not a sandbox. Only our own demo target is reachable, so nothing
+customer-supplied runs yet; the container has to exist before anything does.
+
 ### R-2 · No background work, durable run state, idempotency or tenant propagation — **High when it arrives**
 
 A test run outlives the request that started it. Nothing in the codebase supports that: no queue,
@@ -167,6 +176,13 @@ survives a restart.
 The worker never writes to the database and cannot name an organization: it returns a result
 naming its run, and the application re-reads the organization from the stored row and writes under
 `TenantWriteScope`. The queue and the durable state are Milestone 3.3's to build.
+
+**Built (2026-11-14, Milestone 3.3.)** `test_runs` is the queue: `RunDispatcher` claims a row
+under optimistic concurrency, so two dispatchers cannot take the same run, and a result that names
+a different run than the one dispatched is recorded as an infrastructure error rather than
+believed. Cancellation is a flag on the row, so it survives a restart. **Still open:** one
+dispatcher per process polls, which is right for one machine and not for several; and a run left
+`Running` by a host that died is not yet reaped.
 
 ### R-3 · No artifact storage — **High when it arrives**
 
@@ -179,6 +195,14 @@ is customer data.
 never public, reached through a short-lived signed URL the application issues after the ordinary
 permission check; 90 days, less for traces, which carry request bodies and therefore passwords and
 are off unless asked for.
+
+**Partly built (2026-11-14, Milestone 3.3.)** Screenshots are stored under
+`{organization}/{run}/`, with an `artifacts` row inside the tenant boundary, and are served only
+to a signed-in person holding an unexpired HMAC signature for that one artifact — and then only
+through the tenant filter, so another organization's artifact is *not found* rather than refused.
+Tested in `ExecutionIsolationTests` and `ArtifactAccessTests`. **Not yet built:** object storage
+(the store is a local directory behind `IArtifactStore`), retention and redaction. No traces are
+captured yet, which is the one part of the decision that needs nothing further to hold.
 
 ### R-4 · The audit log is append-only only through Entity Framework — **Medium**
 

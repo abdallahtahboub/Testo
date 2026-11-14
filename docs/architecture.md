@@ -45,7 +45,8 @@ src/
   Testo.Modules.Planning
   Testo.Modules.Analysis
   Testo.Modules.Design
-  Testo.Modules.Execution        // incl. implementation (suites, environments) + regression
+  Testo.Modules.Execution        // PARTLY BUILT (M3.3): run list + one run. Suites,
+                                 // environments and regression still to come
   Testo.Modules.Defects
   Testo.Modules.Reporting        // incl. monitoring & control, release readiness, completion
   Testo.Modules.Settings         // NEW: integrations, team, capability settings host
@@ -54,6 +55,8 @@ src/
   Testo.Domain                   // BUILT (M3): entities and rules (ADR-0014)
   Testo.Application              // BUILT (M3): use cases; implements the Contracts interfaces
   Testo.Persistence              // BUILT (M3): EF Core, PostgreSQL, migrations
+  Testo.DemoShop                 // BUILT (M3.3): the website the slice runs against. Not the product
+  Testo.Worker                   // BUILT (M3.3): drives a browser, out of process, in a container
   Testo.Api                      // PLANNED: REST host for CI integrations, over the same use cases
 tests/
   Testo.UI.Tests                 // bUnit: UI.Shared components + module components
@@ -119,6 +122,8 @@ project (ADR-0013).
 | `Domain` | `Contracts` | anything UI, EF Core, ASP.NET Core Identity |
 | `Persistence` | `Domain`, `Contracts`, EF Core, Identity stores | anything UI, the application layer |
 | `Application` | `Domain`, `Persistence`, `Contracts` | anything UI, ASP.NET Core Identity |
+| `DemoShop` | nothing of ours | It is a target, not part of the product. The one other project that uses the ASP.NET Core server framework, because it is a website |
+| `Worker` | `Contracts`, Playwright | **everything else.** No database, no Identity, no UI, no Application. It is treated as already compromised (ADR-0018) |
 | `Api` *(planned)* | `Application`, `Contracts` | anything UI |
 | `Web` | everything (composition root only, no business UI) | — |
 
@@ -236,10 +241,13 @@ public interface ITestCapability
 
 All data comes from interfaces in `Testo.Contracts`, grouped per domain:
 
-> **None of the interfaces in this table exist yet.** They are the design for the testing-journey
-> milestones. `Testo.Contracts` currently defines six interfaces, all of them about identity:
+> **Almost none of the interfaces in this table exist yet.** They are the design for the
+> testing-journey milestones. `Testo.Contracts` defines six about identity —
 > `IAuthenticationService`, `ICurrentUser`, `IOrganizationContext`, `IMembershipService`,
-> `IInvitationService` and `IAuditLog`. Treat the rows below as a plan, not as an inventory.
+> `IInvitationService`, `IAuditLog` — and, since Milestone 3.3, `IExecutionService`, which is the
+> row below named `ITestRunService`: it was built under the name of the module it serves, and
+> carries the current project with it until the app shell has a project switcher (Milestone 5).
+> Treat the other rows as a plan, not as an inventory.
 
 | Interface | Purpose |
 |---|---|
@@ -247,7 +255,7 @@ All data comes from interfaces in `Testo.Contracts`, grouped per domain:
 | `IRequirementService` | requirements, test conditions, traceability matrix |
 | `ITestPlanService` | test plans, risks, entry/exit criteria |
 | `ITestCaseService` | test cases, versions, suites |
-| `ITestRunService` | run list, run details, start/stop/rerun |
+| `ITestRunService` | run list, run details, start/stop/rerun — **built** as `IExecutionService` (M3.3) |
 | `ITestRunLiveFeed` | live run updates (see §8) |
 | `IDefectService` | defects, lifecycle transitions, links |
 | `IReportingService` | metrics, trends, release readiness, summary reports |

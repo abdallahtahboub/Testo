@@ -33,7 +33,7 @@ public class AppShellTests(AppFixture app) : BrowserTest(app)
     }
 
     [Fact]
-    public async Task Modules_AreListedWithTheirFlagsSwitchedOff()
+    public async Task Modules_AreListedWithTheirFlags()
     {
         var page = await OpenSignedInAsync("/app");
 
@@ -42,7 +42,8 @@ public class AppShellTests(AppFixture app) : BrowserTest(app)
         await Expect(rows.Locator("th")).ToHaveTextAsync(["analysis", "defects", "design", "execution", "planning", "reporting", "settings"]);
         await Expect(rows.Locator("td:nth-child(2)")).ToHaveTextAsync(
             ["Module.Analysis", "Module.Defects", "Module.Design", "Module.Execution", "Module.Planning", "Module.Reporting", "Module.Settings"]);
-        await Expect(rows.Locator("td:nth-child(3)")).ToHaveTextAsync(["Off", "Off", "Off", "Off", "Off", "Off", "Off"]);
+        // Execution is on because Milestone 3.3 built it; the other six are still shells.
+        await Expect(rows.Locator("td:nth-child(3)")).ToHaveTextAsync(["Off", "Off", "Off", "On", "Off", "Off", "Off"]);
     }
 
     [Fact]

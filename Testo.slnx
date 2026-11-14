@@ -3,6 +3,7 @@
     <Project Path="src/Testo.Application/Testo.Application.csproj" />
     <Project Path="src/Testo.Capabilities.E2EWeb/Testo.Capabilities.E2EWeb.csproj" />
     <Project Path="src/Testo.Contracts/Testo.Contracts.csproj" />
+    <Project Path="src/Testo.DemoShop/Testo.DemoShop.csproj" />
     <Project Path="src/Testo.Domain/Testo.Domain.csproj" />
     <Project Path="src/Testo.Mocks/Testo.Mocks.csproj" />
     <Project Path="src/Testo.Modules.Analysis/Testo.Modules.Analysis.csproj" />
@@ -17,11 +18,13 @@
     <Project Path="src/Testo.UI.Shared/Testo.UI.Shared.csproj" />
     <Project Path="src/Testo.Web/Testo.Web.csproj" />
     <Project Path="src/Testo.Website/Testo.Website.csproj" />
+    <Project Path="src/Testo.Worker/Testo.Worker.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Testo.Application.Tests/Testo.Application.Tests.csproj" />
     <Project Path="tests/Testo.E2E/Testo.E2E.csproj" />
     <Project Path="tests/Testo.Mocks.Tests/Testo.Mocks.Tests.csproj" />
     <Project Path="tests/Testo.UI.Tests/Testo.UI.Tests.csproj" />
+    <Project Path="tests/Testo.Worker.Tests/Testo.Worker.Tests.csproj" />
   </Folder>
 </Solution>

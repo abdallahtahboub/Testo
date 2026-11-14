@@ -19,4 +19,8 @@ internal static class AuditActions
     public const string MemberJoined = "member.joined";
     public const string MemberRoleChanged = "member.role_changed";
     public const string MemberRemoved = "member.removed";
+
+    public const string RunStarted = "run.started";
+    public const string RunCancelled = "run.cancelled";
+    public const string RunFinished = "run.finished";
 }

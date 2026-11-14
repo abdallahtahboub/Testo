@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!-- The application the deterministic slice runs against (Milestone 3.3).
+       Ours, so no proof of origin control is needed and no third party is involved. It references
+       nothing of ours: it is a target, not part of the product. -->
+
+</Project>

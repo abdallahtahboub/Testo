@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Nav_Runs" xml:space="preserve">
+    <value>Testläufe</value>
+  </data>
+  <data name="RunList_PageTitle" xml:space="preserve">
+    <value>Testläufe – {0}</value>
+  </data>
+  <data name="RunList_Title" xml:space="preserve">
+    <value>Testläufe</value>
+  </data>
+  <data name="RunList_Intro" xml:space="preserve">
+    <value>Jeder Lauf eines Szenarios gegen die Demo-Anwendung, neueste zuerst.</value>
+  </data>
+  <data name="RunList_Start" xml:space="preserve">
+    <value>Lauf starten</value>
+  </data>
+  <data name="RunList_StartScenario" xml:space="preserve">
+    <value>Starten</value>
+  </data>
+  <data name="RunList_Empty_Title" xml:space="preserve">
+    <value>Es ist noch nichts gelaufen</value>
+  </data>
+  <data name="RunList_Empty_Text" xml:space="preserve">
+    <value>Starten Sie ein Szenario, dann erscheint es hier, während es läuft.</value>
+  </data>
+  <data name="RunList_Column_Run" xml:space="preserve">
+    <value>Lauf</value>
+  </data>
+  <data name="RunList_Column_Scenario" xml:space="preserve">
+    <value>Szenario</value>
+  </data>
+  <data name="RunList_Column_Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="RunList_Column_Queued" xml:space="preserve">
+    <value>Eingereiht</value>
+  </data>
+  <data name="RunList_Attempt" xml:space="preserve">
+    <value>Versuch {0}</value>
+  </data>
+  <data name="Run_PageTitle" xml:space="preserve">
+    <value>Lauf {0} – {1}</value>
+  </data>
+  <data name="Run_Title" xml:space="preserve">
+    <value>Lauf {0}: {1}</value>
+  </data>
+  <data name="Run_Target" xml:space="preserve">
+    <value>Gelaufen gegen {0}</value>
+  </data>
+  <data name="Run_Cancel" xml:space="preserve">
+    <value>Diesen Lauf stoppen</value>
+  </data>
+  <data name="Run_Rerun" xml:space="preserve">
+    <value>Noch einmal laufen lassen</value>
+  </data>
+  <data name="Run_BackToList" xml:space="preserve">
+    <value>Alle Läufe</value>
+  </data>
+  <data name="Run_Steps_Title" xml:space="preserve">
+    <value>Schritte</value>
+  </data>
+  <data name="Run_Steps_Screenshot" xml:space="preserve">
+    <value>Bildschirmfoto von Schritt {0}</value>
+  </data>
+  <data name="Run_NotFound_Title" xml:space="preserve">
+    <value>Kein solcher Lauf</value>
+  </data>
+  <data name="Run_NotFound_Text" xml:space="preserve">
+    <value>Diesen Lauf gibt es nicht, oder er gehört zu einer anderen Organisation.</value>
+  </data>
+  <data name="Run_Failure_Title" xml:space="preserve">
+    <value>Warum er gestoppt hat</value>
+  </data>
+  <data name="Status_Queued" xml:space="preserve">
+    <value>Eingereiht</value>
+  </data>
+  <data name="Status_Running" xml:space="preserve">
+    <value>Läuft</value>
+  </data>
+  <data name="Status_Passed" xml:space="preserve">
+    <value>Bestanden</value>
+  </data>
+  <data name="Status_Failed" xml:space="preserve">
+    <value>Fehlgeschlagen</value>
+  </data>
+  <data name="Status_Cancelled" xml:space="preserve">
+    <value>Gestoppt</value>
+  </data>
+  <data name="Status_TimedOut" xml:space="preserve">
+    <value>Zeit abgelaufen</value>
+  </data>
+  <data name="Status_BudgetExceeded" xml:space="preserve">
+    <value>Budget überschritten</value>
+  </data>
+  <data name="Status_InfrastructureError" xml:space="preserve">
+    <value>Konnte nicht laufen</value>
+  </data>
+  <data name="StepStatus_Pending" xml:space="preserve">
+    <value>Nicht gestartet</value>
+  </data>
+  <data name="StepStatus_Running" xml:space="preserve">
+    <value>Läuft</value>
+  </data>
+  <data name="StepStatus_Passed" xml:space="preserve">
+    <value>Bestanden</value>
+  </data>
+  <data name="StepStatus_Failed" xml:space="preserve">
+    <value>Fehlgeschlagen</value>
+  </data>
+  <data name="StepStatus_Skipped" xml:space="preserve">
+    <value>Übersprungen</value>
+  </data>
+  <data name="Execution_Error_NotAllowed" xml:space="preserve">
+    <value>Ihre Rolle erlaubt es nicht, Testläufe zu starten oder zu stoppen.</value>
+  </data>
+  <data name="Execution_Error_NoSuchScenario" xml:space="preserve">
+    <value>Ein Szenario mit diesem Namen gibt es nicht.</value>
+  </data>
+  <data name="Execution_Error_NoSuchProject" xml:space="preserve">
+    <value>Ein Projekt mit diesem Namen gibt es nicht.</value>
+  </data>
+  <data name="Execution_Error_NoSuchRun" xml:space="preserve">
+    <value>Einen solchen Lauf gibt es nicht.</value>
+  </data>
+  <data name="Execution_Error_AlreadyFinished" xml:space="preserve">
+    <value>Dieser Lauf ist bereits beendet.</value>
+  </data>
+  <data name="Run_Refresh" xml:space="preserve">
+    <value>Aktualisieren</value>
+  </data>
+  <data name="Run_Timing_Queued" xml:space="preserve">
+    <value>Eingereiht</value>
+  </data>
+  <data name="Run_Timing_Started" xml:space="preserve">
+    <value>Gestartet</value>
+  </data>
+  <data name="Run_Timing_Finished" xml:space="preserve">
+    <value>Beendet</value>
+  </data>
+  <data name="Run_Steps_Took" xml:space="preserve">
+    <value>{0} s</value>
+  </data>
+</root>

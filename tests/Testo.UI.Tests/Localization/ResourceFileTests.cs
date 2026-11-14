@@ -101,6 +101,9 @@ public partial class ResourceFileTests
     private static readonly Dictionary<string, string[]> AlsoUsedBy = new(StringComparer.Ordinal)
     {
         ["Testo.Web"] = ["Testo.Application", "Testo.Persistence"],
+
+        // The execution use cases answer with keys that belong to the module that shows them.
+        ["Testo.Modules.Execution"] = ["Testo.Application"],
     };
 
     /// <summary>The Razor and C# files that may use the keys of a resource file.</summary>

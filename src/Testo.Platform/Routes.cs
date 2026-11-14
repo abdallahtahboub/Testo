@@ -37,6 +37,12 @@ public static class Routes
     /// <summary>Where somebody takes up an invitation.</summary>
     public const string AcceptInvitation = Account + "/accept";
 
+    /// <summary>Test runs: the list, and one run with its steps and evidence.</summary>
+    public const string Runs = App + "/runs";
+
+    /// <summary>One run.</summary>
+    public static string Run(Guid runId) => $"{Runs}/{runId}";
+
     /// <summary>
     /// Every component with its variants, for developers and designers. Behind
     /// <c>Feature.Showcase</c>, which is off outside development.

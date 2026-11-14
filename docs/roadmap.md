@@ -121,23 +121,24 @@ Found by opening it in a browser rather than by a test, and worth remembering:
 
 ## Inventory — what is actually built
 
-> Verified at `8af40e34f9057afc2ad0c8cfa062c92df87401d5` on 2026-11-13: `dotnet build` clean,
-> **810 tests passed, 0 failed, 0 skipped** (Mocks 8, UI 623, Application 68, E2E 111), CI green.
+> Last verified on 2026-11-14, after Milestone 3.3: `dotnet build` clean, every test green in CI.
 > This table is authoritative. Where another document disagrees with it, this one is right.
 
 | Area | State |
 |---|---|
 | Identity, organizations, memberships, invitations, roles, audit log | **Real**, on PostgreSQL |
-| Tenant isolation: query filter, save guard, indexes, alternate key | **Real** — with one hole, D-2 in `security-register.md` |
+| Tenant isolation: query filter, save guard, indexes, alternate key | **Real.** D-2, the hole in it, was closed in Milestone 3.1 |
 | Sign in, sign out, password reset, one-time code, accept invitation | **Real** |
 | Design system, 35 components | **Real** |
 | Public website | **One page** (home, EN + DE) plus not-found and error |
-| App area | **One placeholder page** at `/app`, and it does not require signing in (D-1) |
-| The seven feature modules | **Shells.** One class each: an id and a feature flag. No pages, no services |
+| App area | **One placeholder page** at `/app`, plus the two execution pages. Signing in is required everywhere (D-1 closed in Milestone 3.1) |
+| Test runs: start, stop, rerun, steps, screenshots | **Real** for three scripted scenarios against our own demo target. No AI, no customer targets |
+| Browser execution: worker out of process, egress proxy, signed artifact links | **Real.** Not yet a container per run (R-1) |
+| The other six feature modules | **Shells.** One class each: an id and a feature flag. No pages, no services |
 | `Testo.Capabilities.E2EWeb` | **Empty.** An `_Imports.razor` |
 | `Testo.Mocks` | **Shell.** Options and a random source. No services, no seed data |
-| Plans, requirements, test cases, runs, defects, reporting | **Do not exist**, in any form, not even mocked |
-| Email delivery | **Deferred.** Invitation and reset links go to the log (D-3) |
+| Plans, requirements, test cases, suites, environments, defects, reporting | **Do not exist**, in any form, not even mocked |
+| Email delivery | **Deferred.** Invitation and reset links go to the log, and the application refuses to start that way outside development (D-3 closed in Milestone 3.1) |
 | Authenticator enrollment | **Deferred.** Signing in with a code works; setting one up does not |
 | Breached-password check | **Partial.** An embedded list plus runs and repeats; no online check |
 
@@ -197,6 +198,36 @@ persistence, artifacts, cancel and rerun. A worker outside the Blazor process. *
 **Done when:** an authorized person can start, cancel and rerun a real Playwright run; a failure
 carries replayable steps, a screenshot and timestamps; cross-tenant access is refused in adversarial
 tests; it all passes in CI.
+
+**Status: built (2026-11-14), waiting for review.** What is real: `Testo.DemoShop`, a small shop
+with a deliberate bug in its checkout; `Testo.Worker`, a separate process that drives Chromium
+through an egress proxy of its own and prints a result; `test_runs`, `test_run_steps` and
+`artifacts` on PostgreSQL inside the tenant boundary; `RunDispatcher`, which claims a queued run,
+launches the worker and writes back under `TenantWriteScope`; and two pages, `/app/runs` and
+`/app/runs/{id}`.
+
+Four things worth knowing:
+
+- **Every way a run can stop has its own name.** Passed, failed, stopped, out of time, over
+  budget, could not run. A run that hit its budget is not a failing application, and a run the
+  infrastructure lost says nothing about the application at all; one word for all of them would
+  make the failure rate a lie. The badge shows out-of-time and could-not-run as warnings, not
+  failures.
+- **The worker is never told an organization.** It is given a run id, a target, a budget and a
+  directory. A worker a hostile page fully owns therefore learns one run's configuration and
+  nothing about any other customer. The tenant is re-established on the way back in, from the
+  stored row (ADR-0018).
+- **The proxy judges resolved addresses, not URLs**, on every connection including each redirect
+  hop, which is what closes DNS rebinding. A test drives a redirect to an *allowed* hostname that
+  resolves to loopback and watches it be refused — the case a hostname allowlist cannot catch.
+- **A wall-clock budget test caught a real race**, not a test problem: the deadline was only
+  checked while waiting, so a fast run could pass its deadline unnoticed. The runner now checks it
+  at every step boundary.
+
+Not built, and deliberately: the container per run (the worker is a process, which is the right
+shape but not an isolation boundary — R-1 says so plainly), object storage, retention, and a reaper
+for runs left behind by a host that died. Nothing customer-supplied runs against anything yet: the
+only reachable target is ours.
 
 ### Milestone 3.4 — Bounded AI, measured
 A planner behind a provider-agnostic interface. Schema-validated plans, a fixed browser-action

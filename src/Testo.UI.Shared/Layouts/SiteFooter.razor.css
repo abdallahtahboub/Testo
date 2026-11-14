@@ -1,0 +1,124 @@
+/* The footer. Breakpoints as in docs/design-system.md §5, in rem. */
+
+.site-footer {
+  padding-block: var(--space-12) var(--space-6);
+  border-block-start: 1px solid var(--color-border);
+  background-color: var(--color-surface-subtle);
+  font-size: var(--text-body-sm);
+}
+
+.site-footer__top {
+  display: grid;
+  gap: var(--space-10);
+  padding-block-end: var(--space-8);
+}
+
+.site-footer__pitch {
+  margin: var(--space-4) 0 var(--space-6);
+  max-inline-size: 38ch;
+  color: var(--color-text-muted);
+}
+
+.site-footer__newsletter label {
+  display: block;
+  margin-block-end: var(--space-2);
+  font-weight: var(--weight-medium);
+}
+
+.site-footer__newsletter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.site-footer__newsletter-row .t-input {
+  flex: 1 1 14rem;
+}
+
+.site-footer__note {
+  margin: var(--space-2) 0 0;
+  max-inline-size: 42ch;
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+}
+
+.site-footer__columns {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.site-footer__heading {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+}
+
+.site-footer__columns ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-footer__columns a {
+  color: var(--color-text-muted);
+}
+
+.site-footer__columns a:hover {
+  color: var(--color-text);
+}
+
+.site-footer__placeholder {
+  margin-inline-start: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+}
+
+.site-footer__bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-6);
+  padding-block-start: var(--space-6);
+  border-block-start: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.site-footer__copyright {
+  margin: 0;
+}
+
+.site-footer__legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-footer__legal a {
+  color: var(--color-text-muted);
+}
+
+.site-footer__tools {
+  margin-inline-start: auto;
+}
+
+@media (min-width: 37.5rem) {
+  .site-footer__columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 56.25rem) {
+  .site-footer__top {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  }
+
+  .site-footer__columns {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

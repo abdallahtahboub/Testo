@@ -17,6 +17,7 @@ using Testo.Platform;
 using Testo.Platform.Features;
 using Testo.Platform.Localization;
 using Testo.Platform.Modules;
+using Testo.Platform.Navigation;
 using Testo.UI.Shared;
 using Testo.UI.Shared.Branding;
 using Testo.UI.Shared.Identity;
@@ -24,6 +25,7 @@ using Testo.UI.Shared.Theming;
 using Testo.Web.Antiforgery;
 using Testo.Web.Components;
 using Testo.Web.Execution;
+using Testo.Website;
 using Testo.Web.Features;
 using Testo.Web.Identity;
 using Testo.Web.Localization;
@@ -48,6 +50,10 @@ builder.Services.AddPublicPageAntiforgery();
 
 // Design system, brand, languages, feature flags.
 builder.Services.AddTestoDesignSystem();
+
+// The public site's menu and footer. Registered rather than written into the chrome, so the
+// design system renders words it does not own and the website keeps its copy (CLAUDE.md).
+builder.Services.AddSingleton<ISiteMenu, SiteMenuCatalogue>();
 builder.Services.Configure<BrandOptions>(builder.Configuration.GetSection(BrandOptions.SectionName));
 builder.Services.AddTestoLocalization();
 builder.Services.AddFeatureManagement();

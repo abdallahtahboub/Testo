@@ -87,4 +87,220 @@
   <data name="NotFound_Title" xml:space="preserve">
     <value>Page not found</value>
   </data>
+  <data name="Nav_Product" xml:space="preserve">
+    <value>Product</value>
+  </data>
+  <data name="Nav_Product_Platform" xml:space="preserve">
+    <value>The platform</value>
+  </data>
+  <data name="Nav_Product_Journey" xml:space="preserve">
+    <value>The testing journey</value>
+  </data>
+  <data name="Nav_Product_Overview" xml:space="preserve">
+    <value>Overview</value>
+  </data>
+  <data name="Nav_Product_Overview_Text" xml:space="preserve">
+    <value>How the parts fit together</value>
+  </data>
+  <data name="Nav_Capabilities" xml:space="preserve">
+    <value>Capabilities</value>
+  </data>
+  <data name="Nav_Capabilities_Text" xml:space="preserve">
+    <value>What the platform can test, and how new kinds are added</value>
+  </data>
+  <data name="Nav_Integrations" xml:space="preserve">
+    <value>Integrations</value>
+  </data>
+  <data name="Nav_Integrations_Text" xml:space="preserve">
+    <value>Git, issue trackers and CI</value>
+  </data>
+  <data name="Nav_Security" xml:space="preserve">
+    <value>Security and trust</value>
+  </data>
+  <data name="Nav_Security_Text" xml:space="preserve">
+    <value>Where your data lives and who can reach it</value>
+  </data>
+  <data name="Nav_Planning" xml:space="preserve">
+    <value>Test planning</value>
+  </data>
+  <data name="Nav_Planning_Text" xml:space="preserve">
+    <value>Scope, risks, and criteria you agree before you start</value>
+  </data>
+  <data name="Nav_Analysis" xml:space="preserve">
+    <value>Analysis and traceability</value>
+  </data>
+  <data name="Nav_Analysis_Text" xml:space="preserve">
+    <value>From a requirement to the tests that cover it</value>
+  </data>
+  <data name="Nav_Design" xml:space="preserve">
+    <value>Test design</value>
+  </data>
+  <data name="Nav_Design_Text" xml:space="preserve">
+    <value>Cases, techniques and test data</value>
+  </data>
+  <data name="Nav_Execution" xml:space="preserve">
+    <value>Test execution</value>
+  </data>
+  <data name="Nav_Execution_Text" xml:space="preserve">
+    <value>Runs in a real browser, with the evidence kept</value>
+  </data>
+  <data name="Nav_Defects" xml:space="preserve">
+    <value>Defect management</value>
+  </data>
+  <data name="Nav_Defects_Text" xml:space="preserve">
+    <value>Triage, lifecycle and links back to the test</value>
+  </data>
+  <data name="Nav_Reporting" xml:space="preserve">
+    <value>Reporting and release readiness</value>
+  </data>
+  <data name="Nav_Reporting_Text" xml:space="preserve">
+    <value>What to tell the people deciding whether to ship</value>
+  </data>
+  <data name="Nav_Solutions" xml:space="preserve">
+    <value>Solutions</value>
+  </data>
+  <data name="Nav_Solutions_Overview" xml:space="preserve">
+    <value>Overview</value>
+  </data>
+  <data name="Nav_Solutions_ByRole" xml:space="preserve">
+    <value>By role</value>
+  </data>
+  <data name="Nav_Solutions_ByIndustry" xml:space="preserve">
+    <value>By industry</value>
+  </data>
+  <data name="Nav_QaLead" xml:space="preserve">
+    <value>For QA leads</value>
+  </data>
+  <data name="Nav_QaLead_Text" xml:space="preserve">
+    <value>Plan the work, see where it stands, say whether it is ready</value>
+  </data>
+  <data name="Nav_Developer" xml:space="preserve">
+    <value>For developers</value>
+  </data>
+  <data name="Nav_Developer_Text" xml:space="preserve">
+    <value>Fast feedback and a defect you can act on</value>
+  </data>
+  <data name="Nav_EngineeringManager" xml:space="preserve">
+    <value>For engineering managers</value>
+  </data>
+  <data name="Nav_EngineeringManager_Text" xml:space="preserve">
+    <value>Quality you can report on without guessing</value>
+  </data>
+  <data name="Nav_Industry_Finance" xml:space="preserve">
+    <value>Finance</value>
+  </data>
+  <data name="Nav_Industry_Insurance" xml:space="preserve">
+    <value>Insurance</value>
+  </data>
+  <data name="Nav_Industry_Retail" xml:space="preserve">
+    <value>Retail</value>
+  </data>
+  <data name="Nav_Industry_Automotive" xml:space="preserve">
+    <value>Automotive</value>
+  </data>
+  <data name="Nav_Industry_PublicSector" xml:space="preserve">
+    <value>Public sector</value>
+  </data>
+  <data name="Nav_Pricing" xml:space="preserve">
+    <value>Pricing</value>
+  </data>
+  <data name="Nav_Resources" xml:space="preserve">
+    <value>Resources</value>
+  </data>
+  <data name="Nav_Resources_Overview" xml:space="preserve">
+    <value>Overview</value>
+  </data>
+  <data name="Nav_Resources_Read" xml:space="preserve">
+    <value>Reading</value>
+  </data>
+  <data name="Nav_Blog" xml:space="preserve">
+    <value>Blog</value>
+  </data>
+  <data name="Nav_Blog_Text" xml:space="preserve">
+    <value>Notes on testing, and on building this</value>
+  </data>
+  <data name="Nav_Docs" xml:space="preserve">
+    <value>Documentation</value>
+  </data>
+  <data name="Nav_Docs_Text" xml:space="preserve">
+    <value>How to use each part</value>
+  </data>
+  <data name="Nav_CaseStudies" xml:space="preserve">
+    <value>Case studies</value>
+  </data>
+  <data name="Nav_CaseStudies_Text" xml:space="preserve">
+    <value>What teams did with it</value>
+  </data>
+  <data name="Nav_Company" xml:space="preserve">
+    <value>Company</value>
+  </data>
+  <data name="Nav_About" xml:space="preserve">
+    <value>About us</value>
+  </data>
+  <data name="Nav_About_Text" xml:space="preserve">
+    <value>Why this exists</value>
+  </data>
+  <data name="Nav_Careers" xml:space="preserve">
+    <value>Careers</value>
+  </data>
+  <data name="Nav_Careers_Text" xml:space="preserve">
+    <value>Working on it</value>
+  </data>
+  <data name="Nav_Contact" xml:space="preserve">
+    <value>Contact</value>
+  </data>
+  <data name="Nav_Contact_Text" xml:space="preserve">
+    <value>Ask us something</value>
+  </data>
+  <data name="Nav_RequestDemo" xml:space="preserve">
+    <value>Request a demo</value>
+  </data>
+  <data name="Nav_Imprint" xml:space="preserve">
+    <value>Imprint</value>
+  </data>
+  <data name="Nav_Privacy" xml:space="preserve">
+    <value>Privacy</value>
+  </data>
+  <data name="Nav_Terms" xml:space="preserve">
+    <value>Terms</value>
+  </data>
+  <data name="Nav_Accessibility" xml:space="preserve">
+    <value>Accessibility</value>
+  </data>
+  <data name="Nav_Feature_Run_Title" xml:space="preserve">
+    <value>See a real test run</value>
+  </data>
+  <data name="Nav_Feature_Run_Text" xml:space="preserve">
+    <value>A browser driven against a real application, with a screenshot of every step and a failure you can replay.</value>
+  </data>
+  <data name="Nav_Feature_Run_Action" xml:space="preserve">
+    <value>Web end-to-end testing</value>
+  </data>
+  <data name="Nav_Feature_Traceability_Title" xml:space="preserve">
+    <value>From requirement to evidence</value>
+  </data>
+  <data name="Nav_Feature_Traceability_Text" xml:space="preserve">
+    <value>Every requirement, the tests that cover it, and what those tests last said.</value>
+  </data>
+  <data name="Nav_Feature_Traceability_Action" xml:space="preserve">
+    <value>Analysis and traceability</value>
+  </data>
+  <data name="Nav_Feature_Accessibility_Title" xml:space="preserve">
+    <value>We test ourselves too</value>
+  </data>
+  <data name="Nav_Feature_Accessibility_Text" xml:space="preserve">
+    <value>Every page of this site is checked for accessibility on every change. Here is what we commit to.</value>
+  </data>
+  <data name="Nav_Feature_Accessibility_Action" xml:space="preserve">
+    <value>Our accessibility statement</value>
+  </data>
+  <data name="Nav_Feature_Demo_Title" xml:space="preserve">
+    <value>See it on your own application</value>
+  </data>
+  <data name="Nav_Feature_Demo_Text" xml:space="preserve">
+    <value>Tell us what you are testing and we will walk through it with you.</value>
+  </data>
+  <data name="Nav_Feature_Demo_Action" xml:space="preserve">
+    <value>Request a demo</value>
+  </data>
 </root>

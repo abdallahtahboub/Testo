@@ -1,8 +1,10 @@
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
+using Testo.Platform.Navigation;
 using Testo.UI.Shared;
 using Testo.UI.Shared.Branding;
 using Testo.UI.Shared.Theming;
+using Testo.Website;
 
 namespace Testo.UI.Tests.Support;
 
@@ -24,6 +26,10 @@ public abstract class DesignSystemTestContext : BunitContext
         Services.AddTestoDesignSystem();
         Services.Configure<BrandOptions>(options => options.ProductName = "Acme QA");
         Services.AddSingleton<TimeProvider>(new FixedTimeProvider(Now));
+
+        // The real site menu, not a fake: the chrome's job is to render what it is given, and a
+        // test against an invented two-item menu would not notice the real one breaking.
+        Services.AddSingleton<ISiteMenu, SiteMenuCatalogue>();
 
         // Fluent UI components call into JavaScript when they render; the tests do not care.
         JSInterop.Mode = JSRuntimeMode.Loose;

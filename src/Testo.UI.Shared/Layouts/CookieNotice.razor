@@ -1,0 +1,19 @@
+@inject IStringLocalizer<SharedResources> L
+
+@*
+    What we set, and why.
+
+    Not a consent dialog, because there is nothing here to consent to: the three cookies this site
+    sets are the visitor's language, their theme and, inside the app, their session. All three are
+    strictly necessary under GDPR Article 6(1)(f) and need no consent — so asking for it would be
+    theatre, and pretending the choice mattered would be worse.
+
+    If analytics or anything else arrives later, this becomes a real consent banner and this
+    comment becomes wrong. That is the moment to rewrite it, not before.
+*@
+<aside class="cookie-notice" aria-label="@L["Cookie_Label"]" data-testid="cookie-notice">
+    <div class="t-container cookie-notice__inner">
+        <p class="cookie-notice__text">@L["Cookie_Text"]</p>
+        <a class="cookie-notice__link" href="@LocalizedPath.For(SupportedCultures.Current, PublicPages.Privacy)">@L["Cookie_More"]</a>
+    </div>
+</aside>

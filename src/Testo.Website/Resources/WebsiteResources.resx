@@ -1599,4 +1599,121 @@
   <data name="Access_Feedback_Legal" xml:space="preserve">
     <value>In Germany, the Barrierefreiheitsstärkungsgesetz will require this of a service like ours. We would rather be ready early than compliant late.</value>
   </data>
+  <data name="Form_Name" xml:space="preserve">
+    <value>Your name</value>
+  </data>
+  <data name="Form_Email" xml:space="preserve">
+    <value>Email address</value>
+  </data>
+  <data name="Form_Email_Hint" xml:space="preserve">
+    <value>So we can reply. Nothing else is done with it.</value>
+  </data>
+  <data name="Form_Organisation" xml:space="preserve">
+    <value>Organisation</value>
+  </data>
+  <data name="Form_Message" xml:space="preserve">
+    <value>Your message</value>
+  </data>
+  <data name="Form_Error_Required" xml:space="preserve">
+    <value>This field is needed.</value>
+  </data>
+  <data name="Form_Error_Email" xml:space="preserve">
+    <value>That does not look like an email address.</value>
+  </data>
+  <data name="Form_NotDelivered_Before" xml:space="preserve">
+    <value>This form is not connected to anything yet. It checks what you type and shows you what would happen next, and then it discards it: no message is sent, stored or logged. Please do not use it for something you need an answer to.</value>
+  </data>
+  <data name="Form_NotDelivered_After" xml:space="preserve">
+    <value>To be clear: nothing was actually sent. There is no mail service behind this form yet, and we would rather tell you that than leave you waiting for a reply.</value>
+  </data>
+  <data name="Form_Done_Home" xml:space="preserve">
+    <value>Back to the home page</value>
+  </data>
+  <data name="Contact_PageTitle" xml:space="preserve">
+    <value>Contact – {0}</value>
+  </data>
+  <data name="Contact_MetaDescription" xml:space="preserve">
+    <value>Ask us about the product, about security, or about accessibility.</value>
+  </data>
+  <data name="Contact_Title" xml:space="preserve">
+    <value>Contact</value>
+  </data>
+  <data name="Contact_Lead" xml:space="preserve">
+    <value>A question about what this does, what it does not do yet, or how it handles your data.</value>
+  </data>
+  <data name="Contact_Subject" xml:space="preserve">
+    <value>What is it about?</value>
+  </data>
+  <data name="Contact_Subject_Choose" xml:space="preserve">
+    <value>Choose a subject</value>
+  </data>
+  <data name="Contact_Subject_Product" xml:space="preserve">
+    <value>The product</value>
+  </data>
+  <data name="Contact_Subject_Security" xml:space="preserve">
+    <value>Security or data protection</value>
+  </data>
+  <data name="Contact_Subject_Accessibility" xml:space="preserve">
+    <value>An accessibility problem</value>
+  </data>
+  <data name="Contact_Subject_Other" xml:space="preserve">
+    <value>Something else</value>
+  </data>
+  <data name="Contact_Submit" xml:space="preserve">
+    <value>Send the message</value>
+  </data>
+  <data name="Contact_Done_Title" xml:space="preserve">
+    <value>That is what we would have needed</value>
+  </data>
+  <data name="Contact_Done_Text" xml:space="preserve">
+    <value>Everything you filled in was valid, and this is the point at which a real message would be on its way to us.</value>
+  </data>
+  <data name="Demo_PageTitle" xml:space="preserve">
+    <value>Request a demo – {0}</value>
+  </data>
+  <data name="Demo_MetaDescription" xml:space="preserve">
+    <value>See a test run against a real application, and hear plainly what is not built yet.</value>
+  </data>
+  <data name="Demo_Title" xml:space="preserve">
+    <value>Request a demo</value>
+  </data>
+  <data name="Demo_Lead" xml:space="preserve">
+    <value>Half an hour, a real test run, and an honest account of how much of the rest exists.</value>
+  </data>
+  <data name="Demo_Expect_Title" xml:space="preserve">
+    <value>What you would actually see</value>
+  </data>
+  <data name="Demo_Expect_Run" xml:space="preserve">
+    <value>A browser driven against an application, step by step, with the screenshot each step left behind.</value>
+  </data>
+  <data name="Demo_Expect_Evidence" xml:space="preserve">
+    <value>A failure found on purpose: a checkout that charges the wrong amount, and the picture that proves it.</value>
+  </data>
+  <data name="Demo_Expect_Honest" xml:space="preserve">
+    <value>A list of what is not built. One of the six stages is finished, and we would rather say so in the first ten minutes than the last.</value>
+  </data>
+  <data name="Demo_Role" xml:space="preserve">
+    <value>What do you do?</value>
+  </data>
+  <data name="Demo_Role_Choose" xml:space="preserve">
+    <value>Choose a role</value>
+  </data>
+  <data name="Demo_Testing" xml:space="preserve">
+    <value>What are you testing at the moment?</value>
+  </data>
+  <data name="Demo_Testing_Hint" xml:space="preserve">
+    <value>Optional, and the most useful thing you could tell us.</value>
+  </data>
+  <data name="Demo_Submit" xml:space="preserve">
+    <value>Request the demo</value>
+  </data>
+  <data name="Demo_Done_Title" xml:space="preserve">
+    <value>That is everything we would have asked for</value>
+  </data>
+  <data name="Demo_Done_Text" xml:space="preserve">
+    <value>Valid, and enough for us to come back to you with a time.</value>
+  </data>
+  <data name="Demo_Done_Action" xml:space="preserve">
+    <value>Read what the run actually does</value>
+  </data>
 </root>

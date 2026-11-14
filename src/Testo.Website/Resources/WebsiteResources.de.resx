@@ -1599,4 +1599,121 @@
   <data name="Access_Feedback_Legal" xml:space="preserve">
     <value>In Deutschland wird das Barrierefreiheitsstärkungsgesetz dies für einen Dienst wie unseren verlangen. Wir sind lieber früh vorbereitet als spät konform.</value>
   </data>
+  <data name="Form_Name" xml:space="preserve">
+    <value>Ihr Name</value>
+  </data>
+  <data name="Form_Email" xml:space="preserve">
+    <value>E-Mail-Adresse</value>
+  </data>
+  <data name="Form_Email_Hint" xml:space="preserve">
+    <value>Damit wir antworten können. Mehr passiert damit nicht.</value>
+  </data>
+  <data name="Form_Organisation" xml:space="preserve">
+    <value>Organisation</value>
+  </data>
+  <data name="Form_Message" xml:space="preserve">
+    <value>Ihre Nachricht</value>
+  </data>
+  <data name="Form_Error_Required" xml:space="preserve">
+    <value>Dieses Feld wird benötigt.</value>
+  </data>
+  <data name="Form_Error_Email" xml:space="preserve">
+    <value>Das sieht nicht wie eine E-Mail-Adresse aus.</value>
+  </data>
+  <data name="Form_NotDelivered_Before" xml:space="preserve">
+    <value>Dieses Formular ist noch mit nichts verbunden. Es prüft Ihre Eingaben und zeigt, was als Nächstes geschähe – und verwirft sie dann: Es wird keine Nachricht gesendet, gespeichert oder protokolliert. Bitte nutzen Sie es nicht für etwas, das eine Antwort braucht.</value>
+  </data>
+  <data name="Form_NotDelivered_After" xml:space="preserve">
+    <value>Zur Klarstellung: Es wurde tatsächlich nichts gesendet. Hinter diesem Formular steht noch kein Mailversand – und das sagen wir lieber, als Sie auf eine Antwort warten zu lassen.</value>
+  </data>
+  <data name="Form_Done_Home" xml:space="preserve">
+    <value>Zurück zur Startseite</value>
+  </data>
+  <data name="Contact_PageTitle" xml:space="preserve">
+    <value>Kontakt – {0}</value>
+  </data>
+  <data name="Contact_MetaDescription" xml:space="preserve">
+    <value>Fragen Sie uns zum Produkt, zur Sicherheit oder zur Barrierefreiheit.</value>
+  </data>
+  <data name="Contact_Title" xml:space="preserve">
+    <value>Kontakt</value>
+  </data>
+  <data name="Contact_Lead" xml:space="preserve">
+    <value>Eine Frage dazu, was dies leistet, was noch nicht – oder wie es mit Ihren Daten umgeht.</value>
+  </data>
+  <data name="Contact_Subject" xml:space="preserve">
+    <value>Worum geht es?</value>
+  </data>
+  <data name="Contact_Subject_Choose" xml:space="preserve">
+    <value>Thema wählen</value>
+  </data>
+  <data name="Contact_Subject_Product" xml:space="preserve">
+    <value>Das Produkt</value>
+  </data>
+  <data name="Contact_Subject_Security" xml:space="preserve">
+    <value>Sicherheit oder Datenschutz</value>
+  </data>
+  <data name="Contact_Subject_Accessibility" xml:space="preserve">
+    <value>Ein Problem mit der Barrierefreiheit</value>
+  </data>
+  <data name="Contact_Subject_Other" xml:space="preserve">
+    <value>Etwas anderes</value>
+  </data>
+  <data name="Contact_Submit" xml:space="preserve">
+    <value>Nachricht senden</value>
+  </data>
+  <data name="Contact_Done_Title" xml:space="preserve">
+    <value>Das wäre alles, was wir gebraucht hätten</value>
+  </data>
+  <data name="Contact_Done_Text" xml:space="preserve">
+    <value>Alle Ihre Eingaben waren gültig – an dieser Stelle wäre eine echte Nachricht auf dem Weg zu uns.</value>
+  </data>
+  <data name="Demo_PageTitle" xml:space="preserve">
+    <value>Demo anfragen – {0}</value>
+  </data>
+  <data name="Demo_MetaDescription" xml:space="preserve">
+    <value>Sehen Sie einen Testlauf gegen eine echte Anwendung – und hören Sie klar, was noch nicht gebaut ist.</value>
+  </data>
+  <data name="Demo_Title" xml:space="preserve">
+    <value>Demo anfragen</value>
+  </data>
+  <data name="Demo_Lead" xml:space="preserve">
+    <value>Eine halbe Stunde, ein echter Testlauf und eine ehrliche Auskunft, wie viel vom Rest existiert.</value>
+  </data>
+  <data name="Demo_Expect_Title" xml:space="preserve">
+    <value>Was Sie tatsächlich sehen würden</value>
+  </data>
+  <data name="Demo_Expect_Run" xml:space="preserve">
+    <value>Einen Browser, der eine Anwendung Schritt für Schritt bedient – mit dem Bildschirmfoto, das jeder Schritt hinterlässt.</value>
+  </data>
+  <data name="Demo_Expect_Evidence" xml:space="preserve">
+    <value>Einen absichtlich herbeigeführten Fehler: eine Kasse, die den falschen Betrag verlangt – und das Bild, das es beweist.</value>
+  </data>
+  <data name="Demo_Expect_Honest" xml:space="preserve">
+    <value>Eine Liste dessen, was nicht gebaut ist. Eine der sechs Phasen ist fertig – das sagen wir lieber in den ersten zehn Minuten als in den letzten.</value>
+  </data>
+  <data name="Demo_Role" xml:space="preserve">
+    <value>Was ist Ihre Rolle?</value>
+  </data>
+  <data name="Demo_Role_Choose" xml:space="preserve">
+    <value>Rolle wählen</value>
+  </data>
+  <data name="Demo_Testing" xml:space="preserve">
+    <value>Was testen Sie derzeit?</value>
+  </data>
+  <data name="Demo_Testing_Hint" xml:space="preserve">
+    <value>Optional – und das Nützlichste, was Sie uns sagen können.</value>
+  </data>
+  <data name="Demo_Submit" xml:space="preserve">
+    <value>Demo anfragen</value>
+  </data>
+  <data name="Demo_Done_Title" xml:space="preserve">
+    <value>Das wäre alles, was wir gefragt hätten</value>
+  </data>
+  <data name="Demo_Done_Text" xml:space="preserve">
+    <value>Gültig – und genug, um Ihnen einen Termin vorzuschlagen.</value>
+  </data>
+  <data name="Demo_Done_Action" xml:space="preserve">
+    <value>Lesen, was der Lauf tatsächlich tut</value>
+  </data>
 </root>

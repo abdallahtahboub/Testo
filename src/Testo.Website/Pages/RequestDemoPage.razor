@@ -1,0 +1,129 @@
+@page "/en/request-demo"
+@page "/de/request-demo"
+@attribute [HasForm]
+@inject IStringLocalizer<WebsiteResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    Asking for a demonstration.
+
+    Like the contact form, this is the interface and the validation only: nothing is delivered. It
+    says so before and after, and the page is honest about what a demonstration would actually
+    show, which today is one stage of six.
+*@
+<PageTitle>@L["Demo_PageTitle", Brand.Value.ProductName]</PageTitle>
+<HeadContent>
+    <meta name="description" content="@L["Demo_MetaDescription"]" />
+</HeadContent>
+
+<PageHero Overline="@L["Nav_Company"]" Title="@L["Demo_Title"]" Lead="@L["Demo_Lead"]" Narrow="true" />
+
+<PageSection Narrow="true">
+    @if (_submitted)
+    {
+        <div class="form-done" role="status" data-testid="demo-done">
+            <h2 class="form-done__title">@L["Demo_Done_Title"]</h2>
+            <p>@L["Demo_Done_Text"]</p>
+            <p class="form-done__warning">@L["Form_NotDelivered_After"]</p>
+            <TButton Href="@LocalizedPath.For(SupportedCultures.Current, PublicPages.ProductCapabilityE2EWeb)">
+                @L["Demo_Done_Action"]
+            </TButton>
+        </div>
+    }
+    else
+    {
+        <div class="demo-expect">
+            <h2 class="demo-expect__title">@L["Demo_Expect_Title"]</h2>
+            <ul>
+                <li>@L["Demo_Expect_Run"]</li>
+                <li>@L["Demo_Expect_Evidence"]</li>
+                <li>@L["Demo_Expect_Honest"]</li>
+            </ul>
+        </div>
+
+        <p class="form-notice" data-testid="demo-notice">@L["Form_NotDelivered_Before"]</p>
+
+        <EditForm Model="Form" Context="form" FormName="request-demo" OnValidSubmit="Submit" method="post" class="site-form">
+            <TField Label="@L["Form_Name"]" Required Error="@_nameError">
+                <TInput Context="context" Value="@Form.Name" Required name="Input.Name" autocomplete="name" />
+            </TField>
+
+            <TField Label="@L["Form_Email"]" Required Error="@_emailError" Hint="@L["Form_Email_Hint"]">
+                <TInput Context="context" Type="email" Value="@Form.Email" Required name="Input.Email" autocomplete="email" />
+            </TField>
+
+            <TField Label="@L["Form_Organisation"]" Required Error="@_organisationError">
+                <TInput Context="context" Value="@Form.Organisation" Required name="Input.Organisation" autocomplete="organization" />
+            </TField>
+
+            <TField Label="@L["Demo_Role"]">
+                <TSelect Context="context" Value="@Form.Role" name="Input.Role" Placeholder="@L["Demo_Role_Choose"]">
+                    <option value="qa">@L["Nav_QaLead"]</option>
+                    <option value="developer">@L["Nav_Developer"]</option>
+                    <option value="manager">@L["Nav_EngineeringManager"]</option>
+                    <option value="other">@L["Contact_Subject_Other"]</option>
+                </TSelect>
+            </TField>
+
+            <TField Label="@L["Demo_Testing"]" Hint="@L["Demo_Testing_Hint"]">
+                <TTextArea Context="context" Value="@Form.Testing" Rows="5" name="Input.Testing" />
+            </TField>
+
+            <TButton Type="submit" Variant="ButtonVariant.Primary">@L["Demo_Submit"]</TButton>
+        </EditForm>
+    }
+</PageSection>
+
+@code {
+    [SupplyParameterFromForm]
+    private DemoInput? Input { get; set; }
+
+    private DemoInput Form => Input ??= new();
+
+    private bool _submitted;
+    private string? _nameError;
+    private string? _emailError;
+    private string? _organisationError;
+
+    private void Submit()
+    {
+        _nameError = Required(Form.Name);
+        _emailError = Email(Form.Email);
+        _organisationError = Required(Form.Organisation);
+
+        if (_nameError is null && _emailError is null && _organisationError is null)
+        {
+            _submitted = true;
+        }
+    }
+
+    private string? Required(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? L["Form_Error_Required"].Value : null;
+
+    private string? Email(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return L["Form_Error_Required"].Value;
+        }
+
+        var at = value.IndexOf('@', StringComparison.Ordinal);
+
+        return at > 0 && value.IndexOf('.', at) > at + 1 && !value.EndsWith('.')
+            ? null
+            : L["Form_Error_Email"].Value;
+    }
+
+    private sealed class DemoInput
+    {
+        public string Name { get; set; } = "";
+
+        public string Email { get; set; } = "";
+
+        public string Organisation { get; set; } = "";
+
+        public string Role { get; set; } = "";
+
+        public string Testing { get; set; } = "";
+    }
+}

@@ -1,0 +1,133 @@
+@page "/en/contact"
+@page "/de/contact"
+@attribute [HasForm]
+@inject IStringLocalizer<WebsiteResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    The contact form.
+
+    It validates, it reports errors per field, and it goes nowhere: there is no mail service behind
+    it. The page says that twice — before you type and after you submit — because a form that
+    silently discards a message is worse than no form at all. Somebody with a real question would
+    wait for an answer that is never coming.
+
+    Static SSR with a plain form post, which is what a public page can do without the Blazor script
+    (ADR-0003). [HasForm] gets it the antiforgery token it would otherwise lack (ADR-0009).
+*@
+<PageTitle>@L["Contact_PageTitle", Brand.Value.ProductName]</PageTitle>
+<HeadContent>
+    <meta name="description" content="@L["Contact_MetaDescription"]" />
+</HeadContent>
+
+<PageHero Overline="@L["Nav_Company"]" Title="@L["Contact_Title"]" Lead="@L["Contact_Lead"]" Narrow="true" />
+
+<PageSection Narrow="true">
+    @if (_submitted)
+    {
+        <div class="form-done" role="status" data-testid="contact-done">
+            <h2 class="form-done__title">@L["Contact_Done_Title"]</h2>
+            <p>@L["Contact_Done_Text"]</p>
+            <p class="form-done__warning">@L["Form_NotDelivered_After"]</p>
+            <TButton Href="@LocalizedPath.For(SupportedCultures.Current, PublicPages.Home)">@L["Form_Done_Home"]</TButton>
+        </div>
+    }
+    else
+    {
+        <p class="form-notice" data-testid="contact-notice">@L["Form_NotDelivered_Before"]</p>
+
+        <EditForm Model="Form" Context="form" FormName="contact" OnValidSubmit="Submit" method="post" class="site-form">
+            <TField Label="@L["Form_Name"]" Required Error="@_nameError">
+                <TInput Context="context" Value="@Form.Name" Required name="Input.Name" autocomplete="name" />
+            </TField>
+
+            <TField Label="@L["Form_Email"]" Required Error="@_emailError" Hint="@L["Form_Email_Hint"]">
+                <TInput Context="context" Type="email" Value="@Form.Email" Required name="Input.Email" autocomplete="email" />
+            </TField>
+
+            <TField Label="@L["Form_Organisation"]">
+                <TInput Context="context" Value="@Form.Organisation" name="Input.Organisation" autocomplete="organization" />
+            </TField>
+
+            <TField Label="@L["Contact_Subject"]" Required Error="@_subjectError">
+                <TSelect Context="context" Value="@Form.Subject" Required name="Input.Subject" Placeholder="@L["Contact_Subject_Choose"]">
+                    <option value="product">@L["Contact_Subject_Product"]</option>
+                    <option value="security">@L["Contact_Subject_Security"]</option>
+                    <option value="accessibility">@L["Contact_Subject_Accessibility"]</option>
+                    <option value="other">@L["Contact_Subject_Other"]</option>
+                </TSelect>
+            </TField>
+
+            <TField Label="@L["Form_Message"]" Required Error="@_messageError">
+                <TTextArea Context="context" Value="@Form.Message" Required Rows="6" name="Input.Message" />
+            </TField>
+
+            <TButton Type="submit" Variant="ButtonVariant.Primary">@L["Contact_Submit"]</TButton>
+        </EditForm>
+    }
+</PageSection>
+
+@code {
+    [SupplyParameterFromForm]
+    private ContactInput? Input { get; set; }
+
+    /// <summary>The posted values, or a fresh set the first time the page is shown.</summary>
+    private ContactInput Form => Input ??= new();
+
+    private bool _submitted;
+    private string? _nameError;
+    private string? _emailError;
+    private string? _subjectError;
+    private string? _messageError;
+
+    /// <summary>
+    /// Checks the fields and shows the success state. Nothing is sent, stored or logged — there is
+    /// no service behind this, which is why the page says so rather than implying otherwise.
+    /// </summary>
+    private void Submit()
+    {
+        _nameError = Required(Form.Name);
+        _emailError = Email(Form.Email);
+        _subjectError = Required(Form.Subject);
+        _messageError = Required(Form.Message);
+
+        if (_nameError is null && _emailError is null && _subjectError is null && _messageError is null)
+        {
+            _submitted = true;
+        }
+    }
+
+    private string? Required(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? L["Form_Error_Required"].Value : null;
+
+    /// <summary>
+    /// Deliberately a shape check rather than a clever pattern: an address is only really validated
+    /// by sending to it, and a strict expression rejects valid addresses people actually have.
+    /// </summary>
+    private string? Email(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return L["Form_Error_Required"].Value;
+        }
+
+        var at = value.IndexOf('@', StringComparison.Ordinal);
+
+        return at > 0 && value.IndexOf('.', at) > at + 1 && !value.EndsWith('.')
+            ? null
+            : L["Form_Error_Email"].Value;
+    }
+
+    private sealed class ContactInput
+    {
+        public string Name { get; set; } = "";
+
+        public string Email { get; set; } = "";
+
+        public string Organisation { get; set; } = "";
+
+        public string Subject { get; set; } = "";
+
+        public string Message { get; set; } = "";
+    }
+}

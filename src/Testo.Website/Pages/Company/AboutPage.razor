@@ -1,0 +1,44 @@
+@page "/en/about"
+@page "/de/about"
+@inject IStringLocalizer<WebsiteResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    Who we are.
+
+    The team section is the one part that is a placeholder, and it is marked rather than filled with
+    stock photographs of people who do not work here.
+*@
+<PageTitle>@L["About_PageTitle", Brand.Value.ProductName]</PageTitle>
+<HeadContent>
+    <meta name="description" content="@L["About_MetaDescription"]" />
+</HeadContent>
+
+<PageHero Overline="@L["Nav_Company"]" Title="@L["About_Title"]" Lead="@L["About_Lead"]" Narrow="true" />
+
+<PageSection Narrow="true" Title="@L["About_Why_Title"]">
+    <p class="t-lead">@L["About_Why_Lead"]</p>
+    <p>@L["About_Why_Text1"]</p>
+    <p>@L["About_Why_Text2"]</p>
+</PageSection>
+
+<PageSection Title="@L["About_Values_Title"]" Intro="@L["About_Values_Intro"]" Tone="PageSection.SectionTone.Subtle">
+    <CardDeck Columns="2" Cards="@Values" />
+</PageSection>
+
+<PageSection Narrow="true" Title="@L["About_Team_Title"]">
+    <p>@L["About_Team_Text"]</p>
+    <p>
+        <a href="@LocalizedPath.For(SupportedCultures.Current, PublicPages.Contact)">@L["About_Team_Link"]</a>
+    </p>
+</PageSection>
+
+@code {
+    private IReadOnlyList<CardDeck.Card> Values =>
+    [
+        new(L["About_Value_Honest_Title"], L["About_Value_Honest_Text"]),
+        new(L["About_Value_Evidence_Title"], L["About_Value_Evidence_Text"]),
+        new(L["About_Value_Bounded_Title"], L["About_Value_Bounded_Text"]),
+        new(L["About_Value_Access_Title"], L["About_Value_Access_Text"]),
+    ];
+}

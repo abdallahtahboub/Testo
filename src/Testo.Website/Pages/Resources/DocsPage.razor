@@ -1,0 +1,10 @@
+@page "/en/resources/docs"
+@page "/de/resources/docs"
+@inject IStringLocalizer<WebsiteResources> L
+
+@* An empty shelf that says it is empty. *@
+<EmptyListing Title="@L["Nav_Docs"]"
+              Lead="@L["Listing_Docs_Lead"]"
+              Placeholder="@L["Listing_Docs_Placeholder"]"
+              EmptyTitle="@L["Listing_Docs_Empty_Title"]"
+              EmptyText="@L["Listing_Docs_Empty_Text"]" />

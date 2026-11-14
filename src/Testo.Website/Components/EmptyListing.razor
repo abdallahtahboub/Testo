@@ -1,0 +1,49 @@
+@inject IStringLocalizer<WebsiteResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    A listing page with nothing to list.
+
+    Three of these: the blog, the documentation and the case studies. Each one is an empty shelf,
+    and an empty shelf should say it is empty rather than show three invented articles — a fake
+    case study is the single most damaging placeholder a B2B site can carry.
+*@
+<PageTitle>@Title – @Brand.Value.ProductName</PageTitle>
+<HeadContent>
+    <meta name="robots" content="noindex" />
+</HeadContent>
+
+<PlaceholderBanner Text="@Placeholder" />
+
+<PageHero Overline="@L["Nav_Resources"]" Title="@Title" Lead="@Lead" Narrow="true" />
+
+<PageSection Narrow="true">
+    <TEmptyState Title="@EmptyTitle" Icon="IconName.Document">
+        <ChildContent>@EmptyText</ChildContent>
+        <Action>
+            <TButton Href="@LocalizedPath.For(SupportedCultures.Current, PublicPages.Contact)">@L["Listing_Action"]</TButton>
+        </Action>
+    </TEmptyState>
+</PageSection>
+
+@code {
+    /// <summary>The page's heading.</summary>
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    /// <summary>What would be here.</summary>
+    [Parameter, EditorRequired]
+    public string Lead { get; set; } = "";
+
+    /// <summary>What the banner says is missing.</summary>
+    [Parameter, EditorRequired]
+    public string Placeholder { get; set; } = "";
+
+    /// <summary>The empty state's heading.</summary>
+    [Parameter, EditorRequired]
+    public string EmptyTitle { get; set; } = "";
+
+    /// <summary>The empty state's explanation.</summary>
+    [Parameter, EditorRequired]
+    public string EmptyText { get; set; } = "";
+}

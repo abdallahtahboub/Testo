@@ -1,0 +1,21 @@
+@page "/en/terms"
+@page "/de/terms"
+@inject IStringLocalizer<WebsiteResources> L
+@inject IOptions<BrandOptions> Brand
+
+@* Nothing here. Writing terms of use without a lawyer would be pretending to do law. *@
+<PageTitle>@L["Terms_PageTitle", Brand.Value.ProductName]</PageTitle>
+<HeadContent>
+    <meta name="robots" content="noindex" />
+</HeadContent>
+
+<PlaceholderBanner Text="@L["Terms_Placeholder"]" />
+
+<PageHero Title="@L["Terms_Title"]" Lead="@L["Terms_Lead"]" Narrow="true" />
+
+<PageSection Narrow="true">
+    <p>@L["Terms_Text"]</p>
+    <p>
+        <a href="@LocalizedPath.For(SupportedCultures.Current, PublicPages.Contact)">@L["Terms_Contact"]</a>
+    </p>
+</PageSection>

@@ -1,0 +1,53 @@
+@page "/en/imprint"
+@page "/de/imprint"
+@inject IStringLocalizer<WebsiteResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    The Impressum.
+
+    German law (§ 5 DDG, formerly § 5 TMG) requires a provider identification on a commercial
+    website, and getting it wrong is a real liability. We cannot write it: it needs the legal entity,
+    its address, its register entry and a responsible person, none of which this repository knows.
+
+    So the page lists exactly what the law requires, marks every line as missing, and says who has
+    to supply it. That is more useful than an empty page and more honest than invented details.
+*@
+<PageTitle>@L["Imprint_PageTitle", Brand.Value.ProductName]</PageTitle>
+<HeadContent>
+    <meta name="robots" content="noindex" />
+</HeadContent>
+
+<PlaceholderBanner Text="@L["Imprint_Placeholder"]" />
+
+<PageHero Title="@L["Imprint_Title"]" Lead="@L["Imprint_Lead"]" Narrow="true" />
+
+<PageSection Narrow="true">
+    <dl class="legal-fields">
+        @foreach (var field in Required)
+        {
+            <dt>@field.Label</dt>
+            <dd>
+                <span class="legal-fields__missing">@L["Legal_Missing"]</span>
+                <span class="legal-fields__note">@field.Note</span>
+            </dd>
+        }
+    </dl>
+
+    <p>@L["Imprint_Who"]</p>
+</PageSection>
+
+@code {
+    /// <summary>What § 5 DDG asks for, line by line.</summary>
+    private IReadOnlyList<(string Label, string Note)> Required =>
+    [
+        (L["Imprint_Field_Entity"], L["Imprint_Field_Entity_Note"]),
+        (L["Imprint_Field_Address"], L["Imprint_Field_Address_Note"]),
+        (L["Imprint_Field_Contact"], L["Imprint_Field_Contact_Note"]),
+        (L["Imprint_Field_Represented"], L["Imprint_Field_Represented_Note"]),
+        (L["Imprint_Field_Register"], L["Imprint_Field_Register_Note"]),
+        (L["Imprint_Field_Vat"], L["Imprint_Field_Vat_Note"]),
+        (L["Imprint_Field_Responsible"], L["Imprint_Field_Responsible_Note"]),
+        (L["Imprint_Field_Dispute"], L["Imprint_Field_Dispute_Note"]),
+    ];
+}

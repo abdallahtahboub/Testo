@@ -1,0 +1,23 @@
+@page "/en/careers"
+@page "/de/careers"
+@inject IStringLocalizer<WebsiteResources> L
+@inject IOptions<BrandOptions> Brand
+
+@* No roles are open, and inventing some would waste a stranger's afternoon. *@
+<PageTitle>@L["Careers_PageTitle", Brand.Value.ProductName]</PageTitle>
+<HeadContent>
+    <meta name="robots" content="noindex" />
+</HeadContent>
+
+<PlaceholderBanner Text="@L["Careers_Placeholder"]" />
+
+<PageHero Overline="@L["Nav_Company"]" Title="@L["Careers_Title"]" Lead="@L["Careers_Lead"]" Narrow="true" />
+
+<PageSection Narrow="true">
+    <TEmptyState Title="@L["Careers_Empty_Title"]" Icon="IconName.Person">
+        <ChildContent>@L["Careers_Empty_Text"]</ChildContent>
+        <Action>
+            <TButton Href="@LocalizedPath.For(SupportedCultures.Current, PublicPages.Contact)">@L["Careers_Empty_Action"]</TButton>
+        </Action>
+    </TEmptyState>
+</PageSection>

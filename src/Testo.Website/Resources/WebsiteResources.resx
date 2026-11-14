@@ -1086,4 +1086,517 @@
   <data name="Industry_PublicSector_Lead" xml:space="preserve">
     <value>Accessibility is a legal requirement, not a preference, and the user cannot go elsewhere.</value>
   </data>
+  <data name="Pricing_PageTitle" xml:space="preserve">
+    <value>Pricing – {0}</value>
+  </data>
+  <data name="Pricing_MetaDescription" xml:space="preserve">
+    <value>What the plans would include. Prices are not set yet, and this page says so rather than inventing one.</value>
+  </data>
+  <data name="Pricing_Placeholder" xml:space="preserve">
+    <value>No price on this page is real. The plans describe what each one would include; the numbers are not decided, so none is shown. A price you could budget against is the one placeholder that costs a visitor something.</value>
+  </data>
+  <data name="Pricing_Title" xml:space="preserve">
+    <value>Pricing</value>
+  </data>
+  <data name="Pricing_Lead" xml:space="preserve">
+    <value>Three plans, shaped by who needs what. The prices are not set, and we would rather leave them blank than put a number here that moves before you can act on it.</value>
+  </data>
+  <data name="Pricing_NoPrice" xml:space="preserve">
+    <value>Not set yet</value>
+  </data>
+  <data name="Pricing_NoPrice_Note" xml:space="preserve">
+    <value>Ask us and we will tell you what we are thinking.</value>
+  </data>
+  <data name="Pricing_Action" xml:space="preserve">
+    <value>Talk to us</value>
+  </data>
+  <data name="Pricing_Starter_Name" xml:space="preserve">
+    <value>Starter</value>
+  </data>
+  <data name="Pricing_Starter_Who" xml:space="preserve">
+    <value>One team finding out whether this helps them.</value>
+  </data>
+  <data name="Pricing_Starter_Line1" xml:space="preserve">
+    <value>Web end-to-end runs against one application</value>
+  </data>
+  <data name="Pricing_Starter_Line2" xml:space="preserve">
+    <value>Evidence kept per step</value>
+  </data>
+  <data name="Pricing_Starter_Line3" xml:space="preserve">
+    <value>Up to five people</value>
+  </data>
+  <data name="Pricing_Team_Name" xml:space="preserve">
+    <value>Team</value>
+  </data>
+  <data name="Pricing_Team_Who" xml:space="preserve">
+    <value>A QA function that has to answer for a release.</value>
+  </data>
+  <data name="Pricing_Team_Line1" xml:space="preserve">
+    <value>Everything in Starter</value>
+  </data>
+  <data name="Pricing_Team_Line2" xml:space="preserve">
+    <value>The whole testing journey, as each stage is built</value>
+  </data>
+  <data name="Pricing_Team_Line3" xml:space="preserve">
+    <value>Roles, audit trail and unlimited people</value>
+  </data>
+  <data name="Pricing_Enterprise_Name" xml:space="preserve">
+    <value>Enterprise</value>
+  </data>
+  <data name="Pricing_Enterprise_Who" xml:space="preserve">
+    <value>An organisation with a security questionnaire and a procurement process.</value>
+  </data>
+  <data name="Pricing_Enterprise_Line1" xml:space="preserve">
+    <value>Everything in Team</value>
+  </data>
+  <data name="Pricing_Enterprise_Line2" xml:space="preserve">
+    <value>Single sign-on and integrations</value>
+  </data>
+  <data name="Pricing_Enterprise_Line3" xml:space="preserve">
+    <value>A contract, and somebody to answer the questionnaire</value>
+  </data>
+  <data name="Pricing_Compare_Title" xml:space="preserve">
+    <value>What each plan would include</value>
+  </data>
+  <data name="Pricing_Compare_Intro" xml:space="preserve">
+    <value>Rows marked “planned” do not exist yet, in any plan. The unmarked rows are built and in use today.</value>
+  </data>
+  <data name="Pricing_Compare_Feature" xml:space="preserve">
+    <value>Feature</value>
+  </data>
+  <data name="Pricing_Compare_Planned" xml:space="preserve">
+    <value>planned</value>
+  </data>
+  <data name="Pricing_Yes" xml:space="preserve">
+    <value>Included</value>
+  </data>
+  <data name="Pricing_No" xml:space="preserve">
+    <value>Not included</value>
+  </data>
+  <data name="Pricing_Row_Execution" xml:space="preserve">
+    <value>Web end-to-end test runs</value>
+  </data>
+  <data name="Pricing_Row_Evidence" xml:space="preserve">
+    <value>Screenshot and timings per step</value>
+  </data>
+  <data name="Pricing_Row_Roles" xml:space="preserve">
+    <value>Organisations, roles and invitations</value>
+  </data>
+  <data name="Pricing_Row_Audit" xml:space="preserve">
+    <value>Audit trail</value>
+  </data>
+  <data name="Pricing_Row_Planner" xml:space="preserve">
+    <value>Scenarios written in plain language</value>
+  </data>
+  <data name="Pricing_Row_Journey" xml:space="preserve">
+    <value>Plans, requirements, cases, defects, reports</value>
+  </data>
+  <data name="Pricing_Row_Integrations" xml:space="preserve">
+    <value>Git, issue tracker and CI integrations</value>
+  </data>
+  <data name="Pricing_Row_Sso" xml:space="preserve">
+    <value>Single sign-on</value>
+  </data>
+  <data name="Pricing_Faq_Title" xml:space="preserve">
+    <value>Questions you would reasonably ask</value>
+  </data>
+  <data name="Pricing_Faq_Why_Q" xml:space="preserve">
+    <value>Why is there no price?</value>
+  </data>
+  <data name="Pricing_Faq_Why_A" xml:space="preserve">
+    <value>Because we do not know it yet, and a number here would be a guess you might budget against. Most of the product is not built; pricing it would be pricing an intention.</value>
+  </data>
+  <data name="Pricing_Faq_When_Q" xml:space="preserve">
+    <value>When will there be one?</value>
+  </data>
+  <data name="Pricing_Faq_When_A" xml:space="preserve">
+    <value>When enough of the journey is built that a plan is worth buying rather than worth watching. We would rather tell you that date once we believe it.</value>
+  </data>
+  <data name="Pricing_Faq_Today_Q" xml:space="preserve">
+    <value>What could I actually use today?</value>
+  </data>
+  <data name="Pricing_Faq_Today_A" xml:space="preserve">
+    <value>Test execution: a browser driven against a web application, with a screenshot and timings for every step, and accounts and roles around it. Nothing else in the table is running.</value>
+  </data>
+  <data name="Pricing_Faq_Free_Q" xml:space="preserve">
+    <value>Is there a free plan?</value>
+  </data>
+  <data name="Pricing_Faq_Free_A" xml:space="preserve">
+    <value>Not decided. If you want to try it while it is this early, that is a conversation rather than a sign-up form, and it will probably teach us more than it teaches you.</value>
+  </data>
+  <data name="Resources_PageTitle" xml:space="preserve">
+    <value>Resources – {0}</value>
+  </data>
+  <data name="Resources_MetaDescription" xml:space="preserve">
+    <value>Where the writing will be. Nothing is published yet.</value>
+  </data>
+  <data name="Resources_Title" xml:space="preserve">
+    <value>Resources</value>
+  </data>
+  <data name="Resources_Lead" xml:space="preserve">
+    <value>The blog, the documentation and the case studies have a place here and nothing in them yet.</value>
+  </data>
+  <data name="Resources_Blog_Text" xml:space="preserve">
+    <value>Notes on testing, and on the decisions behind this product.</value>
+  </data>
+  <data name="Resources_Docs_Text" xml:space="preserve">
+    <value>How each part works, for somebody using it rather than buying it.</value>
+  </data>
+  <data name="Resources_CaseStudies_Text" xml:space="preserve">
+    <value>What teams did with it. There are none, and we will not invent any.</value>
+  </data>
+  <data name="Resources_Open_Title" xml:space="preserve">
+    <value>What does exist</value>
+  </data>
+  <data name="Resources_Open_Text" xml:space="preserve">
+    <value>The decisions behind this product are written down as they are made — an architecture document, a threat model, a security register, a numbered decision record for anything that would be expensive to change, and a benchmark report that includes the number we have not measured yet. They live with the source code rather than on this site. If that is the kind of material you want, ask and we will send it.</value>
+  </data>
+  <data name="Listing_Action" xml:space="preserve">
+    <value>Ask us instead</value>
+  </data>
+  <data name="Listing_Blog_Lead" xml:space="preserve">
+    <value>Notes on testing, and on the decisions behind this product.</value>
+  </data>
+  <data name="Listing_Blog_Placeholder" xml:space="preserve">
+    <value>The blog has no articles. This page is the shelf, not the books.</value>
+  </data>
+  <data name="Listing_Blog_Empty_Title" xml:space="preserve">
+    <value>Nothing published yet</value>
+  </data>
+  <data name="Listing_Blog_Empty_Text" xml:space="preserve">
+    <value>When there is something worth reading we will put it here. Until then, the architecture documents and decision records that come with the source are the real writing.</value>
+  </data>
+  <data name="Listing_Docs_Lead" xml:space="preserve">
+    <value>How each part works, for somebody using it rather than buying it.</value>
+  </data>
+  <data name="Listing_Docs_Placeholder" xml:space="preserve">
+    <value>The documentation is not written for this site yet.</value>
+  </data>
+  <data name="Listing_Docs_Empty_Title" xml:space="preserve">
+    <value>No documentation here yet</value>
+  </data>
+  <data name="Listing_Docs_Empty_Text" xml:space="preserve">
+    <value>There is one part of the product worth documenting so far, and its page under Product describes it in more detail than a manual would.</value>
+  </data>
+  <data name="Listing_Cases_Lead" xml:space="preserve">
+    <value>What teams did with it, in their words.</value>
+  </data>
+  <data name="Listing_Cases_Placeholder" xml:space="preserve">
+    <value>There are no case studies, and we will not write any until a team has actually used this and agreed to be quoted.</value>
+  </data>
+  <data name="Listing_Cases_Empty_Title" xml:space="preserve">
+    <value>No case studies</value>
+  </data>
+  <data name="Listing_Cases_Empty_Text" xml:space="preserve">
+    <value>A case study about a customer who does not exist is the most damaging thing a page like this can carry, so this one stays empty until it is earned.</value>
+  </data>
+  <data name="About_PageTitle" xml:space="preserve">
+    <value>About us – {0}</value>
+  </data>
+  <data name="About_MetaDescription" xml:space="preserve">
+    <value>Why this product exists, what it refuses to do, and who is behind it.</value>
+  </data>
+  <data name="About_Title" xml:space="preserve">
+    <value>About us</value>
+  </data>
+  <data name="About_Lead" xml:space="preserve">
+    <value>A small effort to build a testing platform that reports what it found rather than what its buyer hoped for.</value>
+  </data>
+  <data name="About_Why_Title" xml:space="preserve">
+    <value>Why this exists</value>
+  </data>
+  <data name="About_Why_Lead" xml:space="preserve">
+    <value>Testing tools are good at counting tests and bad at saying whether the software works.</value>
+  </data>
+  <data name="About_Why_Text1" xml:space="preserve">
+    <value>The number most tools put on the front page is a pass rate, and a pass rate mostly measures how many tests exist. A suite of four hundred tests that all check the same happy path passes beautifully, and tells a release manager nothing. The questions that matter are harder to display: what was not tested, which failures are the application and which are the test environment, and whether anything that passed should not have.</value>
+  </data>
+  <data name="About_Why_Text2" xml:space="preserve">
+    <value>Adding a model to a tool like that makes the problem worse rather than better, because a model will cheerfully produce a test that passes. So this product is being built in the opposite order: the evidence and the boundaries first, the model afterwards, and no claim about what the model can do until the number for how often it wrongly says “passed” has been measured and published.</value>
+  </data>
+  <data name="About_Values_Title" xml:space="preserve">
+    <value>What we have decided in advance</value>
+  </data>
+  <data name="About_Values_Intro" xml:space="preserve">
+    <value>These are written into the repository as rules with tests behind them, not as a poster.</value>
+  </data>
+  <data name="About_Value_Honest_Title" xml:space="preserve">
+    <value>An unfinished thing is labeled unfinished</value>
+  </data>
+  <data name="About_Value_Honest_Text" xml:space="preserve">
+    <value>Every page of this site that describes something we have not built says so, including the ones where that is commercially inconvenient.</value>
+  </data>
+  <data name="About_Value_Evidence_Title" xml:space="preserve">
+    <value>A verdict comes with its evidence</value>
+  </data>
+  <data name="About_Value_Evidence_Text" xml:space="preserve">
+    <value>A run that says “failed” and shows nothing is a run that costs somebody an afternoon. Every step keeps its screenshot and its timings.</value>
+  </data>
+  <data name="About_Value_Bounded_Title" xml:space="preserve">
+    <value>A model plans; it never acts freely</value>
+  </data>
+  <data name="About_Value_Bounded_Text" xml:space="preserve">
+    <value>Model output is a list of actions from a fixed vocabulary, checked before anything runs. It is never executed as code — that line does not move.</value>
+  </data>
+  <data name="About_Value_Access_Title" xml:space="preserve">
+    <value>Accessibility is tested, not intended</value>
+  </data>
+  <data name="About_Value_Access_Text" xml:space="preserve">
+    <value>Every page here is scanned on every change and fails the build if it regresses. A QA product that is inaccessible is an argument against itself.</value>
+  </data>
+  <data name="About_Team_Title" xml:space="preserve">
+    <value>Who is behind it</value>
+  </data>
+  <data name="About_Team_Text" xml:space="preserve">
+    <value>This section is not written yet, and there are no photographs of people who do not work here. When there is a team to introduce, it will be introduced.</value>
+  </data>
+  <data name="About_Team_Link" xml:space="preserve">
+    <value>Ask us anything directly</value>
+  </data>
+  <data name="Careers_PageTitle" xml:space="preserve">
+    <value>Careers – {0}</value>
+  </data>
+  <data name="Careers_Placeholder" xml:space="preserve">
+    <value>There are no open roles, and this page exists so the link in the footer leads somewhere honest.</value>
+  </data>
+  <data name="Careers_Title" xml:space="preserve">
+    <value>Careers</value>
+  </data>
+  <data name="Careers_Lead" xml:space="preserve">
+    <value>Nothing is open. Listing invented roles would waste a stranger’s afternoon.</value>
+  </data>
+  <data name="Careers_Empty_Title" xml:space="preserve">
+    <value>No open roles</value>
+  </data>
+  <data name="Careers_Empty_Text" xml:space="preserve">
+    <value>If testing tools are the kind of problem you think about anyway, write to us and say what you would build differently. That is more interesting to us than a CV against a job description we have not written.</value>
+  </data>
+  <data name="Careers_Empty_Action" xml:space="preserve">
+    <value>Write to us</value>
+  </data>
+  <data name="Legal_Missing" xml:space="preserve">
+    <value>To be supplied</value>
+  </data>
+  <data name="Imprint_PageTitle" xml:space="preserve">
+    <value>Imprint – {0}</value>
+  </data>
+  <data name="Imprint_Placeholder" xml:space="preserve">
+    <value>This Impressum is incomplete and therefore not yet legally compliant. German law requires every item below before this site may be operated commercially. Each one needs the real legal entity, which this page cannot invent.</value>
+  </data>
+  <data name="Imprint_Title" xml:space="preserve">
+    <value>Imprint</value>
+  </data>
+  <data name="Imprint_Lead" xml:space="preserve">
+    <value>Provider identification under § 5 DDG. The required items are listed so that nothing is forgotten when they are filled in.</value>
+  </data>
+  <data name="Imprint_Field_Entity" xml:space="preserve">
+    <value>Name and legal form</value>
+  </data>
+  <data name="Imprint_Field_Entity_Note" xml:space="preserve">
+    <value>The company as registered, including its legal form.</value>
+  </data>
+  <data name="Imprint_Field_Address" xml:space="preserve">
+    <value>Postal address</value>
+  </data>
+  <data name="Imprint_Field_Address_Note" xml:space="preserve">
+    <value>A street address. A post-office box is not sufficient.</value>
+  </data>
+  <data name="Imprint_Field_Contact" xml:space="preserve">
+    <value>Contact</value>
+  </data>
+  <data name="Imprint_Field_Contact_Note" xml:space="preserve">
+    <value>An email address and a telephone number, or an equivalent means of rapid electronic contact.</value>
+  </data>
+  <data name="Imprint_Field_Represented" xml:space="preserve">
+    <value>Represented by</value>
+  </data>
+  <data name="Imprint_Field_Represented_Note" xml:space="preserve">
+    <value>The managing director or other authorised representative.</value>
+  </data>
+  <data name="Imprint_Field_Register" xml:space="preserve">
+    <value>Register and number</value>
+  </data>
+  <data name="Imprint_Field_Register_Note" xml:space="preserve">
+    <value>The commercial register, the court holding it, and the registration number.</value>
+  </data>
+  <data name="Imprint_Field_Vat" xml:space="preserve">
+    <value>VAT identification number</value>
+  </data>
+  <data name="Imprint_Field_Vat_Note" xml:space="preserve">
+    <value>Under § 27a of the German VAT Act, where one has been issued.</value>
+  </data>
+  <data name="Imprint_Field_Responsible" xml:space="preserve">
+    <value>Responsible for content</value>
+  </data>
+  <data name="Imprint_Field_Responsible_Note" xml:space="preserve">
+    <value>A named person with an address, for editorial content.</value>
+  </data>
+  <data name="Imprint_Field_Dispute" xml:space="preserve">
+    <value>Consumer dispute resolution</value>
+  </data>
+  <data name="Imprint_Field_Dispute_Note" xml:space="preserve">
+    <value>Whether we take part in a dispute-resolution scheme, which has to be stated either way.</value>
+  </data>
+  <data name="Imprint_Who" xml:space="preserve">
+    <value>These are details only the operating company can supply, and the text should be checked by a lawyer before this site goes live. It is not something a developer should write.</value>
+  </data>
+  <data name="Privacy_PageTitle" xml:space="preserve">
+    <value>Privacy – {0}</value>
+  </data>
+  <data name="Privacy_Placeholder" xml:space="preserve">
+    <value>This is not a complete privacy notice and must not be relied on as one. What it does contain is accurate: the facts below are taken from what the software actually does. What is missing is listed at the bottom, and a lawyer has to write that part.</value>
+  </data>
+  <data name="Privacy_Title" xml:space="preserve">
+    <value>Privacy</value>
+  </data>
+  <data name="Privacy_Lead" xml:space="preserve">
+    <value>What this software does with data, stated from the code rather than from a template.</value>
+  </data>
+  <data name="Privacy_Known_Title" xml:space="preserve">
+    <value>What we can state accurately today</value>
+  </data>
+  <data name="Privacy_Known_Intro" xml:space="preserve">
+    <value>These facts are verifiable from the source code and are tested.</value>
+  </data>
+  <data name="Privacy_Cookies_Title" xml:space="preserve">
+    <value>Cookies</value>
+  </data>
+  <data name="Privacy_Cookie_Culture" xml:space="preserve">
+    <value>Your language choice, so a page stays in the language you picked.</value>
+  </data>
+  <data name="Privacy_Cookie_Theme" xml:space="preserve">
+    <value>Your light or dark preference, so the page does not flash the wrong one.</value>
+  </data>
+  <data name="Privacy_Cookie_Session" xml:space="preserve">
+    <value>Your session, once you sign in. Not set for a visitor who only reads the website.</value>
+  </data>
+  <data name="Privacy_Cookies_None" xml:space="preserve">
+    <value>There is no analytics, no advertising, no third-party script and no tracking pixel on this site. The three cookies above are the only ones it sets, which is why there is no consent banner: there is nothing here to consent to.</value>
+  </data>
+  <data name="Privacy_Account_Title" xml:space="preserve">
+    <value>If you have an account</value>
+  </data>
+  <data name="Privacy_Account_Text" xml:space="preserve">
+    <value>An account holds an email address, a display name, a password that is stored only as a hash, the organisation you belong to and your role in it. Actions that change who can do what are written to an audit trail with the time and the person.</value>
+  </data>
+  <data name="Privacy_Evidence_Title" xml:space="preserve">
+    <value>Screenshots from test runs</value>
+  </data>
+  <data name="Privacy_Evidence_Text" xml:space="preserve">
+    <value>A test run photographs the application it is testing, and that picture may contain personal data belonging to your users. It is stored against your organisation, is never public, and is reachable only through a short-lived signed link issued after a permission check. Password fields are masked before the picture is taken. Retention is not implemented yet, which is one of the gaps listed below.</value>
+  </data>
+  <data name="Privacy_Model_Title" xml:space="preserve">
+    <value>If AI planning is used</value>
+  </data>
+  <data name="Privacy_Model_Text" xml:space="preserve">
+    <value>A model is given the scenario you wrote and a description of the pages a crawl found: roles, names and visible text. It is not given credentials, your organisation, or anything about other customers. No model output is ever executed as code.</value>
+  </data>
+  <data name="Privacy_Missing_Title" xml:space="preserve">
+    <value>What this notice still needs</value>
+  </data>
+  <data name="Privacy_Missing_Intro" xml:space="preserve">
+    <value>Each of these requires a decision by the operating company and a legal review. They are listed rather than guessed at.</value>
+  </data>
+  <data name="Privacy_Missing_Controller" xml:space="preserve">
+    <value>The controller, with an address, and a data-protection contact.</value>
+  </data>
+  <data name="Privacy_Missing_Basis" xml:space="preserve">
+    <value>The legal basis for each purpose under Article 6.</value>
+  </data>
+  <data name="Privacy_Missing_Retention" xml:space="preserve">
+    <value>How long each kind of data is kept, and what happens at the end.</value>
+  </data>
+  <data name="Privacy_Missing_Processors" xml:space="preserve">
+    <value>Every processor and sub-processor, including where the data is hosted and whether anything leaves the EU.</value>
+  </data>
+  <data name="Privacy_Missing_Rights" xml:space="preserve">
+    <value>Your rights under Articles 15 to 22 and how to exercise them.</value>
+  </data>
+  <data name="Terms_PageTitle" xml:space="preserve">
+    <value>Terms – {0}</value>
+  </data>
+  <data name="Terms_Placeholder" xml:space="preserve">
+    <value>There are no terms of use yet. This page exists so the footer link leads somewhere that says so.</value>
+  </data>
+  <data name="Terms_Title" xml:space="preserve">
+    <value>Terms</value>
+  </data>
+  <data name="Terms_Lead" xml:space="preserve">
+    <value>Not written. Writing terms of use without a lawyer would be pretending to do law, and the result would be worse than nothing.</value>
+  </data>
+  <data name="Terms_Text" xml:space="preserve">
+    <value>When there is a product to sell there will be terms, drafted by somebody qualified and covering the things that actually matter here: what we do with your evidence, what we promise about availability, what happens to your data when you leave, and what we are liable for when a test run goes wrong against your production system.</value>
+  </data>
+  <data name="Terms_Contact" xml:space="preserve">
+    <value>Ask us what we would commit to</value>
+  </data>
+  <data name="Access_PageTitle" xml:space="preserve">
+    <value>Accessibility – {0}</value>
+  </data>
+  <data name="Access_MetaDescription" xml:space="preserve">
+    <value>What we commit to, how it is tested on every change, what is still missing, and how to tell us we have failed.</value>
+  </data>
+  <data name="Access_Title" xml:space="preserve">
+    <value>Accessibility</value>
+  </data>
+  <data name="Access_Lead" xml:space="preserve">
+    <value>This is the one statement on this site that is not a placeholder, because it is the only one we can verify ourselves.</value>
+  </data>
+  <data name="Access_Standard_Title" xml:space="preserve">
+    <value>What we aim for</value>
+  </data>
+  <data name="Access_Standard_Text" xml:space="preserve">
+    <value>WCAG 2.2 at level AA, on the public website and in the product. We aim for it rather than claim it, because a conformance claim needs an audit by somebody other than the people who wrote the code, and there has not been one.</value>
+  </data>
+  <data name="Access_How_Title" xml:space="preserve">
+    <value>How it is checked</value>
+  </data>
+  <data name="Access_How_Intro" xml:space="preserve">
+    <value>Not by intention. These checks run on every change and fail the build:</value>
+  </data>
+  <data name="Access_How_Automated" xml:space="preserve">
+    <value>An automated accessibility scan of every page, in the light and the dark theme, with zero serious or critical findings allowed.</value>
+  </data>
+  <data name="Access_How_Keyboard" xml:space="preserve">
+    <value>Keyboard tests: every control reachable, a visible focus ring, and a skip link to the main content.</value>
+  </data>
+  <data name="Access_How_Contrast" xml:space="preserve">
+    <value>Contrast checked against the tokens rather than per page, so a new page cannot introduce an unreadable combination.</value>
+  </data>
+  <data name="Access_How_Motion" xml:space="preserve">
+    <value>Reduced motion respected: animation is removed, not merely shortened, when the system asks for it.</value>
+  </data>
+  <data name="Access_How_Status" xml:space="preserve">
+    <value>Status is never conveyed by colour alone — a failing test run says the word as well as showing the colour.</value>
+  </data>
+  <data name="Access_How_Limit" xml:space="preserve">
+    <value>An automated scan finds perhaps a third to a half of real accessibility problems. It cannot tell whether a heading structure makes sense or whether an error message is useful, which is why the limitations below matter.</value>
+  </data>
+  <data name="Access_Known_Title" xml:space="preserve">
+    <value>Known limitations</value>
+  </data>
+  <data name="Access_Known_Intro" xml:space="preserve">
+    <value>Stated rather than discovered by you:</value>
+  </data>
+  <data name="Access_Known_Manual" xml:space="preserve">
+    <value>No screen-reader testing by a person who relies on one, and no external audit. Both are needed before any conformance claim.</value>
+  </data>
+  <data name="Access_Known_German" xml:space="preserve">
+    <value>The German translation has not been reviewed by a native speaker. A clumsy sentence is an accessibility problem for somebody reading with assistive technology.</value>
+  </data>
+  <data name="Access_Known_App" xml:space="preserve">
+    <value>The product behind the sign-in is tested the same way, but it is early, and a part of it that does not exist cannot have been checked.</value>
+  </data>
+  <data name="Access_Feedback_Title" xml:space="preserve">
+    <value>If something here does not work for you</value>
+  </data>
+  <data name="Access_Feedback_Text" xml:space="preserve">
+    <value>Tell us what you were trying to do, on which page, and with what — browser, screen reader, keyboard only. A specific report is worth more than a general one and we will answer it.</value>
+  </data>
+  <data name="Access_Feedback_Action" xml:space="preserve">
+    <value>Report an accessibility problem</value>
+  </data>
+  <data name="Access_Feedback_Legal" xml:space="preserve">
+    <value>In Germany, the Barrierefreiheitsstärkungsgesetz will require this of a service like ours. We would rather be ready early than compliant late.</value>
+  </data>
 </root>

@@ -1,5 +1,6 @@
 using Testo.Contracts.Execution;
 using Testo.Contracts.Planning;
+using Testo.DemoShop;
 using Testo.Worker.Tests.Support;
 
 namespace Testo.Worker.Tests;
@@ -9,6 +10,7 @@ namespace Testo.Worker.Tests;
 /// because what is under test is the execution of a plan, not the making of one — and because a
 /// test whose input comes from a model is not a test.
 /// </summary>
+[Collection(Serially.Name)]
 public class PlannedRunTests(DemoShopFixture shop)
 {
     [Fact]
@@ -38,7 +40,9 @@ public class PlannedRunTests(DemoShopFixture shop)
     public async Task APlanWhoseAssertionIsWrongAboutTheApplication_Fails_AndNamesTheStep()
     {
         // The known defect, found by a plan instead of by a scripted scenario: the basket says
-        // £53.25 and the checkout asks for £42.00.
+        // £53.25 and the checkout asks for £42.00. Switched on for this test only.
+        using var defect = DemoShopDefects.On(Defects.CheckoutTotal);
+
         PlannedAction[] plan =
         [
             new(ActionKind.Goto, "Open the catalogue", Path: "/"),

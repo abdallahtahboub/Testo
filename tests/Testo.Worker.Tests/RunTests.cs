@@ -1,4 +1,5 @@
 using Testo.Contracts.Execution;
+using Testo.DemoShop;
 using Testo.Worker.Tests.Support;
 
 // Testo.Worker.Scenarios is a namespace in scope here, which would otherwise shadow the catalogue.
@@ -10,6 +11,7 @@ namespace Testo.Worker.Tests;
 /// The worker driving a real browser against a real target, which is the whole point of the
 /// slice. No model chooses anything here (ADR-0018).
 /// </summary>
+[Collection(Serially.Name)]
 public class RunTests(DemoShopFixture shop)
 {
     [Fact]
@@ -41,6 +43,11 @@ public class RunTests(DemoShopFixture shop)
     [Fact]
     public async Task ARunThatFails_NamesTheStepAndKeepsTheScreenshotOfTheMoment()
     {
+        // The shop is sound unless told otherwise, so the defect this scenario looks for is
+        // switched on for the length of the test. A target that is broken by default would make
+        // every other measurement against it suspect.
+        using var defect = DemoShopDefects.On(Defects.CheckoutTotal);
+
         var result = await RunAsync(Catalogue.DemoShopCheckoutTotal, out var artifacts);
 
         Assert.Equal(RunStatus.Failed, result.Status);
@@ -62,6 +69,8 @@ public class RunTests(DemoShopFixture shop)
     {
         // The distinction the whole status list exists for. A defect in the application under
         // test is Failed; anything else would make the failure rate a lie about it.
+        using var defect = DemoShopDefects.On(Defects.CheckoutTotal);
+
         var result = await RunAsync(Catalogue.DemoShopCheckoutTotal);
 
         Assert.NotEqual(RunStatus.InfrastructureError, result.Status);

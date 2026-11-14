@@ -12,10 +12,39 @@ namespace Testo.Contracts.Planning;
 /// Anything the planner wants a person to know — an assumption it made, an assertion it would
 /// like changed. Never acted on; a suggestion is not an action (ADR-0019 §3).
 /// </param>
-public sealed record TestPlan(string ScenarioName, IReadOnlyList<PlannedAction> Actions, IReadOnlyList<string> Notes)
+/// <param name="Coverage">
+/// Whether this plan covers the whole scenario or only part of it, as the planner itself reported.
+/// </param>
+public sealed record TestPlan(
+    string ScenarioName,
+    IReadOnlyList<PlannedAction> Actions,
+    IReadOnlyList<string> Notes,
+    PlanCoverage Coverage = PlanCoverage.Full)
 {
     /// <summary>How many of the actions check something.</summary>
     public int AssertionCount => Actions.Count(action => action.IsAssertion);
+}
+
+/// <summary>How much of what was asked for a plan actually covers.</summary>
+/// <remarks>
+/// <para>
+/// Structured, not prose. The planner was already saying "I could only do part of this" in its
+/// notes, and notes are never acted on — so a plan that deliberately tested half the scenario,
+/// passed that half, and reported <em>Passed</em> was the result. Which is the exact shape of the
+/// mistake this product exists to prevent: an assurance covering less than it appears to.
+/// </para>
+/// <para>
+/// A field the run can read means the honest outcome can be produced rather than hoped for
+/// (<see cref="PlanOutcome"/>).
+/// </para>
+/// </remarks>
+public enum PlanCoverage
+{
+    /// <summary>Everything the scenario asked for is in the plan.</summary>
+    Full = 1,
+
+    /// <summary>Only part of it is. The planner says which part in its notes.</summary>
+    Partial = 2,
 }
 
 /// <summary>What one planning call cost.</summary>
@@ -104,6 +133,16 @@ public static class PlanningErrors
 
     /// <summary>The provider could not be reached, or would not answer.</summary>
     public const string ProviderUnavailable = "Planning_Error_ProviderUnavailable";
+
+    /// <summary>
+    /// The provider refused the credentials: the key is wrong, expired, or not a key for this API.
+    /// </summary>
+    /// <remarks>
+    /// Separate from <see cref="ProviderUnavailable"/> because the two need opposite responses, and
+    /// reporting both as "could not be reached" sends somebody to check their network when the
+    /// answer is in their console. Found the first time a person ran the benchmark.
+    /// </remarks>
+    public const string ProviderRefusedTheKey = "Planning_Error_ProviderRefusedTheKey";
 
     /// <summary>No planner is configured, so nothing can be planned.</summary>
     public const string NoPlanner = "Planning_Error_NoPlanner";

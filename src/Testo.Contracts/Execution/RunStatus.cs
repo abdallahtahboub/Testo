@@ -34,6 +34,18 @@ public enum RunStatus
 
     /// <summary>The worker, the proxy or the host failed. Nothing is known about the application under test.</summary>
     InfrastructureError = 8,
+
+    /// <summary>
+    /// Every step the run carried out passed, but the plan covered only part of the scenario, so
+    /// the scenario itself has not been answered.
+    /// </summary>
+    /// <remarks>
+    /// Not a pass, and not a failure of the application either. A planner that honestly says it
+    /// could only test half of what was asked, and then has that half reported as a pass, has
+    /// produced an assurance wider than the evidence — which is the mistake the whole product is
+    /// against. Found in the first measured benchmark run.
+    /// </remarks>
+    Inconclusive = 9,
 }
 
 /// <summary>What became of one step.</summary>

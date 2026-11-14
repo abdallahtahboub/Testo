@@ -23,6 +23,17 @@ public enum Verdict
 
     /// <summary>It never reached a verdict: out of time, over budget, could not run, or could not be planned.</summary>
     Inconclusive = 4,
+
+    /// <summary>
+    /// It failed the broken shop, and it also failed the sound one. It detected nothing.
+    /// </summary>
+    /// <remarks>
+    /// Without this, such a run counts as a correct verdict and the table flatters the planner:
+    /// the first real measurement scored five of six defects "caught", and four of those five were
+    /// plans that fail against a working application too. A test that always fails is right about
+    /// a broken application for the same reason a stopped clock is right twice a day.
+    /// </remarks>
+    FailedRegardless = 5,
 }
 
 /// <summary>One execution of one plan.</summary>
@@ -79,6 +90,19 @@ public sealed record Measurement(
 /// </remarks>
 public sealed class Harness(string origin, IScenarioPlanner? planner, int repetitions, string? recordingDirectory)
 {
+    /// <summary>
+    /// Told what is happening as it happens.
+    /// </summary>
+    /// <remarks>
+    /// A full run is ninety browser launches and eighteen model calls, which is ten minutes of
+    /// nothing if the results are only printed at the end. The first person to run it with a
+    /// planner watched a blank terminal and reasonably assumed it had hung.
+    /// </remarks>
+    public Action<string>? Say { get; set; }
+
+    /// <summary>Called as each measurement finishes, so a long run reports itself.</summary>
+    public Action<Measurement>? Measured { get; set; }
+
     private readonly PlanningService? _planning =
         planner is null ? null : new PlanningService(planner, NullLogger<PlanningService>.Instance);
 
@@ -101,8 +125,9 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
             {
                 Switch(scenario, defectOn);
 
-                measurements.Add(await MeasureAsync(
-                    scenario, defectOn, "baseline", scenario.Baseline, PlanningCost.None, [], [], cancellationToken)
+                Report(measurements, await MeasureAsync(
+                    scenario, defectOn, "baseline", scenario.Baseline, PlanCoverage.Full,
+                    PlanningCost.None, [], [], cancellationToken)
                     .ConfigureAwait(false));
 
                 if (_planning is null)
@@ -110,18 +135,71 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
                     continue;
                 }
 
+                // _planning is not null, so neither is the planner it was built from.
+                var model = planner!.Model;
+
+                Say?.Invoke($"  {scenario.Id,-34} defect={(defectOn ? "on " : "off")} "
+                    + $"{model,-18} looking at the application, then planning…");
+
                 var planned = await PlanAsync(scenario, cancellationToken).ConfigureAwait(false);
 
-                measurements.Add(planned.Plan is { } plan
+                var measured = planned.Plan is { } plan
                     ? await MeasureAsync(
-                        scenario, defectOn, planner!.Model, plan.Actions, planned.Cost, [], planned.Notes, cancellationToken)
+                        scenario, defectOn, model, plan.Actions, plan.Coverage, planned.Cost, [], planned.Notes,
+                        cancellationToken)
                         .ConfigureAwait(false)
-                    : new Measurement(scenario, defectOn, planner!.Model, [], planned.Cost, planned.Errors, planned.Notes));
+                    : new Measurement(scenario, defectOn, model, [], planned.Cost, planned.Errors, planned.Notes);
+
+                Report(measurements, Honestly(measured, measurements));
             }
         }
 
         Defects.Set([]);
         return measurements;
+    }
+
+    /// <summary>
+    /// Downgrades a "correct" verdict on a broken shop when the same plan also failed the sound
+    /// one, because then it found nothing — it fails at everything, and one of the things it fails
+    /// at happened to be broken.
+    /// </summary>
+    /// <remarks>
+    /// The defect-off run always happens first, so by the time the defect is switched on the
+    /// evidence for this is already in hand.
+    /// </remarks>
+    private static Measurement Honestly(Measurement measurement, List<Measurement> earlier)
+    {
+        if (!measurement.DefectOn || measurement.Verdict != Verdict.Correct)
+        {
+            return measurement;
+        }
+
+        var sound = earlier.LastOrDefault(candidate =>
+            !candidate.DefectOn
+            && candidate.Scenario.Id == measurement.Scenario.Id
+            && string.Equals(candidate.Source, measurement.Source, StringComparison.Ordinal));
+
+        if (sound?.Verdict != Verdict.FalseNegative)
+        {
+            return measurement;
+        }
+
+        return measurement with
+        {
+            Attempts =
+            [
+                .. measurement.Attempts.Select(attempt => attempt.Verdict == Verdict.Correct
+                    ? attempt with { Verdict = Verdict.FailedRegardless }
+                    : attempt),
+            ],
+        };
+    }
+
+    /// <summary>Keeps a measurement and says so, so a long run is not a blank terminal.</summary>
+    private void Report(List<Measurement> measurements, Measurement measurement)
+    {
+        measurements.Add(measurement);
+        Measured?.Invoke(measurement);
     }
 
     /// <summary>
@@ -170,6 +248,7 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
         bool defectOn,
         string source,
         IReadOnlyList<PlannedAction> plan,
+        PlanCoverage coverage,
         PlanningCost planning,
         IReadOnlyList<string> planningErrors,
         IReadOnlyList<string> notes,
@@ -187,7 +266,11 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
 
             clock.Stop();
 
-            attempts.Add(new Attempt(Judge(result.Status, defectOn), result.Status, clock.Elapsed));
+            // A plan that said it covers part of the scenario, and passed that part, has not
+            // answered the scenario. The product applies the same rule; this is the same function.
+            var status = PlanOutcome.Reconcile(result.Status, coverage);
+
+            attempts.Add(new Attempt(Judge(status, defectOn), status, clock.Elapsed));
         }
 
         return new Measurement(scenario, defectOn, source, attempts, planning, planningErrors, notes);

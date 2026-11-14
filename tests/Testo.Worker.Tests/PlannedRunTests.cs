@@ -68,6 +68,45 @@ public class PlannedRunTests(DemoShopFixture shop)
     }
 
     [Fact]
+    public async Task APlanThatChecksAnAbsence_PassesWhenTheThingIsGone()
+    {
+        // The action the first measured benchmark run asked for three times: half of what a person
+        // wants checked is that something is no longer there (ADR-0019 §2).
+        PlannedAction[] plan =
+        [
+            new(ActionKind.Goto, "Open the catalogue", Path: "/"),
+            new(ActionKind.Click, "Add the teapot", ActionTarget.ByTestId("add-pot")),
+            new(ActionKind.AssertVisible, "The teapot is in the basket", ActionTarget.ByTestId("line-pot")),
+            new(ActionKind.Click, "Take it out again", ActionTarget.ByTestId("remove-pot")),
+            new(ActionKind.AssertNotVisible, "The teapot is gone", ActionTarget.ByTestId("line-pot")),
+        ];
+
+        var result = await Jobs.PlannedAsync(shop.Origin, plan);
+
+        Assert.Equal(RunStatus.Passed, result.Status);
+        Assert.All(result.Steps, step => Assert.Equal(StepStatus.Passed, step.Status));
+    }
+
+    [Fact]
+    public async Task APlanThatChecksAnAbsence_FailsWhenTheThingIsStillThere()
+    {
+        // The mistake this action exists to catch: a removal that does not remove. Without it the
+        // only way to express this is to assert some other presence, which passes either way.
+        PlannedAction[] plan =
+        [
+            new(ActionKind.Goto, "Open the catalogue", Path: "/"),
+            new(ActionKind.Click, "Add the teapot", ActionTarget.ByTestId("add-pot")),
+            new(ActionKind.AssertNotVisible, "The teapot is gone", ActionTarget.ByTestId("line-pot")),
+        ];
+
+        var result = await Jobs.PlannedAsync(shop.Origin, plan);
+
+        var failed = Assert.Single(result.Steps, step => step.Status == StepStatus.Failed);
+        Assert.Equal("The teapot is gone", failed.Description);
+        Assert.NotEqual(RunStatus.InfrastructureError, result.Status);
+    }
+
+    [Fact]
     public async Task APlanThatTypesASecret_UsesTheValueWithoutEverCarryingIt()
     {
         PlannedAction[] plan =

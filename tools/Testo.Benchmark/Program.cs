@@ -43,17 +43,44 @@ Console.WriteLine(planner is null
 
 Console.WriteLine($"{scenarios.Count} scenario(s), {options.Repetitions} execution(s) each.");
 
-var harness = new Harness(origin, planner, options.Repetitions, options.RecordingDirectory);
+if (planner is not null)
+{
+    // Said before the silence rather than after it: a planned run crawls the application and asks
+    // a model for every scenario, and ten quiet minutes look exactly like a hang.
+    Console.WriteLine(
+        $"This takes a while: {scenarios.Count * 2} crawls, {scenarios.Count * 2} model calls and "
+        + $"about {scenarios.Count * 4 * options.Repetitions} browser runs. Lines appear as each one finishes.");
+}
+
+Console.WriteLine();
+
+var clock = System.Diagnostics.Stopwatch.StartNew();
+
+var harness = new Harness(origin, planner, options.Repetitions, options.RecordingDirectory)
+{
+    Say = Console.WriteLine,
+    Measured = measurement =>
+    {
+        // The reason, not just "no plan". Somebody watching lines scroll past should not have to
+        // open a markdown file to find out that their key was refused.
+        var outcome = measurement.PlanningErrors.Count > 0
+            ? "no plan — " + string.Join(", ", measurement.PlanningErrors.Select(Explain))
+            : measurement.Verdict.ToString();
+
+        var cost = measurement.Planning.TotalTokens > 0
+            ? $"  {measurement.Planning.TotalTokens} tokens, ${measurement.Planning.Cost:0.0000}"
+            : "";
+
+        Console.WriteLine(
+            $"  {measurement.Scenario.Id,-34} defect={(measurement.DefectOn ? "on " : "off")} "
+            + $"{measurement.Source,-18} {outcome}{cost}");
+    },
+};
 
 using var stopping = new CancellationTokenSource(TimeSpan.FromMinutes(options.Smoke ? 5 : 60));
 var measurements = await harness.RunAsync(scenarios, stopping.Token);
 
-foreach (var measurement in measurements)
-{
-    Console.WriteLine(
-        $"  {measurement.Scenario.Id,-34} defect={(measurement.DefectOn ? "on " : "off")} "
-        + $"{measurement.Source,-18} {(measurement.PlanningErrors.Count > 0 ? "no plan" : measurement.Verdict.ToString())}");
-}
+Console.WriteLine($"\nFinished in {clock.Elapsed.TotalMinutes:0.0} minutes.");
 
 var report = Report.Write(measurements, options.Repetitions, DateTimeOffset.UtcNow);
 
@@ -78,6 +105,24 @@ if (falsePositives > 0)
 }
 
 return falsePositives > 0 && options.FailOnFalsePositive ? 1 : 0;
+
+// One sentence per resource key, for the console. The report has its own copy for markdown.
+static string Explain(string error) => error switch
+{
+    PlanningErrors.ProviderRefusedTheKey =>
+        "the provider refused the key (401 or 403): it is wrong, truncated, expired or revoked",
+    PlanningErrors.ProviderUnavailable => "the provider could not be reached",
+    PlanningErrors.NoPlanner => "no planner is configured",
+    PlanningErrors.Unreadable => "the answer was not a plan",
+    PlanningErrors.ForeignOrigin => "the plan named somewhere other than the shop",
+    PlanningErrors.NoAssertions => "the plan checked nothing",
+    PlanningErrors.TooManyActions => "the plan was longer than the budget",
+    PlanningErrors.UnknownAction => "the plan used an action that does not exist",
+    PlanningErrors.UnknownTarget => "a target was named in a way that is not allowed",
+    PlanningErrors.Incomplete => "an action was missing something it needs",
+    PlanningErrors.BudgetSpent => "planning spent the run's token or money budget",
+    _ => error,
+};
 
 static IScenarioPlanner? Planner(BenchmarkOptions options)
 {
@@ -130,8 +175,9 @@ internal sealed record BenchmarkOptions(
             repetitions,
             Value(args, "--report") ?? Path.Combine(root, "docs", "ai-benchmark.md"),
 
-            // Recordings live beside the tool, in the repository: they are real answers, and CI
-            // replays them so that the whole path is exercised for nothing.
+            // Where a run against a provider writes its answers, so that a later --recorded run
+            // can replay them for nothing. Nothing is committed here yet and CI does not replay
+            // them: it runs --self-check only.
             Value(args, "--recordings") ?? Path.Combine(root, "tools", "Testo.Benchmark", "recordings"),
             args.Contains("--fail-on-false-positive", StringComparer.Ordinal));
     }

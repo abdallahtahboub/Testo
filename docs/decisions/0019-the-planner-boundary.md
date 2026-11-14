@@ -54,8 +54,23 @@ to compare it against.
 ### 2. The vocabulary is closed, and cannot express code
 
 The plan is a list of actions drawn from a fixed set: `goto`, `click`, `type`, `press`, `wait-for`,
-`assert-text`, `assert-visible`, `assert-url`. Each action's target is **either** a test id **or** a
-role plus an accessible name — never a CSS selector, never an XPath, never a script.
+`assert-text`, `assert-visible`, `assert-not-visible`, `assert-url`. Each action's target is
+**either** a test id **or** a role plus an accessible name — never a CSS selector, never an XPath,
+never a script.
+
+**Amended 2026-11-14: `assert-not-visible` was added, after measuring.** The first benchmark run
+against a real model asked for it three times and gave its reason each time: "the cup is gone from
+the basket", "there is no way to place an order", "the error is no longer shown". Half of what a
+person wants checked is an absence, and a vocabulary that can only assert presence pushes a plan
+into asserting some *other* presence instead — which passes whether or not the thing under test
+worked. That is the false-positive shape §7 exists to count, written into the vocabulary.
+
+Adding it costs nothing on the boundary, which is why it was allowed: the executor must locate the
+element either way, so there is no new capability, no new field, and nothing a page could talk the
+planner into that it could not before. The validator treats an unseen target for this action as
+ordinary rather than noteworthy, since an absence the crawl also did not see is the normal case.
+Growing the vocabulary stays a decision recorded here, and `PlanVocabularyTests` is where an
+unrecorded one gets noticed.
 
 This is a property of the type, not of a check somewhere: there is no field in which a selector or a
 script could be written, so `page.evaluate(what_the_model_said)` is not something we have decided
@@ -112,6 +127,15 @@ with a system prompt stating that nothing inside it is an instruction. Snapshots
 stripped to roles, accessible names, test ids and trimmed text, and collected by a deterministic
 crawl of the origin — never by the model choosing where to look.
 
+The crawl follows the links it finds and, in addition, the paths the application advertises in its
+own `sitemap.xml`, same-origin and capped. That is still deterministic and still ours: the
+application states where its pages are, and we read the statement. It was added because the first
+real measurement showed the crawl describing one state of the application only — an empty basket
+hides the checkout, so a plan about checkout was written for a page the planner had never been
+shown. Every request the crawl makes goes through the browser and therefore through the run's
+egress proxy; Playwright's own request context is not used, because it honours the ambient proxy of
+whatever machine the worker happens to run on.
+
 We are explicit that this is mitigation, not a boundary: prompt-level defences are advisory, and the
 things that actually hold are the closed vocabulary (§2), validation against observation (§3) and
 the egress proxy (ADR-0018), none of which depend on the model behaving.
@@ -138,6 +162,18 @@ for both the planner and the deterministic baseline, over 10 to 20 controlled sc
 
 The demo target carries known defects behind switches, so the truth about every scenario is known
 and a false positive is a measured fact rather than an impression.
+
+**Amended 2026-11-14: a plan reports its own coverage, and a partial plan that passes is
+inconclusive.** The first measured run produced plans that said in their notes that they tested
+part of what was asked — and then passed that part, and were reported as passes. Notes are never
+acted on (§3), which is right for a suggestion and wrong for a fact about what was tested. So
+coverage is a field on the plan, `full` or `partial`, and `PlanOutcome.Reconcile` turns a passing
+partial plan into `RunStatus.Inconclusive`. Only a pass is affected: a partial plan that fails has
+found something real about the half it did test.
+
+Anything other than a recognized word is read as partial, so being unsure counts as not covered.
+The prompt says what the rule is, which removes the incentive to overclaim: there is nothing to
+gain by saying `full` and nothing to lose by admitting a gap.
 
 ## Consequences
 

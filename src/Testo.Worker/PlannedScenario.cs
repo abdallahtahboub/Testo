@@ -81,6 +81,12 @@ internal static class PlannedScenario
                 await Assertions.Expect(Locate(page, action)).ToBeVisibleAsync().ConfigureAwait(false);
                 break;
 
+            case ActionKind.AssertNotVisible:
+                // A waiting assertion, like the others: "not there" has to mean "not there once the
+                // page has settled", or every absence passes on a page that has not finished.
+                await Assertions.Expect(Locate(page, action)).ToBeHiddenAsync().ConfigureAwait(false);
+                break;
+
             case ActionKind.AssertUrl:
                 // A path, not a URL: a plan cannot name another origin, so it cannot assert one
                 // either. Checked as "ends with" so a query string does not fail an honest check.

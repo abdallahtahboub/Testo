@@ -63,7 +63,8 @@ public static class PlanJson
             return new TestPlan(
                 string.IsNullOrWhiteSpace(wire.ScenarioName) ? "A plan" : wire.ScenarioName.Trim(),
                 actions,
-                wire.Notes?.Where(note => !string.IsNullOrWhiteSpace(note)).ToList() ?? []);
+                wire.Notes?.Where(note => !string.IsNullOrWhiteSpace(note)).ToList() ?? [],
+                Coverage(wire.Coverage));
         }
         catch (JsonException)
         {
@@ -165,6 +166,7 @@ public static class PlanJson
         "waitfor" => ActionKind.WaitFor,
         "asserttext" => ActionKind.AssertText,
         "assertvisible" => ActionKind.AssertVisible,
+        "assertnotvisible" => ActionKind.AssertNotVisible,
         "asserturl" => ActionKind.AssertUrl,
         _ => null,
     };
@@ -189,9 +191,24 @@ public static class PlanJson
 
     private static string? Blank(string? value) => string.IsNullOrWhiteSpace(value) ? null : value;
 
+    /// <summary>
+    /// How much of the scenario the plan claims to cover.
+    /// </summary>
+    /// <remarks>
+    /// An answer that says nothing is taken as a full plan, which is the lenient reading — but a
+    /// planner that silently covers half of a scenario is the thing this field exists to catch, so
+    /// anything other than a recognized word is read as partial. Being unsure is partial.
+    /// </remarks>
+    private static PlanCoverage Coverage(string? word) => word?.Trim().ToLowerInvariant() switch
+    {
+        null or "" or "full" or "complete" or "all" => PlanCoverage.Full,
+        _ => PlanCoverage.Partial,
+    };
+
     private sealed record WirePlan(
         string? ScenarioName,
         List<string>? Notes,
+        string? Coverage,
         List<WireAction>? Actions);
 
     private sealed record WireAction(

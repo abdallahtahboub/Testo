@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -85,10 +86,17 @@ public sealed class AnthropicPlanner(HttpClient client, PlannerOptions options, 
 
             if (!response.IsSuccessStatusCode)
             {
-                // The status, not the body: a provider's error body can carry the prompt back,
+                // The status, never the body: a provider's error body can carry the prompt back,
                 // and the prompt contains the application under test.
+                //
+                // 401 and 403 are told apart from everything else because they need the opposite
+                // response. "Could not be reached" sends somebody to check their network when the
+                // answer is a key in their console — which is exactly what happened the first time
+                // a person ran this.
+                var refused = response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden;
+
                 return PlanResult.Failed(
-                    [PlanningErrors.ProviderUnavailable],
+                    [refused ? PlanningErrors.ProviderRefusedTheKey : PlanningErrors.ProviderUnavailable],
                     Spent(0, 0, started),
                     Model);
             }
@@ -162,14 +170,17 @@ public sealed class AnthropicPlanner(HttpClient client, PlannerOptions options, 
 /// </summary>
 /// <remarks>
 /// <para>
-/// This is what lets the tests and CI exercise the whole path — prompt, parsing, validation,
-/// execution — for nothing and with the same answer every time. A test whose input comes from a
-/// live model is not a test; it is a sample.
+/// The point of it is to let the whole path — prompt, parsing, validation, execution — be exercised
+/// for nothing and with the same answer every time. A test whose input comes from a live model is
+/// not a test; it is a sample.
 /// </para>
 /// <para>
-/// The recordings are real answers, saved when the benchmark last ran against a provider. So the
-/// JSON a model actually produces is what the parser is held to, rather than JSON we imagined it
-/// would produce.
+/// <strong>No recordings are committed yet, and nothing replays them.</strong> The benchmark writes
+/// one per scenario when it runs against a provider, but the only run so far happened on a
+/// developer machine and its answers were not kept. CI runs <c>--self-check</c> and not
+/// <c>--recorded</c>. So this class works and is tested, and the claim that the parser is held to
+/// JSON a model actually produced is not true yet — it becomes true when a run's recordings are
+/// committed.
 /// </para>
 /// </remarks>
 public sealed class RecordedPlanner(IReadOnlyDictionary<string, string> answers, string model = "recorded")

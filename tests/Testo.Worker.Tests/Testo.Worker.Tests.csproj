@@ -5,7 +5,20 @@
        docs/execution-threat-model.md §4.1, one test each. -->
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Testo.Worker\Testo.Worker.csproj" />
+
+    <!-- The target the slice runs against. A test project may reference it; it references nothing. -->
+    <ProjectReference Include="..\..\src\Testo.DemoShop\Testo.DemoShop.csproj" />
+  </ItemGroup>
+
+  <!-- Browser tests are heavy. Two at a time keeps them from being killed for want of memory,
+       which looks like a timeout rather than what it is. -->
+  <ItemGroup>
+    <None Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

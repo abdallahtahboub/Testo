@@ -78,6 +78,86 @@ public class EgressProxyTests
         Assert.True(proxy.BytesDownloaded > 0, "what came back should be counted against the budget.");
     }
 
+    [Fact]
+    public async Task Get_AnAllowedOriginThatRedirectsSomewhereItMayNotGo_IsRefusedAtTheRedirect()
+    {
+        // The first hop is allowed and the second is not. A check on the address first asked for
+        // would pass this; the proxy judges every connection, so the redirect is a new question
+        // with its own answer (docs/execution-threat-model.md §4.1).
+        using var target = new TcpListener(IPAddress.Loopback, 0);
+        target.Start();
+        var port = ((IPEndPoint)target.LocalEndpoint).Port;
+
+        var serving = ServeOnceAsync(
+            target,
+            "HTTP/1.1 302 Found\r\nLocation: http://10.0.0.5/secrets\r\nContent-Length: 0\r\nConnection: close\r\n\r\n");
+
+        var refusals = new List<string>();
+        await using var proxy = EgressProxy.Start(
+            new EgressPolicy([], [$"http://127.0.0.1:{port}"]),
+            refusals.Add);
+
+        using var handler = new HttpClientHandler
+        {
+            Proxy = new WebProxy($"http://127.0.0.1:{proxy.Port}"),
+            UseProxy = true,
+            AllowAutoRedirect = true,
+        };
+
+        using var client = new HttpClient(handler);
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+
+        using var response = await client.GetAsync(new Uri($"http://127.0.0.1:{port}/"), timeout.Token);
+
+        await serving;
+
+        // The redirect was followed, and the place it led to was refused by name.
+        //
+        // Which gate caught it is worth knowing: the origin one, because 10.0.0.5 is not an origin
+        // this run may reach at all. The address gate behind it would have refused it too. Both
+        // are checked on the redirect, because the redirect is a new connection and therefore a
+        // new question.
+        Assert.Equal(System.Net.HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Contains(refusals, refusal => refusal.Contains("10.0.0.5", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Get_ARedirectToAnAllowedNameThatResolvesLocally_IsRefusedByTheAddress()
+    {
+        // The other half of the redirect question: this time the place it leads to *is* an allowed
+        // origin, and it is refused anyway, because the address it resolves to is this machine.
+        // That is the case a hostname allowlist cannot catch.
+        using var target = new TcpListener(IPAddress.Loopback, 0);
+        target.Start();
+        var port = ((IPEndPoint)target.LocalEndpoint).Port;
+
+        var serving = ServeOnceAsync(
+            target,
+            "HTTP/1.1 302 Found\r\nLocation: http://localhost:80/\r\nContent-Length: 0\r\nConnection: close\r\n\r\n");
+
+        var refusals = new List<string>();
+        await using var proxy = EgressProxy.Start(
+            new EgressPolicy(["http://localhost:80"], [$"http://127.0.0.1:{port}"]),
+            refusals.Add);
+
+        using var handler = new HttpClientHandler
+        {
+            Proxy = new WebProxy($"http://127.0.0.1:{proxy.Port}"),
+            UseProxy = true,
+            AllowAutoRedirect = true,
+        };
+
+        using var client = new HttpClient(handler);
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+
+        using var response = await client.GetAsync(new Uri($"http://127.0.0.1:{port}/"), timeout.Token);
+
+        await serving;
+
+        Assert.Equal(System.Net.HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Contains(refusals, refusal => refusal.Contains("this machine", StringComparison.Ordinal));
+    }
+
     /// <summary>Sends one request and reads whatever comes back until the far end closes.</summary>
     private static async Task<string> SendAsync(int proxyPort, string request)
     {

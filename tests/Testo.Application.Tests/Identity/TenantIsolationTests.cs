@@ -3,6 +3,7 @@ using Testo.Application.Tests.Support;
 using Testo.Contracts.Identity;
 using Testo.Domain.Audit;
 using Testo.Domain.Common;
+using Testo.Domain.Execution;
 using Testo.Domain.Identity;
 using Testo.Domain.Projects;
 
@@ -28,37 +29,71 @@ public sealed class TenantIsolationTests : IAsyncLifetime
     /// entry here, and <see cref="Seeding_Always_CoversEveryTenantEntity"/> fails if one is
     /// missing — so an entity added in a later milestone cannot quietly go untested.
     /// </summary>
-    private static readonly Dictionary<Type, Func<Guid, Guid, object>> Seeds = new()
+    /// <summary>
+    /// What a seed is given. The ids of the parents are decided up front so that a run can point
+    /// at a real project and a step at a real run: the composite foreign keys are part of what is
+    /// being tested, and they refuse anything else.
+    /// </summary>
+    private readonly record struct SeedContext(Guid OrganizationId, Guid UserId, Guid ProjectId, Guid RunId);
+
+    private static readonly Dictionary<Type, Func<SeedContext, object>> Seeds = new()
     {
-        [typeof(Membership)] = (organizationId, userId) => new Membership
+        [typeof(Membership)] = seed => new Membership
         {
-            OrganizationId = organizationId,
-            UserId = userId,
+            OrganizationId = seed.OrganizationId,
+            UserId = seed.UserId,
             Role = Role.Owner,
             JoinedAt = DateTimeOffset.UtcNow,
         },
-        [typeof(Invitation)] = (organizationId, _) => new Invitation
+        [typeof(Invitation)] = seed => new Invitation
         {
-            OrganizationId = organizationId,
+            OrganizationId = seed.OrganizationId,
             Email = $"invited-{Guid.CreateVersion7():N}@example.com",
             NormalizedEmail = $"INVITED-{Guid.CreateVersion7():N}@EXAMPLE.COM",
             Role = Role.QaEngineer,
             TokenHash = Guid.CreateVersion7().ToByteArray(),
             ExpiresAt = DateTimeOffset.UtcNow.AddDays(7),
         },
-        [typeof(AuditEntry)] = (organizationId, userId) => new AuditEntry
+        [typeof(AuditEntry)] = seed => new AuditEntry
         {
-            OrganizationId = organizationId,
-            ActorUserId = userId,
+            OrganizationId = seed.OrganizationId,
+            ActorUserId = seed.UserId,
             Action = "test.seeded",
             SubjectType = nameof(Organization),
             At = DateTimeOffset.UtcNow,
         },
-        [typeof(Project)] = (organizationId, _) => new Project
+        [typeof(Project)] = seed => new Project
         {
-            OrganizationId = organizationId,
+            Id = seed.ProjectId,
+            OrganizationId = seed.OrganizationId,
             Name = "Shop",
             KeyPrefix = $"K{Random.Shared.Next(1000, 9999)}",
+        },
+        [typeof(TestRun)] = seed => new TestRun
+        {
+            Id = seed.RunId,
+            OrganizationId = seed.OrganizationId,
+            ProjectId = seed.ProjectId,
+            Number = Random.Shared.Next(1, 100_000),
+            ScenarioId = Contracts.Execution.Scenarios.DemoShopBasket,
+            TargetOrigin = "http://127.0.0.1:5090",
+            QueuedAt = DateTimeOffset.UtcNow,
+        },
+        [typeof(TestRunStep)] = seed => new TestRunStep
+        {
+            OrganizationId = seed.OrganizationId,
+            TestRunId = seed.RunId,
+            Order = 1,
+            Description = "Seeded",
+        },
+        [typeof(Artifact)] = seed => new Artifact
+        {
+            OrganizationId = seed.OrganizationId,
+            TestRunId = seed.RunId,
+            Kind = ArtifactKind.Screenshot,
+            StorageKey = $"{seed.OrganizationId:N}/seed/step-001.png",
+            ContentType = "image/png",
+            CapturedAt = DateTimeOffset.UtcNow,
         },
     };
 
@@ -293,9 +328,11 @@ public sealed class TenantIsolationTests : IAsyncLifetime
         database.Users.Add(user);
         await database.SaveChangesAsync(TestContext.Current.CancellationToken);
 
+        var seedContext = new SeedContext(organization.Id, user.Id, Guid.CreateVersion7(), Guid.CreateVersion7());
+
         foreach (var seed in Seeds.Values)
         {
-            database.Add(seed(organization.Id, user.Id));
+            database.Add(seed(seedContext));
         }
 
         // Seeding is the one place a test writes into an organization it is not acting in, and it

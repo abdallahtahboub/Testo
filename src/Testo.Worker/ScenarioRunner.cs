@@ -97,9 +97,19 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
         context.SetDefaultTimeout(15_000);
 
         var page = await context.NewPageAsync().ConfigureAwait(false);
+        var deadline = startedAt.Add(job.Budget.WallClock);
 
         for (var index = 0; index < scenario.Steps.Count; index++)
         {
+            // Checked here as well as by the cancellation token. The token stops a step that is
+            // already running; this stops a run whose steps each finished in time but which has
+            // nevertheless spent its budget, and it reports it as a budget, not as a failure.
+            if (timeProvider.GetUtcNow() >= deadline)
+            {
+                Skip(steps, from: index);
+                return Finish(job, RunStatus.TimedOut, startedAt, steps, proxy, Reason(RunStatus.TimedOut, refusals));
+            }
+
             if (index >= job.Budget.MaxSteps)
             {
                 return Finish(job, RunStatus.BudgetExceeded, startedAt, steps, proxy,

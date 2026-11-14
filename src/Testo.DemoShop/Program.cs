@@ -114,6 +114,10 @@ app.MapGet("/probe", (string? target) => Html(Page("Probe", $"""
     </script>
     """)));
 
+// Sends the browser somewhere it must not go. Nothing links to it; it exists so a test can prove
+// that a redirect is judged at the hop it redirects to, not only at the address first asked for.
+app.MapGet("/redirect", (string? to) => Results.Redirect(to ?? "http://169.254.169.254/latest/meta-data/"));
+
 app.MapGet("/health", () => Results.Text("ok"));
 
 app.Run();

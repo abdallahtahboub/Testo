@@ -130,7 +130,7 @@ Found by opening it in a browser rather than by a test, and worth remembering:
 | Tenant isolation: query filter, save guard, indexes, alternate key | **Real.** D-2, the hole in it, was closed in Milestone 3.1 |
 | Sign in, sign out, password reset, one-time code, accept invitation | **Real** |
 | Design system, 35 components | **Real** |
-| Public website | **One page** (home, EN + DE) plus not-found and error |
+| Public website | **Real.** 29 routes in English and German, with every placeholder page labeled as one |
 | App area | **One placeholder page** at `/app`, plus the two execution pages. Signing in is required everywhere (D-1 closed in Milestone 3.1) |
 | Test runs: start, stop, rerun, steps, screenshots | **Real** for three scripted scenarios against our own demo target. No customer targets |
 | AI planning: interface, vocabulary, validator, provider adapter, benchmark | **Built, unmeasured.** No model key was available, so the planner column of `ai-benchmark.md` is empty and no claim about AI is supported yet |
@@ -277,6 +277,47 @@ is built and the *capability* is unmeasured.
 **Scope:** all public pages from `sitemap.md` §A with real copy (EN + DE) where we have it and labeled placeholders elsewhere; mega-menu navigation, language switcher, rich footer; contact + demo forms (UI and validation only); Imprint, Privacy, Terms, Accessibility statement placeholders; original SVG illustrations; `sitemap.xml`, `robots.txt`, meta/OpenGraph tags, `hreflang`.
 
 **Done when:** every public page has a Playwright smoke test (title, `h1`, no console errors, axe pass); the pages render in static SSR (no SignalR circuit opened — asserted in E2E); every page with a form carries `[HasForm]` and a test finds pages that forgot it (ADR-0009); Lighthouse (manual run, documented in the PR) shows Performance ≥ 90 and Accessibility ≥ 95 on Home and Pricing (mobile profile).
+
+**Status: built (2026-11-14), waiting for review.** 29 routes in English and German: the home page,
+the product section with the six journey stages, solutions with three roles and five industry
+placeholders, pricing, the resources hub with three listings, about, careers, contact, request a
+demo, and the four legal pages.
+
+What the milestone turned out to be about, more than layout, was what a website is allowed to
+claim:
+
+- **Every page that describes something unbuilt says so**, in a box that cannot be skimmed past.
+  Five of the six journey pages say "not built". The product overview says one of six stages is
+  built. The home page says it above the fold rather than in small print.
+- **Pricing shows no price.** A number would be a guess a visitor could budget against, which makes
+  it the one placeholder that costs the reader something. The comparison table marks every row that
+  does not exist yet.
+- **There are no customer logos and no case studies**, and both sections say why. A row of borrowed
+  logos is what a buyer checks first.
+- **The Impressum lists every item § 5 DDG requires**, each marked "to be supplied", because a
+  developer inventing company details would be worse than an empty page. The privacy notice
+  separates what the code can prove from what a lawyer has to write. The accessibility statement is
+  the one legal page that is real, and it lists three known limitations including that no
+  screen-reader user has tested this.
+- **Thirteen placeholder pages carry `noindex`** and are left out of `sitemap.xml`: a placeholder
+  that ranks is a placeholder a stranger reads first.
+
+Three faults found by building it rather than by review:
+
+- The obvious responsive mega-menu — the whole navigation in one `<details>`, forced open by CSS on
+  a desktop — **does not work**, because a browser hides a closed `<details>`'s content in a way CSS
+  cannot override. Measured in Chromium at 1280px before the header was written: both the menu and
+  its toggle were invisible. Each section is now its own disclosure.
+- The `[HasForm]` test passed with the attribute deleted, because the page's own comment mentions
+  `[HasForm]` and the test searched for the string. Found by deleting the attribute and watching the
+  test stay green.
+- The home page was still the Milestone 1 placeholder, and its hero claimed present-tense support
+  for all six stages.
+
+**Not done in this milestone:** the Lighthouse run. It needs the application running against
+PostgreSQL, and this environment has neither a database nor Chrome's Lighthouse — so the two
+numbers the milestone asks for are outstanding and the milestone is not closed until somebody runs
+them.
 
 ## Milestone 5 — App shell + module registry
 **Scope:** the app shell on the real sign-in from Milestone 3; app shell (registry-driven left nav, top bar with project switcher, search, notifications, user menu); `Testo.Mocks` with the seed data generator and all `Mock*` services (with configurable latency/failure); dashboard rendering registered widgets: quality KPIs, run trends, open defects by severity, release readiness, recent runs; feature flags hiding unfinished modules; "module not available" page.

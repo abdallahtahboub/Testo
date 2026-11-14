@@ -105,6 +105,16 @@ public static class PlanningErrors
     /// <summary>The provider could not be reached, or would not answer.</summary>
     public const string ProviderUnavailable = "Planning_Error_ProviderUnavailable";
 
+    /// <summary>
+    /// The provider refused the credentials: the key is wrong, expired, or not a key for this API.
+    /// </summary>
+    /// <remarks>
+    /// Separate from <see cref="ProviderUnavailable"/> because the two need opposite responses, and
+    /// reporting both as "could not be reached" sends somebody to check their network when the
+    /// answer is in their console. Found the first time a person ran the benchmark.
+    /// </remarks>
+    public const string ProviderRefusedTheKey = "Planning_Error_ProviderRefusedTheKey";
+
     /// <summary>No planner is configured, so nothing can be planned.</summary>
     public const string NoPlanner = "Planning_Error_NoPlanner";
 }

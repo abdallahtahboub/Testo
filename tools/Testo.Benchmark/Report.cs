@@ -202,6 +202,7 @@ public static class Report
     {
         PlanningErrors.NoPlanner => "no planner configured",
         PlanningErrors.ProviderUnavailable => "the provider could not be reached",
+        PlanningErrors.ProviderRefusedTheKey => "the provider refused the key (401 or 403): it is wrong, expired, or not a key for this API",
         PlanningErrors.Unreadable => "the answer was not a plan",
         PlanningErrors.ForeignOrigin => "a path named somewhere other than the shop",
         PlanningErrors.NoAssertions => "the plan checked nothing",

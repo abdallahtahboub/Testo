@@ -46,7 +46,7 @@ internal static class Jobs
         // Ours, loopback, and named as trusted by the job. A customer-supplied target never is.
         TrustedLocalOrigins: [origin],
         budget ?? RunBudget.Default,
-        ArtifactDirectory: Directory.CreateTempSubdirectory("testo-worker-test-").FullName,
+        ArtifactDirectory: Directory.CreateTempSubdirectory("autestiq-worker-test-").FullName,
         task);
 
     private static Task<WorkerResult> RunAsync(WorkerJob job, out string artifacts)

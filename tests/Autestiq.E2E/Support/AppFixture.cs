@@ -91,7 +91,7 @@ public sealed class AppFixture : IAsyncLifetime
     /// <summary>Signs in through the real screen once, and keeps the cookie for the run.</summary>
     private async Task<string> SignInOnceAsync()
     {
-        var file = Path.Combine(Path.GetTempPath(), $"testo-signed-in-{Guid.CreateVersion7():N}.json");
+        var file = Path.Combine(Path.GetTempPath(), $"autestiq-signed-in-{Guid.CreateVersion7():N}.json");
 
         await using var context = await Browser.NewContextAsync();
         var page = await context.NewPageAsync();

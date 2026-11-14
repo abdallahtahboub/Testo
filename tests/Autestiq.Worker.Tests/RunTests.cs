@@ -136,7 +136,7 @@ public class RunTests(DemoShopFixture shop)
 
     private Task<WorkerResult> RunAsync(string scenarioId, out string artifactDirectory, RunBudget budget)
     {
-        var directory = Directory.CreateTempSubdirectory("testo-worker-test-");
+        var directory = Directory.CreateTempSubdirectory("autestiq-worker-test-");
         artifactDirectory = directory.FullName;
 
         var job = new WorkerJob(

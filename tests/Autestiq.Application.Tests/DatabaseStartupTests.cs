@@ -12,7 +12,7 @@ public class DatabaseStartupTests
 {
     /// <summary>A port nothing listens on, so the connection is refused rather than left hanging.</summary>
     private const string Unreachable =
-        "Host=127.0.0.1;Port=5466;Database=testo_nowhere;Username=nobody;Password=secret-value";
+        "Host=127.0.0.1;Port=5466;Database=autestiq_nowhere;Username=nobody;Password=secret-value";
 
     [Fact]
     public async Task EnsureReachable_WhenTheServerIsNotThere_SaysSoAndSaysWhatToDo()
@@ -24,7 +24,7 @@ public class DatabaseStartupTests
 
         // Which server was tried, so the reader can tell a wrong port from a stopped server.
         Assert.Contains("127.0.0.1:5466", refusal.Message, StringComparison.Ordinal);
-        Assert.Contains("testo_nowhere", refusal.Message, StringComparison.Ordinal);
+        Assert.Contains("autestiq_nowhere", refusal.Message, StringComparison.Ordinal);
         Assert.Contains("nobody", refusal.Message, StringComparison.Ordinal);
 
         // And what to do about it.

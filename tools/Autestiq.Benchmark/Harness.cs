@@ -307,7 +307,7 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
         AllowedOrigins: [],
         TrustedLocalOrigins: [origin],
         RunBudget.Default,
-        Directory.CreateTempSubdirectory("testo-benchmark-").FullName,
+        Directory.CreateTempSubdirectory("autestiq-benchmark-").FullName,
         task,
         plan,
         scenario.Secrets);

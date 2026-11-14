@@ -25,7 +25,7 @@ namespace Autestiq.Application.Tests.Support;
 /// </remarks>
 public sealed class TestDatabase : IAsyncDisposable
 {
-    private readonly string _databaseName = $"testo_test_{Guid.CreateVersion7():N}";
+    private readonly string _databaseName = $"autestiq_test_{Guid.CreateVersion7():N}";
     private readonly string _serverConnectionString;
 
     private TestDatabase(string serverConnectionString) => _serverConnectionString = serverConnectionString;

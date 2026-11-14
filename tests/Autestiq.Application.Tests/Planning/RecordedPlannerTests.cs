@@ -19,7 +19,7 @@ public class RecordedPlannerTests
     [Fact]
     public async Task PlanAsync_AnAnswerOnDisk_IsReplayedAtNoCost()
     {
-        var directory = Directory.CreateTempSubdirectory("testo-recordings-");
+        var directory = Directory.CreateTempSubdirectory("autestiq-recordings-");
 
         try
         {
@@ -56,7 +56,7 @@ public class RecordedPlannerTests
     [Fact]
     public async Task PlanAsync_AScenarioNobodyRecorded_SaysThereIsNoPlanner()
     {
-        var directory = Directory.CreateTempSubdirectory("testo-recordings-");
+        var directory = Directory.CreateTempSubdirectory("autestiq-recordings-");
 
         try
         {
@@ -77,7 +77,7 @@ public class RecordedPlannerTests
     [Fact]
     public void FromDirectory_ADirectoryThatIsNotThere_IsEmptyRatherThanAThrow()
     {
-        var planner = RecordedPlanner.FromDirectory(Path.Combine(Path.GetTempPath(), "testo-no-such-dir"));
+        var planner = RecordedPlanner.FromDirectory(Path.Combine(Path.GetTempPath(), "autestiq-no-such-dir"));
 
         Assert.Equal("recorded", planner.Model);
     }

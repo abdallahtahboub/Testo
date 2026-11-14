@@ -13,7 +13,7 @@ namespace Autestiq.E2E.Support;
 /// </remarks>
 internal sealed class E2EDatabase : IAsyncDisposable
 {
-    private readonly string _databaseName = $"testo_e2e_{Guid.CreateVersion7():N}";
+    private readonly string _databaseName = $"autestiq_e2e_{Guid.CreateVersion7():N}";
     private readonly string _serverConnectionString;
 
     private E2EDatabase(string serverConnectionString) => _serverConnectionString = serverConnectionString;

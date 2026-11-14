@@ -12,6 +12,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Testo.Application\Testo.Application.csproj" />
+
+    <!-- The provider adapter is not referenced by Testo.Application: the use cases depend on
+         IScenarioPlanner in Contracts, and the host chooses the adapter. The tests see both. -->
+    <ProjectReference Include="..\..\src\Testo.Ai\Testo.Ai.csproj" />
   </ItemGroup>
 
 </Project>

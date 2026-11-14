@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The adapters that speak to a model provider, and nothing else.
+
+       Its own project so that "provider-agnostic" is structural rather than aspirational: the
+       application depends on IScenarioPlanner in Testo.Contracts and never on a provider's wire
+       format, and a second provider is a second file in here.
+
+       No SDK: one HTTP call and System.Text.Json. A provider SDK would be a dependency, a release
+       cadence and a surface area, for a POST with four fields. -->
+
+  <ItemGroup>
+    <ProjectReference Include="../Testo.Contracts/Testo.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

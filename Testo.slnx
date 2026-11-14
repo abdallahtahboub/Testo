@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Testo.Ai/Testo.Ai.csproj" />
     <Project Path="src/Testo.Application/Testo.Application.csproj" />
     <Project Path="src/Testo.Capabilities.E2EWeb/Testo.Capabilities.E2EWeb.csproj" />
     <Project Path="src/Testo.Contracts/Testo.Contracts.csproj" />

@@ -55,6 +55,7 @@ src/
   Testo.Domain                   // BUILT (M3): entities and rules (ADR-0014)
   Testo.Application              // BUILT (M3): use cases; implements the Contracts interfaces
   Testo.Persistence              // BUILT (M3): EF Core, PostgreSQL, migrations
+  Testo.Ai                       // BUILT (M3.4): the provider adapters. Contracts only
   Testo.DemoShop                 // BUILT (M3.3): the website the slice runs against. Not the product
   Testo.Worker                   // BUILT (M3.3): drives a browser, out of process, in a container
   Testo.Api                      // PLANNED: REST host for CI integrations, over the same use cases

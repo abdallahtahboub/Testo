@@ -88,7 +88,9 @@ public class LanguageTests(AppFixture app) : BrowserTest(app)
         await page.Page.WaitUntilInteractiveAsync();
         await Expect(page.Page.GetByTestId("formats")).ToContainTextAsync("1,234,567.89");
 
-        await page.Page.LanguageButton("Deutsch").ClickAsync();
+        // Page-wide, not the header-scoped locator the public tests use: an app page has its own
+        // chrome and one language switch, so there is nothing here to be ambiguous with.
+        await page.Page.SwitchButton("Deutsch").ClickAsync();
 
         await Expect(page.Page.Locator("h1")).ToHaveTextAsync("Vorschau der App-Shell");
         await page.Page.WaitUntilInteractiveAsync();

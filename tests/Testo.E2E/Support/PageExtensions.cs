@@ -6,12 +6,14 @@ namespace Testo.E2E.Support;
 internal static class PageExtensions
 {
     /// <summary>
-    /// A button of the theme switch, found by its accessible name.
+    /// A button of a theme or language switch, found anywhere on the page by its accessible name.
     /// </summary>
     /// <remarks>
-    /// Page-wide, because the theme switch appears once — including on app pages, which have no
-    /// site header to scope to. The language switch is a different matter; see
-    /// <see cref="LanguageButton"/>.
+    /// Use this where the control appears once: the theme switch, and anything on an app page,
+    /// which has its own chrome and no site header to scope to. On a public page the language
+    /// switch appears twice, so use <see cref="LanguageButton"/> there — and note that scoping
+    /// this one to the header instead would break the app tests, which is how that mistake was
+    /// found the first time.
     /// </remarks>
     public static ILocator SwitchButton(this IPage page, string name) =>
         page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = name, Exact = true });

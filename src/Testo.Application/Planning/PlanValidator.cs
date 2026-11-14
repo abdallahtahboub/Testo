@@ -202,6 +202,13 @@ public static class PlanValidator
             return null;
         }
 
+        if (action.Kind == ActionKind.AssertNotVisible)
+        {
+            // An absence the crawl also did not see is the ordinary case for this action, and
+            // saying so on every run would teach a person to skip the notes.
+            return null;
+        }
+
         return $"The step “{action.Description}” acts on {target}, which was not on any page "
             + "the crawl saw. That is normal for something that appears only once the test has acted, "
             + "and a mistake otherwise.";

@@ -181,6 +181,35 @@ public class PlanValidatorTests
     }
 
     [Fact]
+    public void Review_AnAbsenceTheCrawlAlsoDidNotSee_IsNotWorthANote()
+    {
+        // The ordinary case for assert-not-visible: the whole point is that the thing is not there.
+        // A note on every one of them would teach a person to stop reading the notes (ADR-0019 §2).
+        var review = PlanValidator.Review(
+            Plan(
+                Goto("/"),
+                new PlannedAction(ActionKind.AssertNotVisible, "No basket line yet", ActionTarget.ByTestId("line-pot"))),
+            Shop,
+            maxActions: 20);
+
+        Assert.True(review.Allowed);
+        Assert.Empty(review.Notes);
+    }
+
+    [Fact]
+    public void Review_APlanWhoseOnlyCheckIsAnAbsence_Counts_AsCheckingSomething()
+    {
+        var review = PlanValidator.Review(
+            Plan(
+                Goto("/"),
+                new PlannedAction(ActionKind.AssertNotVisible, "Nothing is in the basket", ActionTarget.ByTestId("line-pot"))),
+            Shop,
+            maxActions: 20);
+
+        Assert.DoesNotContain(PlanningErrors.NoAssertions, review.Errors);
+    }
+
+    [Fact]
     public void Review_APlanThatACrawledPageTriedToTalkThePlannerInto_IsStillRefused()
     {
         // The whole attack, end to end, on the one page that carries it: a page whose visible text

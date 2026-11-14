@@ -54,8 +54,23 @@ to compare it against.
 ### 2. The vocabulary is closed, and cannot express code
 
 The plan is a list of actions drawn from a fixed set: `goto`, `click`, `type`, `press`, `wait-for`,
-`assert-text`, `assert-visible`, `assert-url`. Each action's target is **either** a test id **or** a
-role plus an accessible name — never a CSS selector, never an XPath, never a script.
+`assert-text`, `assert-visible`, `assert-not-visible`, `assert-url`. Each action's target is
+**either** a test id **or** a role plus an accessible name — never a CSS selector, never an XPath,
+never a script.
+
+**Amended 2026-11-14: `assert-not-visible` was added, after measuring.** The first benchmark run
+against a real model asked for it three times and gave its reason each time: "the cup is gone from
+the basket", "there is no way to place an order", "the error is no longer shown". Half of what a
+person wants checked is an absence, and a vocabulary that can only assert presence pushes a plan
+into asserting some *other* presence instead — which passes whether or not the thing under test
+worked. That is the false-positive shape §7 exists to count, written into the vocabulary.
+
+Adding it costs nothing on the boundary, which is why it was allowed: the executor must locate the
+element either way, so there is no new capability, no new field, and nothing a page could talk the
+planner into that it could not before. The validator treats an unseen target for this action as
+ordinary rather than noteworthy, since an absence the crawl also did not see is the normal case.
+Growing the vocabulary stays a decision recorded here, and `PlanVocabularyTests` is where an
+unrecorded one gets noticed.
 
 This is a property of the type, not of a check somewhere: there is no field in which a selector or a
 script could be written, so `page.evaluate(what_the_model_said)` is not something we have decided

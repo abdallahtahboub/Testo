@@ -27,35 +27,8 @@
   <data name="Error_Title" xml:space="preserve">
     <value>Etwas ist schiefgelaufen</value>
   </data>
-  <data name="Home_Card_Languages_Text" xml:space="preserve">
-    <value>Jeder Text liegt in beiden Sprachen vor. Öffentliche Seiten tragen die Sprache in ihrer Adresse.</value>
-  </data>
-  <data name="Home_Card_Languages_Title" xml:space="preserve">
-    <value>Englisch und Deutsch</value>
-  </data>
-  <data name="Home_Card_Themes_Text" xml:space="preserve">
-    <value>Das Farbschema folgt dem System oder Ihrer Auswahl – ohne kurzes Aufblitzen des falschen Schemas.</value>
-  </data>
-  <data name="Home_Card_Themes_Title" xml:space="preserve">
-    <value>Hell und dunkel</value>
-  </data>
-  <data name="Home_Card_Tokens_Text" xml:space="preserve">
-    <value>Farben, Schrift, Abstände und Bewegung stammen aus einer einzigen Token-Datei. Jede Komponente nutzt sie.</value>
-  </data>
-  <data name="Home_Card_Tokens_Title" xml:space="preserve">
-    <value>Design-Tokens</value>
-  </data>
-  <data name="Home_Foundation_Intro" xml:space="preserve">
-    <value>Meilenstein 1 legt das Fundament, auf dem alle weiteren Seiten aufbauen.</value>
-  </data>
-  <data name="Home_Foundation_Title" xml:space="preserve">
-    <value>Was diese Vorschau zeigt</value>
-  </data>
   <data name="Home_Hero_Lead" xml:space="preserve">
-    <value>{0} begleitet den gesamten Testprozess: Planung, Analyse, Entwurf, Durchführung, Fehlermanagement und Reporting. Diese Vorschau zeigt das Fundament; die vollständige Website folgt.</value>
-  </data>
-  <data name="Home_Hero_OpenApp" xml:space="preserve">
-    <value>App-Vorschau öffnen</value>
+    <value>{0} folgt den sechs Phasen eines Testprozesses und behält den Faden dazwischen. Eine der sechs ist heute gebaut – und jede Seite dieser Website sagt, welche.</value>
   </data>
   <data name="Home_Hero_Overline" xml:space="preserve">
     <value>KI-gestützte QA-Plattform</value>
@@ -64,7 +37,7 @@
     <value>Qualität, die man sieht – von der Anforderung bis zum Release</value>
   </data>
   <data name="Home_MetaDescription" xml:space="preserve">
-    <value>{0} begleitet den gesamten Softwaretest – von den Anforderungen bis zur Release-Freigabe.</value>
+    <value>{0} begleitet den gesamten Testprozess – von der Anforderung bis zum Release. Eine der sechs Phasen ist heute gebaut, und jede Seite sagt, welche.</value>
   </data>
   <data name="NotFound_App" xml:space="preserve">
     <value>App öffnen</value>
@@ -1682,5 +1655,77 @@
   </data>
   <data name="Social_Card_Alt" xml:space="preserve">
     <value>Das Logo von {0} neben den Worten „Qualität, die man sieht – von der Anforderung bis zum Release“.</value>
+  </data>
+  <data name="Home_Hero_SeeARun" xml:space="preserve">
+    <value>Einen echten Testlauf ansehen</value>
+  </data>
+  <data name="Home_State_Now_Label" xml:space="preserve">
+    <value>Was heute real ist</value>
+  </data>
+  <data name="Home_State_Now_Text" xml:space="preserve">
+    <value>Die Testdurchführung. Ein Browser bedient eine Webanwendung außerhalb des Prozesses, jeder Schritt behält ein Bildschirmfoto und seine Zeiten, und keine Organisation sieht die Läufe einer anderen. Konten, Rollen und das Prüfprotokoll sind ebenfalls real.</value>
+  </data>
+  <data name="Home_State_Now_Link" xml:space="preserve">
+    <value>Genau sehen, was es leistet</value>
+  </data>
+  <data name="Home_State_Next_Label" xml:space="preserve">
+    <value>Was noch nicht gebaut ist</value>
+  </data>
+  <data name="Home_State_Next_Text" xml:space="preserve">
+    <value>Die anderen fünf Phasen – Planung, Analyse, Entwurf, Fehler und Berichte – sind entworfen und dokumentiert, aber keine läuft. Jede Seite sagt das, statt einen Plan in der Gegenwartsform zu beschreiben.</value>
+  </data>
+  <data name="Home_State_Next_Link" xml:space="preserve">
+    <value>Der gesamte Prozess, Phase für Phase</value>
+  </data>
+  <data name="Home_Why_Title" xml:space="preserve">
+    <value>Warum noch ein Testwerkzeug</value>
+  </data>
+  <data name="Home_Why_Intro" xml:space="preserve">
+    <value>Weil die Zahl, die die meisten Werkzeuge zeigen, am leichtesten zu erzeugen und am schwersten zu nutzen ist.</value>
+  </data>
+  <data name="Home_Pillar_Evidence_Title" xml:space="preserve">
+    <value>Ein überprüfbares Urteil</value>
+  </data>
+  <data name="Home_Pillar_Evidence_Text" xml:space="preserve">
+    <value>Jeder Schritt behält ein Bildschirmfoto und einen Zeitstempel – ein Fehler kommt also mit dem Bild dessen, was die Anwendung tatsächlich gezeigt hat, statt jemanden zum Nachstellen zu schicken.</value>
+  </data>
+  <data name="Home_Pillar_Journey_Title" xml:space="preserve">
+    <value>Ein Faden von der Anforderung bis zum Release</value>
+  </data>
+  <data name="Home_Pillar_Journey_Text" xml:space="preserve">
+    <value>Pläne, Anforderungen, Testfälle, Läufe und Fehler als dieselben Daten – die Abdeckung wird abgeleitet statt in der Nacht vor dem Release aus vier Werkzeugen zusammengetragen.</value>
+  </data>
+  <data name="Home_Pillar_Bounded_Title" xml:space="preserve">
+    <value>KI, die plant – nie KI, die improvisiert</value>
+  </data>
+  <data name="Home_Pillar_Bounded_Text" xml:space="preserve">
+    <value>Ein Modell wählt aus einer festen Menge von Browser-Aktionen, und seine Ausgabe wird vor jeder Ausführung geprüft. Sie wird nie als Code ausgeführt – und wir veröffentlichen, wie oft sie falsch liegt.</value>
+  </data>
+  <data name="Home_Journey_Title" xml:space="preserve">
+    <value>Die sechs Phasen</value>
+  </data>
+  <data name="Home_Journey_Intro" xml:space="preserve">
+    <value>Ein Testprozess, keine Funktionsliste. Jede Phase hat eine Seite, und jede Seite sagt, was heute existiert.</value>
+  </data>
+  <data name="Home_Proof_Title" xml:space="preserve">
+    <value>Wo die Kundenlogos stünden</value>
+  </data>
+  <data name="Home_Proof_Lead" xml:space="preserve">
+    <value>Es gibt keine – also steht hier nichts.</value>
+  </data>
+  <data name="Home_Proof_Text" xml:space="preserve">
+    <value>Eine Reihe von Logos von Unternehmen, die dies nicht genutzt haben, wäre das Unehrlichste auf dieser Website – und genau so etwas prüfen Käufer nach. Wenn ein Team es genutzt hat und das sagen möchte, steht sein Name hier, mit Einverständnis und nicht früher.</value>
+  </data>
+  <data name="Home_Proof_Link" xml:space="preserve">
+    <value>Was wir im Voraus entschieden haben</value>
+  </data>
+  <data name="Home_Cta_Title" xml:space="preserve">
+    <value>Sehen Sie es an etwas Echtem</value>
+  </data>
+  <data name="Home_Cta_Intro" xml:space="preserve">
+    <value>Eine halbe Stunde, ein Browser, der eine Anwendung bedient – und eine klare Auskunft über den Rest.</value>
+  </data>
+  <data name="Home_Cta_Contact" xml:space="preserve">
+    <value>Lieber eine Frage stellen</value>
   </data>
 </root>

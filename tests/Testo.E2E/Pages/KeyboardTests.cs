@@ -39,14 +39,30 @@ public class KeyboardTests(AppFixture app) : BrowserTest(app)
         var page = await OpenAsync("/en");
         var stops = new List<string>();
 
-        for (var index = 0; index < 9; index++)
+        // Far enough to get through the brand, every menu section and the tools. The icons inside
+        // the menu summaries are decorative, so each summary's name is its one word.
+        for (var index = 0; index < 13; index++)
         {
             await page.Page.Keyboard.PressAsync("Tab");
             stops.Add(await FocusedNameAsync(page.Page));
         }
 
         Assert.Equal(
-            ["Skip to main content", "Testo home page", "EN English", "DE Deutsch", "Light", "Dark", "Same as system", "Open app", "Open the app preview"],
+            [
+                "Skip to main content",
+                "Testo home page",
+                "Product",
+                "Solutions",
+                "Resources",
+                "Company",
+                "Pricing",
+                "EN English",
+                "DE Deutsch",
+                "Light",
+                "Dark",
+                "Same as system",
+                "Sign in",
+            ],
             stops);
     }
 

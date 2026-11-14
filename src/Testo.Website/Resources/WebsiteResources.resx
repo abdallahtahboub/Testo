@@ -27,35 +27,8 @@
   <data name="Error_Title" xml:space="preserve">
     <value>Something went wrong</value>
   </data>
-  <data name="Home_Card_Languages_Text" xml:space="preserve">
-    <value>Every text exists in both languages. Public pages carry the language in their address.</value>
-  </data>
-  <data name="Home_Card_Languages_Title" xml:space="preserve">
-    <value>English and German</value>
-  </data>
-  <data name="Home_Card_Themes_Text" xml:space="preserve">
-    <value>The theme follows your system or your own choice, and the page never flashes the wrong one.</value>
-  </data>
-  <data name="Home_Card_Themes_Title" xml:space="preserve">
-    <value>Light and dark</value>
-  </data>
-  <data name="Home_Card_Tokens_Text" xml:space="preserve">
-    <value>Colors, type, spacing and motion come from one token file. Every component uses it.</value>
-  </data>
-  <data name="Home_Card_Tokens_Title" xml:space="preserve">
-    <value>Design tokens</value>
-  </data>
-  <data name="Home_Foundation_Intro" xml:space="preserve">
-    <value>Milestone 1 lays the groundwork that every later page builds on.</value>
-  </data>
-  <data name="Home_Foundation_Title" xml:space="preserve">
-    <value>What this preview shows</value>
-  </data>
   <data name="Home_Hero_Lead" xml:space="preserve">
-    <value>{0} supports the whole testing journey: planning, analysis, design, execution, defects and reporting. This preview shows the foundation; the full website follows.</value>
-  </data>
-  <data name="Home_Hero_OpenApp" xml:space="preserve">
-    <value>Open the app preview</value>
+    <value>{0} follows the six stages of a testing process and keeps the thread between them. One of the six is built today — and every page on this site says which.</value>
   </data>
   <data name="Home_Hero_Overline" xml:space="preserve">
     <value>AI-assisted QA platform</value>
@@ -64,7 +37,7 @@
     <value>Quality you can see, from requirement to release</value>
   </data>
   <data name="Home_MetaDescription" xml:space="preserve">
-    <value>{0} supports the whole software testing journey, from requirements to release sign-off.</value>
+    <value>{0} covers the whole testing journey, from requirement to release. One of the six stages is built today, and every page says which.</value>
   </data>
   <data name="NotFound_App" xml:space="preserve">
     <value>Open the app</value>
@@ -1682,5 +1655,77 @@
   </data>
   <data name="Social_Card_Alt" xml:space="preserve">
     <value>The {0} logo beside the words “Quality you can see, from requirement to release”.</value>
+  </data>
+  <data name="Home_Hero_SeeARun" xml:space="preserve">
+    <value>See a real test run</value>
+  </data>
+  <data name="Home_State_Now_Label" xml:space="preserve">
+    <value>What is real today</value>
+  </data>
+  <data name="Home_State_Now_Text" xml:space="preserve">
+    <value>Test execution. A browser is driven against a web application out of process, every step keeps a screenshot and its timings, and one organisation cannot see another’s runs. Accounts, roles and the audit trail are real too.</value>
+  </data>
+  <data name="Home_State_Now_Link" xml:space="preserve">
+    <value>See exactly what it does</value>
+  </data>
+  <data name="Home_State_Next_Label" xml:space="preserve">
+    <value>What is not built yet</value>
+  </data>
+  <data name="Home_State_Next_Text" xml:space="preserve">
+    <value>The other five stages — planning, analysis, design, defects and reporting — are designed and written down, and none of them is running. Each page says so rather than describing a plan in the present tense.</value>
+  </data>
+  <data name="Home_State_Next_Link" xml:space="preserve">
+    <value>The whole journey, stage by stage</value>
+  </data>
+  <data name="Home_Why_Title" xml:space="preserve">
+    <value>Why another testing tool</value>
+  </data>
+  <data name="Home_Why_Intro" xml:space="preserve">
+    <value>Because the number most tools show you is the one that is easiest to produce and hardest to act on.</value>
+  </data>
+  <data name="Home_Pillar_Evidence_Title" xml:space="preserve">
+    <value>A verdict you can check</value>
+  </data>
+  <data name="Home_Pillar_Evidence_Text" xml:space="preserve">
+    <value>Every step keeps a screenshot and a timestamp, so a failure arrives with the picture of what the application actually showed instead of sending somebody to reproduce it.</value>
+  </data>
+  <data name="Home_Pillar_Journey_Title" xml:space="preserve">
+    <value>One thread from requirement to release</value>
+  </data>
+  <data name="Home_Pillar_Journey_Text" xml:space="preserve">
+    <value>Plans, requirements, cases, runs and defects as the same data, so coverage is derived rather than assembled from four tools the night before a release.</value>
+  </data>
+  <data name="Home_Pillar_Bounded_Title" xml:space="preserve">
+    <value>AI that plans, never AI that improvises</value>
+  </data>
+  <data name="Home_Pillar_Bounded_Text" xml:space="preserve">
+    <value>A model chooses from a fixed set of browser actions and its output is checked before anything runs. It is never executed as code, and we publish how often it is wrong.</value>
+  </data>
+  <data name="Home_Journey_Title" xml:space="preserve">
+    <value>The six stages</value>
+  </data>
+  <data name="Home_Journey_Intro" xml:space="preserve">
+    <value>A testing process, not a feature list. Each stage has a page, and each page says what exists today.</value>
+  </data>
+  <data name="Home_Proof_Title" xml:space="preserve">
+    <value>Where the customer logos would be</value>
+  </data>
+  <data name="Home_Proof_Lead" xml:space="preserve">
+    <value>There are none, so there is nothing here.</value>
+  </data>
+  <data name="Home_Proof_Text" xml:space="preserve">
+    <value>A row of logos belonging to companies that have not used this would be the most dishonest thing on the site, and it is the kind of thing a buyer checks. When a team has used it and is willing to say so, their name will be here with their permission and not before.</value>
+  </data>
+  <data name="Home_Proof_Link" xml:space="preserve">
+    <value>What we have decided in advance</value>
+  </data>
+  <data name="Home_Cta_Title" xml:space="preserve">
+    <value>See it on something real</value>
+  </data>
+  <data name="Home_Cta_Intro" xml:space="preserve">
+    <value>Half an hour, a browser driven against an application, and a straight answer about the rest.</value>
+  </data>
+  <data name="Home_Cta_Contact" xml:space="preserve">
+    <value>Ask a question instead</value>
   </data>
 </root>

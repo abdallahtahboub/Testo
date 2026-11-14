@@ -6,10 +6,14 @@ using static Microsoft.Playwright.Assertions;
 namespace Testo.E2E.Pages;
 
 /// <summary>
-/// The smoke test every page gets: it loads, has the right title and exactly one main
+/// The smoke test every app page gets: it loads, has the right title and exactly one main
 /// heading, the browser reports no problems, and the accessibility scan is clean in the
 /// light and in the dark theme.
 /// </summary>
+/// <remarks>
+/// The public website has its own, driven from the page catalogue so that a page cannot be added
+/// without one: <c>PublicSiteSmokeTests</c>.
+/// </remarks>
 public class PageSmokeTests(AppFixture app) : BrowserTest(app)
 {
     public static TheoryData<string, string, string, string, ColorScheme> Pages
@@ -19,8 +23,8 @@ public class PageSmokeTests(AppFixture app) : BrowserTest(app)
             var pages = new TheoryData<string, string, string, string, ColorScheme>();
             foreach (var scheme in new[] { ColorScheme.Light, ColorScheme.Dark })
             {
-                pages.Add("/en", "en", "Testo – AI-assisted QA platform", "Quality you can see, from requirement to release", scheme);
-                pages.Add("/de", "de", "Testo – KI-gestützte QA-Plattform", "Qualität, die man sieht – von der Anforderung bis zum Release", scheme);
+                // The public website is covered page by page, in both languages, by
+                // PublicSiteSmokeTests. What is left here is the product behind the sign-in.
                 pages.Add("/app", "en", "App preview – Testo", "App shell preview", scheme);
                 pages.Add(Routes.Runs, "en", "Test runs – Testo", "Test runs", scheme);
 

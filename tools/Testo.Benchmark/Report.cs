@@ -55,6 +55,7 @@ public static class Report
         Row(text, "**False positives** (passed a broken shop)", sources, measurements, group => Count(group, Verdict.FalsePositive));
         Row(text, "False negatives (failed a sound shop)", sources, measurements, group => Count(group, Verdict.FalseNegative));
         Row(text, "Correct verdicts", sources, measurements, group => Count(group, Verdict.Correct));
+        Row(text, "Failed the broken shop *and* the sound one", sources, measurements, group => Count(group, Verdict.FailedRegardless));
         Row(text, "Never reached a verdict", sources, measurements, group => Count(group, Verdict.Inconclusive));
         Row(text, "Scenarios that flaked", sources, measurements, group => group.Count(m => m.Flaked).ToString(CultureInfo.InvariantCulture));
         Row(text, "Could not be planned", sources, measurements, group => group.Count(m => m.PlanningErrors.Count > 0).ToString(CultureInfo.InvariantCulture));
@@ -136,6 +137,12 @@ public static class Report
         a person an afternoon. A false positive converts an absence of testing into an assurance of
         quality, which is worse than having no tests at all, because somebody then ships on it.
 
+        **"Detected nothing" is a third outcome, and it exists because the first real measurement
+        needed it.** A plan that fails the broken shop *and* the sound one has not found the defect;
+        it fails at everything, and one of the things it fails at happens to be broken. Counting
+        those as correct verdicts turned "one defect genuinely caught out of six" into "five of six",
+        which is the sort of number a benchmark exists to prevent.
+
         Flake is measured across repeated **executions** of the same plan, so it describes the
         application and our runner, not the model's variation between answers. That is a different
         question and it is not answered here.
@@ -195,6 +202,7 @@ public static class Report
         Verdict.Correct => "correct",
         Verdict.FalsePositive => "**false positive**",
         Verdict.FalseNegative => "false negative",
+        Verdict.FailedRegardless => "detected nothing",
         _ => "inconclusive",
     };
 
@@ -202,7 +210,7 @@ public static class Report
     {
         PlanningErrors.NoPlanner => "no planner configured",
         PlanningErrors.ProviderUnavailable => "the provider could not be reached",
-        PlanningErrors.ProviderRefusedTheKey => "the provider refused the key (401 or 403): it is wrong, expired, or not a key for this API",
+        PlanningErrors.ProviderRefusedTheKey => "the provider refused the key (401 or 403): it is wrong, truncated, expired or revoked",
         PlanningErrors.Unreadable => "the answer was not a plan",
         PlanningErrors.ForeignOrigin => "a path named somewhere other than the shop",
         PlanningErrors.NoAssertions => "the plan checked nothing",

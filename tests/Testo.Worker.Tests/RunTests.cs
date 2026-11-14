@@ -15,12 +15,24 @@ public class RunTests(DemoShopFixture shop)
     [Fact]
     public async Task ARunThatPasses_ReportsEveryStepAndAScreenshotForEach()
     {
-        var result = await RunAsync(Catalogue.DemoShopBasket);
+        var result = await RunAsync(Catalogue.DemoShopBasket, out var artifacts);
 
         Assert.Equal(RunStatus.Passed, result.Status);
         Assert.Null(result.FailureReason);
         Assert.All(result.Steps, step => Assert.Equal(StepStatus.Passed, step.Status));
-        Assert.All(result.Steps, step => Assert.NotNull(step.ScreenshotFile));
+
+        // A passed step has nothing to say unless something went wrong collecting its evidence, so
+        // this assertion is also the diagnosis: a missing screenshot names its own reason here.
+        Assert.All(result.Steps, step => Assert.Null(step.Message));
+
+        // The file, not just the name of one. A name pointing at nothing is not evidence.
+        Assert.All(result.Steps, step =>
+        {
+            Assert.NotNull(step.ScreenshotFile);
+            Assert.True(
+                File.Exists(Path.Combine(artifacts, step.ScreenshotFile!)),
+                $"step {step.Order} reported {step.ScreenshotFile} and there is no such file.");
+        });
 
         // Something was actually fetched, which the budget counts and the record keeps.
         Assert.True(result.BytesDownloaded > 0);

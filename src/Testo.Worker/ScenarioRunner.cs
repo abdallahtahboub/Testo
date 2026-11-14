@@ -156,23 +156,31 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
         {
             await step.Run(page, budget).ConfigureAwait(false);
 
+            var evidence = await CaptureAsync(page, job, index + 1).ConfigureAwait(false);
+
             steps[index] = steps[index] with
             {
                 Status = StepStatus.Passed,
                 FinishedAt = timeProvider.GetUtcNow(),
-                ScreenshotFile = await CaptureAsync(page, job, index + 1).ConfigureAwait(false),
+
+                // A step that passed usually has nothing to say. When its screenshot could not be
+                // taken it does: evidence that goes missing quietly is the same as no evidence.
+                Message = evidence.Problem,
+                ScreenshotFile = evidence.File,
             };
 
             return null;
         }
         catch (OperationCanceledException)
         {
+            var evidence = await CaptureAsync(page, job, index + 1).ConfigureAwait(false);
+
             steps[index] = steps[index] with
             {
                 Status = StepStatus.Failed,
                 FinishedAt = timeProvider.GetUtcNow(),
-                Message = "The run was stopped before this step finished.",
-                ScreenshotFile = await CaptureAsync(page, job, index + 1).ConfigureAwait(false),
+                Message = Say("The run was stopped before this step finished.", evidence.Problem),
+                ScreenshotFile = evidence.File,
             };
 
             return budget.IsCancellationRequested ? RunStatus.TimedOut : RunStatus.Cancelled;
@@ -181,39 +189,85 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
         {
             // What the application under test did, or did not do. A screenshot of the moment is
             // the difference between a failure somebody can act on and a line in a log.
+            var evidence = await CaptureAsync(page, job, index + 1).ConfigureAwait(false);
+
             steps[index] = steps[index] with
             {
                 Status = StepStatus.Failed,
                 FinishedAt = timeProvider.GetUtcNow(),
-                Message = FirstLine(exception.Message),
-                ScreenshotFile = await CaptureAsync(page, job, index + 1).ConfigureAwait(false),
+                Message = Say(FirstLine(exception.Message), evidence.Problem),
+                ScreenshotFile = evidence.File,
             };
 
             return RunStatus.Failed;
         }
     }
 
-    /// <summary>A screenshot at the end of a step, named by its number. Best effort.</summary>
-    private static async Task<string?> CaptureAsync(IPage page, WorkerJob job, int stepNumber)
+    /// <summary>A screenshot, or the reason there is none.</summary>
+    /// <param name="File">The file inside the job's artifact directory, or <c>null</c>.</param>
+    /// <param name="Problem">Why there is no screenshot, when there is none.</param>
+    private readonly record struct Evidence(string? File, string? Problem);
+
+    /// <summary>
+    /// A screenshot at the end of a step, named by its number.
+    /// </summary>
+    /// <remarks>
+    /// A step that clicks something which submits a form leaves the page navigating, and a
+    /// screenshot taken in that moment is refused by the browser. That is how a CI run lost the
+    /// evidence of a step that had passed, so the page is given a moment to settle first and one
+    /// retry after that. A run is still more useful without one screenshot than not at all, so a
+    /// failure here never fails the run — but it is always reported, because evidence that
+    /// disappears quietly is indistinguishable from evidence nobody collected.
+    /// </remarks>
+    private static async Task<Evidence> CaptureAsync(IPage page, WorkerJob job, int stepNumber)
     {
         var file = $"step-{stepNumber:D3}.png";
 
         try
         {
             Directory.CreateDirectory(job.ArtifactDirectory);
-            await page.ScreenshotAsync(new PageScreenshotOptions
-            {
-                Path = Path.Combine(job.ArtifactDirectory, file),
-            }).ConfigureAwait(false);
-
-            return file;
+            return new Evidence(await ShootAsync(page, job, file).ConfigureAwait(false), null);
         }
-        catch (Exception exception) when (exception is PlaywrightException or IOException)
+        catch (Exception first) when (IsCaptureProblem(first))
         {
-            // A run that fails is more useful without its screenshot than not at all.
-            return null;
+            try
+            {
+                return new Evidence(await ShootAsync(page, job, file).ConfigureAwait(false), null);
+            }
+            catch (Exception again) when (IsCaptureProblem(again))
+            {
+                return new Evidence(null, $"No screenshot of this step: {FirstLine(again.Message)}");
+            }
         }
     }
+
+    private static async Task<string> ShootAsync(IPage page, WorkerJob job, string file)
+    {
+        // Settling is best effort: a page that never finishes loading is still worth a picture.
+        try
+        {
+            await page.WaitForLoadStateAsync(LoadState.Load, new PageWaitForLoadStateOptions { Timeout = 5_000 })
+                .ConfigureAwait(false);
+        }
+        catch (Exception exception) when (IsCaptureProblem(exception))
+        {
+            // Nothing to do about it here; the screenshot below either works or is reported.
+        }
+
+        await page.ScreenshotAsync(new PageScreenshotOptions
+        {
+            Path = Path.Combine(job.ArtifactDirectory, file),
+        }).ConfigureAwait(false);
+
+        return file;
+    }
+
+    private static bool IsCaptureProblem(Exception exception) =>
+        exception is PlaywrightException or TimeoutException or IOException;
+
+    /// <summary>Joins what happened with anything that went wrong collecting the evidence.</summary>
+    private static string Say(string what, string? problem) =>
+        problem is null ? what : $"{what} {problem}";
 
     private static void Skip(List<WorkerStepResult> steps, int from)
     {

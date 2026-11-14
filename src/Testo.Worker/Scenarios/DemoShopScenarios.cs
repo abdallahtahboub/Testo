@@ -44,6 +44,11 @@ public static class DemoShopScenarios
                 {
                     await page.GotoAsync("/");
                     await page.GetByTestId("add-cup").ClickAsync();
+
+                    // A step is not finished when the click is dispatched; it is finished when the
+                    // application has done the thing. Without this the step passes while the page
+                    // is still moving, which is both a weaker check and a race with the screenshot.
+                    await Assertions.Expect(page.GetByTestId("line-cup")).ToBeVisibleAsync();
                 }),
                 new("The basket lists both items", async (page, _) =>
                 {
@@ -66,11 +71,13 @@ public static class DemoShopScenarios
                 {
                     await page.GotoAsync("/");
                     await page.GetByTestId("add-pot").ClickAsync();
+                    await Assertions.Expect(page.GetByTestId("line-pot")).ToBeVisibleAsync();
                 }),
                 new("Add the cup", async (page, _) =>
                 {
                     await page.GotoAsync("/");
                     await page.GetByTestId("add-cup").ClickAsync();
+                    await Assertions.Expect(page.GetByTestId("line-cup")).ToBeVisibleAsync();
                 }),
                 new("The basket shows two items", async (page, _) =>
                 {

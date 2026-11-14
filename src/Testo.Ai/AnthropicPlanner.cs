@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -85,10 +86,17 @@ public sealed class AnthropicPlanner(HttpClient client, PlannerOptions options, 
 
             if (!response.IsSuccessStatusCode)
             {
-                // The status, not the body: a provider's error body can carry the prompt back,
+                // The status, never the body: a provider's error body can carry the prompt back,
                 // and the prompt contains the application under test.
+                //
+                // 401 and 403 are told apart from everything else because they need the opposite
+                // response. "Could not be reached" sends somebody to check their network when the
+                // answer is a key in their console — which is exactly what happened the first time
+                // a person ran this.
+                var refused = response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden;
+
                 return PlanResult.Failed(
-                    [PlanningErrors.ProviderUnavailable],
+                    [refused ? PlanningErrors.ProviderRefusedTheKey : PlanningErrors.ProviderUnavailable],
                     Spent(0, 0, started),
                     Model);
             }

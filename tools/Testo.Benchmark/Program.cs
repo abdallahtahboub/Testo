@@ -50,9 +50,15 @@ var measurements = await harness.RunAsync(scenarios, stopping.Token);
 
 foreach (var measurement in measurements)
 {
+    // The reason, not just "no plan". Somebody watching a run of thirty-six lines scroll past
+    // should not have to open a markdown file to find out that their key was refused.
+    var outcome = measurement.PlanningErrors.Count > 0
+        ? "no plan — " + string.Join(", ", measurement.PlanningErrors.Select(Explain))
+        : measurement.Verdict.ToString();
+
     Console.WriteLine(
         $"  {measurement.Scenario.Id,-34} defect={(measurement.DefectOn ? "on " : "off")} "
-        + $"{measurement.Source,-18} {(measurement.PlanningErrors.Count > 0 ? "no plan" : measurement.Verdict.ToString())}");
+        + $"{measurement.Source,-18} {outcome}");
 }
 
 var report = Report.Write(measurements, options.Repetitions, DateTimeOffset.UtcNow);
@@ -78,6 +84,25 @@ if (falsePositives > 0)
 }
 
 return falsePositives > 0 && options.FailOnFalsePositive ? 1 : 0;
+
+// One sentence per resource key, for the console. The report has its own copy for markdown.
+static string Explain(string error) => error switch
+{
+    PlanningErrors.ProviderRefusedTheKey =>
+        "the provider refused the key (401 or 403). Check PLANNER__APIKEY: a console API key starts "
+        + "sk-ant-api, and a user or CLI token will not work with this API",
+    PlanningErrors.ProviderUnavailable => "the provider could not be reached",
+    PlanningErrors.NoPlanner => "no planner is configured",
+    PlanningErrors.Unreadable => "the answer was not a plan",
+    PlanningErrors.ForeignOrigin => "the plan named somewhere other than the shop",
+    PlanningErrors.NoAssertions => "the plan checked nothing",
+    PlanningErrors.TooManyActions => "the plan was longer than the budget",
+    PlanningErrors.UnknownAction => "the plan used an action that does not exist",
+    PlanningErrors.UnknownTarget => "a target was named in a way that is not allowed",
+    PlanningErrors.Incomplete => "an action was missing something it needs",
+    PlanningErrors.BudgetSpent => "planning spent the run's token or money budget",
+    _ => error,
+};
 
 static IScenarioPlanner? Planner(BenchmarkOptions options)
 {

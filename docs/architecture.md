@@ -58,6 +58,10 @@ src/
   Testo.Ai                       // BUILT (M3.4): the provider adapters. Contracts only
   Testo.DemoShop                 // BUILT (M3.3): the website the slice runs against. Not the product
   Testo.Worker                   // BUILT (M3.3): drives a browser, out of process, in a container
+
+tools/
+  Testo.Benchmark                // BUILT (M3.4): measures the planner against the baseline.
+                                 // Not shipped; run by hand, and in CI for its self-check
   Testo.Api                      // PLANNED: REST host for CI integrations, over the same use cases
 tests/
   Testo.UI.Tests                 // bUnit: UI.Shared components + module components

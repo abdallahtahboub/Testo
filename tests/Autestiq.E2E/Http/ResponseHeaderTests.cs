@@ -22,7 +22,7 @@ public class ResponseHeaderTests(AppFixture app) : HttpTest(app)
     [Fact]
     public async Task PublicPage_ServerRendersTheThemeFromTheCookie()
     {
-        using var response = await GetAsync("/en", ("Cookie", "testo.theme=dark"));
+        using var response = await GetAsync("/en", ("Cookie", "autestiq.theme=dark"));
         var html = await response.Content.ReadAsStringAsync(Cancellation);
 
         Assert.Contains("<html lang=\"en\" data-theme=\"dark\">", html, StringComparison.Ordinal);

@@ -22,7 +22,7 @@ public class PreferenceEndpointTests(AppFixture app) : HttpTest(app)
         Assert.Equal(HttpStatusCode.SeeOther, response.StatusCode);
         Assert.Equal("/de?x=1", response.Headers.Location?.OriginalString);
         var cookie = Assert.Single(Header(response, "Set-Cookie"));
-        Assert.StartsWith($"testo.theme={choice};", cookie, StringComparison.Ordinal);
+        Assert.StartsWith($"autestiq.theme={choice};", cookie, StringComparison.Ordinal);
         Assert.Contains("max-age=31536000", cookie, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("path=/", cookie, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("samesite=lax", cookie, StringComparison.OrdinalIgnoreCase);
@@ -38,7 +38,7 @@ public class PreferenceEndpointTests(AppFixture app) : HttpTest(app)
 
         Assert.Equal(HttpStatusCode.SeeOther, response.StatusCode);
         var cookie = Assert.Single(Header(response, "Set-Cookie"));
-        Assert.StartsWith("testo.theme=;", cookie, StringComparison.Ordinal);
+        Assert.StartsWith("autestiq.theme=;", cookie, StringComparison.Ordinal);
         Assert.Contains("expires=Thu, 01 Jan 1970", cookie, StringComparison.OrdinalIgnoreCase);
     }
 

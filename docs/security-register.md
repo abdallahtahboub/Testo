@@ -236,7 +236,10 @@ using a model on input we did not write.
 **Bounded — [ADR-0019](decisions/0019-the-planner-boundary.md).** The model plans once, before the
 browser opens, so there is no prompt to inject into while a run is under way; its output is a closed
 vocabulary with no field in which a selector or a script could be written; and the plan is validated
-against what the crawl actually observed, so an invented target or a foreign origin is refused. The
+against what the crawl actually observed. A foreign origin is refused. An invented target is **not**
+refused: the validator only notes it, and the run goes ahead, so a guessed identifier reaches the
+browser. Found in the 2026-11-15 benchmark, where five plans acted on identifiers the crawl never saw
+(see `docs/ai-benchmark.md`). Closing that gap is part of the analysis work, not this register's claim.
 prompt also says the page content is data, which is advisory and recorded as such: the things that
 hold are the type, the validator and the proxy, none of which depend on the model behaving.
 

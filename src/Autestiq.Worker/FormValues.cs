@@ -65,4 +65,4 @@ internal enum FormKind
 }
 
 /// <summary>One press on a path: the control, and how its form was filled first.</summary>
-internal sealed record PressStep(string TestId, FillMode Fill);
+internal sealed record PressStep(Autestiq.Contracts.Planning.ActionTarget Target, FillMode Fill);

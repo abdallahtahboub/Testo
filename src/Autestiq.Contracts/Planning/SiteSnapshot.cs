@@ -11,7 +11,11 @@ namespace Autestiq.Contracts.Planning;
 /// <param name="Name">Its accessible name — what a person would call it.</param>
 /// <param name="TestId">Its <c>data-testid</c>, when it has one. The stable way to name it.</param>
 /// <param name="Text">What it reads, trimmed, when that is not already its name.</param>
-public sealed record SnapshotElement(string Role, string Name, string? TestId = null, string? Text = null);
+/// <param name="Within">
+/// When other elements on the page share its role and name, the text of the row, item, form or section it
+/// sits in, which is how a target tells it apart (ADR-0024). Absent when the element is unique.
+/// </param>
+public sealed record SnapshotElement(string Role, string Name, string? TestId = null, string? Text = null, string? Within = null);
 
 /// <summary>One page as a deterministic crawl found it.</summary>
 /// <param name="Path">The path within the origin, such as <c>/basket</c>.</param>
@@ -87,8 +91,17 @@ public sealed record SiteSnapshot(string Origin, IReadOnlyList<PageSnapshot> Pag
         // A name is what a person reads, so it is compared the way a person would.
         TargetKind.RoleAndName =>
             string.Equals(element.Role, target.Role, StringComparison.OrdinalIgnoreCase)
-            && string.Equals(element.Name, target.Value, StringComparison.OrdinalIgnoreCase),
+            && string.Equals(element.Name, target.Value, StringComparison.OrdinalIgnoreCase)
+            && WithinMatches(element, target),
+
+        TargetKind.Text =>
+            string.Equals(element.Text ?? element.Name, target.Value, StringComparison.Ordinal)
+            && WithinMatches(element, target),
 
         _ => false,
     };
+
+    private static bool WithinMatches(SnapshotElement element, ActionTarget target) =>
+        target.Within is not { Length: > 0 } within
+        || string.Equals(element.Within, within, StringComparison.OrdinalIgnoreCase);
 }

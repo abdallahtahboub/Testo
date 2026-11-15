@@ -197,15 +197,23 @@ public static class PlanJson
             return null;
         }
 
-        return target.Kind?.Trim().ToLowerInvariant() switch
+        var converted = target.Kind?.Trim().ToLowerInvariant() switch
         {
             "testid" => ActionTarget.ByTestId(target.Value.Trim()),
 
             "roleandname" when !string.IsNullOrWhiteSpace(target.Role) =>
                 ActionTarget.ByRole(target.Role.Trim().ToLowerInvariant(), target.Value.Trim()),
 
+            // Exactly the text an element shows. Kept as written apart from the ends: the browser
+            // compares it with the page's own words, so it is never read as anything but text.
+            "text" => ActionTarget.ByText(target.Value.Trim()),
+
             _ => null,
         };
+
+        return converted is not null && !string.IsNullOrWhiteSpace(target.Within)
+            ? converted.InsideOf(target.Within.Trim())
+            : converted;
     }
 
     private static string? Blank(string? value) => string.IsNullOrWhiteSpace(value) ? null : value;
@@ -238,5 +246,5 @@ public static class PlanJson
         string? Text,
         [property: JsonPropertyName("secretName")] string? SecretName);
 
-    private sealed record WireTarget(string? Kind, string? Value, string? Role);
+    private sealed record WireTarget(string? Kind, string? Value, string? Role, string? Within);
 }

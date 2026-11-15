@@ -62,14 +62,31 @@ public enum TargetKind
 
     /// <summary>The element with this ARIA role and this accessible name.</summary>
     RoleAndName = 2,
+
+    /// <summary>
+    /// The element whose visible text is exactly this. Matched as text by the browser, never read as a
+    /// selector, so an application that has no test ids can still be checked (ADR-0024).
+    /// </summary>
+    Text = 3,
 }
 
 /// <summary>Which element on the page an action is about.</summary>
 /// <param name="Kind">How the element is named.</param>
-/// <param name="Value">The test id, or the accessible name when <see cref="Role"/> is set.</param>
+/// <param name="Value">The test id; the accessible name when <see cref="Role"/> is set; or the exact visible text.</param>
 /// <param name="Role">The ARIA role, for <see cref="TargetKind.RoleAndName"/>.</param>
-public sealed record ActionTarget(TargetKind Kind, string Value, string? Role = null)
+/// <param name="Within">
+/// When several elements fit, the text of the row, list item, form or section the right one is inside:
+/// "the Add to basket button within the item that says Cast iron teapot". Matched as text, never as a
+/// selector (ADR-0024).
+/// </param>
+public sealed record ActionTarget(TargetKind Kind, string Value, string? Role = null, string? Within = null)
 {
+    /// <summary>A target named by the exact text it shows.</summary>
+    public static ActionTarget ByText(string text) => new(TargetKind.Text, text);
+
+    /// <summary>The same target, looked for only inside the nearest row, item, form or section that contains this text.</summary>
+    public ActionTarget InsideOf(string within) => this with { Within = within };
+
     /// <summary>A target named by its test id.</summary>
     public static ActionTarget ByTestId(string testId) => new(TargetKind.TestId, testId);
 
@@ -78,7 +95,13 @@ public sealed record ActionTarget(TargetKind Kind, string Value, string? Role = 
 
     /// <summary>What to show a person reading the plan.</summary>
     public override string ToString() =>
-        Kind == TargetKind.TestId ? $"#{Value}" : $"{Role} “{Value}”";
+        (Kind switch
+        {
+            TargetKind.TestId => $"#{Value}",
+            TargetKind.Text => $"the text “{Value}”",
+            _ => $"{Role} “{Value}”",
+        })
+        + (Within is { Length: > 0 } within ? $" within “{within}”" : "");
 }
 
 /// <summary>

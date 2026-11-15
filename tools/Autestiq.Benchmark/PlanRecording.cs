@@ -48,9 +48,14 @@ public static class PlanRecording
 
         if (action.Target is { } target)
         {
-            fields.Add(target.Kind == TargetKind.TestId
-                ? $"\"target\": {{ \"kind\": \"testId\", \"value\": {Quote(target.Value)} }}"
-                : $"\"target\": {{ \"kind\": \"roleAndName\", \"role\": {Quote(target.Role ?? "")}, \"value\": {Quote(target.Value)} }}");
+            var within = target.Within is { Length: > 0 } scope ? $", \"within\": {Quote(scope)}" : "";
+
+            fields.Add(target.Kind switch
+            {
+                TargetKind.TestId => $"\"target\": {{ \"kind\": \"testId\", \"value\": {Quote(target.Value)}{within} }}",
+                TargetKind.Text => $"\"target\": {{ \"kind\": \"text\", \"value\": {Quote(target.Value)}{within} }}",
+                _ => $"\"target\": {{ \"kind\": \"roleAndName\", \"role\": {Quote(target.Role ?? "")}, \"value\": {Quote(target.Value)}{within} }}",
+            });
         }
 
         if (action.Path is { } path)

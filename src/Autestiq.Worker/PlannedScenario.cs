@@ -120,41 +120,11 @@ internal static class PlannedScenario
             : throw new PlaywrightException($"This run was not given a value called '{name}'.");
     }
 
-    /// <summary>
-    /// A target becomes a locator. Two shapes, both of which Playwright has a first-class way to
-    /// express, so nothing is concatenated into a selector.
-    /// </summary>
-    private static ILocator Locate(IPage page, PlannedAction action)
-    {
-        var target = action.Target
-            ?? throw new PlaywrightException($"The step '{action.Description}' does not say what to act on.");
-
-        return target.Kind switch
-        {
-            TargetKind.TestId => page.GetByTestId(target.Value),
-
-            TargetKind.RoleAndName => page.GetByRole(
-                Role(target.Role),
-                new PageGetByRoleOptions { Name = target.Value, Exact = false }),
-
-            _ => throw new PlaywrightException($"The step '{action.Description}' names its target in a way this worker does not know."),
-        };
-    }
-
-    /// <summary>
-    /// The roles a plan may name. A closed list again: an unknown role is a refusal, not a guess.
-    /// </summary>
-    private static AriaRole Role(string? role) => role?.ToLowerInvariant() switch
-    {
-        "button" => AriaRole.Button,
-        "link" => AriaRole.Link,
-        "textbox" => AriaRole.Textbox,
-        "checkbox" => AriaRole.Checkbox,
-        "radio" => AriaRole.Radio,
-        "combobox" => AriaRole.Combobox,
-        "heading" => AriaRole.Heading,
-        _ => throw new PlaywrightException($"'{role}' is not a role a plan may name."),
-    };
+    /// <summary>A target becomes a locator, in the one place that decides how (<see cref="Targets"/>).</summary>
+    private static ILocator Locate(IPage page, PlannedAction action) =>
+        Targets.Locate(
+            page,
+            action.Target ?? throw new PlaywrightException($"The step '{action.Description}' does not say what to act on."));
 
     private static string Required(string? value, PlannedAction action) =>
         value is { Length: > 0 }

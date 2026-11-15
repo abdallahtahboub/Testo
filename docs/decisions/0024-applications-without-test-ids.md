@@ -1,6 +1,6 @@
 # 0024 — Applications without test ids
 
-- **Status:** Proposed
+- **Status:** Accepted by the owner on 2026-11-15, with an addition: the software finds the best way to reach each element itself
 - **Date:** 2026-11-15
 
 ## Context
@@ -51,6 +51,39 @@ Test ids stay preferred: they survive a change of wording. Without them:
 - **Measurement:** developed against our three applications with their test ids removed, so that
   eShopOnWeb stays unseen until it is measured.
 
-## Decision needed from the owner
-Approve the vocabulary amendment (points 2 and 3), or keep the closed vocabulary as it is and require
-test ids from customers.
+## Decision (2026-11-15)
+The owner approved points 2 and 3, and asked that elements be tested whether or not they have test ids,
+with the software finding the best way to reach each one itself. That choice is made by our code, never
+by the model: the explorer works out, for every element, the most robust target in a fixed order, and the
+planner is shown it.
+
+1. **The order:** a test id; else role and accessible name, when unique on the page; else exact visible
+   text; and for a repeat, the same scoped by the text of the row, item, form or section it sits in
+   (`within`), looked for up to three containers out. A repeat nothing tells apart is not offered, and a
+   target that matches more than one element fails its step rather than picking one.
+2. **One place decides how a target becomes an element** (`Targets.Locate` in the worker), for planned
+   runs and exploration alike. Every way it reaches an element is one Playwright expresses directly, with
+   values passed as values: no selector is ever built from a plan or a page.
+3. **The vocabulary** (amending ADR-0019): `TargetKind.Text`, and `Within` on a target. A target's text
+   and its `within` are at most 200 characters each; a longer one is refused.
+4. **Kinds of page are judged by structure.** Plain text without a test id counts by being there, not by
+   what it says, so a page for another date or another invoice is not a new kind. Pages reached by
+   pressing are kept apart by what they say as well, so two different refusals are both shown.
+5. **Every exploration starts from a fresh application**, the crawl included, not only the visits that
+   press.
+
+## Measured, with no model (2026-11-15)
+Coverage of the baseline plans, with test ids and with them removed (`--without-test-ids --coverage`,
+which compares each element the baselines name by test id with what the copy without them shows):
+
+| Set | With test ids | Without test ids |
+|---|---|---|
+| Demo shop, first twelve | 64 of 65 (98%) | 63 of 65 (97%) |
+| Demo shop, held-out twenty | 106 of 106 (100%) | 104 of 106 (98%) |
+| Booking clinic | 167 of 168 (99%) | 167 of 168 (99%) |
+| Invoice desk | 100 of 102 (98%) | 88 of 102 (86%) |
+
+Every gap without test ids that is not also a gap with them is a whole row or basket line, which is not
+described as one element because it holds others. Its link and its cells are described, so a plan can
+check it by those; the measure cannot see that equivalence. Describing text makes every prompt larger:
+the invoice desk shows 726 elements with test ids, up from 647.

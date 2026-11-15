@@ -30,6 +30,8 @@ public static class PlanPrompt
           "actions": [
             { "kind": "goto",          "description": "why this step exists", "path": "/basket" },
             { "kind": "click",         "description": "...", "target": { "kind": "testId", "value": "add-pot" } },
+            { "kind": "click",         "description": "...", "target": { "kind": "roleAndName", "role": "button", "value": "Add to basket", "within": "Cast iron teapot" } },
+            { "kind": "assertVisible", "description": "...", "target": { "kind": "text", "value": "£42.00" } },
             { "kind": "type",          "description": "...", "target": { "kind": "testId", "value": "search" }, "text": "teapot" },
             { "kind": "type",          "description": "...", "target": { "kind": "testId", "value": "password" }, "secretName": "password" },
             { "kind": "press",         "description": "...", "target": { "kind": "testId", "value": "search" }, "text": "Enter" },
@@ -45,8 +47,11 @@ public static class PlanPrompt
 
         - Those ten kinds and no others. There is no action that runs code, evaluates an
           expression, or takes a CSS or XPath selector, and no way to express one.
-        - A target is either a testId or a roleAndName, with role one of: button, link, textbox,
-          checkbox, radio, combobox, heading.
+        - A target is a testId; a roleAndName, with role one of: button, link, textbox, checkbox,
+          radio, combobox, heading; or a text: the element whose visible text is exactly the value.
+          A target may also have "within": the text of the row, item, form or section it is in.
+          Where the description of a page shows within="..." for an element, that element is one of
+          several alike, and your target for it needs "within" with the same text.
         - "path" is a path within the application under test, starting with "/". You cannot name
           another host; a plan that tries is refused before it runs.
         - Every plan must check something. A plan with no assert* action is refused, because a run
@@ -60,7 +65,8 @@ public static class PlanPrompt
           inconclusive, never as a pass, so there is nothing to gain by claiming full coverage and
           nothing to lose by admitting a gap: the alternative is an assurance covering less than it
           appears to, which is the one outcome worse than no test at all.
-        - Prefer a testId over a roleAndName when the page offers one: it survives wording changes.
+        - Prefer a testId when the page offers one: it survives wording changes. Otherwise a
+          roleAndName, and a text only for what has neither, such as a price in a table.
         - Use assertNotVisible for what should be absent: a line gone from a basket, a button that
           should not be offered, an error that should no longer be shown. An absence is half of what
           a person wants checked, and asserting the opposite presence instead is not the same test.
@@ -148,7 +154,14 @@ public static class PlanPrompt
                     text.Append(" testId=").Append(Sanitize(testId));
                 }
 
-                text.Append(" name=\"").Append(Sanitize(element.Name)).Append("\"\n");
+                text.Append(" name=\"").Append(Sanitize(element.Name)).Append('"');
+
+                if (element.Within is { Length: > 0 } within)
+                {
+                    text.Append(" within=\"").Append(Sanitize(within)).Append('"');
+                }
+
+                text.Append('\n');
             }
         }
 

@@ -48,6 +48,17 @@ internal static partial class SiteExplorer
     /// <summary>How many paths are taken from a sitemap. A large site lists thousands.</summary>
     private const int MaxSitemapPaths = 40;
 
+    /// <summary>How many containers out from a repeated element its distinguishing text is looked for in.</summary>
+    private const int ContainerLevels = 3;
+
+    /// <summary>How long the text that tells a repeated element apart may be.</summary>
+    private const int MaxWithinLength = 60;
+
+    /// <summary>Elements that hold text and nothing else: what a test checks when nothing has a test id.</summary>
+    private const string LeafTextSelector =
+        "td:not(:has(*)), th:not(:has(*)), li:not(:has(*)), p:not(:has(*)), dd:not(:has(*)), dt:not(:has(*)), "
+        + "span:not(:has(*)), strong:not(:has(*)), em:not(:has(*)), b:not(:has(*)), output:not(:has(*)), caption:not(:has(*))";
+
     /// <summary>How many pages may be opened for each page the budget allows to be shown.</summary>
     private const int PagesOpenedPerPageShown = 4;
 
@@ -74,6 +85,13 @@ internal static partial class SiteExplorer
         CancellationToken cancellationToken)
     {
         var origin = new Uri(job.TargetOrigin);
+
+        // The crawl reads the application as it opened, like every visit after it. An earlier exploration, or
+        // run, may have left a booking or a paid invoice behind.
+        if (startAfresh is not null && ExplorationPolicy.MayPressControls(job))
+        {
+            await startAfresh().ConfigureAwait(false);
+        }
 
         // Which address is opened next, and whether the crawl has stopped short when it stops, is the
         // frontier's to decide: one address of every kind first (CrawlFrontier).
@@ -197,7 +215,24 @@ internal static partial class SiteExplorer
     /// What makes two pages the same kind of page: where they are and what is on them, with numbers
     /// masked. The same page for another date, or with another booking reference, is one kind.
     /// </summary>
+    /// <remarks>
+    /// Plain text without a test id counts by being there, not by what it says. It is the application's
+    /// data — a weekday, a client's name, a description — and two invoices are one kind of page whatever they
+    /// are for. Without this, describing text (ADR-0024) made every invoice and every date a kind of its own.
+    /// </remarks>
     private static string Signature(PageSnapshot state) =>
+        Masked(PathOnly(state.Path)) + "|"
+        + string.Join(',', state.Elements.Select(element =>
+            element.TestId is { Length: > 0 } testId ? Masked(testId)
+            : element.Role == "text" ? "(text)"
+            : Masked(element.Role + ":" + element.Name)));
+
+    /// <summary>
+    /// What makes two pages reached by pressing worth showing apart: their kind, and what their plain text
+    /// says, with numbers masked. Two forms that refuse for different reasons look the same and say different
+    /// things, and what they say is the point of pressing them.
+    /// </summary>
+    private static string Telling(PageSnapshot state) =>
         Masked(PathOnly(state.Path)) + "|"
         + string.Join(',', state.Elements.Select(element => Masked(element.TestId ?? element.Name)));
 
@@ -208,7 +243,7 @@ internal static partial class SiteExplorer
     /// </summary>
     private static string ContentKey(PageSnapshot state) =>
         PathOnly(state.Path) + "\n" + state.Title + "\n" + state.Heading + "\n"
-        + string.Join('\n', state.Elements.Select(element => $"{element.Role}\t{element.TestId}\t{element.Name}\t{element.Text}"));
+        + string.Join('\n', state.Elements.Select(element => $"{element.Role}\t{element.TestId}\t{element.Name}\t{element.Text}\t{element.Within}"));
 
     /// <summary>A path without its query string.</summary>
     private static string PathOnly(string path)
@@ -306,17 +341,17 @@ internal static partial class SiteExplorer
         var title = await page.TitleAsync().ConfigureAwait(false);
         var heading = await FirstTextAsync(page.Locator("h1")).ConfigureAwait(false);
 
-        var elements = new List<SnapshotElement>();
+        var found = new List<(SnapshotElement Element, ILocator Locator)>();
         var seen = new HashSet<string>(StringComparer.Ordinal);
 
         foreach (var role in Roles)
         {
-            var found = page.Locator($"[role='{role}'], {HtmlFor(role)}");
-            var count = Math.Min(await found.CountAsync().ConfigureAwait(false), MaxElementsPerPage);
+            var candidates = page.Locator($"[role='{role}'], {HtmlFor(role)}");
+            var count = Math.Min(await candidates.CountAsync().ConfigureAwait(false), MaxElementsPerPage);
 
-            for (var index = 0; index < count && elements.Count < MaxElementsPerPage; index++)
+            for (var index = 0; index < count && found.Count < MaxElementsPerPage; index++)
             {
-                var element = found.Nth(index);
+                var element = candidates.Nth(index);
 
                 var name = Trim(await TextOrAttributeAsync(element).ConfigureAwait(false));
                 var testId = await AttributeAsync(element, "data-testid").ConfigureAwait(false);
@@ -332,13 +367,128 @@ internal static partial class SiteExplorer
                     continue;
                 }
 
-                elements.Add(new SnapshotElement(role, name ?? testId ?? "", testId));
+                found.Add((new SnapshotElement(role, name ?? testId ?? "", testId), element));
             }
         }
 
-        await AddTestIdElementsAsync(page, elements, seen).ConfigureAwait(false);
+        await AddTestIdElementsAsync(page, found, seen).ConfigureAwait(false);
+        await AddTextElementsAsync(page, found).ConfigureAwait(false);
+        await TellRepeatsApartAsync(found).ConfigureAwait(false);
 
-        return new PageSnapshot(path, Trim(title) ?? "", heading, elements);
+        return new PageSnapshot(path, Trim(title) ?? "", heading, [.. found.Select(item => item.Element)]);
+    }
+
+    /// <summary>
+    /// Plain text that has no test id: the cells, items and short paragraphs a test most often checks.
+    /// </summary>
+    /// <remarks>
+    /// Only leaf elements, ones with no element inside them, so that a row is not described as one long
+    /// string and again as each of its cells. Added after everything with a role or a test id, so the
+    /// limit on elements per page cuts plain text first (ADR-0024).
+    /// </remarks>
+    private static async Task AddTextElementsAsync(IPage page, List<(SnapshotElement Element, ILocator Locator)> found)
+    {
+        // Words a control or heading already says are that element's, not new text.
+        var named = new HashSet<string>(found.Where(item => item.Element.Role != "text").Select(item => item.Element.Name), StringComparer.Ordinal);
+        var candidates = page.Locator(LeafTextSelector);
+        var count = Math.Min(await candidates.CountAsync().ConfigureAwait(false), MaxElementsPerPage * 2);
+
+        for (var index = 0; index < count && found.Count < MaxElementsPerPage; index++)
+        {
+            var element = candidates.Nth(index);
+
+            if (await AttributeAsync(element, "data-testid").ConfigureAwait(false) is not null)
+            {
+                // Described already, by its test id.
+                continue;
+            }
+
+            if (Trim(await FirstTextAsync(element).ConfigureAwait(false)) is not { } text || named.Contains(text))
+            {
+                continue;
+            }
+
+            found.Add((new SnapshotElement("text", text, Text: text), element));
+        }
+    }
+
+    /// <summary>
+    /// Gives every element without a test id that shares its role and name with another on the page the
+    /// text of the container it sits in, so that a target can say which one it means.
+    /// </summary>
+    /// <remarks>
+    /// "Add to basket" four times is four buttons a plan cannot tell apart by name. Each is inside a list
+    /// item that says which product it is for, and that text is what <see cref="Targets.Locate"/> narrows
+    /// the search by. A repeat whose container says nothing that tells it apart is left without one, and a
+    /// plan cannot name it.
+    /// </remarks>
+    private static async Task TellRepeatsApartAsync(List<(SnapshotElement Element, ILocator Locator)> found)
+    {
+        var repeated = found
+            .Select((item, index) => (item, index))
+            .Where(entry => entry.item.Element.TestId is null)
+            .GroupBy(entry => (entry.item.Element.Role, entry.item.Element.Name))
+            .Where(group => group.Count() > 1)
+            .ToList();
+
+        foreach (var group in repeated)
+        {
+            var labels = new List<(int Index, string? Label)>();
+
+            foreach (var (item, index) in group)
+            {
+                labels.Add((index, await ContainerLabelAsync(item.Locator, item.Element.Name).ConfigureAwait(false)));
+            }
+
+            foreach (var (index, label) in labels)
+            {
+                if (label is not null && labels.Count(other => other.Label == label) == 1)
+                {
+                    found[index] = found[index] with { Element = found[index].Element with { Within = label } };
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// The first line of a surrounding container's text that is not the element's own: in a list of products,
+    /// the product's name and price. The nearest container first, then the ones around it, because a button is
+    /// often alone in a form of its own, inside the list item that says what it is for.
+    /// </summary>
+    private static async Task<string?> ContainerLabelAsync(ILocator element, string name)
+    {
+        for (var level = 1; level <= ContainerLevels; level++)
+        {
+            // A fixed path of ours, to the nth nearest of the containers Targets.Containers lists.
+            var container = element.Locator(
+                "xpath=ancestor::*[self::tr or self::li or self::article or self::section or self::form or self::fieldset or self::dl]"
+                + $"[{level.ToString(System.Globalization.CultureInfo.InvariantCulture)}]");
+
+            try
+            {
+                if (await container.CountAsync().ConfigureAwait(false) != 1)
+                {
+                    return null;
+                }
+
+                var text = await container.InnerTextAsync(new LocatorInnerTextOptions { Timeout = 5_000 }).ConfigureAwait(false);
+
+                foreach (var line in text.Split('\n'))
+                {
+                    if (Trim(line.Replace(name, "", StringComparison.Ordinal)) is { Length: > 0 and <= MaxWithinLength } label)
+                    {
+                        return label;
+                    }
+                }
+            }
+            catch (Exception exception) when (exception is PlaywrightException or TimeoutException)
+            {
+                // A container that will not give up its text cannot tell its element apart.
+                return null;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -359,14 +509,14 @@ internal static partial class SiteExplorer
     /// carried too, because "what does it currently say" is most of what an assertion needs.
     /// </para>
     /// </remarks>
-    private static async Task AddTestIdElementsAsync(IPage page, List<SnapshotElement> elements, HashSet<string> seen)
+    private static async Task AddTestIdElementsAsync(IPage page, List<(SnapshotElement Element, ILocator Locator)> found, HashSet<string> seen)
     {
-        var found = page.Locator("[data-testid]");
-        var count = Math.Min(await found.CountAsync().ConfigureAwait(false), MaxElementsPerPage);
+        var candidates = page.Locator("[data-testid]");
+        var count = Math.Min(await candidates.CountAsync().ConfigureAwait(false), MaxElementsPerPage);
 
-        for (var index = 0; index < count && elements.Count < MaxElementsPerPage; index++)
+        for (var index = 0; index < count && found.Count < MaxElementsPerPage; index++)
         {
-            var element = found.Nth(index);
+            var element = candidates.Nth(index);
 
             if (await AttributeAsync(element, "data-testid").ConfigureAwait(false) is not { Length: > 0 } testId
                 || !seen.Add(testId))
@@ -376,7 +526,7 @@ internal static partial class SiteExplorer
 
             var text = await FirstTextAsync(element).ConfigureAwait(false);
 
-            elements.Add(new SnapshotElement("text", text ?? testId, testId, text));
+            found.Add((new SnapshotElement("text", text ?? testId, testId, text), element));
         }
     }
 

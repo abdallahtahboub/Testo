@@ -52,8 +52,8 @@ internal static partial class SiteExplorer
         public static Visit Failed => new(null, FormKind.None);
     }
 
-    /// <summary>One control worth pressing.</summary>
-    private readonly record struct Control(string TestId, bool IsButton);
+    /// <summary>One control worth pressing: how to reach it, and whether it is a button.</summary>
+    private readonly record struct Control(ActionTarget Target, bool IsButton);
 
     /// <summary>
     /// Presses the application's controls, one path at a time, and describes what each path reaches.
@@ -95,7 +95,9 @@ internal static partial class SiteExplorer
     {
         var mayType = ExplorationPolicy.MaySubmitForms(job);
 
-        var knownKinds = new HashSet<string>(crawled.Select(Signature), StringComparer.Ordinal);
+        // What is already shown. By what pages say, not only their kind: two refusals with different messages
+        // are both worth a plan's attention.
+        var knownKinds = new HashSet<string>(crawled.Select(Telling), StringComparer.Ordinal);
         var searched = new HashSet<string>(StringComparer.Ordinal);
         var found = new List<PageSnapshot>();
         var queue = new Queue<(string Start, List<PressStep> Presses, PageSnapshot State)>();
@@ -123,7 +125,7 @@ internal static partial class SiteExplorer
                 continue;
             }
 
-            var last = presses.Count > 0 ? presses[^1].TestId : null;
+            var last = presses.Count > 0 ? KindOf(presses[^1].Target) : null;
 
             foreach (var control in Controls(state, untouched: presses.Count == 0, last, mayType))
             {
@@ -139,7 +141,7 @@ internal static partial class SiteExplorer
                         return new Pressing(found, Truncated: true, visits, failed);
                     }
 
-                    var reached = new List<PressStep>(presses) { new(control.TestId, fills[index]) };
+                    var reached = new List<PressStep>(presses) { new(control.Target, fills[index]) };
                     var askForm = mayType && control.IsButton && index == 0;
 
                     var visit = await VisitAsync(page, job, start, reached, mayType, askForm, described, startAfresh, cancellationToken)
@@ -175,7 +177,7 @@ internal static partial class SiteExplorer
 
                     // The snapshot holds one page of each kind. The same page for another date, or with
                     // another reference number, would only fill the prompt.
-                    if (knownKinds.Add(Signature(arrived)))
+                    if (knownKinds.Add(Telling(arrived)))
                     {
                         found.Add(arrived);
                     }
@@ -196,10 +198,9 @@ internal static partial class SiteExplorer
     /// <param name="untouched">Whether nothing has been pressed on the way here.</param>
     /// <param name="last">The control pressed to get here, when one was.</param>
     /// <param name="mayType">Whether forms may be filled and sent.</param>
-    private static IEnumerable<Control> Controls(PageSnapshot state, bool untouched, string? last, bool mayType)
+    private static IEnumerable<Control> Controls(PageSnapshot state, bool untouched, string? lastKind, bool mayType)
     {
         var kinds = new HashSet<string>(StringComparer.Ordinal);
-        var lastKind = last is null ? null : Masked(last);
 
         foreach (var element in state.Elements)
         {
@@ -208,9 +209,10 @@ internal static partial class SiteExplorer
                 yield break;
             }
 
-            if (element.TestId is not { Length: > 0 } testId)
+            // The best way to reach it: its test id, or else its role and name, told apart from others like it
+            // by the container it sits in. A repeat nothing tells apart cannot be pressed (ADR-0024).
+            if (TargetFor(element, state) is not { } target)
             {
-                // Only what the application's authors marked as worth addressing is pressed.
                 continue;
             }
 
@@ -227,7 +229,7 @@ internal static partial class SiteExplorer
                 continue;
             }
 
-            var kind = Masked(testId);
+            var kind = KindOf(target);
 
             // The same control twice running rarely shows what the first press did not.
             if (string.Equals(kind, lastKind, StringComparison.Ordinal))
@@ -235,7 +237,7 @@ internal static partial class SiteExplorer
                 continue;
             }
 
-            var words = testId + " " + element.Name;
+            var words = element.TestId + " " + element.Name;
 
             if (NeverPressedPattern().IsMatch(words) || (!mayType && SendsAFormPattern().IsMatch(words)))
             {
@@ -245,10 +247,39 @@ internal static partial class SiteExplorer
             // date-16 and date-17 are one kind of control, and one of a kind is pressed.
             if (kinds.Add(kind))
             {
-                yield return new Control(testId, isButton);
+                yield return new Control(target, isButton);
             }
         }
     }
+
+    /// <summary>How a control is reached, in order of what survives a change best; null when it cannot be told apart.</summary>
+    private static ActionTarget? TargetFor(SnapshotElement element, PageSnapshot state)
+    {
+        if (element.TestId is { Length: > 0 } testId)
+        {
+            return ActionTarget.ByTestId(testId);
+        }
+
+        if (element.Role is not ("button" or "link") || element.Name.Length == 0)
+        {
+            return null;
+        }
+
+        var target = ActionTarget.ByRole(element.Role, element.Name);
+
+        if (element.Within is { Length: > 0 } within)
+        {
+            return target.InsideOf(within);
+        }
+
+        var alike = state.Elements.Count(other => other.TestId is null && other.Role == element.Role && other.Name == element.Name);
+
+        return alike == 1 ? target : null;
+    }
+
+    /// <summary>What makes two controls the same kind: date-16 and date-17 are one kind of control.</summary>
+    private static string KindOf(ActionTarget target) =>
+        Masked($"{target.Kind}:{target.Role}:{target.Value}:{target.Within}");
 
     /// <summary>How a path is put to a planner: where it started and what was done, in a plan's own words.</summary>
     private static List<string> Steps(string start, List<PressStep> presses) =>
@@ -256,11 +287,16 @@ internal static partial class SiteExplorer
         "open " + start,
         .. presses.Select(press => press.Fill switch
         {
-            FillMode.Valid => "type test values, then click " + press.TestId,
-            FillMode.WrongEmail => "type test values with an email address that is not one, then click " + press.TestId,
-            _ => "click " + press.TestId,
+            FillMode.Valid => "type test values, then click " + Named(press.Target),
+            FillMode.WrongEmail => "type test values with an email address that is not one, then click " + Named(press.Target),
+            _ => "click " + Named(press.Target),
         }),
     ];
+
+    /// <summary>How a press's control is put in a plan's own words: its test id, or what it is and what it says.</summary>
+    private static string Named(ActionTarget target) => target.Kind == TargetKind.TestId
+        ? target.Value
+        : $"the {target.Role} \"{target.Value}\"" + (target.Within is { Length: > 0 } within ? $" within \"{within}\"" : "");
 
     /// <summary>
     /// Makes one visit: starts afresh, opens the page the path starts on, carries out each press, and
@@ -300,9 +336,9 @@ internal static partial class SiteExplorer
             {
                 var press = presses[index];
 
-                // By test id, through Playwright's own escaping: the id came from the application, and is
-                // never put into a selector as text.
-                var target = page.GetByTestId(press.TestId);
+                // Through the one place that turns a target into an element: nothing from the application is
+                // ever put into a selector as text.
+                var target = Targets.Locate(page, press.Target);
 
                 if (await target.CountAsync().ConfigureAwait(false) != 1)
                 {

@@ -33,14 +33,14 @@ var options = BenchmarkOptions.From(args);
 // application that has none, as most do.
 var withoutTestIds = args.Contains("--without-test-ids", StringComparer.Ordinal);
 
-using var host = InProcessHost.Start(
-    options.Target switch
-    {
-        "booking" => app => Autestiq.BookingShop.BookingShopRoutes.Map(app),
-        "invoices" => app => Autestiq.InvoiceDesk.InvoiceDeskRoutes.Map(app),
-        _ => app => DemoShopRoutes.Map(app),
-    },
-    withoutTestIds);
+Action<WebApplication> map = options.Target switch
+{
+    "booking" => app => Autestiq.BookingShop.BookingShopRoutes.Map(app),
+    "invoices" => app => Autestiq.InvoiceDesk.InvoiceDeskRoutes.Map(app),
+    _ => app => DemoShopRoutes.Map(app),
+};
+
+using var host = InProcessHost.Start(map, withoutTestIds);
 var origin = host.Origin;
 
 Console.WriteLine(options.Target switch
@@ -91,7 +91,21 @@ if (args.Contains("--coverage", StringComparer.Ordinal))
 {
     var (snapshot, said) = await Coverage.ExploreAsync(origin, startAfresh);
     Console.WriteLine(said);
-    Coverage.Print(targetScenarios, snapshot, Console.Out);
+
+    if (withoutTestIds)
+    {
+        // The baselines name elements by test id, which this copy has lost. A second copy, with them,
+        // says what each test id is: its role, its name, its text. The question is whether the copy without
+        // them still shows that element.
+        using var reference = InProcessHost.Start(map, withoutTestIds: false);
+        var (withIds, _) = await Coverage.ExploreAsync(reference.Origin, startAfresh);
+        Coverage.PrintWithoutTestIds(targetScenarios, snapshot, withIds, Console.Out);
+    }
+    else
+    {
+        Coverage.Print(targetScenarios, snapshot, Console.Out);
+    }
+
     return 0;
 }
 
@@ -108,16 +122,21 @@ if (args.Contains("--explore", StringComparer.Ordinal))
         Console.WriteLine($"  {page.Path,-48} {route}  [{page.Elements.Count} elements]");
     }
 
-    // What a plan could name, with the vocabulary as it stands (ADR-0019): an element with a test id, or one
-    // with a role a target may have and a name no other element of that role on its page shares.
+    // What a plan could name (ADR-0019, ADR-0024): by test id; else by role and name, or by exact text,
+    // when that is unique on its page or the element carries the text of the container it is in.
     string[] nameableRoles = ["button", "link", "textbox", "checkbox", "radio", "combobox", "heading"];
     var all = snapshot.Pages.SelectMany(page => page.Elements.Select(element => (page, element))).ToList();
-    var byTestId = all.Count(item => item.element.TestId is { Length: > 0 });
-    var byRole = all.Count(item => item.element.TestId is not { Length: > 0 }
-        && nameableRoles.Contains(item.element.Role)
-        && item.page.Elements.Count(other => other.Role == item.element.Role && other.Name == item.element.Name) == 1);
 
-    Console.WriteLine($"Elements described: {all.Count}. A plan could name {byTestId} by test id and {byRole} more by role and a unique name; {all.Count - byTestId - byRole} not at all.");
+    bool ToldApart(PageSnapshot page, SnapshotElement element) =>
+        element.Within is { Length: > 0 }
+        || page.Elements.Count(other => other.TestId is null && other.Role == element.Role && other.Name == element.Name) == 1;
+
+    var byTestId = all.Count(item => item.element.TestId is { Length: > 0 });
+    var byRole = all.Count(item => item.element.TestId is null && nameableRoles.Contains(item.element.Role) && ToldApart(item.page, item.element));
+    var byText = all.Count(item => item.element.TestId is null && item.element.Role == "text" && ToldApart(item.page, item.element));
+
+    Console.WriteLine($"Elements described: {all.Count}. A plan could name {byTestId} by test id, {byRole} by role and name, "
+        + $"{byText} by text; {all.Count - byTestId - byRole - byText} not at all.");
 
     return 0;
 }

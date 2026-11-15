@@ -47,11 +47,13 @@ public static class PlanPrompt
 
         - Those ten kinds and no others. There is no action that runs code, evaluates an
           expression, or takes a CSS or XPath selector, and no way to express one.
-        - A target is a testId; a roleAndName, with role one of: button, link, textbox, checkbox,
-          radio, combobox, heading; or a text: the element whose visible text is exactly the value.
+        - A target is a testId; a roleAndName, with role one of: button, link, textbox, searchbox,
+          checkbox, radio, combobox, heading; or a text: the element whose visible text is exactly the value.
           A target may also have "within": the text of the row, item, form or section it is in.
-          Where the description of a page shows within="..." for an element, that element is one of
-          several alike, and your target for it needs "within" with the same text.
+          Every element in the description of a page says how to name it: use=testId, use=roleAndName
+          or use=text, with within="..." when that was needed. The crawl tried them in that order and
+          kept the first one that finds that element and nothing else, so name it exactly that way.
+          use=none means nothing names it reliably: do not build a step on it.
         - "path" is a path within the application under test, starting with "/". You cannot name
           another host; a plan that tries is refused before it runs.
         - Every plan must check something. A plan with no assert* action is refused, because a run
@@ -160,6 +162,16 @@ public static class PlanPrompt
                 {
                     text.Append(" within=\"").Append(Sanitize(within)).Append('"');
                 }
+
+                // How to name it, settled by the crawl against the page: the target kind that finds this
+                // element and no other. None when nothing does.
+                text.Append(" use=").Append(element.NamedBy switch
+                {
+                    TargetKind.TestId => "testId",
+                    TargetKind.RoleAndName => "roleAndName",
+                    TargetKind.Text => "text",
+                    _ => "none",
+                });
 
                 text.Append('\n');
             }

@@ -15,7 +15,18 @@ namespace Autestiq.Contracts.Planning;
 /// When other elements on the page share its role and name, the text of the row, item, form or section it
 /// sits in, which is how a target tells it apart (ADR-0024). Absent when the element is unique.
 /// </param>
-public sealed record SnapshotElement(string Role, string Name, string? TestId = null, string? Text = null, string? Within = null);
+/// <param name="NamedBy">
+/// How a plan should name it: the first of test id, role and name, or exact text, that the browser confirmed
+/// finds this element and no other, with <see cref="Within"/> when that was needed. Null when nothing does,
+/// and then a plan cannot name it reliably (ADR-0024).
+/// </param>
+public sealed record SnapshotElement(
+    string Role,
+    string Name,
+    string? TestId = null,
+    string? Text = null,
+    string? Within = null,
+    TargetKind? NamedBy = null);
 
 /// <summary>One page as a deterministic crawl found it.</summary>
 /// <param name="Path">The path within the origin, such as <c>/basket</c>.</param>

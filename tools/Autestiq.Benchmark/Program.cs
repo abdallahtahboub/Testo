@@ -124,19 +124,21 @@ if (args.Contains("--explore", StringComparer.Ordinal))
 
     // What a plan could name (ADR-0019, ADR-0024): by test id; else by role and name, or by exact text,
     // when that is unique on its page or the element carries the text of the container it is in.
-    string[] nameableRoles = ["button", "link", "textbox", "checkbox", "radio", "combobox", "heading"];
     var all = snapshot.Pages.SelectMany(page => page.Elements.Select(element => (page, element))).ToList();
 
-    bool ToldApart(PageSnapshot page, SnapshotElement element) =>
-        element.Within is { Length: > 0 }
-        || page.Elements.Count(other => other.TestId is null && other.Role == element.Role && other.Name == element.Name) == 1;
-
-    var byTestId = all.Count(item => item.element.TestId is { Length: > 0 });
-    var byRole = all.Count(item => item.element.TestId is null && nameableRoles.Contains(item.element.Role) && ToldApart(item.page, item.element));
-    var byText = all.Count(item => item.element.TestId is null && item.element.Role == "text" && ToldApart(item.page, item.element));
+    // Settled by the crawl against the page, element by element (NamedBy).
+    var byTestId = all.Count(item => item.element.NamedBy == TargetKind.TestId);
+    var byRole = all.Count(item => item.element.NamedBy == TargetKind.RoleAndName);
+    var byText = all.Count(item => item.element.NamedBy == TargetKind.Text);
 
     Console.WriteLine($"Elements described: {all.Count}. A plan could name {byTestId} by test id, {byRole} by role and name, "
         + $"{byText} by text; {all.Count - byTestId - byRole - byText} not at all.");
+
+    // What nothing reaches reliably, so that it can be looked at: where a test id would help most.
+    foreach (var (page, element) in all.Where(item => item.element.NamedBy is null).Take(25))
+    {
+        Console.WriteLine($"    not reachable: {page.Path} {element.Role} \"{element.Name}\"" + (element.Within is { } w ? $" within \"{w}\"" : ""));
+    }
 
     return 0;
 }

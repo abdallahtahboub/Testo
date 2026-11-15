@@ -21,7 +21,7 @@ namespace Autestiq.Worker;
 internal static class Targets
 {
     /// <summary>What can hold a repeated control or value: the containers "within" may name. Ours, and fixed.</summary>
-    internal const string Containers = "tr, li, article, section, form, fieldset, dl";
+    internal const string Containers = "tr, li, article, section, form, fieldset, dl, p";
 
     /// <summary>The element a target names, on this page.</summary>
     public static ILocator Locate(IPage page, ActionTarget target)
@@ -51,6 +51,7 @@ internal static class Targets
         "button" => AriaRole.Button,
         "link" => AriaRole.Link,
         "textbox" => AriaRole.Textbox,
+        "searchbox" => AriaRole.Searchbox,
         "checkbox" => AriaRole.Checkbox,
         "radio" => AriaRole.Radio,
         "combobox" => AriaRole.Combobox,
@@ -60,5 +61,5 @@ internal static class Targets
 
     /// <summary>The roles <see cref="Role"/> accepts.</summary>
     public static IReadOnlyList<string> NameableRoles { get; } =
-        ["button", "link", "textbox", "checkbox", "radio", "combobox", "heading"];
+        ["button", "link", "textbox", "searchbox", "checkbox", "radio", "combobox", "heading"];
 }

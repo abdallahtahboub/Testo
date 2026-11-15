@@ -57,6 +57,7 @@ mechanical find-and-replace.
 - All data access via interfaces from `Contracts`. Components never `new` a service or touch mock data directly.
 - Service methods: async, `CancellationToken` last parameter, return Contracts DTOs (`record`s), lists via `PagedResult<T>`.
 - Every unfinished module/capability sits behind a feature flag (`Module.X`, `Capability.X`, `Feature.X`).
+- **Locators are chosen by the software, never by the model** (ADR-0024). Without a test id, the explorer tries role and accessible name, then exact text, then each narrowed to a container cell or line, and keeps the first the browser finds **exactly one** element for, through `Targets.Locate`. Never describe an element as reachable on a guess; a change that lowers the share reached shows up in `--without-test-ids --explore`.
 
 ## Render modes
 

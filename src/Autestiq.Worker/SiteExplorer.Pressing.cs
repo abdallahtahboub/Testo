@@ -211,7 +211,7 @@ internal static partial class SiteExplorer
 
             // The best way to reach it: its test id, or else its role and name, told apart from others like it
             // by the container it sits in. A repeat nothing tells apart cannot be pressed (ADR-0024).
-            if (TargetFor(element, state) is not { } target)
+            if (TargetFor(element) is not { } target)
             {
                 continue;
             }
@@ -252,29 +252,28 @@ internal static partial class SiteExplorer
         }
     }
 
-    /// <summary>How a control is reached, in order of what survives a change best; null when it cannot be told apart.</summary>
-    private static ActionTarget? TargetFor(SnapshotElement element, PageSnapshot state)
+    /// <summary>
+    /// How a control is reached: the way the describing step confirmed finds it and nothing else
+    /// (<c>ChooseHowToNameEachAsync</c>). Null when no way does, and then it is not pressed.
+    /// </summary>
+    private static ActionTarget? TargetFor(SnapshotElement element)
     {
-        if (element.TestId is { Length: > 0 } testId)
-        {
-            return ActionTarget.ByTestId(testId);
-        }
-
-        if (element.Role is not ("button" or "link") || element.Name.Length == 0)
+        if (element.Role is not ("button" or "link"))
         {
             return null;
         }
 
-        var target = ActionTarget.ByRole(element.Role, element.Name);
-
-        if (element.Within is { Length: > 0 } within)
+        ActionTarget? target = element.NamedBy switch
         {
-            return target.InsideOf(within);
-        }
+            TargetKind.TestId when element.TestId is { Length: > 0 } testId => ActionTarget.ByTestId(testId),
+            TargetKind.RoleAndName when element.Name.Length > 0 => ActionTarget.ByRole(element.Role, element.Name),
+            TargetKind.Text when (element.Text ?? element.Name) is { Length: > 0 } text => ActionTarget.ByText(text),
+            _ => null,
+        };
 
-        var alike = state.Elements.Count(other => other.TestId is null && other.Role == element.Role && other.Name == element.Name);
-
-        return alike == 1 ? target : null;
+        return target is not null && element.NamedBy != TargetKind.TestId && element.Within is { Length: > 0 } within
+            ? target.InsideOf(within)
+            : target;
     }
 
     /// <summary>What makes two controls the same kind: date-16 and date-17 are one kind of control.</summary>

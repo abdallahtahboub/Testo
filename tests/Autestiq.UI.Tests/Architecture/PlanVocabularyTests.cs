@@ -93,7 +93,7 @@ public class PlanVocabularyTests
         // The snapshot is untrusted input that goes into a prompt on purpose (ADR-0019 §5), so its
         // fields are attack surface. Four of them, all plain text.
         Assert.Equal(
-            ["Name", "Role", "TestId", "Text", "Within"],
+            ["Name", "NamedBy", "Role", "TestId", "Text", "Within"],
             Fields(typeof(SnapshotElement)).Select(property => property.Name).Order(StringComparer.Ordinal));
 
         Assert.All(Fields(typeof(SnapshotElement)), property => Assert.Equal(typeof(string), property.PropertyType));

@@ -87,3 +87,34 @@ Every gap without test ids that is not also a gap with them is a whole row or ba
 described as one element because it holds others. Its link and its cells are described, so a plan can
 check it by those; the measure cannot see that equivalence. Describing text makes every prompt larger:
 the invoice desk shows 726 elements with test ids, up from 647.
+
+## The best locator, found and checked by the software (2026-11-15)
+The owner's addition, made a standing rule: **when an element has no test id, the software, not the
+model, looks for the best way to reach it, and checks it in the browser before a plan may use it.** A
+locator that matches two elements, or none, fails a step for a reason that has nothing to do with the
+application, so this decides more of a run's outcome than anything the model writes.
+
+For every element the explorer describes, the candidates are tried in this order, and the first one the
+browser finds exactly one element for is kept, through the same `Targets.Locate` a planned run uses:
+
+1. its **test id**, when it has one;
+2. its **role and accessible name**, as the browser computes them (read from Playwright's ARIA snapshot):
+   a field labelled "Email" is `textbox "Email"` whatever its `name` attribute says, and a search field is
+   a `searchbox`, the role the browser gives it;
+3. its **exact visible text**;
+4. each of those **narrowed to a container** (`tr`, `li`, `article`, `section`, `form`, `fieldset`, `dl`,
+   `p`), trying each single cell or label of the nearest three containers, then each whole line, until
+   one is unique. The first cell is not always the one that tells it apart: two clinic services cost the
+   same, and only their names differ. A line is taken whole, never with the element's own text cut out
+   of it, which once turned "£11.25" into "£.25".
+
+The choice is recorded on the element as `NamedBy` (and `Within`), the prompt tells the model which form
+to use (`use=testId|roleAndName|text|none`), and pressing during exploration uses the same choice. An
+element nothing reaches uniquely is described as `use=none`, and a plan does not lean on it. The test
+`EveryElement_HasAWayToBeReached_ThatTheBrowserConfirmed` holds this on the demo shop without test ids.
+
+Measured on all three applications served without test ids (`--without-test-ids --explore`): before this
+change 20 elements on the demo shop and 13 on the invoice desk had no unique locator; after it, none on
+any of the three (demo shop 147 elements: 81 by role and name, 66 by text; invoice desk 660: 300 and 360;
+clinic 401: 311 and 90). Coverage of the baselines is unchanged, because it counts what is shown, not
+whether it can be reached.

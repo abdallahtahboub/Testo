@@ -54,6 +54,9 @@ internal static partial class SiteExplorer
     /// <summary>How long the text that tells a repeated element apart may be.</summary>
     private const int MaxWithinLength = 60;
 
+    /// <summary>How many things a container says are tried as a scope before an element is called unreachable.</summary>
+    private const int MaxLabelsTried = 8;
+
     /// <summary>Elements that hold text and nothing else: what a test checks when nothing has a test id.</summary>
     private const string LeafTextSelector =
         "td:not(:has(*)), th:not(:has(*)), li:not(:has(*)), p:not(:has(*)), dd:not(:has(*)), dt:not(:has(*)), "
@@ -64,7 +67,7 @@ internal static partial class SiteExplorer
 
     /// <summary>The roles worth describing: the things a plan can act on or check.</summary>
     private static readonly string[] Roles =
-        ["button", "link", "textbox", "checkbox", "radio", "combobox", "heading"];
+        ["button", "link", "textbox", "searchbox", "checkbox", "radio", "combobox", "heading"];
 
     /// <summary>
     /// Describes the target: the pages its links and its sitemap reach, within the page budget, and,
@@ -353,7 +356,8 @@ internal static partial class SiteExplorer
             {
                 var element = candidates.Nth(index);
 
-                var name = Trim(await TextOrAttributeAsync(element).ConfigureAwait(false));
+                var (ariaRole, accessibleName) = await AccessibleOfAsync(element).ConfigureAwait(false);
+                var name = Trim(accessibleName) ?? Trim(await TextOrAttributeAsync(element).ConfigureAwait(false));
                 var testId = await AttributeAsync(element, "data-testid").ConfigureAwait(false);
 
                 if (name is null && testId is null)
@@ -367,13 +371,17 @@ internal static partial class SiteExplorer
                     continue;
                 }
 
-                found.Add((new SnapshotElement(role, name ?? testId ?? "", testId), element));
+                // The role the browser gives it, when that is one a target may name: a search field is a
+                // "searchbox", and a target by role "textbox" would never find it.
+                var described = ariaRole is { } given && Targets.NameableRoles.Contains(given) ? given : role;
+
+                found.Add((new SnapshotElement(described, name ?? testId ?? "", testId), element));
             }
         }
 
         await AddTestIdElementsAsync(page, found, seen).ConfigureAwait(false);
         await AddTextElementsAsync(page, found).ConfigureAwait(false);
-        await TellRepeatsApartAsync(found).ConfigureAwait(false);
+        await ChooseHowToNameEachAsync(page, found).ConfigureAwait(false);
 
         return new PageSnapshot(path, Trim(title) ?? "", heading, [.. found.Select(item => item.Element)]);
     }
@@ -413,82 +421,192 @@ internal static partial class SiteExplorer
     }
 
     /// <summary>
-    /// Gives every element without a test id that shares its role and name with another on the page the
-    /// text of the container it sits in, so that a target can say which one it means.
+    /// Settles, for every element, the best way a plan can reach it, by asking the browser rather than guessing.
     /// </summary>
     /// <remarks>
-    /// "Add to basket" four times is four buttons a plan cannot tell apart by name. Each is inside a list
-    /// item that says which product it is for, and that text is what <see cref="Targets.Locate"/> narrows
-    /// the search by. A repeat whose container says nothing that tells it apart is left without one, and a
-    /// plan cannot name it.
+    /// <para>
+    /// The candidates are tried in order of what survives a change to the application best: a test id; then role
+    /// and accessible name; then exact visible text; then each of those narrowed to the row, item or form the
+    /// element sits in. The first one the browser finds exactly one element for is the one a plan is told to use.
+    /// An element nothing reaches uniquely is marked so, and a plan does not lean on it (ADR-0024).
+    /// </para>
+    /// <para>
+    /// Without test ids this is what a test's success turns on: a locator that matches two elements, or none,
+    /// fails a step for a reason that has nothing to do with the application.
+    /// </para>
     /// </remarks>
-    private static async Task TellRepeatsApartAsync(List<(SnapshotElement Element, ILocator Locator)> found)
+    private static async Task ChooseHowToNameEachAsync(IPage page, List<(SnapshotElement Element, ILocator Locator)> found)
     {
-        var repeated = found
-            .Select((item, index) => (item, index))
-            .Where(entry => entry.item.Element.TestId is null)
-            .GroupBy(entry => (entry.item.Element.Role, entry.item.Element.Name))
-            .Where(group => group.Count() > 1)
-            .ToList();
-
-        foreach (var group in repeated)
+        for (var index = 0; index < found.Count; index++)
         {
-            var labels = new List<(int Index, string? Label)>();
+            var (element, locator) = found[index];
 
-            foreach (var (item, index) in group)
+            if (element.TestId is { Length: > 0 })
             {
-                labels.Add((index, await ContainerLabelAsync(item.Locator, item.Element.Name).ConfigureAwait(false)));
+                found[index] = found[index] with { Element = element with { NamedBy = TargetKind.TestId } };
+                continue;
             }
 
-            foreach (var (index, label) in labels)
+            var (byRole, byText) = Candidates(element);
+            var chosen = await FirstUniqueAsync(page, [byRole, byText]).ConfigureAwait(false);
+            string? firstLabel = null;
+
+            if (chosen is null && (byRole is not null || byText is not null))
             {
-                if (label is not null && labels.Count(other => other.Label == label) == 1)
+                // Not unique on its own: narrowed by each thing its row, item or form says, nearest first, until
+                // the browser finds exactly one. The first cell is not always the one that tells it apart: two
+                // services can cost the same, and only their names differ.
+                var labels = await ContainerLabelsAsync(locator, element.Name).ConfigureAwait(false);
+                firstLabel = labels.FirstOrDefault();
+
+                foreach (var label in labels)
                 {
-                    found[index] = found[index] with { Element = found[index].Element with { Within = label } };
+                    if ((chosen = await FirstUniqueAsync(page, [byRole?.InsideOf(label), byText?.InsideOf(label)]).ConfigureAwait(false)) is not null)
+                    {
+                        break;
+                    }
                 }
             }
+
+            found[index] = found[index] with
+            {
+                Element = element with { NamedBy = chosen?.Kind, Within = chosen is null ? firstLabel : chosen.Within },
+            };
+        }
+    }
+
+    /// <summary>The first of the targets the browser finds exactly one element for.</summary>
+    private static async Task<ActionTarget?> FirstUniqueAsync(IPage page, ActionTarget?[] targets)
+    {
+        foreach (var target in targets)
+        {
+            if (target is not null && await FindsExactlyOneAsync(page, target).ConfigureAwait(false))
+            {
+                return target;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>The two ways to reach an element without a test id: by role and name, and by its exact text.</summary>
+    private static (ActionTarget? ByRole, ActionTarget? ByText) Candidates(SnapshotElement element)
+    {
+        var byRole = Targets.NameableRoles.Contains(element.Role) && element.Name.Length > 0
+            ? ActionTarget.ByRole(element.Role, element.Name)
+            : null;
+
+        var text = element.Text ?? (element.Role is "text" or "button" or "link" or "heading" ? element.Name : null);
+
+        return (byRole, text is { Length: > 0 } ? ActionTarget.ByText(text) : null);
+    }
+
+    /// <summary>Whether a target finds one element on the page, through the same code a planned run uses.</summary>
+    private static async Task<bool> FindsExactlyOneAsync(IPage page, ActionTarget target)
+    {
+        try
+        {
+            return await Targets.Locate(page, target).CountAsync().ConfigureAwait(false) == 1;
+        }
+        catch (Exception exception) when (exception is PlaywrightException or TimeoutException)
+        {
+            return false;
         }
     }
 
     /// <summary>
-    /// The first line of a surrounding container's text that is not the element's own: in a list of products,
-    /// the product's name and price. The nearest container first, then the ones around it, because a button is
-    /// often alone in a form of its own, inside the list item that says what it is for.
+    /// What the browser calls an element: its role and its accessible name, which is what a target by role and
+    /// name is matched against. A field labelled "Full name" is "Full name", whatever its <c>name</c> attribute
+    /// says. Read through Playwright's own description of the page; nulls when it gives none.
     /// </summary>
-    private static async Task<string?> ContainerLabelAsync(ILocator element, string name)
+    private static async Task<(string? Role, string? Name)> AccessibleOfAsync(ILocator element)
     {
+        try
+        {
+            var described = await element.AriaSnapshotAsync(new LocatorAriaSnapshotOptions { Timeout = 5_000 }).ConfigureAwait(false);
+
+            if (AccessiblePattern().Match(described.Split('\n', 2)[0]) is { Success: true } match)
+            {
+                var name = match.Groups[2].Success ? match.Groups[2].Value.Replace("\\\"", "\"", StringComparison.Ordinal) : null;
+                return (match.Groups[1].Value, name is { Length: > 0 } ? name : null);
+            }
+        }
+        catch (Exception exception) when (exception is PlaywrightException or TimeoutException)
+        {
+            // Described from its attributes and text instead.
+        }
+
+        return (null, null);
+    }
+
+    /// <summary>The role and name in the first line of Playwright's description of an element: <c>- textbox "Full name"</c>.</summary>
+    [System.Text.RegularExpressions.GeneratedRegex(@"^\s*-\s+([\w-]+)(?:\s+""((?:[^""\\]|\\.)*)"")?")]
+    private static partial System.Text.RegularExpressions.Regex AccessiblePattern();
+
+    /// <summary>
+    /// What the containers around an element say, nearest first and without repeats: each single cell or label,
+    /// then each line. In a list of products, the product's name and its price; in a table, every cell of the
+    /// row. A button is often alone in a form of its own, inside the list item that says what it is for, so the
+    /// containers around the nearest one are read too.
+    /// </summary>
+    private static async Task<List<string>> ContainerLabelsAsync(ILocator element, string name)
+    {
+        var labels = new List<string>();
+
+        void Add(string? text)
+        {
+            if (Trim(text) is { Length: > 0 and <= MaxWithinLength } label
+                && !string.Equals(label, name, StringComparison.Ordinal)
+                && !labels.Contains(label)
+                && labels.Count < MaxLabelsTried)
+            {
+                labels.Add(label);
+            }
+        }
+
         for (var level = 1; level <= ContainerLevels; level++)
         {
             // A fixed path of ours, to the nth nearest of the containers Targets.Containers lists.
             var container = element.Locator(
-                "xpath=ancestor::*[self::tr or self::li or self::article or self::section or self::form or self::fieldset or self::dl]"
+                "xpath=ancestor::*[self::tr or self::li or self::article or self::section or self::form or self::fieldset or self::dl or self::p]"
                 + $"[{level.ToString(System.Globalization.CultureInfo.InvariantCulture)}]");
 
             try
             {
                 if (await container.CountAsync().ConfigureAwait(false) != 1)
                 {
-                    return null;
+                    break;
                 }
 
+                // Single cells and labels first: their text is the same to every way a browser reads a page. A
+                // whole line, as the page is rendered, can join two cells in a way the browser's text filter does
+                // not ("200g £8.50" on screen, "200g£8.50" underneath).
+                var leaves = container.Locator(LeafTextSelector);
+                var leafCount = Math.Min(await leaves.CountAsync().ConfigureAwait(false), MaxLabelsTried);
+
+                for (var leaf = 0; leaf < leafCount; leaf++)
+                {
+                    Add(await FirstTextAsync(leaves.Nth(leaf)).ConfigureAwait(false));
+                }
+
+                // A table row's text comes as one line with its cells separated by tabs: each cell is a line here.
+                // A line is taken whole or not at all: cutting the element's own text out of it would leave words
+                // the page never shows (the "1" of a quantity taken out of "£11.25").
                 var text = await container.InnerTextAsync(new LocatorInnerTextOptions { Timeout = 5_000 }).ConfigureAwait(false);
 
-                foreach (var line in text.Split('\n'))
+                foreach (var line in text.Split(['\n', '\t']))
                 {
-                    if (Trim(line.Replace(name, "", StringComparison.Ordinal)) is { Length: > 0 and <= MaxWithinLength } label)
-                    {
-                        return label;
-                    }
+                    Add(line);
                 }
             }
             catch (Exception exception) when (exception is PlaywrightException or TimeoutException)
             {
                 // A container that will not give up its text cannot tell its element apart.
-                return null;
+                break;
             }
         }
 
-        return null;
+        return labels;
     }
 
     /// <summary>

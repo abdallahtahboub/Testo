@@ -48,6 +48,37 @@ public class WithoutTestIdsTests(ShopWithoutTestIdsFixture shop) : IClassFixture
     }
 
     [Fact]
+    public async Task EveryElement_HasAWayToBeReached_ThatTheBrowserConfirmed()
+    {
+        // The rule the whole of ADR-0024 rests on: without test ids the software finds the best locator itself,
+        // and an element is described as reachable only once the browser found exactly one element for it.
+        var elements = Explorations.Elements(Explorations.SnapshotOf(await ExploredAsync())).ToList();
+
+        Assert.NotEmpty(elements);
+        Assert.All(elements, element => Assert.NotNull(element.NamedBy));
+    }
+
+    [Fact]
+    public async Task AField_IsNamedByItsLabel_NotByItsAttributes()
+    {
+        var signIn = Explorations.SnapshotOf(await ExploredAsync()).Pages.First(page => page.Path == "/sign-in");
+
+        var email = Assert.Single(signIn.Elements, element => element.Role == "textbox" && element.Name == "Email");
+        Assert.Equal(TargetKind.RoleAndName, email.NamedBy);
+    }
+
+    [Fact]
+    public async Task ASearchField_HasTheRoleTheBrowserGivesIt()
+    {
+        // A target by role "textbox" never finds a search field: the browser calls it a searchbox.
+        var catalogue = Explorations.SnapshotOf(await ExploredAsync()).Pages.First(page => page.Path == "/");
+
+        var search = Assert.Single(catalogue.Elements, element => element.Role == "searchbox");
+        Assert.Equal("Search the catalogue", search.Name);
+        Assert.Equal(TargetKind.RoleAndName, search.NamedBy);
+    }
+
+    [Fact]
     public async Task Pressing_ReachesTheBasket_ByTheButtonInTheTeapotsItem()
     {
         var snapshot = Explorations.SnapshotOf(await ExploredAsync());

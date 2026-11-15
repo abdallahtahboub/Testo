@@ -48,6 +48,9 @@ internal static partial class SiteExplorer
     /// <summary>How many paths are taken from a sitemap. A large site lists thousands.</summary>
     private const int MaxSitemapPaths = 40;
 
+    /// <summary>How many pages may be opened for each page the budget allows to be shown.</summary>
+    private const int PagesOpenedPerPageShown = 4;
+
     /// <summary>The roles worth describing: the things a plan can act on or check.</summary>
     private static readonly string[] Roles =
         ["button", "link", "textbox", "checkbox", "radio", "combobox", "heading"];
@@ -90,9 +93,15 @@ internal static partial class SiteExplorer
         var described = new Dictionary<string, PageSnapshot>(StringComparer.Ordinal);
         var kindsShown = new HashSet<string>(StringComparer.Ordinal);
 
-        while (pages.Count < job.Budget.MaxPagesCrawled && frontier.Next() is { } path)
+        // A cap on pages opened as well as pages shown. A kind whose samples differ is opened in full,
+        // and an application can have thousands of one kind.
+        var opened = 0;
+        var maxOpened = job.Budget.MaxPagesCrawled * PagesOpenedPerPageShown;
+
+        while (pages.Count < job.Budget.MaxPagesCrawled && opened < maxOpened && frontier.Next() is { } path)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            opened++;
 
             var response = await Open(page, path).ConfigureAwait(false);
 

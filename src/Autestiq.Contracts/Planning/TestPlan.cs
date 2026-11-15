@@ -144,6 +144,16 @@ public static class PlanningErrors
     /// </remarks>
     public const string ProviderRefusedTheKey = "Planning_Error_ProviderRefusedTheKey";
 
+    /// <summary>
+    /// The provider answered that the account has no credit left. Separate, because the answer is a
+    /// payment, and a run that stops for it part way is incomplete rather than failed. Found when a
+    /// benchmark run stopped four scenarios from the end and its report said "could not be reached".
+    /// </summary>
+    public const string ProviderOutOfCredit = "Planning_Error_ProviderOutOfCredit";
+
+    /// <summary>The provider asked for fewer requests: wait, then try again.</summary>
+    public const string ProviderRateLimited = "Planning_Error_ProviderRateLimited";
+
     /// <summary>No planner is configured, so nothing can be planned.</summary>
     public const string NoPlanner = "Planning_Error_NoPlanner";
 }

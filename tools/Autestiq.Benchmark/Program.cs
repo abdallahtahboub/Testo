@@ -201,6 +201,8 @@ static string Explain(string error) => error switch
     PlanningErrors.ProviderRefusedTheKey =>
         "the provider refused the key (401 or 403): it is wrong, truncated, expired or revoked",
     PlanningErrors.ProviderUnavailable => "the provider could not be reached",
+    PlanningErrors.ProviderOutOfCredit => "the provider account is out of credit: the run is incomplete, not failed",
+    PlanningErrors.ProviderRateLimited => "the provider asked for fewer requests (429): wait and run again",
     PlanningErrors.NoPlanner => "no planner is configured",
     PlanningErrors.Unreadable => "the answer was not a plan",
     PlanningErrors.ForeignOrigin => "the plan named somewhere other than the shop",

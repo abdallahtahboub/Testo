@@ -83,6 +83,14 @@ after the client a scenario types, and a quantity error that only shows once a r
 would make it a design set like the other two. The planner is measured on the explorer as it is, and the
 sampling is changed afterwards, with any later measurement of the desk counted as a design-set result.
 
+## Amendment after the planner run on the invoice desk (2026-11-15)
+The sampling of decision 9 is changed: a kind is settled after three samples agree, taken spread across
+its addresses (the first, the last, then the middle of those left), not after two neighbours agree.
+Neighbouring invoices share a status; distant ones less often. A cap on pages opened (four for each page
+the budget allows to be shown) bounds a kind that is opened in full. Coverage with no model: the invoice
+desk 100 of 102 steps (was 95), the others unchanged. From this change on, any measurement of the invoice
+desk is a design-set result.
+
 ## Alternatives considered
 - **Let the model choose what to type.** Rejected: ADR-0019 §5. The page could lead it.
 - **Take values from the page**, such as a placeholder. Rejected: the application would then choose

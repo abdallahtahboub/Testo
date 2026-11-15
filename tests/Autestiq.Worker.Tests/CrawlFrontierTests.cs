@@ -31,11 +31,14 @@ public class CrawlFrontierTests
         Assert.Equal("/", frontier.Next());
         Assert.Equal("/day/1", frontier.Next());
         Assert.Equal("/about", frontier.Next());
-        Assert.Equal("/day/2", frontier.Next());
+        frontier.Saw("/day/1", "a day");
+
+        // The second sample of a kind is its last address, not its next one.
+        Assert.Equal("/day/3", frontier.Next());
     }
 
     [Fact]
-    public void AKindWhoseSecondAddressIsTheSameKindOfPage_IsSettled_AndTheRestAreLeftAlone()
+    public void AKindWhoseThreeSpreadSamplesAgree_IsSettled_AndTheRestAreLeftAlone()
     {
         var frontier = new CrawlFrontier("/");
 
@@ -46,8 +49,8 @@ public class CrawlFrontierTests
 
         var opened = Drain(frontier, path => path == "/" ? "home" : "a day");
 
-        // The first, and one more as a check. Not thirty.
-        Assert.Equal(["/", "/day/1", "/day/2"], opened);
+        // The first, the last, and the middle of those left. Not thirty.
+        Assert.Equal(["/", "/day/1", "/day/30", "/day/16"], opened);
         Assert.False(frontier.HasUnseen, "thirty dates of a settled kind are not a missing part of the application.");
     }
 
@@ -65,7 +68,7 @@ public class CrawlFrontierTests
 
         var opened = Drain(frontier, path => "the page at " + path);
 
-        Assert.Equal(["/", "/page/1", "/page/2", "/page/3", "/page/4", "/page/5"], opened);
+        Assert.Equal(["/", "/page/1", "/page/5", "/page/2", "/page/3", "/page/4"], opened);
     }
 
     [Fact]
@@ -84,7 +87,7 @@ public class CrawlFrontierTests
             ["/page/4"] = "four",
         };
 
-        Assert.Equal(["/page/1", "/page/2", "/page/3", "/page/4"], Drain(frontier, path => shapes[path]));
+        Assert.Equal(["/page/1", "/page/4", "/page/2", "/page/3"], Drain(frontier, path => shapes[path]));
     }
 
     [Fact]
@@ -138,11 +141,49 @@ public class CrawlFrontierTests
         Assert.Equal("/day/2", frontier.Next());
         frontier.Saw("/day/2", "a day");
 
+        Assert.Equal("/day/4", frontier.Next());
+        frontier.Saw("/day/4", "a day");
+
         Assert.Equal("/day/3", frontier.Next());
         frontier.Saw("/day/3", "a day");
 
         Assert.Null(frontier.Next());
         Assert.False(frontier.HasUnseen);
+    }
+
+    [Fact]
+    public void TwoNeighboursThatAgree_DoNotSettleAKindWhoseLaterPagesDiffer()
+    {
+        // The invoice desk, in miniature. Its first invoices are paid and have no buttons; later ones are
+        // open and do. Settling after two neighbours agreed hid every button an open invoice has.
+        var frontier = new CrawlFrontier("/invoices");
+
+        foreach (var number in Enumerable.Range(1001, 10))
+        {
+            frontier.Note($"/invoices/INV-{number}");
+        }
+
+        var opened = Drain(frontier, path => path == "/invoices" ? "list"
+            : int.Parse(path[^4..], System.Globalization.CultureInfo.InvariantCulture) <= 1003 ? "a paid invoice" : "an open invoice");
+
+        Assert.Contains(opened, path => path == "/invoices/INV-1010");
+        Assert.Equal(11, opened.Count);
+    }
+
+    [Fact]
+    public void AKindWithTwoAgreeingSamples_IsNotYetSettled()
+    {
+        var frontier = new CrawlFrontier("/day/1");
+        frontier.Note("/day/2");
+        frontier.Note("/day/3");
+
+        Assert.Equal("/day/1", frontier.Next());
+        frontier.Saw("/day/1", "a day");
+        Assert.Equal("/day/3", frontier.Next());
+        frontier.Saw("/day/3", "a day");
+
+        Assert.True(frontier.HasUnseen, "two samples are not enough to say the rest are the same.");
+        Assert.Equal("/day/2", frontier.Next());
     }
 
     [Theory]

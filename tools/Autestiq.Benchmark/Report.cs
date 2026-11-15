@@ -221,6 +221,8 @@ public static class Report
     {
         PlanningErrors.NoPlanner => "no planner configured",
         PlanningErrors.ProviderUnavailable => "the provider could not be reached",
+        PlanningErrors.ProviderOutOfCredit => "the provider account is out of credit: the run is incomplete, not failed",
+        PlanningErrors.ProviderRateLimited => "the provider asked for fewer requests (429): wait and run again",
         PlanningErrors.ProviderRefusedTheKey => "the provider refused the key (401 or 403): it is wrong, truncated, expired or revoked",
         PlanningErrors.Unreadable => "the answer was not a plan",
         PlanningErrors.ForeignOrigin => "a path named somewhere other than the shop",

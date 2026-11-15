@@ -93,12 +93,19 @@ public sealed class AnthropicPlanner(HttpClient client, PlannerOptions options, 
                 // response. "Could not be reached" sends somebody to check their network when the
                 // answer is a key in their console — which is exactly what happened the first time
                 // a person ran this.
-                var refused = response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden;
+                //
+                // Running out of credit comes back as an ordinary 400, so it is told apart by the
+                // provider's own fixed wording, read here and kept nowhere (SaysOutOfCreditAsync).
+                var error = response.StatusCode switch
+                {
+                    HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden => PlanningErrors.ProviderRefusedTheKey,
+                    HttpStatusCode.TooManyRequests => PlanningErrors.ProviderRateLimited,
+                    HttpStatusCode.BadRequest or HttpStatusCode.PaymentRequired
+                        when await SaysOutOfCreditAsync(response, cancellationToken).ConfigureAwait(false) => PlanningErrors.ProviderOutOfCredit,
+                    _ => PlanningErrors.ProviderUnavailable,
+                };
 
-                return PlanResult.Failed(
-                    [refused ? PlanningErrors.ProviderRefusedTheKey : PlanningErrors.ProviderUnavailable],
-                    Spent(0, 0, started),
-                    Model);
+                return PlanResult.Failed([error], Spent(0, 0, started), Model);
             }
 
             var answer = await response.Content.ReadFromJsonAsync<Answer>(Wire, cancellationToken).ConfigureAwait(false);
@@ -139,6 +146,29 @@ public sealed class AnthropicPlanner(HttpClient client, PlannerOptions options, 
         message.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
         return message;
+    }
+
+    /// <summary>
+    /// Whether an error answer says the account has run out of credit. Only the first few kilobytes are
+    /// read, only to look for the provider's fixed phrases, and nothing of the body is kept or logged:
+    /// an error body can carry the prompt back, and the prompt contains the application under test.
+    /// </summary>
+    private static async Task<bool> SaysOutOfCreditAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+            var buffer = new byte[4096];
+            var read = await stream.ReadAtLeastAsync(buffer, buffer.Length, throwOnEndOfStream: false, cancellationToken).ConfigureAwait(false);
+            var text = System.Text.Encoding.UTF8.GetString(buffer, 0, read);
+
+            return text.Contains("credit balance", StringComparison.OrdinalIgnoreCase)
+                || text.Contains("insufficient credit", StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception exception) when (exception is IOException or HttpRequestException)
+        {
+            return false;
+        }
     }
 
     private PlanningCost Spent(int input, int output, long started) => new(

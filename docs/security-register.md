@@ -276,6 +276,11 @@ Today `TargetOrigin` comes from configuration (`ExecutionService.cs:231,287`), s
 ever admits our demo target. The first customer-supplied URL would turn it into a route to whatever
 listens on the worker host's loopback interface.
 
+**It now guards a second thing.** Whether an exploration may press an application's controls and fill
+its forms is decided from the same list ([ADR-0022](decisions/0022-filling-forms-while-exploring.md)).
+The policy also requires a loopback address written as a number, so a customer's application on the
+internet is refused whatever the list says. A customer-supplied loopback address would pass both.
+
 **Fix before any customer target.** Trusted-local origins come from configuration only, never from a
 stored run. A regression test writes a loopback origin to a run row and expects a refusal.
 Tracked as gap G2 in [`commercial-readiness.md`](commercial-readiness.md).

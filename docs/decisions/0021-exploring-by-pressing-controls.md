@@ -1,6 +1,6 @@
 # 0021 — Exploring by pressing controls: opt-in, bounded, fresh-start
 
-- **Status:** Accepted
+- **Status:** Accepted. Sections 1, 5 and 7 of the decision are superseded by [ADR-0022](0022-filling-forms-while-exploring.md)
 - **Date:** 2026-11-15
 
 ## Context
@@ -58,3 +58,10 @@ sign-out. So it must be an explicit choice, not a default.
   depth. A bounded search that is honest about its limit is better than an unbounded one that times out.
 - **Exercise customer applications by default.** Rejected: an action on someone else's system needs
   their approval, which is a product decision, not a default.
+
+## Amendment, 2026-11-15
+The search described above did not last the day. The clinic showed that following every combination of
+presses spends the budget before a booking form is reached, and adding forms showed 253 visits for 28
+pages. [ADR-0022](0022-filling-forms-while-exploring.md) replaces the search (decision 5 and 7 here), and
+makes "opt-in" (decision 1) a check in code: pressing is refused on any application we do not run
+ourselves. Decisions 2, 3, 4 and 6 stand, with "cancel" added to the controls never pressed.

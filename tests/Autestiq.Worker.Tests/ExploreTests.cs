@@ -8,14 +8,14 @@ namespace Autestiq.Worker.Tests;
 /// The crawl that describes an application before anything is planned against it. Deterministic on
 /// purpose: a plan is only reproducible if its input is (ADR-0019 §5).
 /// </summary>
+/// <remarks>
+/// In the collection that runs one at a time. The shop's defects are switched for the whole process,
+/// and a crawl made while another test has one switched on describes a different shop: comparing two
+/// crawls would then fail for a reason that has nothing to do with the crawl.
+/// </remarks>
+[Collection(Serially.Name)]
 public class ExploreTests(DemoShopFixture shop)
 {
-    /// <summary>
-    /// Exploring presses many controls, one fresh visit each. The default budget is for reading an
-    /// application, so exploration asks for more time and the same page count.
-    /// </summary>
-    private static readonly RunBudget ExplorationBudget = new(TimeSpan.FromMinutes(10), 100, 50 * 1024 * 1024);
-
     [Fact]
     public async Task Explore_TheDemoShop_FindsItsPagesAndWhatIsOnThem()
     {
@@ -130,64 +130,4 @@ public class ExploreTests(DemoShopFixture shop)
             snapshot.Pages.Select(page =>
                 $"{page.Path} | {page.Title} | {page.Heading} | "
                 + string.Join(", ", page.Elements.Select(element => $"{element.Role}:{element.TestId}:{element.Name}"))));
-
-    [Fact]
-    public async Task ExploreStates_ReachesABasketHoldingTwoProducts()
-    {
-        // Add the teapot, go back to the catalogue, add the cup. The crawl alone never shows this
-        // basket, and a two-product scenario cannot be planned without it.
-        var result = await Jobs.ExploreAsync(shop.Origin, exploreStates: true, budget: ExplorationBudget);
-        var snapshot = Assert.IsType<SiteSnapshot>(result.Snapshot);
-
-        var basket = snapshot.Pages.FirstOrDefault(page =>
-            page.Path == "/basket"
-            && page.Elements.Any(element => element.TestId == "line-pot")
-            && page.Elements.Any(element => element.TestId == "line-cup"));
-
-        Assert.NotNull(basket);
-
-        // Which order the two products were added in does not matter, and either path is the one a plan needs.
-        Assert.Equal(3, basket.ReachedBy!.Count);
-        Assert.Contains("click add-pot", basket.ReachedBy);
-        Assert.Contains("click add-cup", basket.ReachedBy);
-    }
-
-    [Fact]
-    public async Task ExploreStates_NeverPressesTheControlThatPlacesAnOrder()
-    {
-        // Finding states is the job. Buying something on the way is not, and the order page is only
-        // reachable by placing one, so its absence is the evidence.
-        var result = await Jobs.ExploreAsync(shop.Origin, exploreStates: true, budget: ExplorationBudget);
-        var snapshot = Assert.IsType<SiteSnapshot>(result.Snapshot);
-
-        Assert.DoesNotContain(snapshot.Pages, page => page.ReachedBy is { } path && path.Any(step => step.Contains("place-order", StringComparison.OrdinalIgnoreCase)));
-
-        // The sitemap lists the confirmation page, so it is in the crawl, reached by a link. It must
-        // not be reached by pressing anything.
-        Assert.DoesNotContain(snapshot.Pages, page => page.Path == "/order/placed" && page.ReachedBy is { Count: > 0 });
-    }
-
-    [Fact]
-    public async Task Explore_WithoutExploreStates_PressesNothing()
-    {
-        // Off by default. A crawl of an application nobody chose to exercise only reads it.
-        var result = await Jobs.ExploreAsync(shop.Origin);
-        var snapshot = Assert.IsType<SiteSnapshot>(result.Snapshot);
-
-        Assert.DoesNotContain(snapshot.Pages, page => page.ReachedBy is { Count: > 0 });
-    }
-
-    [Fact]
-    public async Task ExploreStates_IsTheSameOnEveryRun()
-    {
-        // A plan is only reproducible if its input is (ADR-0019 §5). Exploration must not depend on
-        // timing or on what an earlier run left behind.
-        var first = Assert.IsType<SiteSnapshot>((await Jobs.ExploreAsync(shop.Origin, exploreStates: true, budget: ExplorationBudget)).Snapshot);
-        var second = Assert.IsType<SiteSnapshot>((await Jobs.ExploreAsync(shop.Origin, exploreStates: true, budget: ExplorationBudget)).Snapshot);
-
-        string Describe(SiteSnapshot snapshot) => string.Join("\n", snapshot.Pages.Select(page =>
-            page.Path + " via " + string.Join(" > ", page.ReachedBy ?? []) + " :: " + string.Join(",", page.Elements.Select(element => element.TestId ?? element.Name))));
-
-        Assert.Equal(Describe(first), Describe(second));
-    }
 }

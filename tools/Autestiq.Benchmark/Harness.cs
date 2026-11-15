@@ -226,7 +226,7 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
     {
         await ResetAsync().ConfigureAwait(false);
 
-        var explored = await new ScenarioRunner(TimeProvider.System)
+        var explored = await new ScenarioRunner(TimeProvider.System) { StartAfresh = ResetTarget }
             .RunAsync(Job(scenario, WorkerTask.Explore, null) with { Budget = ExplorationBudget }, cancellationToken)
             .ConfigureAwait(false);
 
@@ -320,8 +320,12 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
         }
     }
 
-    /// <summary>Exploring presses many controls, one fresh visit each, and needs more time than a single run.</summary>
-    internal static readonly RunBudget ExplorationBudget = new(TimeSpan.FromMinutes(10), 100, 50 * 1024 * 1024);
+    /// <summary>
+    /// Exploring presses many controls, one fresh visit each, so it needs more time than a single run.
+    /// It also reads more pages than a run's default of twelve: the clinic has seventeen kinds of page.
+    /// </summary>
+    internal static readonly RunBudget ExplorationBudget =
+        new(TimeSpan.FromMinutes(10), 100, 50 * 1024 * 1024, MaxPagesCrawled: 24);
 
     private WorkerJob Job(BenchmarkScenario scenario, WorkerTask task, IReadOnlyList<PlannedAction>? plan) => new(
         RunId: Guid.CreateVersion7(),
@@ -334,5 +338,9 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
         task,
         plan,
         scenario.Secrets,
-        ExploreStates: task == WorkerTask.Explore);
+        // Every target this tool measures is one it started itself, so it asks for the controls to be
+        // pressed and the forms to be filled. Whether that is allowed is not decided here: the worker's
+        // own policy decides, from the address (Autestiq.Worker.ExplorationPolicy).
+        ExploreStates: task == WorkerTask.Explore,
+        SubmitForms: task == WorkerTask.Explore);
 }

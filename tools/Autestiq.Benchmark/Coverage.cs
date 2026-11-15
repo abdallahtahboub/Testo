@@ -23,8 +23,10 @@ namespace Autestiq.Benchmark;
 /// </remarks>
 internal static class Coverage
 {
-    /// <summary>Runs the crawl once, against the target as it is, with exploration on, as the planner gets it.</summary>
-    public static async Task<SiteSnapshot> ExploreAsync(string origin)
+    /// <summary>Explores the target once, the way a planner's exploration does, and says what that took.</summary>
+    /// <param name="origin">Where the target is.</param>
+    /// <param name="startAfresh">Puts the target back to its starting state, when it keeps any on its server.</param>
+    public static async Task<(SiteSnapshot Snapshot, string Said)> ExploreAsync(string origin, Func<Task>? startAfresh)
     {
         var job = new WorkerJob(
             RunId: Guid.CreateVersion7(),
@@ -35,11 +37,17 @@ internal static class Coverage
             Budget: Harness.ExplorationBudget,
             ArtifactDirectory: Directory.CreateTempSubdirectory("autestiq-coverage-").FullName,
             Task: WorkerTask.Explore,
-            ExploreStates: true);
+            ExploreStates: true,
+            SubmitForms: true);
 
-        var result = await new ScenarioRunner(TimeProvider.System).RunAsync(job, CancellationToken.None);
+        var result = await new ScenarioRunner(TimeProvider.System) { StartAfresh = startAfresh }
+            .RunAsync(job, CancellationToken.None);
 
-        return result.Snapshot ?? SiteSnapshot.Empty(origin);
+        var said = result.Steps.Count > 0 && result.Steps[0].Message is { Length: > 0 } message
+            ? message
+            : result.FailureReason ?? result.Status.ToString();
+
+        return (result.Snapshot ?? SiteSnapshot.Empty(origin), said);
     }
 
     /// <summary>Writes, per scenario, the steps the crawl shows and the steps it does not.</summary>

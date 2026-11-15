@@ -28,11 +28,23 @@ public class PlanPromptTests
             "Basket",
             "Basket",
             [new SnapshotElement("button", "Remove", "remove-pot")],
-            ReachedBy: ["click add-pot"]);
+            ReachedBy: ["open /", "click add-pot"]);
 
         var prompt = PlanPrompt.User(Request(new SiteSnapshot("http://127.0.0.1:5090", [basket], false)));
 
-        Assert.Contains("reached by: click add-pot", prompt, StringComparison.Ordinal);
+        Assert.Contains("reached by: open /, then click add-pot", prompt, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void System_SaysWhatReachedByMeans_AndThatTypedTestValuesAreNotTheApplications()
+    {
+        // The crawl types placeholder values to see what a form does. A planner that took them for the
+        // values a scenario needs would type "Test value" where a tester asked for a voucher code.
+        var system = PlanPrompt.System;
+
+        Assert.Contains("reached by", system, StringComparison.Ordinal);
+        Assert.Contains("fresh visit", system, StringComparison.Ordinal);
+        Assert.Contains("your plan types what the scenario calls for", system, StringComparison.Ordinal);
     }
 
     [Fact]

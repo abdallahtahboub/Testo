@@ -1,8 +1,17 @@
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.Playwright;
 using Autestiq.Contracts.Execution;
 using Autestiq.Contracts.Planning;
 
 namespace Autestiq.Worker;
+
+/// <summary>What an exploration found, and what it took.</summary>
+/// <param name="Snapshot">The description of the application. The only part that goes any further.</param>
+/// <param name="Visits">How many fresh visits were made to press controls. Each is a page load and a few presses.</param>
+/// <param name="VisitsFailed">How many of those could not be carried out, after one retry.</param>
+/// <param name="PressingRefused">Whether pressing controls was asked for and refused by <see cref="ExplorationPolicy"/>.</param>
+internal sealed record Exploration(SiteSnapshot Snapshot, int Visits, int VisitsFailed, bool PressingRefused);
 
 /// <summary>
 /// Walks the target and describes what is on it, so that a plan can be made against an application
@@ -13,9 +22,12 @@ namespace Autestiq.Worker;
 /// No model is involved here, and that is the point (ADR-0019 §5). The crawl is a breadth-first
 /// walk of in-origin links from the start page, within a budget, so the same application produces
 /// the same description — which is what makes a plan reproducible and a flake rate meaningful.
-/// When the job asks for it (ADR-0021), it also presses the application's own controls and says what
-/// each path reaches, by the same fixed, bounded rule.
 /// A model choosing where to look could be led somewhere by the page it is reading.
+/// </para>
+/// <para>
+/// When the job asks for it and <see cref="ExplorationPolicy"/> allows it (ADR-0021, ADR-0022), the
+/// explorer also presses the application's own controls and says what each one leads to, by the
+/// same fixed, bounded rule. That part is in <c>SiteExplorer.Pressing.cs</c>.
 /// </para>
 /// <para>
 /// Everything it returns is untrusted input. It is kept to roles, accessible names, test ids and
@@ -36,38 +48,33 @@ internal static partial class SiteExplorer
     /// <summary>How many paths are taken from a sitemap. A large site lists thousands.</summary>
     private const int MaxSitemapPaths = 40;
 
-    /// <summary>How many click paths are tried, in all. Each one is a fresh visit, so this is what exploring costs.</summary>
-    private const int MaxReplays = 300;
-
-    /// <summary>
-    /// How many actions one path may take. Three reaches a basket with two products (add one, back to the
-    /// catalogue, add another). Four reaches a clinic's details form from its home page (services, a book
-    /// link, a date, a time). Five would reach three products in a basket, and it multiplies the pages a
-    /// plan is shown without adding a state a scenario needs.
-    /// </summary>
-    private const int MaxPathDepth = 4;
-
-    /// <summary>How many controls of one state are pressed. The rest are described, not exercised.</summary>
-    private const int MaxControlsPerState = 8;
-
-    /// <summary>How many distinct states exploration may add to a snapshot.</summary>
-    private const int MaxExploredStates = 60;
-
     /// <summary>The roles worth describing: the things a plan can act on or check.</summary>
     private static readonly string[] Roles =
         ["button", "link", "textbox", "checkbox", "radio", "combobox", "heading"];
 
     /// <summary>
-    /// Describes the target, following in-origin links until the page budget is spent.
+    /// Describes the target: the pages its links and its sitemap reach, within the page budget, and,
+    /// where the job asks and the policy allows, what its controls do.
     /// </summary>
-    public static async Task<SiteSnapshot> ExploreAsync(
+    /// <param name="page">The browser page to drive.</param>
+    /// <param name="job">The job: the target, the budget and what was asked for.</param>
+    /// <param name="startAfresh">
+    /// Puts the target back to its starting state, for an application that keeps state on its server.
+    /// Called before every visit that presses something. Null for an application whose state lives in
+    /// the browser, which clearing the cookies resets.
+    /// </param>
+    /// <param name="cancellationToken">Stops the exploration.</param>
+    public static async Task<Exploration> ExploreAsync(
         IPage page,
         WorkerJob job,
+        Func<Task>? startAfresh,
         CancellationToken cancellationToken)
     {
         var origin = new Uri(job.TargetOrigin);
-        var queue = new Queue<string>(["/"]);
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "/" };
+
+        // Which address is opened next, and whether the crawl has stopped short when it stops, is the
+        // frontier's to decide: one address of every kind first (CrawlFrontier).
+        var frontier = new CrawlFrontier("/");
 
         // Pages the application itself advertises. Following links alone is not enough: the demo
         // shop hides its checkout behind a basket that has something in it, so a crawl that starts
@@ -76,27 +83,16 @@ internal static partial class SiteExplorer
         // A real application publishes a sitemap for exactly this reason.
         foreach (var advertised in await SitemapPathsAsync(page, origin).ConfigureAwait(false))
         {
-            if (seen.Add(advertised))
-            {
-                queue.Enqueue(advertised);
-            }
+            frontier.Note(advertised);
         }
-        var pages = new List<PageSnapshot>();
-        var truncated = false;
 
-        while (queue.Count > 0)
+        var pages = new List<PageSnapshot>();
+        var described = new Dictionary<string, PageSnapshot>(StringComparer.Ordinal);
+        var kindsShown = new HashSet<string>(StringComparer.Ordinal);
+
+        while (pages.Count < job.Budget.MaxPagesCrawled && frontier.Next() is { } path)
         {
             cancellationToken.ThrowIfCancellationRequested();
-
-            if (pages.Count >= job.Budget.MaxPagesCrawled)
-            {
-                // Said rather than hidden: a planner that does not know it is looking at part of an
-                // application will plan as though it were all of it.
-                truncated = true;
-                break;
-            }
-
-            var path = queue.Dequeue();
 
             var response = await Open(page, path).ConfigureAwait(false);
 
@@ -105,188 +101,115 @@ internal static partial class SiteExplorer
                 continue;
             }
 
-            pages.Add(await DescribeAsync(page, path).ConfigureAwait(false));
+            var looked = await LookAtAsync(page, path, described).ConfigureAwait(false);
+            var shape = Signature(looked);
+
+            frontier.Saw(path, shape);
+
+            // One page of each kind is shown. The same page for another date says nothing a plan
+            // needs, and every page shown is paid for in every prompt.
+            if (kindsShown.Add(shape))
+            {
+                pages.Add(looked);
+            }
 
             foreach (var link in await LinksAsync(page, origin).ConfigureAwait(false))
             {
-                if (seen.Add(link))
-                {
-                    queue.Enqueue(link);
-                }
+                frontier.Note(link);
             }
         }
+
+        // Said rather than hidden: a planner that does not know it is looking at part of an
+        // application will plan as though it were all of it. And not said when it is not so: a planner
+        // told it has seen only part will hedge every plan it writes.
+        var truncated = frontier.HasUnseen;
+
+        var visits = 0;
+        var visitsFailed = 0;
+        var refused = false;
 
         if (job.ExploreStates)
         {
-            var explored = await ExploreStatesAsync(page, job, pages, cancellationToken).ConfigureAwait(false);
-            pages.AddRange(explored.Pages);
-            truncated |= explored.Truncated;
+            if (ExplorationPolicy.MayPressControls(job))
+            {
+                var pressed = await PressAsync(page, job, pages, described, startAfresh, cancellationToken).ConfigureAwait(false);
+                pages.AddRange(pressed.Pages);
+                truncated |= pressed.Truncated;
+                visits = pressed.Visits;
+                visitsFailed = pressed.Failed;
+            }
+            else
+            {
+                // Asked for and not done. Said, so that nobody reads a description made without pressing
+                // anything as one made with it.
+                refused = true;
+            }
         }
 
-        return new SiteSnapshot(job.TargetOrigin, pages, truncated);
+        return new Exploration(new SiteSnapshot(job.TargetOrigin, pages, truncated), visits, visitsFailed, refused);
     }
 
     /// <summary>
-    /// Presses the application's own controls, one path at a time, and describes the state each path
-    /// reaches. This is what lets a plan know that "add to basket" leads to the basket, and what the
-    /// basket then holds, before the plan is written.
+    /// Describes the page the browser is on, or recalls the description when this exact page has been
+    /// described before.
     /// </summary>
     /// <remarks>
-    /// <para>
-    /// Every path starts from a fresh visit: cookies are cleared and the start page is loaded again,
-    /// so no path inherits what an earlier one put in the basket. The order is breadth first, the
-    /// paths are fixed by the application, and the number of visits is capped, so the same
-    /// application is explored the same way every time. A time limit would not be deterministic.
-    /// </para>
-    /// <para>
-    /// Only controls with a test id are pressed, and never one whose name says it changes something
-    /// that should not change on the way (<see cref="ConsequentialPattern"/>): ordering, paying,
-    /// deleting, signing out. A crawl exists to find states, not to buy things.
-    /// </para>
+    /// Describing a page is a hundred questions to the browser, and pressing controls lands on the same
+    /// few pages again and again. So the page's markup is hashed, and a page whose hash has been seen is
+    /// not described twice. Only the hash is kept: the markup never leaves this method, and nothing of it
+    /// reaches a snapshot.
     /// </remarks>
-    private static async Task<(List<PageSnapshot> Pages, bool Truncated)> ExploreStatesAsync(
-        IPage page,
-        WorkerJob job,
-        IReadOnlyList<PageSnapshot> crawled,
-        CancellationToken cancellationToken)
+    private static async Task<PageSnapshot> LookAtAsync(IPage page, string path, Dictionary<string, PageSnapshot> described)
     {
-        var start = crawled.FirstOrDefault(candidate => candidate.Path == "/" && (candidate.ReachedBy is null or { Count: 0 }));
+        string key;
 
-        if (start is null)
+        try
         {
-            return ([], false);
+            key = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(await page.ContentAsync().ConfigureAwait(false))));
+        }
+        catch (Exception exception) when (exception is PlaywrightException or TimeoutException)
+        {
+            // A page that will not give up its markup is described the long way, and not remembered.
+            return await DescribeAsync(page, path).ConfigureAwait(false);
         }
 
-        // What is already in the snapshot. Only used to keep the output free of repeats.
-        var known = new HashSet<string>(crawled.Select(Signature), StringComparer.Ordinal);
-        var expanded = new HashSet<string>(StringComparer.Ordinal);
-        var found = new List<PageSnapshot>();
-        var queue = new Queue<(List<string> Path, PageSnapshot State)>();
-        queue.Enqueue((new List<string>(), start));
-        var replays = 0;
-
-        while (queue.Count > 0)
+        if (described.TryGetValue(key, out var known))
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var (path, state) = queue.Dequeue();
-
-            if (path.Count >= MaxPathDepth)
-            {
-                continue;
-            }
-
-            foreach (var control in Clickable(state).Take(MaxControlsPerState))
-            {
-                if (replays >= MaxReplays || found.Count >= MaxExploredStates)
-                {
-                    // Said rather than hidden, for the same reason as the crawl's own budget.
-                    return (found, true);
-                }
-
-                replays++;
-
-                var reached = new List<string>(path) { control.TestId! };
-                var next = await ReplayAsync(page, job, reached, cancellationToken).ConfigureAwait(false);
-
-                if (next is null)
-                {
-                    continue;
-                }
-
-                var described = next with { ReachedBy = reached.Select(testId => "click " + testId).ToList() };
-                var shape = Signature(described);
-
-                // The snapshot holds each shape once, including the shapes the crawl already read, so a plan
-                // is not shown the same page twice. The same page reached by a different date is the same page
-                // for a plan, and listing every date would only fill the prompt.
-                if (known.Add(shape))
-                {
-                    found.Add(described);
-                }
-
-                // Expansion is tracked separately, and only for pages reached by pressing. A page the crawl
-                // already read has not been pressed on yet, so it is still expanded here. A page reached again
-                // from the same kind of page is not followed again: that is what stops the clinic's menu being
-                // pressed in every combination.
-                // The page it was reached from is part of the key. The catalogue after a teapot and the catalogue
-                // after a tea read the same, but the basket before the last click does not, and that is the
-                // difference between a basket with a teapot and a cup and one with a tea and a cup.
-                if (expanded.Add(shape + " <- " + Signature(state)))
-                {
-                    queue.Enqueue((reached, described));
-                }
-            }
+            return known with { Path = path, ReachedBy = null };
         }
 
-        return (found, false);
+        var fresh = await DescribeAsync(page, path).ConfigureAwait(false);
+        described[key] = fresh;
+
+        return fresh;
     }
-
-    /// <summary>The controls of one state that exploration may press.</summary>
-    private static IEnumerable<SnapshotElement> Clickable(PageSnapshot state) =>
-        state.Elements.Where(element =>
-            element.TestId is { Length: > 0 }
-            && element.Role is "button" or "link"
-            && !ConsequentialPattern().IsMatch(element.TestId + " " + element.Name));
 
     /// <summary>
-    /// Visits the start page afresh, presses each control in turn, and describes where that ends.
-    /// Null when the path cannot be carried out or leaves the target.
+    /// What makes two pages the same kind of page: where they are and what is on them, with numbers
+    /// masked. The same page for another date, or with another booking reference, is one kind.
     /// </summary>
-    private static async Task<PageSnapshot?> ReplayAsync(
-        IPage page,
-        WorkerJob job,
-        IReadOnlyList<string> path,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        await page.Context.ClearCookiesAsync().ConfigureAwait(false);
-
-        if (await Open(page, "/").ConfigureAwait(false) is null)
-        {
-            return null;
-        }
-
-        foreach (var testId in path)
-        {
-            // By test id, through Playwright's own escaping: the id came from the application, and
-            // is never put into a selector as text.
-            var target = page.GetByTestId(testId);
-
-            try
-            {
-                if (await target.CountAsync().ConfigureAwait(false) != 1)
-                {
-                    return null;
-                }
-
-                await target.ClickAsync().ConfigureAwait(false);
-                await page.WaitForLoadStateAsync(LoadState.Load).ConfigureAwait(false);
-            }
-            catch (Exception exception) when (exception is PlaywrightException or TimeoutException)
-            {
-                return null;
-            }
-        }
-
-        var here = new Uri(page.Url);
-        var origin = new Uri(job.TargetOrigin);
-
-        if (!string.Equals(here.GetLeftPart(UriPartial.Authority), origin.GetLeftPart(UriPartial.Authority), StringComparison.OrdinalIgnoreCase))
-        {
-            return null;
-        }
-
-        return await DescribeAsync(page, here.PathAndQuery).ConfigureAwait(false);
-    }
-
-    /// <summary>What makes two states the same: where they are and what is on them.</summary>
     private static string Signature(PageSnapshot state) =>
-        Masked(state.Path) + "|"
+        Masked(PathOnly(state.Path)) + "|"
         + string.Join(',', state.Elements.Select(element => Masked(element.TestId ?? element.Name)));
 
-    /// <summary>Numbers, as in a date or a time, are the same shape whatever their value.</summary>
+    /// <summary>
+    /// What makes two pages the same page: where they are and everything they say. A catalogue whose
+    /// basket link reads "Basket (1)" is the same kind of page as one that reads "Basket (0)", and not
+    /// the same page.
+    /// </summary>
+    private static string ContentKey(PageSnapshot state) =>
+        PathOnly(state.Path) + "\n" + state.Title + "\n" + state.Heading + "\n"
+        + string.Join('\n', state.Elements.Select(element => $"{element.Role}\t{element.TestId}\t{element.Name}\t{element.Text}"));
+
+    /// <summary>A path without its query string.</summary>
+    private static string PathOnly(string path)
+    {
+        var query = path.IndexOf('?', StringComparison.Ordinal);
+
+        return query < 0 ? path : path[..query];
+    }
+
+    /// <summary>Numbers, as in a date or a time, are the same kind whatever their value.</summary>
     private static string Masked(string text) => DigitsPattern().Replace(text, "#");
 
     [System.Text.RegularExpressions.GeneratedRegex(@"\d+")]
@@ -352,11 +275,6 @@ internal static partial class SiteExplorer
 
     [System.Text.RegularExpressions.GeneratedRegex(@"<loc>\s*([^<]+?)\s*</loc>", System.Text.RegularExpressions.RegexOptions.IgnoreCase)]
     private static partial System.Text.RegularExpressions.Regex LocationPattern();
-
-    [System.Text.RegularExpressions.GeneratedRegex(
-        @"order|pay|purchase|place|delete|cancel|sign-?out|log-?out|submit|confirm|send",
-        System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.CultureInvariant)]
-    private static partial System.Text.RegularExpressions.Regex ConsequentialPattern();
 
     /// <summary>
     /// Opens a path, or gives up on it. A page that will not load is not a reason to abandon the

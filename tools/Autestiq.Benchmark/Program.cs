@@ -42,35 +42,32 @@ if (options.SelfCheck)
     return await SelfCheck.RunAsync(origin) ? 0 : 1;
 }
 
-// How much of what the baseline plans need the crawl shows: no key, nothing spent.
+// The clinic keeps its diary on the server, so anything that explores it puts it back first.
+Func<Task>? startAfresh = booking
+    ? () =>
+    {
+        Autestiq.BookingShop.Clinic.Reset();
+        return Task.CompletedTask;
+    }
+    : null;
+
+// How much of what the baseline plans need the exploration shows: no key, nothing spent.
 if (args.Contains("--coverage", StringComparer.Ordinal))
 {
-    var snapshot = await Coverage.ExploreAsync(origin);
-    Coverage.Print(booking ? BookingScenarios.All : BenchmarkScenarios.All, snapshot, Console.Out);
+    var (snapshot, said) = await Coverage.ExploreAsync(origin, startAfresh);
+    Console.WriteLine(said);
+    Coverage.Print(booking ? BookingScenarios.All : options.HeldOut ? HeldOutScenarios.All : BenchmarkScenarios.All, snapshot, Console.Out);
     return 0;
 }
 
-// What the crawl sees of the target, printed, with no planner and nothing spent. The way to check the
-// crawl against an application without a key.
+// What the exploration sees of the target, printed, with no planner and nothing spent. The way to check
+// the crawl against an application without a key.
 if (args.Contains("--explore", StringComparer.Ordinal))
 {
-    var job = new WorkerJob(
-        RunId: Guid.CreateVersion7(),
-        ScenarioId: "explore",
-        TargetOrigin: origin,
-        AllowedOrigins: [],
-        TrustedLocalOrigins: [origin],
-        Budget: Harness.ExplorationBudget,
-        ArtifactDirectory: Directory.CreateTempSubdirectory("autestiq-explore-").FullName,
-        Task: WorkerTask.Explore,
-        ExploreStates: true);
+    var (snapshot, said) = await Coverage.ExploreAsync(origin, startAfresh);
+    Console.WriteLine(said);
 
-    var explored = await new ScenarioRunner(TimeProvider.System).RunAsync(job, CancellationToken.None);
-    var snapshot = explored.Snapshot;
-
-    Console.WriteLine($"Status {explored.Status}. {snapshot?.Pages.Count ?? 0} page(s), truncated: {snapshot?.Truncated}.");
-
-    foreach (var page in snapshot?.Pages ?? [])
+    foreach (var page in snapshot.Pages)
     {
         var route = page.ReachedBy is { Count: > 0 } steps ? string.Join(" > ", steps) : "(by link)";
         Console.WriteLine($"  {page.Path,-48} {route}  [{page.Elements.Count} elements]");
@@ -121,13 +118,7 @@ var harness = new Harness(origin, planner, options.Repetitions, options.Recordin
     SetDefects = booking
         ? names => Autestiq.BookingShop.Defects.Set(names)
         : names => Autestiq.DemoShop.Defects.Set(names),
-    ResetTarget = booking
-        ? () =>
-        {
-            Autestiq.BookingShop.Clinic.Reset();
-            return Task.CompletedTask;
-        }
-        : null,
+    ResetTarget = startAfresh,
     Measured = measurement =>
     {
         // The reason, not just "no plan". Somebody watching lines scroll past should not have to

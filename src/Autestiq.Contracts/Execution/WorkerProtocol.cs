@@ -52,6 +52,12 @@ public enum WorkerTask
 /// path reaches. Off unless the caller asks, because pressing controls on somebody else's application
 /// is an action on it, and only a target we have chosen to exercise may have it.
 /// </param>
+/// <param name="SubmitForms">
+/// For <see cref="WorkerTask.Explore"/> with <see cref="ExploreStates"/>: also submit forms, typing fixed
+/// test values into them first. Honoured only for a target this job names as trusted-local, which is how
+/// the benchmark marks the applications it runs itself. A customer's application never has it
+/// (<c>ExplorationPolicy</c>), whatever the job asks for.
+/// </param>
 public sealed record WorkerJob(
     Guid RunId,
     string ScenarioId,
@@ -63,7 +69,8 @@ public sealed record WorkerJob(
     WorkerTask Task = WorkerTask.Scripted,
     IReadOnlyList<PlannedAction>? Plan = null,
     IReadOnlyDictionary<string, string>? Secrets = null,
-    bool ExploreStates = false);
+    bool ExploreStates = false,
+    bool SubmitForms = false);
 
 /// <summary>What a run may spend. Exceeding any one of these ends the run with a status that says which.</summary>
 /// <param name="WallClock">How long the whole run may take.</param>

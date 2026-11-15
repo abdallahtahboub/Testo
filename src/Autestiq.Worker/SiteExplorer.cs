@@ -696,13 +696,17 @@ internal static partial class SiteExplorer
         return await FirstTextAsync(element).ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// The text an element holds, as the page wrote it rather than as it is drawn: a stylesheet that shows a
+    /// name in capitals does not change what the browser's text filter and its text assertions compare with.
+    /// </summary>
     private static async Task<string?> FirstTextAsync(ILocator locator)
     {
         try
         {
             return await locator.CountAsync().ConfigureAwait(false) == 0
                 ? null
-                : Trim(await locator.First.InnerTextAsync().ConfigureAwait(false));
+                : Trim(await locator.First.TextContentAsync().ConfigureAwait(false));
         }
         catch (Exception exception) when (exception is PlaywrightException or TimeoutException)
         {

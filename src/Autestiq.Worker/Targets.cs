@@ -29,19 +29,36 @@ internal static class Targets
         ArgumentNullException.ThrowIfNull(page);
         ArgumentNullException.ThrowIfNull(target);
 
-        // The innermost container with the text comes last in document order, after any it is nested in.
-        var scope = target.Within is { Length: > 0 } within
-            ? page.Locator(Containers).Filter(new LocatorFilterOptions { HasText = within }).Last
-            : page.Locator(":root");
+        // A role's name is matched exactly, whitespace aside: "Password" is not "Confirm password". The names a
+        // plan is shown are the browser's own accessible names, so an exact match finds the element meant.
+        if (target.Within is not { Length: > 0 } within)
+        {
+            return target.Kind switch
+            {
+                TargetKind.TestId => page.GetByTestId(target.Value),
+                TargetKind.RoleAndName => page.GetByRole(Role(target.Role), new PageGetByRoleOptions { Name = target.Value, Exact = true }),
+                TargetKind.Text => page.GetByText(target.Value, new PageGetByTextOptions { Exact = true }),
+                _ => throw Unknown(),
+            };
+        }
+
+        // The innermost container that holds both the text and the element: it comes last in document order,
+        // after any it is nested in. Holding the text alone is not enough, because the innermost container
+        // with a product's name can be the cell that shows only the name, and the price is in the next one.
+        var holder = page.Locator(Containers)
+            .Filter(new LocatorFilterOptions { HasText = within, Has = Locate(page, target with { Within = null }) })
+            .Last;
 
         return target.Kind switch
         {
-            TargetKind.TestId => scope.GetByTestId(target.Value),
-            TargetKind.RoleAndName => scope.GetByRole(Role(target.Role), new LocatorGetByRoleOptions { Name = target.Value, Exact = false }),
-            TargetKind.Text => scope.GetByText(target.Value, new LocatorGetByTextOptions { Exact = true }),
-            _ => throw new PlaywrightException("A target is named in a way this worker does not know."),
+            TargetKind.TestId => holder.GetByTestId(target.Value),
+            TargetKind.RoleAndName => holder.GetByRole(Role(target.Role), new LocatorGetByRoleOptions { Name = target.Value, Exact = true }),
+            TargetKind.Text => holder.GetByText(target.Value, new LocatorGetByTextOptions { Exact = true }),
+            _ => throw Unknown(),
         };
     }
+
+    private static PlaywrightException Unknown() => new("A target is named in a way this worker does not know.");
 
     /// <summary>
     /// The roles a target may name. A closed list again: an unknown role is a refusal, not a guess.

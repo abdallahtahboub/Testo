@@ -18,13 +18,48 @@ namespace Autestiq.Worker;
 /// list of containers is a fixed selector of ours; the text is matched as text.
 /// </para>
 /// </remarks>
-internal static class Targets
+// Public so that how a target becomes an element is tested against small fixed pages, not only through runs.
+public static class Targets
 {
     /// <summary>What can hold a repeated control or value: the containers "within" may name. Ours, and fixed.</summary>
     internal const string Containers = "tr, li, article, section, form, fieldset, dl, p";
 
     /// <summary>The element a target names, on this page.</summary>
-    public static ILocator Locate(IPage page, ActionTarget target)
+    public static ILocator Locate(IPage page, ActionTarget target) => Locate(page, target, exactName: true);
+
+    /// <summary>
+    /// The element a plan's step names. The exact name first; a name a person or a model shortened ("Basket" for
+    /// the link "Basket (2)") is matched loosely only when nothing has the exact name, after a short wait for the
+    /// page to show it. What the explorer offers a plan is always checked with exact names (<see cref="Locate(IPage, ActionTarget)"/>).
+    /// </summary>
+    public static async Task<ILocator> LocateForStepAsync(IPage page, ActionTarget target)
+    {
+        ArgumentNullException.ThrowIfNull(page);
+        ArgumentNullException.ThrowIfNull(target);
+
+        var exact = Locate(page, target);
+
+        if (target.Kind != TargetKind.RoleAndName)
+        {
+            return exact;
+        }
+
+        try
+        {
+            await exact.First.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Attached, Timeout = ExactNameWaitMilliseconds })
+                .ConfigureAwait(false);
+            return exact;
+        }
+        catch (TimeoutException)
+        {
+            return Locate(page, target, exactName: false);
+        }
+    }
+
+    /// <summary>How long a step waits for its exact name before it settles for a looser one.</summary>
+    private const float ExactNameWaitMilliseconds = 2_000;
+
+    private static ILocator Locate(IPage page, ActionTarget target, bool exactName)
     {
         ArgumentNullException.ThrowIfNull(page);
         ArgumentNullException.ThrowIfNull(target);
@@ -36,7 +71,7 @@ internal static class Targets
             return target.Kind switch
             {
                 TargetKind.TestId => page.GetByTestId(target.Value),
-                TargetKind.RoleAndName => page.GetByRole(Role(target.Role), new PageGetByRoleOptions { Name = target.Value, Exact = true }),
+                TargetKind.RoleAndName => page.GetByRole(Role(target.Role), new PageGetByRoleOptions { Name = target.Value, Exact = exactName }),
                 TargetKind.Text => page.GetByText(target.Value, new PageGetByTextOptions { Exact = true }),
                 _ => throw Unknown(),
             };
@@ -46,13 +81,13 @@ internal static class Targets
         // after any it is nested in. Holding the text alone is not enough, because the innermost container
         // with a product's name can be the cell that shows only the name, and the price is in the next one.
         var holder = page.Locator(Containers)
-            .Filter(new LocatorFilterOptions { HasText = within, Has = Locate(page, target with { Within = null }) })
+            .Filter(new LocatorFilterOptions { HasText = within, Has = Locate(page, target with { Within = null }, exactName) })
             .Last;
 
         return target.Kind switch
         {
             TargetKind.TestId => holder.GetByTestId(target.Value),
-            TargetKind.RoleAndName => holder.GetByRole(Role(target.Role), new LocatorGetByRoleOptions { Name = target.Value, Exact = true }),
+            TargetKind.RoleAndName => holder.GetByRole(Role(target.Role), new LocatorGetByRoleOptions { Name = target.Value, Exact = exactName }),
             TargetKind.Text => holder.GetByText(target.Value, new LocatorGetByTextOptions { Exact = true }),
             _ => throw Unknown(),
         };

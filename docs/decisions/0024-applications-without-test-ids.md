@@ -163,3 +163,9 @@ with the model. A fourth scenario, about a refused registration, was dropped bef
 baseline failed: the message is shown both in the form's summary and beside the field. After the fixes the
 explorer does tell the two apart (one of them is the only copy inside a container that also says
 "Password"), but the scenario stays dropped: the set was frozen without it.
+
+**Exact names, and a plan's own words.** What the explorer offers a plan is checked with exact names. A
+plan's step is matched exactly first as well; only when nothing has the exact name within two seconds is a
+looser match tried, so a name a person or a model shortened ("Basket" for the link "Basket (2)", whose count
+changes as the test runs) still finds its element, and an exact match is never passed over for a looser one
+(`Targets.LocateForStepAsync`).

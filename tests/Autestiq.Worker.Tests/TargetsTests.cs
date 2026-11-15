@@ -79,6 +79,28 @@ public sealed class TargetsTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task AStep_NamingAShortenedName_StillFindsTheOneLinkWithIt()
+    {
+        // "Basket" for the link "Basket (2)": what a person writes, and a count that changes as the test runs.
+        await Page.SetContentAsync("""<p><a href="/basket">Basket (2)</a></p>""");
+
+        var found = await Targets.LocateForStepAsync(Page, ActionTarget.ByRole("link", "Basket"));
+
+        Assert.Equal(1, await found.CountAsync());
+        Assert.Equal(0, await Targets.Locate(Page, ActionTarget.ByRole("link", "Basket")).CountAsync());
+    }
+
+    [Fact]
+    public async Task AStep_PrefersTheExactName_OverOneThatOnlyContainsIt()
+    {
+        await Page.SetContentAsync("""<p><a href="/a">Basket</a> <a href="/b">Back to the basket</a></p>""");
+
+        var found = await Targets.LocateForStepAsync(Page, ActionTarget.ByRole("link", "Basket"));
+
+        Assert.Equal("/a", await found.GetAttributeAsync("href"));
+    }
+
+    [Fact]
     public async Task Within_ATextNoContainerShares_FindsNothing()
     {
         const string basket = """<article><section>Roslyn Red Sheet</section><section>8.50</section></article>""";

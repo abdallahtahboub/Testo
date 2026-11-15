@@ -217,7 +217,11 @@ var measurements = await harness.RunAsync(scenarios, stopping.Token);
 
 Console.WriteLine($"\nFinished in {clock.Elapsed.TotalMinutes:0.0} minutes.");
 
-var report = Report.Write(measurements, options.Repetitions, DateTimeOffset.UtcNow);
+var report = Report.Write(
+    measurements,
+    options.Repetitions,
+    DateTimeOffset.UtcNow,
+    external is null ? "an application of our own" : "eShopOnWeb, Microsoft's sample shop, which nobody here wrote");
 
 if (options.Smoke)
 {

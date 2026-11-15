@@ -17,9 +17,4 @@
     <PackageReference Include="Microsoft.Playwright" />
   </ItemGroup>
 
-  <!-- How a target becomes an element (Targets) is tested against small fixed pages, not only through runs. -->
-  <ItemGroup>
-    <InternalsVisibleTo Include="Autestiq.Worker.Tests" />
-  </ItemGroup>
-
 </Project>

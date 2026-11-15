@@ -38,6 +38,22 @@ internal static class SelfCheck
             .Where(measurement => measurement.DefectOn && string.Equals(measurement.Source, "baseline", StringComparison.Ordinal))
             .ToList();
 
+        // Every run, not only the verdict that decides pass or fail. A run that never reached a
+        // verdict looks like a missed defect otherwise, and it is the browser, not the shop.
+        foreach (var measurement in measurements)
+        {
+            var status = measurement.Attempts.Count > 0 ? measurement.Attempts[0].Status.ToString() : "not run";
+            Console.WriteLine($"    {measurement.Source,-10} defect={(measurement.DefectOn ? "on " : "off")} "
+                + $"verdict={measurement.Verdict} status={status}");
+        }
+
+        if (measurements.Any(measurement => measurement.Verdict == Verdict.Inconclusive))
+        {
+            Console.WriteLine("    Some runs never reached a verdict. Usually the browser did not start: set "
+                + "AUTESTIQ_BROWSER_PATH to a Chromium, or install the test browser with "
+                + "`dotnet build tests/Autestiq.E2E -t:InstallTestBrowser`.");
+        }
+
         var caught = pretending.Count > 0 && pretending.All(measurement => measurement.Verdict == Verdict.FalsePositive);
         var baselineCorrect = baseline.Count > 0 && baseline.All(measurement => measurement.Verdict == Verdict.Correct);
 

@@ -70,6 +70,19 @@ the demo shop and took three minutes, most of them returning to pages already kn
 - **Planner prompts change.** A page's "reached by" now starts with the page the path opened, and can
   say that test values were typed.
 
+## Measured on the third application, before any planner run (2026-11-15)
+The invoice desk (`src/Autestiq.InvoiceDesk`) was built after these rules were settled, with twenty
+scenarios whose baselines all passed on their first run. The coverage measure, with no model, shows 95 of
+102 steps (93%). One gap is a weakness of decision 9 that the first two applications could not show: the
+crawl opened two invoices, both paid, found them the same kind of page, and settled the kind, so the
+"mark as paid" and "send reminder" buttons of an unpaid invoice were never described. Two samples that
+agree are not proof that every page of the kind agrees. The other gaps are inherent: a test id named
+after the client a scenario types, and a quantity error that only shows once a real client name passes.
+
+**Not fixed before the planner run, on purpose.** Changing the explorer because of a result on this set
+would make it a design set like the other two. The planner is measured on the explorer as it is, and the
+sampling is changed afterwards, with any later measurement of the desk counted as a design-set result.
+
 ## Alternatives considered
 - **Let the model choose what to type.** Rejected: ADR-0019 §5. The page could lead it.
 - **Take values from the page**, such as a placeholder. Rejected: the application would then choose

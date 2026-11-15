@@ -18,6 +18,7 @@
     <ProjectReference Include="../../src/Autestiq.Contracts/Autestiq.Contracts.csproj" />
     <ProjectReference Include="../../src/Autestiq.DemoShop/Autestiq.DemoShop.csproj" />
     <ProjectReference Include="../../src/Autestiq.BookingShop/Autestiq.BookingShop.csproj" />
+    <ProjectReference Include="../../src/Autestiq.InvoiceDesk/Autestiq.InvoiceDesk.csproj" />
     <ProjectReference Include="../../src/Autestiq.Worker/Autestiq.Worker.csproj" />
   </ItemGroup>
 

@@ -26,37 +26,67 @@ using Autestiq.DemoShop;
 
 var options = BenchmarkOptions.From(args);
 
-// Two targets: the demo shop (the first application) and the booking clinic (the second, held-out
-// application). Each runs in this process, so its diary and defects are set from here.
-var booking = options.Target == "booking";
-using var demo = booking ? null : DemoShopHost.Start();
-using var clinic = booking ? BookingShopHost.Start() : null;
-var origin = (booking ? clinic?.Origin : demo?.Origin) ?? throw new InvalidOperationException("No target started.");
+// Three targets, each run in this process so that its state and its defects are set from here: the demo
+// shop (the first application), the booking clinic (the second) and the invoice desk (the third, built
+// after the explorer's rules were settled).
+using var host = options.Target switch
+{
+    "booking" => InProcessHost.Start(app => Autestiq.BookingShop.BookingShopRoutes.Map(app)),
+    "invoices" => InProcessHost.Start(app => Autestiq.InvoiceDesk.InvoiceDeskRoutes.Map(app)),
+    _ => null,
+};
+using var demo = host is null ? DemoShopHost.Start() : null;
+var origin = host?.Origin ?? demo?.Origin ?? throw new InvalidOperationException("No target started.");
 
-Console.WriteLine(booking
-    ? $"The booking clinic is at {origin}."
-    : $"The demo shop is at {origin}.");
+Console.WriteLine(options.Target switch
+{
+    "booking" => $"The booking clinic is at {origin}.",
+    "invoices" => $"The invoice desk is at {origin}.",
+    _ => $"The demo shop is at {origin}.",
+});
 
 if (options.SelfCheck)
 {
     return await SelfCheck.RunAsync(origin) ? 0 : 1;
 }
 
-// The clinic keeps its diary on the server, so anything that explores it puts it back first.
-Func<Task>? startAfresh = booking
-    ? () =>
+// The clinic and the desk keep their state on the server, so anything that explores or runs against
+// them puts them back first.
+Func<Task>? startAfresh = options.Target switch
+{
+    "booking" => () =>
     {
         Autestiq.BookingShop.Clinic.Reset();
         return Task.CompletedTask;
-    }
-    : null;
+    },
+    "invoices" => () =>
+    {
+        Autestiq.InvoiceDesk.Ledger.Reset();
+        return Task.CompletedTask;
+    },
+    _ => null,
+};
+
+Func<IReadOnlyList<string>, bool> setDefects = options.Target switch
+{
+    "booking" => names => Autestiq.BookingShop.Defects.Set(names),
+    "invoices" => names => Autestiq.InvoiceDesk.Defects.Set(names),
+    _ => names => Autestiq.DemoShop.Defects.Set(names),
+};
+
+IReadOnlyList<BenchmarkScenario> targetScenarios = options.Target switch
+{
+    "booking" => BookingScenarios.All,
+    "invoices" => InvoiceScenarios.All,
+    _ => options.HeldOut ? HeldOutScenarios.All : BenchmarkScenarios.All,
+};
 
 // How much of what the baseline plans need the exploration shows: no key, nothing spent.
 if (args.Contains("--coverage", StringComparer.Ordinal))
 {
     var (snapshot, said) = await Coverage.ExploreAsync(origin, startAfresh);
     Console.WriteLine(said);
-    Coverage.Print(booking ? BookingScenarios.All : options.HeldOut ? HeldOutScenarios.All : BenchmarkScenarios.All, snapshot, Console.Out);
+    Coverage.Print(targetScenarios, snapshot, Console.Out);
     return 0;
 }
 
@@ -78,17 +108,9 @@ if (args.Contains("--explore", StringComparer.Ordinal))
 
 var planner = Planner(options);
 // The held-out set is measured once, against the frozen scenarios and baselines (HeldOutScenarios).
-IReadOnlyList<BenchmarkScenario> scenarios = BenchmarkScenarios.All;
+IReadOnlyList<BenchmarkScenario> scenarios = targetScenarios;
 
-if (booking)
-{
-    scenarios = BookingScenarios.All;
-}
-else if (options.HeldOut)
-{
-    scenarios = HeldOutScenarios.All;
-}
-else if (options.Smoke)
+if (options.Smoke && options.Target == "demo" && !options.HeldOut)
 {
     scenarios = [BenchmarkScenarios.All[0]];
 }
@@ -115,9 +137,7 @@ var clock = System.Diagnostics.Stopwatch.StartNew();
 var harness = new Harness(origin, planner, options.Repetitions, options.RecordingDirectory)
 {
     Say = Console.WriteLine,
-    SetDefects = booking
-        ? names => Autestiq.BookingShop.Defects.Set(names)
-        : names => Autestiq.DemoShop.Defects.Set(names),
+    SetDefects = setDefects,
     ResetTarget = startAfresh,
     Measured = measurement =>
     {
@@ -260,6 +280,7 @@ internal sealed record BenchmarkOptions(
     /// <summary>Each target and each set has its own report, so no run can overwrite another's.</summary>
     private static string ReportFileName(string[] args) =>
         Value(args, "--target") == "booking" ? "ai-benchmark-booking.md"
+        : Value(args, "--target") == "invoices" ? "ai-benchmark-invoices.md"
         : args.Contains("--held-out", StringComparer.Ordinal) ? "ai-benchmark-held-out.md"
         : "ai-benchmark.md";
 

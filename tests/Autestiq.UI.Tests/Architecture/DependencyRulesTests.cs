@@ -16,6 +16,7 @@ public class DependencyRulesTests
     private const string Worker = "Autestiq.Worker";
     private const string DemoShop = "Autestiq.DemoShop";
     private const string BookingShop = "Autestiq.BookingShop";
+    private const string InvoiceDesk = "Autestiq.InvoiceDesk";
     private const string Platform = "Autestiq.Platform";
     private const string UiShared = "Autestiq.UI.Shared";
     private const string Host = "Autestiq.Web";
@@ -39,6 +40,10 @@ public class DependencyRulesTests
 
         // The second application the held-out benchmark measures against. A target, like the first.
         (BookingShop, []),
+
+        // The third, built after the explorer's rules were settled, so that it can be measured on an
+        // application those rules were not worked out on.
+        (InvoiceDesk, []),
         (Platform, [Contracts]),
         (UiShared, [Contracts, Platform]),
         ("Autestiq.Website", [Contracts, Platform, UiShared]),

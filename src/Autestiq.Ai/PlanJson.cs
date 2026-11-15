@@ -130,7 +130,7 @@ public static class PlanJson
 
     private static PlannedAction? Convert(WireAction action)
     {
-        if (Kind(action.Kind) is not { } kind || string.IsNullOrWhiteSpace(action.Description))
+        if (KindForWord(action.Kind) is not { } kind || string.IsNullOrWhiteSpace(action.Description))
         {
             return null;
         }
@@ -156,8 +156,27 @@ public static class PlanJson
             Blank(action.SecretName));
     }
 
+    /// <summary>The word a plan uses for an action: the inverse of <see cref="Kind"/>, for writing plans out.</summary>
+    /// <remarks>
+    /// Exhaustive on purpose. A new action without a word fails here, and the round-trip test fails
+    /// with it, rather than a recording crashing halfway through a paid benchmark run.
+    /// </remarks>
+    public static string Word(ActionKind kind) => kind switch
+    {
+        ActionKind.Goto => "goto",
+        ActionKind.Click => "click",
+        ActionKind.Type => "type",
+        ActionKind.Press => "press",
+        ActionKind.WaitFor => "waitfor",
+        ActionKind.AssertText => "asserttext",
+        ActionKind.AssertVisible => "assertvisible",
+        ActionKind.AssertNotVisible => "assertnotvisible",
+        ActionKind.AssertUrl => "asserturl",
+        _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "There is no word for that action."),
+    };
+
     /// <summary>The nine words a plan may use for an action. Anything else is not a plan.</summary>
-    private static ActionKind? Kind(string? kind) => kind?.Trim().ToLowerInvariant() switch
+    public static ActionKind? KindForWord(string? kind) => kind?.Trim().ToLowerInvariant() switch
     {
         "goto" => ActionKind.Goto,
         "click" => ActionKind.Click,

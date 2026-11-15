@@ -9,6 +9,26 @@ namespace Autestiq.Application.Tests.Planning;
 /// </summary>
 public class PlanJsonTests
 {
+    [Theory]
+    [MemberData(nameof(EveryActionKind))]
+    public void Word_RoundTripsThroughTheParser_ForEveryAction(ActionKind kind)
+    {
+        // A new action without a word, or a word the parser does not read, fails here before any
+        // recording is written or any model is paid for.
+        Assert.Equal(kind, PlanJson.KindForWord(PlanJson.Word(kind)));
+    }
+
+    public static TheoryData<ActionKind> EveryActionKind()
+    {
+        var data = new TheoryData<ActionKind>();
+        foreach (var kind in Enum.GetValues<ActionKind>())
+        {
+            data.Add(kind);
+        }
+
+        return data;
+    }
+
     [Fact]
     public void Read_AnOrdinaryAnswer_BecomesAPlan()
     {

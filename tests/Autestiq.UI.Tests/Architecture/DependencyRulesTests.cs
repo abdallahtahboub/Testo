@@ -15,6 +15,7 @@ public class DependencyRulesTests
     private const string Ai = "Autestiq.Ai";
     private const string Worker = "Autestiq.Worker";
     private const string DemoShop = "Autestiq.DemoShop";
+    private const string BookingShop = "Autestiq.BookingShop";
     private const string Platform = "Autestiq.Platform";
     private const string UiShared = "Autestiq.UI.Shared";
     private const string Host = "Autestiq.Web";
@@ -35,6 +36,9 @@ public class DependencyRulesTests
         // Not part of the product: the application the execution slice runs against, so that a
         // browser is never pointed at anybody else's website to build it (ADR-0018).
         (DemoShop, []),
+
+        // The second application the held-out benchmark measures against. A target, like the first.
+        (BookingShop, []),
         (Platform, [Contracts]),
         (UiShared, [Contracts, Platform]),
         ("Autestiq.Website", [Contracts, Platform, UiShared]),

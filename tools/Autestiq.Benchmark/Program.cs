@@ -25,10 +25,16 @@ using Autestiq.DemoShop;
 
 var options = BenchmarkOptions.From(args);
 
-using var shop = DemoShopHost.Start();
-var origin = shop.Origin;
+// Two targets: the demo shop (the first application) and the booking clinic (the second, held-out
+// application). Each runs in this process, so its diary and defects are set from here.
+var booking = options.Target == "booking";
+using var demo = booking ? null : DemoShopHost.Start();
+using var clinic = booking ? BookingShopHost.Start() : null;
+var origin = (booking ? clinic?.Origin : demo?.Origin) ?? throw new InvalidOperationException("No target started.");
 
-Console.WriteLine($"The demo shop is at {origin}.");
+Console.WriteLine(booking
+    ? $"The booking clinic is at {origin}."
+    : $"The demo shop is at {origin}.");
 
 if (options.SelfCheck)
 {
@@ -39,7 +45,11 @@ var planner = Planner(options);
 // The held-out set is measured once, against the frozen scenarios and baselines (HeldOutScenarios).
 IReadOnlyList<BenchmarkScenario> scenarios = BenchmarkScenarios.All;
 
-if (options.HeldOut)
+if (booking)
+{
+    scenarios = BookingScenarios.All;
+}
+else if (options.HeldOut)
 {
     scenarios = HeldOutScenarios.All;
 }
@@ -70,6 +80,16 @@ var clock = System.Diagnostics.Stopwatch.StartNew();
 var harness = new Harness(origin, planner, options.Repetitions, options.RecordingDirectory)
 {
     Say = Console.WriteLine,
+    SetDefects = booking
+        ? names => Autestiq.BookingShop.Defects.Set(names)
+        : names => Autestiq.DemoShop.Defects.Set(names),
+    ResetTarget = booking
+        ? () =>
+        {
+            Autestiq.BookingShop.Clinic.Reset();
+            return Task.CompletedTask;
+        }
+        : null,
     Measured = measurement =>
     {
         // The reason, not just "no plan". Somebody watching lines scroll past should not have to
@@ -175,7 +195,8 @@ internal sealed record BenchmarkOptions(
     string ReportPath,
     string? RecordingDirectory,
     bool FailOnFalsePositive,
-    bool HeldOut)
+    bool HeldOut,
+    string Target)
 {
     /// <summary>Reads the arguments. Plain switches; this is a tool, not a product.</summary>
     public static BenchmarkOptions From(string[] args)
@@ -196,15 +217,22 @@ internal sealed record BenchmarkOptions(
             repetitions,
             // The held-out run has its own report, so that it can never overwrite the first one.
             Value(args, "--report")
-                ?? Path.Combine(root, "docs", args.Contains("--held-out", StringComparer.Ordinal) ? "ai-benchmark-held-out.md" : "ai-benchmark.md"),
+                ?? Path.Combine(root, "docs", ReportFileName(args)),
 
             // Where a run against a provider writes its answers, so that a later --recorded run
             // can replay them for nothing. Nothing is committed here yet and CI does not replay
             // them: it runs --self-check only.
             Value(args, "--recordings") ?? Path.Combine(root, "tools", "Autestiq.Benchmark", "recordings"),
             args.Contains("--fail-on-false-positive", StringComparer.Ordinal),
-            args.Contains("--held-out", StringComparer.Ordinal));
+            args.Contains("--held-out", StringComparer.Ordinal),
+            Value(args, "--target") ?? "demo");
     }
+
+    /// <summary>Each target and each set has its own report, so no run can overwrite another's.</summary>
+    private static string ReportFileName(string[] args) =>
+        Value(args, "--target") == "booking" ? "ai-benchmark-booking.md"
+        : args.Contains("--held-out", StringComparer.Ordinal) ? "ai-benchmark-held-out.md"
+        : "ai-benchmark.md";
 
     private static string? Value(string[] args, string name)
     {

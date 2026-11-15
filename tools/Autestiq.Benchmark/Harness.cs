@@ -5,6 +5,7 @@ using Autestiq.Application.Planning;
 using Autestiq.Contracts.Execution;
 using Autestiq.Contracts.Planning;
 using Autestiq.DemoShop;
+using DemoShopDefects = Autestiq.DemoShop.Defects;
 using Autestiq.Worker;
 
 namespace Autestiq.Benchmark;
@@ -104,6 +105,18 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
     /// <summary>Called as each measurement finishes, so a long run reports itself.</summary>
     public Action<Measurement>? Measured { get; set; }
 
+    /// <summary>
+    /// Switches the target's defects on and off. The demo shop by default; the held-out target
+    /// supplies its own. Returns false for a name the target does not have.
+    /// </summary>
+    public Func<IReadOnlyList<string>, bool> SetDefects { get; init; } = names => DemoShopDefects.Set(names);
+
+    /// <summary>
+    /// Starts the target afresh before each run, when the target keeps state between runs. The demo
+    /// shop does not need it, because its basket lives in each browser's cookies.
+    /// </summary>
+    public Func<Task>? ResetTarget { get; init; }
+
     private readonly PlanningService? _planning =
         planner is null ? null : new PlanningService(planner, NullLogger<PlanningService>.Instance);
 
@@ -155,7 +168,7 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
             }
         }
 
-        Defects.Set([]);
+        SetDefects([]);
         return measurements;
     }
 
@@ -197,6 +210,8 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
     }
 
     /// <summary>Keeps a measurement and says so, so a long run is not a blank terminal.</summary>
+    private Task ResetAsync() => ResetTarget is null ? Task.CompletedTask : ResetTarget();
+
     private void Report(List<Measurement> measurements, Measurement measurement)
     {
         measurements.Add(measurement);
@@ -209,6 +224,8 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
     /// </summary>
     private async Task<PlannedResult> PlanAsync(BenchmarkScenario scenario, CancellationToken cancellationToken)
     {
+        await ResetAsync().ConfigureAwait(false);
+
         var explored = await new ScenarioRunner(TimeProvider.System)
             .RunAsync(Job(scenario, WorkerTask.Explore, null) with { Budget = ExplorationBudget }, cancellationToken)
             .ConfigureAwait(false);
@@ -259,6 +276,8 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
 
         for (var repetition = 0; repetition < repetitions; repetition++)
         {
+            await ResetAsync().ConfigureAwait(false);
+
             var clock = Stopwatch.StartNew();
 
             var result = await new ScenarioRunner(TimeProvider.System)
@@ -293,9 +312,9 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
         _ => Verdict.Inconclusive,
     };
 
-    private static void Switch(BenchmarkScenario scenario, bool defectOn)
+    private void Switch(BenchmarkScenario scenario, bool defectOn)
     {
-        if (!Defects.Set(defectOn && scenario.Defect is { } defect ? [defect] : []))
+        if (!SetDefects(defectOn && scenario.Defect is { } defect ? [defect] : []))
         {
             throw new InvalidOperationException($"'{scenario.Defect}' is not a defect this shop has.");
         }

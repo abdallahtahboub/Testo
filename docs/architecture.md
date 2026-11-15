@@ -57,6 +57,7 @@ src/
   Autestiq.Persistence              // BUILT (M3): EF Core, PostgreSQL, migrations
   Autestiq.Ai                       // BUILT (M3.4): the provider adapters. Contracts only
   Autestiq.DemoShop                 // BUILT (M3.3): the website the slice runs against. Not the product
+  Autestiq.BookingShop          // BUILT (ADR-0020): the second target, for the held-out benchmark. Not part of the product
   Autestiq.Worker                   // BUILT (M3.3): drives a browser, out of process, in a container
 
 tools/
@@ -127,7 +128,8 @@ project (ADR-0013).
 | `Domain` | `Contracts` | anything UI, EF Core, ASP.NET Core Identity |
 | `Persistence` | `Domain`, `Contracts`, EF Core, Identity stores | anything UI, the application layer |
 | `Application` | `Domain`, `Persistence`, `Contracts` | anything UI, ASP.NET Core Identity |
-| `DemoShop` | nothing of ours | It is a target, not part of the product. The one other project that uses the ASP.NET Core server framework, because it is a website |
+| `DemoShop` | nothing of ours | It is a target, not part of the product. The targets (this one and `BookingShop`) are the only other projects that use the ASP.NET Core server framework, because they are websites |
+| `BookingShop` | nothing of ours | The second target, for the held-out benchmark (ADR-0020). Like `DemoShop`, it is not part of the product and references nothing of ours |
 | `Worker` | `Contracts`, Playwright | **everything else.** No database, no Identity, no UI, no Application. It is treated as already compromised (ADR-0018) |
 | `Api` *(planned)* | `Application`, `Contracts` | anything UI |
 | `Web` | everything (composition root only, no business UI) | — |

@@ -264,6 +264,26 @@ actual infrastructure. Deliberately not configured blind: trusting `X-Forwarded-
 unknown source lets anybody claim any address and escape the limit entirely, which is worse than
 the blunt version.
 
+### R-11 · The loopback exception would apply to a stored target — **Critical once customer targets exist**
+
+`EgressPolicy.Check` lets a loopback address through when the origin is in `TrustedLocalOrigins`
+(`src/Testo.Worker/Egress/EgressPolicy.cs`, the `isTrustedLocal && reach == Reach.Loopback` branch).
+`RunDispatcher` sets that list from the run's own `TargetOrigin` (`src/Testo.Application/Execution/RunDispatcher.cs:140`).
+Today `TargetOrigin` comes from configuration (`ExecutionService.cs:231,287`), so the exception only
+ever admits our demo target. The first customer-supplied URL would turn it into a route to whatever
+listens on the worker host's loopback interface.
+
+**Fix before any customer target.** Trusted-local origins come from configuration only, never from a
+stored run. A regression test writes a loopback origin to a run row and expects a refusal.
+Tracked as gap G2 in [`commercial-readiness.md`](commercial-readiness.md).
+
+### R-12 · Concurrency is a per-process limit, not a per-organization one — **High when paid plans exist**
+
+`MaxConcurrentRuns = 2` is enforced by a `SemaphoreSlim` inside each process
+(`RunDispatcher.cs:41`). Two processes allow four runs; one organization can take all of them.
+Nothing in the database counts an organization's active runs. **Fix:** a count under a row lock in
+the claim transaction (gap G7 in [`commercial-readiness.md`](commercial-readiness.md)).
+
 ### R-7 · One database for every tenant — **Accepted, documented**
 
 ADR-0012 chose a shared database with filtered access and listed the consequences, including the

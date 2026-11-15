@@ -157,7 +157,14 @@ Milestone 4 is already built and awaits review, so it stays where it is in the l
 gate and the billing sandbox (Phase D, Stripe Billing in test mode) are not milestones; they are gates
 that come after 3.8. Scope is in [`commercial-readiness.md`](commercial-readiness.md) §6.
 
-**Order, updated:** 3.1 → 3.2 → 3.3 → 3.4 → 3.5 → 3.6 → 3.7 → 3.8 → 4 → 5 → 6 → 7 → 8.
+**Order, updated:** 3.1 → 3.2 → 3.3 → 3.4 → 3.5 → 3.6 → 3.7 → 3.8 → 3.9 → 4 → 5 → 6 → 7 → 8.
+
+**Product scope (ADR-0020, accepted 2026-11-15):** the first product is AI-generated E2E UI tests.
+**Milestone 3.9 — validation gate:** re-measure the planner on an expanded benchmark, using a developer
+machine with a model key, and publish the result beside the baseline. The thresholds are proposed in
+ADR-0020 and wait for the owner's confirmation. Milestone 5 is narrowed to projects, environments,
+generated test cases and suites, run history and reports. The other modules wait until after the
+first pilot. The business model is in [`business/BUSINESS_MODEL.md`](business/BUSINESS_MODEL.md).
 
 **3.1 → 3.2 → 3.3 → 3.4 → 4 → 5 → 6 → 7 → 8**
 

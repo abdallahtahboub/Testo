@@ -1,3 +1,4 @@
+using Autestiq.Contracts.Execution;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
@@ -35,7 +36,17 @@ if (options.SelfCheck)
 }
 
 var planner = Planner(options);
-var scenarios = options.Smoke ? [BenchmarkScenarios.All[0]] : BenchmarkScenarios.All;
+// The held-out set is measured once, against the frozen scenarios and baselines (HeldOutScenarios).
+IReadOnlyList<BenchmarkScenario> scenarios = BenchmarkScenarios.All;
+
+if (options.HeldOut)
+{
+    scenarios = HeldOutScenarios.All;
+}
+else if (options.Smoke)
+{
+    scenarios = [BenchmarkScenarios.All[0]];
+}
 
 Console.WriteLine(planner is null
     ? "No planner: measuring the baseline only."
@@ -74,6 +85,15 @@ var harness = new Harness(origin, planner, options.Repetitions, options.Recordin
         Console.WriteLine(
             $"  {measurement.Scenario.Id,-34} defect={(measurement.DefectOn ? "on " : "off")} "
             + $"{measurement.Source,-18} {outcome}{cost}");
+
+        // Why a run that did not pass did not pass. A failure that is only a missing element looks the
+        // same as a failure to find the defect, and only the reason tells them apart.
+        if (measurement.Attempts.Count > 0
+            && measurement.Attempts[0].Status != RunStatus.Passed
+            && measurement.Attempts[0].Reason is { Length: > 0 } reason)
+        {
+            Console.WriteLine($"      because: {reason.Split('\n')[0]}");
+        }
     },
 };
 
@@ -154,7 +174,8 @@ internal sealed record BenchmarkOptions(
     int Repetitions,
     string ReportPath,
     string? RecordingDirectory,
-    bool FailOnFalsePositive)
+    bool FailOnFalsePositive,
+    bool HeldOut)
 {
     /// <summary>Reads the arguments. Plain switches; this is a tool, not a product.</summary>
     public static BenchmarkOptions From(string[] args)
@@ -173,13 +194,16 @@ internal sealed record BenchmarkOptions(
             recorded,
             args.Contains("--self-check", StringComparer.Ordinal),
             repetitions,
-            Value(args, "--report") ?? Path.Combine(root, "docs", "ai-benchmark.md"),
+            // The held-out run has its own report, so that it can never overwrite the first one.
+            Value(args, "--report")
+                ?? Path.Combine(root, "docs", args.Contains("--held-out", StringComparer.Ordinal) ? "ai-benchmark-held-out.md" : "ai-benchmark.md"),
 
             // Where a run against a provider writes its answers, so that a later --recorded run
             // can replay them for nothing. Nothing is committed here yet and CI does not replay
             // them: it runs --self-check only.
             Value(args, "--recordings") ?? Path.Combine(root, "tools", "Autestiq.Benchmark", "recordings"),
-            args.Contains("--fail-on-false-positive", StringComparer.Ordinal));
+            args.Contains("--fail-on-false-positive", StringComparer.Ordinal),
+            args.Contains("--held-out", StringComparer.Ordinal));
     }
 
     private static string? Value(string[] args, string name)

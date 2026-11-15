@@ -292,10 +292,20 @@ These change what the next milestone should be, so they are questions rather tha
    one letter from **AutoTestIQ** (Grazitti), a live AI software-testing product in the same category,
    and it is close to **AutonomIQ**, another autonomous-testing company. A clearance search is needed
    before the rename. Until then, nothing is renamed.
+
+   **Check run 2026-11-15, not a clearance.** Web search found no registration for *Autestiq* on
+   USPTO, EUIPO or DPMA results, though the tool does not query EUIPO or DPMA directly, so this is not
+   conclusive. No DNS record for autestiq.com, .io, .de or .ai (an unregistered domain and an
+   unpublished one look the same from here). No GitHub user, organization or repository with the name.
+   Near marks found: AUTOTECHIQ (pending, automotive repair information, 2022–2023), AUTOTEQ (pending,
+   2025), AUTOIQ and AUTHENIQ. No registration found for the Grazitti product *AutoTestIQ*; whether it is
+   registered is unknown, and an unregistered product name can still be protected in use. Judgement:
+   AutoTestIQ is the same category as ours, so the conflict is real for buyers even before a legal
+   question. Recommend a trademark attorney's clearance opinion before any name is adopted.
 2. **Accept §6.** **Accepted 2026-11-15.** Recorded in [`roadmap.md`](roadmap.md) under Order of work.
 3. **Pilot scope.** Which first design partner, and do they accept a demo target only, or do they need
    their own staging URL soon? A staging URL makes G1 to G3 urgent.
-4. **Billable failures. Open.** The owner asked for more context. Options:
+4. **Billable failures. Decided 2026-11-15: option B.** Runs that reach the customer's application are billable; our proxy, worker and planner failures are not. The owner first confirmed both A and B, which exclude each other, and then chose B when asked. Options considered: Options:
    - **A. Bill every started run** (simplest, what most per-minute test services do). Customers pay for
      what they started, and our own faults are the cost of doing business. Risk: a customer disputes a
      bill for our outage.

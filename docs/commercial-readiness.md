@@ -305,7 +305,7 @@ These change what the next milestone should be, so they are questions rather tha
 2. **Accept §6.** **Accepted 2026-11-15.** Recorded in [`roadmap.md`](roadmap.md) under Order of work.
 3. **Pilot scope.** Which first design partner, and do they accept a demo target only, or do they need
    their own staging URL soon? A staging URL makes G1 to G3 urgent.
-4. **Billable failures. Decided 2026-11-15: option B.** Runs that reach the customer's application are billable; our proxy, worker and planner failures are not. The owner first confirmed both A and B, which exclude each other, and then chose B when asked. Options considered: Options:
+4. **Billable failures. Decided 2026-11-15: option B.** Runs that reach the customer's application are billable; our proxy, worker and planner failures are not. The owner first confirmed both A and B, which exclude each other, and then chose B when asked. Options considered:
    - **A. Bill every started run** (simplest, what most per-minute test services do). Customers pay for
      what they started, and our own faults are the cost of doing business. Risk: a customer disputes a
      bill for our outage.

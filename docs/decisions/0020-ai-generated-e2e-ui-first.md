@@ -38,6 +38,12 @@ fixes followed, and none has been re-measured. A model key is not available in t
    safety boundaries and a different execution model. Nothing in this repository prepares for it
    beyond keeping the execution boundary general.
 
+**Result, on the invoice desk (2026-11-15), incomplete:** the first run on an application the explorer's
+rules were not worked out on. The provider could not be reached for the last four scenarios, so 36 of 52
+runs were measured. Of those: 24 of 32 sound-desk runs correct (75%), the other 8 inconclusive and none a
+false negative; both defects measured were caught in both executions; no false positives. Below the gate
+on the sound desk. Four of the six defects are unmeasured. Recorded in `docs/ai-benchmark-invoices.md`.
+
 **Validation gate (confirmed by the owner on 2026-11-15):** before the first paid pilot, the planner
 is re-measured on the benchmark, with more scenarios than the current 12, and a published result is
 required that shows at least:

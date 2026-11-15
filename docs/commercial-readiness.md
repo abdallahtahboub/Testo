@@ -1,10 +1,9 @@
 # Commercial readiness
 
-> Status: **Proposal, not accepted.** Written 2026-11-15 from the founder directive (Phase A to
-> Phase E), against commit `5f6179d` on `claude/exciting-mayer-gzv57w`. Every claim below cites
-> code or a document in this repository. Items that were not checked are marked **Not verified**.
-> Nothing here changes code. The roadmap insertions in §6 wait for the owner's approval, as
-> `CLAUDE.md` requires at each milestone boundary.
+> Status: **§6 accepted by the owner on 2026-11-15**; the product name and the first-customer details
+> remain open (§9). Written 2026-11-15 from the founder directive (Phase A to Phase E), against commit
+> `5f6179d`. Every claim below cites code or a document in this repository. Items that were not checked
+> are marked **Not verified**.
 
 The directive's test for every decision is one question: does it protect customer safety, security,
 execution correctness, or cost control before it adds anything else? The current order of work in
@@ -287,17 +286,30 @@ No checklist item is a claim about compliance. Items 14 and 15 need documents an
 
 These change what the next milestone should be, so they are questions rather than assumptions:
 
-1. **Product name.** Keep *Testo* as the working name, or switch to *Autestiq*? A rename is mechanical; the
-   timing is the decision.
-2. **Accept §6.** Insert 3.5 and 3.6 before Milestone 5? This is the only change that alters current
-   order.
+1. **Product name. Open.** The owner chose *Autestiq*, then asked for a recommendation. Findings
+   (2026-11-15): *Testo* is a registered trademark of Testo SE & Co. KGaA for measuring apparatus, in
+   the same test-and-measurement space, so it is a poor choice. *Autestiq* has no exact match, but it is
+   one letter from **AutoTestIQ** (Grazitti), a live AI software-testing product in the same category,
+   and it is close to **AutonomIQ**, another autonomous-testing company. A clearance search is needed
+   before the rename. Until then, nothing is renamed.
+2. **Accept §6.** **Accepted 2026-11-15.** Recorded in [`roadmap.md`](roadmap.md) under Order of work.
 3. **Pilot scope.** Which first design partner, and do they accept a demo target only, or do they need
    their own staging URL soon? A staging URL makes G1 to G3 urgent.
-4. **Billable failures.** Directive §7 asks us to define them. Proposed default, pending approval:
-   a run that fails because of the target, the test, or the customer's own configuration is billable; a
-   run that fails because of our infrastructure, the proxy, a worker crash or a planner outage is not.
+4. **Billable failures. Open.** The owner asked for more context. Options:
+   - **A. Bill every started run** (simplest, what most per-minute test services do). Customers pay for
+     what they started, and our own faults are the cost of doing business. Risk: a customer disputes a
+     bill for our outage.
+   - **B. Bill only runs that reached the target** (recommended). A run counts once the browser reaches
+     the customer's application. Failures of the target, the test, or the customer's configuration are
+     billable. Failures from our proxy, worker crash, or planner outage are not. Risk: needs a clear
+     "reached" definition and the ledger to record it, which 3.6 builds.
+   - **C. Bill only passing runs.** Rejected: it rewards tests that never reach a verdict and makes
+     failures free, which invites abuse.
+   Recommendation: B. It is what the ledger in 3.6 can actually measure, and it is the easiest to
+   explain on an invoice. Needs the owner's decision before 3.6 begins.
 5. **Retention periods.** 90 days for screenshots is the ADR-0018 figure. Confirm before any real customer data.
-6. **Billing provider.** Stripe Billing in test mode is the proposed candidate. Confirm before an ADR is written.
+6. **Billing provider. Confirmed 2026-11-15:** Stripe Billing, test mode only. An ADR must be written
+   before any code calls it, and no live charges until the security and financial-correctness gates pass.
 7. **Data region.** Which region for the first customers? `DataRegion` exists but only one value is in use.
 8. **Model re-run.** Who will run the planner benchmark with a model key, and when?
 

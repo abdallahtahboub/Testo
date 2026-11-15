@@ -151,10 +151,13 @@ Changed on 2026-11-13 by ADR-0017, with the owner's approval. The milestones bel
 numbers; only the order changed. New work is inserted as 3.1 to 3.4 rather than renumbering,
 because renumbering is what put the issue tracker a number behind this document.
 
-**Proposed, not accepted (2026-11-15):** milestones 3.5 (customer-target safety), 3.6 (usage ledger
-and quotas), 3.7 (plan catalog), 3.8 (cost and evidence retention) and a pilot gate, placed before
-Milestone 5. See [`commercial-readiness.md`](commercial-readiness.md) §6. This order does not change
-until the owner accepts it.
+**Accepted by the owner (2026-11-15):** milestones 3.5 (customer-target safety), 3.6 (usage ledger
+and quotas), 3.7 (plan catalog) and 3.8 (cost and evidence retention) sit between 3.4 and Milestone 4.
+Milestone 4 is already built and awaits review, so it stays where it is in the list above. The pilot
+gate and the billing sandbox (Phase D, Stripe Billing in test mode) are not milestones; they are gates
+that come after 3.8. Scope is in [`commercial-readiness.md`](commercial-readiness.md) §6.
+
+**Order, updated:** 3.1 → 3.2 → 3.3 → 3.4 → 3.5 → 3.6 → 3.7 → 3.8 → 4 → 5 → 6 → 7 → 8.
 
 **3.1 → 3.2 → 3.3 → 3.4 → 4 → 5 → 6 → 7 → 8**
 

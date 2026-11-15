@@ -47,6 +47,12 @@ internal static class Coverage
             ? message
             : result.FailureReason ?? result.Status.ToString();
 
+        // A crawl that saw nothing says why, rather than reporting an empty application.
+        if (result.Snapshot is not { Pages.Count: > 0 })
+        {
+            said += $" ({result.Status}: {result.FailureReason ?? "no reason given"})";
+        }
+
         return (result.Snapshot ?? SiteSnapshot.Empty(origin), said);
     }
 

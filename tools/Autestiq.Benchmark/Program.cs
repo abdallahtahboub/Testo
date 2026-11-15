@@ -40,13 +40,20 @@ Action<WebApplication> map = options.Target switch
     _ => app => DemoShopRoutes.Map(app),
 };
 
-using var host = InProcessHost.Start(map, withoutTestIds);
-var origin = host.Origin;
+// eShopOnWeb (Microsoft's sample, ADR-0024) is not ours: it runs on its own, and --origin says where. It has no
+// test ids and no defect switches, so it measures planning on a sound application nobody here wrote.
+var external = options.Target == "eshop"
+    ? BenchmarkOptions.Value(args, "--origin") ?? "http://127.0.0.1:5106"
+    : null;
+
+using var host = external is null ? InProcessHost.Start(map, withoutTestIds) : null;
+var origin = external ?? host!.Origin; // host is started exactly when there is no external origin.
 
 Console.WriteLine(options.Target switch
 {
     "booking" => $"The booking clinic is at {origin}.",
     "invoices" => $"The invoice desk is at {origin}.",
+    "eshop" => $"eShopOnWeb is expected at {origin}; it is started separately.",
     _ => $"The demo shop is at {origin}.",
 });
 
@@ -76,6 +83,7 @@ Func<IReadOnlyList<string>, bool> setDefects = options.Target switch
 {
     "booking" => names => Autestiq.BookingShop.Defects.Set(names),
     "invoices" => names => Autestiq.InvoiceDesk.Defects.Set(names),
+    "eshop" => names => names.Count == 0,
     _ => names => Autestiq.DemoShop.Defects.Set(names),
 };
 
@@ -83,6 +91,7 @@ IReadOnlyList<BenchmarkScenario> targetScenarios = options.Target switch
 {
     "booking" => BookingScenarios.All,
     "invoices" => InvoiceScenarios.All,
+    "eshop" => EshopScenarios.All,
     _ => options.HeldOut ? HeldOutScenarios.All : BenchmarkScenarios.All,
 };
 
@@ -320,10 +329,11 @@ internal sealed record BenchmarkOptions(
     private static string ReportFileName(string[] args) =>
         Value(args, "--target") == "booking" ? "ai-benchmark-booking.md"
         : Value(args, "--target") == "invoices" ? "ai-benchmark-invoices.md"
+        : Value(args, "--target") == "eshop" ? "ai-benchmark-eshop.md"
         : args.Contains("--held-out", StringComparer.Ordinal) ? "ai-benchmark-held-out.md"
         : "ai-benchmark.md";
 
-    private static string? Value(string[] args, string name)
+    internal static string? Value(string[] args, string name)
     {
         var index = Array.IndexOf(args, name);
         return index >= 0 && index + 1 < args.Length ? args[index + 1] : null;

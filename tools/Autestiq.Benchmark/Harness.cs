@@ -210,7 +210,7 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
     private async Task<PlannedResult> PlanAsync(BenchmarkScenario scenario, CancellationToken cancellationToken)
     {
         var explored = await new ScenarioRunner(TimeProvider.System)
-            .RunAsync(Job(scenario, WorkerTask.Explore, null), cancellationToken)
+            .RunAsync(Job(scenario, WorkerTask.Explore, null) with { Budget = ExplorationBudget }, cancellationToken)
             .ConfigureAwait(false);
 
         var site = explored.Snapshot ?? SiteSnapshot.Empty(origin);
@@ -301,6 +301,9 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
         }
     }
 
+    /// <summary>Exploring presses many controls, one fresh visit each, and needs more time than a single run.</summary>
+    private static readonly RunBudget ExplorationBudget = new(TimeSpan.FromMinutes(10), 100, 50 * 1024 * 1024);
+
     private WorkerJob Job(BenchmarkScenario scenario, WorkerTask task, IReadOnlyList<PlannedAction>? plan) => new(
         RunId: Guid.CreateVersion7(),
         scenario.Id,
@@ -311,5 +314,6 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
         Directory.CreateTempSubdirectory("autestiq-benchmark-").FullName,
         task,
         plan,
-        scenario.Secrets);
+        scenario.Secrets,
+        ExploreStates: task == WorkerTask.Explore);
 }

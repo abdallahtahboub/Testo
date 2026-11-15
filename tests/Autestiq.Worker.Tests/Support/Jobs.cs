@@ -18,8 +18,8 @@ internal static class Jobs
         RunAsync(Job(origin, scenarioId, WorkerTask.Scripted, budget), out artifacts);
 
     /// <summary>Walks the application and describes it.</summary>
-    public static Task<WorkerResult> ExploreAsync(string origin, RunBudget? budget = null) =>
-        RunAsync(Job(origin, "explore", WorkerTask.Explore, budget), out _);
+    public static Task<WorkerResult> ExploreAsync(string origin, RunBudget? budget = null, bool exploreStates = false) =>
+        RunAsync(Job(origin, "explore", WorkerTask.Explore, budget) with { ExploreStates = exploreStates }, out _);
 
     /// <summary>Carries out a plan.</summary>
     public static Task<WorkerResult> PlannedAsync(

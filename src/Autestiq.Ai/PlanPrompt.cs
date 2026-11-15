@@ -120,6 +120,12 @@ public static class PlanPrompt
         foreach (var page in site.Pages)
         {
             text.Append("PAGE ").Append(page.Path).Append('\n');
+
+            if (page.ReachedBy is { Count: > 0 } reachedBy)
+            {
+                text.Append("  reached by: ").Append(string.Join(", then ", reachedBy.Select(Sanitize))).Append('\n');
+            }
+
             text.Append("  title: ").Append(Sanitize(page.Title)).Append('\n');
 
             if (page.Heading is { Length: > 0 } heading)

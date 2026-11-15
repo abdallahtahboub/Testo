@@ -47,6 +47,11 @@ public enum WorkerTask
 /// The values this one run may type, by name, so that a plan can say "type the password" without
 /// containing one. Never logged, never put in a step's message, and masked out of screenshots.
 /// </param>
+/// <param name="ExploreStates">
+/// For <see cref="WorkerTask.Explore"/>: press the application's own controls and describe what each
+/// path reaches. Off unless the caller asks, because pressing controls on somebody else's application
+/// is an action on it, and only a target we have chosen to exercise may have it.
+/// </param>
 public sealed record WorkerJob(
     Guid RunId,
     string ScenarioId,
@@ -57,7 +62,8 @@ public sealed record WorkerJob(
     string ArtifactDirectory,
     WorkerTask Task = WorkerTask.Scripted,
     IReadOnlyList<PlannedAction>? Plan = null,
-    IReadOnlyDictionary<string, string>? Secrets = null);
+    IReadOnlyDictionary<string, string>? Secrets = null,
+    bool ExploreStates = false);
 
 /// <summary>What a run may spend. Exceeding any one of these ends the run with a status that says which.</summary>
 /// <param name="WallClock">How long the whole run may take.</param>

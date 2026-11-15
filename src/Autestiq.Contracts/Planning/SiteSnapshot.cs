@@ -18,11 +18,17 @@ public sealed record SnapshotElement(string Role, string Name, string? TestId = 
 /// <param name="Title">The page's title.</param>
 /// <param name="Heading">Its one <c>h1</c>, when it has one.</param>
 /// <param name="Elements">What is on it that a plan could act on or check.</param>
+/// <param name="ReachedBy">
+/// The actions that led here from the start page, when the crawl acted on the application rather
+/// than only reading it: for example <c>click add-pot</c>, then <c>click to-catalogue</c>. Empty for
+/// a page the crawl reached by following a link.
+/// </param>
 public sealed record PageSnapshot(
     string Path,
     string Title,
     string? Heading,
-    IReadOnlyList<SnapshotElement> Elements);
+    IReadOnlyList<SnapshotElement> Elements,
+    IReadOnlyList<string>? ReachedBy = null);
 
 /// <summary>
 /// The application as a crawl found it: the pages that were reachable, and what is on each.

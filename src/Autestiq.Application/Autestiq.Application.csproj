@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The use cases. Implements the interfaces of Autestiq.Contracts, so replacing Autestiq.Mocks with
+       this one is a single line in the host (ADR-0014). The REST host of a later milestone uses
+       the same use cases rather than its own copy. -->
+
+  <ItemGroup>
+    <ProjectReference Include="../Autestiq.Contracts/Autestiq.Contracts.csproj" />
+    <ProjectReference Include="../Autestiq.Domain/Autestiq.Domain.csproj" />
+    <ProjectReference Include="../Autestiq.Persistence/Autestiq.Persistence.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <!-- The startup check reads the connection string to say which server it tried. -->
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+    <PackageReference Include="Npgsql" />
+  </ItemGroup>
+
+</Project>

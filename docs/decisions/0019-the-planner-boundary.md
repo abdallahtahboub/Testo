@@ -112,7 +112,7 @@ product that reports what its customer wants to hear.
 ### 4. The model never sees a credential, and the worker never sees the model's key
 
 The API key lives on the application side, in configuration, and is read by the adapter in
-`Testo.Ai`. It is **never** put in a `WorkerJob`. ADR-0018 treats the worker as already compromised;
+`Autestiq.Ai`. It is **never** put in a `WorkerJob`. ADR-0018 treats the worker as already compromised;
 giving it the key to our model account would hand an attacker who owns one run a bill on every other
 one.
 

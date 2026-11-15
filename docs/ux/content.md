@@ -54,8 +54,8 @@ Specifically:
   "Fehlerzustand" or "Veröffentlichung" reads as a bad translation.
 - Compound nouns are written as one word: "Testfallbeschreibung". Watch the line length in
   narrow columns.
-- Formal register, but not bureaucratic. "Bitte wählen Sie ein Testobjekt" — not
-  "Es ist ein Testobjekt auszuwählen".
+- Formal register, but not bureaucratic. "Bitte wählen Sie ein Autestiqbjekt" — not
+  "Es ist ein Autestiqbjekt auszuwählen".
 
 ## Terminology
 

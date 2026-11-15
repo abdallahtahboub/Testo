@@ -1,9 +1,9 @@
-# The Software Testing Journey in Testo
+# The Software Testing Journey in Autestiq
 
-> Working product name: **Testo** (placeholder, see `CLAUDE.md` → "Product name").
+> Working product name: **Autestiq** (placeholder, see `CLAUDE.md` → "Product name").
 > Status: **Accepted** (Step 0 approved on 2026-11-11).
 
-Testo supports the whole testing journey, following the **ISTQB test process** (CTFL v4.0).
+Autestiq supports the whole testing journey, following the **ISTQB test process** (CTFL v4.0).
 The ISTQB activities are not a strict waterfall: planning and monitoring/control run
 across the whole lifecycle, and analysis → design → implementation → execution repeats
 every sprint or release. The platform reflects that: every stage is a feature module you
@@ -66,7 +66,7 @@ needs, previous test summary reports and lessons learned, team capacity, environ
 **Roles.** QA lead / test manager (owner), product owner, engineering manager,
 developers (review), stakeholders (approval).
 
-**What Testo does.**
+**What Autestiq does.**
 | Capability | Mode |
 |---|---|
 | Test plan editor with a structured template (IEEE 29119-3 inspired sections) | Manual |
@@ -92,7 +92,7 @@ and take corrective actions (re-prioritize, add resources, change scope).
 
 **Roles.** QA lead (owner), engineering manager, product owner.
 
-**What Testo does.**
+**What Autestiq does.**
 | Capability | Mode |
 |---|---|
 | Live metrics and trends from execution and defect data | Automated |
@@ -111,7 +111,7 @@ share the same metrics). The app **Dashboard** shows the key widgets.
 here are the cheapest ones.
 
 **Inputs.** Requirements and user stories (imported from Jira / Azure DevOps or created
-in Testo), acceptance criteria, designs, risk register.
+in Autestiq), acceptance criteria, designs, risk register.
 
 **Outputs / artifacts.**
 - Test conditions, linked to requirements and risks
@@ -120,7 +120,7 @@ in Testo), acceptance criteria, designs, risk register.
 
 **Roles.** Test analyst / QA engineer (owner), product owner, business analyst, developers.
 
-**What Testo does.**
+**What Autestiq does.**
 | Capability | Mode |
 |---|---|
 | Requirement list with import placeholder (Jira, Azure DevOps) | Manual (import automated later) |
@@ -146,7 +146,7 @@ coverage techniques, and identify test data needs.
 **Roles.** Test analyst / QA engineer (owner), developers (review), product owner (review
 of acceptance scenarios).
 
-**What Testo does.**
+**What Autestiq does.**
 | Capability | Mode |
 |---|---|
 | Test case editor (steps, expected results, attachments, versioning) | Manual |
@@ -173,7 +173,7 @@ runs, prepare environments and data, and create automation scripts.
 
 **Roles.** QA engineer / test automation engineer (owner), DevOps engineer (environments).
 
-**What Testo does.**
+**What Autestiq does.**
 | Capability | Mode |
 |---|---|
 | Suite builder (static and query-based "smart" suites) | Manual |
@@ -202,7 +202,7 @@ performance, security, accessibility.
 
 **Roles.** QA engineer / tester (owner), developers (unit/integration in CI), CI pipeline.
 
-**What Testo does.**
+**What Autestiq does.**
 | Capability | Mode |
 |---|---|
 | Manual test runner (step-by-step, pass/fail per step, evidence upload) | Manual |
@@ -232,7 +232,7 @@ and requirements they affect.
 **Roles.** Tester (reporter), QA lead / triage board (triage), developer (fix),
 product owner (priority).
 
-**What Testo does.**
+**What Autestiq does.**
 | Capability | Mode |
 |---|---|
 | Defect board (list + kanban by status) and detail view with lifecycle | Manual |
@@ -257,7 +257,7 @@ decision for a release.
 
 **Roles.** QA lead (owner), engineering manager, product owner, release manager.
 
-**What Testo does.**
+**What Autestiq does.**
 | Capability | Mode |
 |---|---|
 | Dashboards and charts from live data | Automated |
@@ -282,7 +282,7 @@ decision for a release.
 
 **Roles.** QA lead (owner), whole team for lessons learned.
 
-**What Testo does.**
+**What Autestiq does.**
 | Capability | Mode |
 |---|---|
 | Closure checklist and report template | Manual |
@@ -307,7 +307,7 @@ continuously, fix or retire flaky and obsolete tests, and keep traceability curr
 
 **Roles.** QA engineer / automation engineer (owner), developers, DevOps.
 
-**What Testo does.**
+**What Autestiq does.**
 | Capability | Mode |
 |---|---|
 | Scheduled and CI-triggered regression runs | Automated (later) |

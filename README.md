@@ -1,6 +1,6 @@
-# Testo
+# Autestiq
 
-**Testo** is an AI-assisted QA platform for software companies. It covers the whole
+**Autestiq** is an AI-assisted QA platform for software companies. It covers the whole
 software testing journey, from requirements to release sign-off, following the
 [ISTQB test process](docs/testing-journey.md). The first automated capability is
 AI-driven end-to-end web testing with a live progress view.
@@ -13,7 +13,7 @@ AI-driven end-to-end web testing with a live progress view.
 >
 > `docs/roadmap.md` §Inventory is the authoritative list of what is built, and
 > `docs/security-register.md` is the honest list of what is not yet safe.
-> `Testo` is a working name.
+> `Autestiq` is a working name.
 
 ## Getting started
 
@@ -25,7 +25,7 @@ one it tried and how to get one running, rather than printing a connection error
 The quickest way to get one:
 
 ```bash
-docker run --name testo-db -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16
+docker run --name autestiq-db -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16
 ```
 
 Or install PostgreSQL locally. Note that Homebrew and apt create a superuser named after your
@@ -49,15 +49,15 @@ psql -d postgres -c "ALTER USER postgres WITH PASSWORD 'postgres';"
 To use a different server or account instead, override the connection string:
 
 ```bash
-export ConnectionStrings__Testo="Host=localhost;Database=testo_dev;Username=me;Password=secret"
+export ConnectionStrings__Autestiq="Host=localhost;Database=autestiq_dev;Username=me;Password=secret"
 ```
 
-**Run every command below from the repository root**, the folder containing `Testo.slnx`.
+**Run every command below from the repository root**, the folder containing `Autestiq.slnx`.
 From inside a project folder, `dotnet` only sees that one project: `dotnet test` then
 reports "No test projects were found".
 
 ```bash
-dotnet run --project src/Testo.Web
+dotnet run --project src/Autestiq.Web
 ```
 
 On the first run in development it creates the schema and seeds an organization, so there is
@@ -65,7 +65,7 @@ somebody to sign in as. The log says who:
 
 ```
 Seeded the development database with Northwind Software.
-Sign in as mara@northwind.example with the password testo-development-password.
+Sign in as mara@northwind.example with the password autestiq-development-password.
 ```
 
 The site is served at `http://localhost:5080`:
@@ -83,13 +83,13 @@ A run needs two more things than the web application: something to run against, 
 that drives the browser. Start the demo shop in one terminal and leave it there:
 
 ```bash
-dotnet run --project src/Testo.DemoShop --urls http://127.0.0.1:5090
+dotnet run --project src/Autestiq.DemoShop --urls http://127.0.0.1:5090
 ```
 
 Build the worker once, so the dispatcher has an executable to launch:
 
 ```bash
-dotnet build src/Testo.Worker
+dotnet build src/Autestiq.Worker
 ```
 
 `appsettings.Development.json` points at both. Then start a run from `/app/runs`.
@@ -98,7 +98,7 @@ basket and forgets the rest, and the step that fails keeps the screenshot that s
 
 The worker drives Chromium through an egress proxy of its own that refuses every address but the
 target. It needs the same browser the tests use, so install that first (below), or point
-`TESTO_BROWSER_PATH` at a Chromium you already have.
+`AUTESTIQ_BROWSER_PATH` at a Chromium you already have.
 
 ### The AI benchmark
 
@@ -107,13 +107,13 @@ the demo shop, half of them with a real defect switched on, and writes
 [`docs/ai-benchmark.md`](docs/ai-benchmark.md):
 
 ```bash
-dotnet run --project tools/Testo.Benchmark
+dotnet run --project tools/Autestiq.Benchmark
 ```
 
 Without a key that measures the hand-written baseline only. To measure the planner as well:
 
 ```bash
-PLANNER__APIKEY=sk-... dotnet run --project tools/Testo.Benchmark
+PLANNER__APIKEY=sk-... dotnet run --project tools/Autestiq.Benchmark
 ```
 
 The key is read from configuration and never stored in the repository, and it is never given to the
@@ -137,14 +137,14 @@ look for the server at `localhost:5432` with the usual development credentials; 
 somewhere else with:
 
 ```bash
-export TESTO_TEST_DB="Host=localhost;Port=5432;Username=me;Password=secret"
+export AUTESTIQ_TEST_DB="Host=localhost;Port=5432;Username=me;Password=secret"
 ```
 
 **Once per machine**, the browser the tests drive has to be downloaded, or every browser
 test fails with *"Executable doesn't exist"*:
 
 ```bash
-dotnet build tests/Testo.E2E -t:InstallTestBrowser
+dotnet build tests/Autestiq.E2E -t:InstallTestBrowser
 ```
 
 That needs nothing beyond the .NET SDK: Playwright ships its own Node runtime inside the
@@ -154,28 +154,28 @@ build output and the target uses it. (Playwright's own documentation points at a
 To run only part of the suite:
 
 ```bash
-dotnet test --project tests/Testo.UI.Tests
-dotnet test --project tests/Testo.E2E --filter-class "Testo.E2E.Pages.ThemeTests"
+dotnet test --project tests/Autestiq.UI.Tests
+dotnet test --project tests/Autestiq.E2E --filter-class "Autestiq.E2E.Pages.ThemeTests"
 ```
 
 ## How the solution is organized
 
 ```
 src/
-  Testo.Contracts        DTOs and data service interfaces. No UI dependencies; the
+  Autestiq.Contracts        DTOs and data service interfaces. No UI dependencies; the
                          future backend reuses this project.
-  Testo.Platform         Module and capability contracts, registries, route constants,
+  Autestiq.Platform         Module and capability contracts, registries, route constants,
                          language helpers, feature-flag abstraction.
-  Testo.UI.Shared        The design system: tokens, fonts, components, layouts.
-  Testo.Website          The public marketing website (rendered statically).
-  Testo.Modules.*        One module per stage of the testing journey.
-  Testo.Capabilities.*   Pluggable test execution engines.
-  Testo.Mocks            In-memory data, deterministic. Swapped for HTTP clients later.
-  Testo.Web              The host: composition root only.
+  Autestiq.UI.Shared        The design system: tokens, fonts, components, layouts.
+  Autestiq.Website          The public marketing website (rendered statically).
+  Autestiq.Modules.*        One module per stage of the testing journey.
+  Autestiq.Capabilities.*   Pluggable test execution engines.
+  Autestiq.Mocks            In-memory data, deterministic. Swapped for HTTP clients later.
+  Autestiq.Web              The host: composition root only.
 tests/
-  Testo.UI.Tests         Component tests (bUnit) and the rules that guard the structure.
-  Testo.Mocks.Tests      Mock data and timing.
-  Testo.E2E              Browser tests (Playwright) and raw HTTP tests.
+  Autestiq.UI.Tests         Component tests (bUnit) and the rules that guard the structure.
+  Autestiq.Mocks.Tests      Mock data and timing.
+  Autestiq.E2E              Browser tests (Playwright) and raw HTTP tests.
 ```
 
 A module never references another module. The dependency rules are
@@ -194,7 +194,7 @@ registration line. Nothing existing changes.
 | [`docs/sitemap.md`](docs/sitemap.md) | Every page of the website and the app |
 | [`docs/domain-model.md`](docs/domain-model.md) | What is stored, and how customers are kept apart |
 | [`docs/identity-and-access.md`](docs/identity-and-access.md) | Sign-in, roles, permissions, audit, GDPR |
-| [`docs/ux/`](docs/ux/) | Who uses Testo, the flows, how the interface behaves, how it is written |
+| [`docs/ux/`](docs/ux/) | Who uses Autestiq, the flows, how the interface behaves, how it is written |
 | [`docs/design-system.md`](docs/design-system.md) | Colors, type, spacing, components, accessibility rules |
 | [`docs/roadmap.md`](docs/roadmap.md) | The milestones and what "done" means for each |
 | [`docs/decisions/`](docs/decisions/) | Why each significant decision was made |

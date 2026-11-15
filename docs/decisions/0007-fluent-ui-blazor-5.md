@@ -12,7 +12,7 @@ its whole look from CSS custom properties (`--colorBrandBackground`, `--fontFami
 ## Decision
 - Use `Microsoft.FluentUI.AspNetCore.Components` **5.0.1**, pinned exactly in
   `Directory.Packages.props`. Updates are deliberate: read the release notes, run all tests.
-- Only `Testo.UI.Shared` references the package. Modules use Fluent components through it.
+- Only `Autestiq.UI.Shared` references the package. Modules use Fluent components through it.
 - Fluent UI is loaded **on app pages only**. Its script (about 460 KB) and style sheet
   (about 175 KB) never reach a public page.
 - Our look goes on top in three steps:

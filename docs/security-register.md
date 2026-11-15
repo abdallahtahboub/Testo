@@ -20,7 +20,7 @@ a missing lock, and the room does not stay empty.
 `GET /app` with no cookie answers **200 OK** and renders the page.
 
 There is no `[Authorize]` anywhere in `src`, no fallback authorization policy and no
-`RequireAuthorization()`. `Testo.Web/Identity/TestoIdentityServiceCollectionExtensions.cs:83`
+`RequireAuthorization()`. `Autestiq.Web/Identity/AutestiqIdentityServiceCollectionExtensions.cs:83`
 calls `AddAuthorization()`, which registers services that nothing then consumes.
 
 **Why it is not an incident today.** `/app` is a placeholder, and the data services fail closed:
@@ -49,7 +49,7 @@ Instead:
 
 ### D-2 · The tenant guard trusts any pre-set `OrganizationId` — **High** · *Fixed 2026-11-13, Milestone 3.1*
 
-`Testo.Persistence/Interceptors/TenantGuardInterceptor.cs`, the `case EntityState.Added:` branch:
+`Autestiq.Persistence/Interceptors/TenantGuardInterceptor.cs`, the `case EntityState.Added:` branch:
 a row that already carries an organization is accepted without comparing it to the current context.
 
 **Reproduced.** Acting as organization A, a `Project` carrying organization B's id saved without
@@ -80,7 +80,7 @@ permission that outlived its block would be worse than no guard, because it woul
 
 ### D-3 · Invitation and password-reset tokens are written to the log — **Critical** · *Fixed 2026-11-13, Milestone 3.1*
 
-`Testo.Application/ApplicationServiceCollectionExtensions.cs` registers `LoggingInvitationNotifier`
+`Autestiq.Application/ApplicationServiceCollectionExtensions.cs` registers `LoggingInvitationNotifier`
 unconditionally, including in production. It logs the raw token at `Warning`.
 
 Anyone who can read the logs can accept any invitation or reset any password. The severity is
@@ -159,7 +159,7 @@ tests.
 
 **Partly built (2026-11-14, Milestone 3.3.)** The proxy exists and refuses by default, judging
 every resolved address of every connection, including each hop of a redirect chain; 45 tests in
-`tests/Testo.Worker.Tests/Egress` cover loopback, private ranges, link-local, carrier NAT, IPv4
+`tests/Autestiq.Worker.Tests/Egress` cover loopback, private ranges, link-local, carrier NAT, IPv4
 mapped into IPv6, NAT64 and cloud metadata, over real sockets. A page's own `fetch()` to
 `169.254.169.254` is refused. **Not yet built:** the container per run. The worker is a separate
 process with no database connection and no cloud role, which is the shape ADR-0018 asks for but
@@ -267,8 +267,8 @@ the blunt version.
 ### R-11 · The loopback exception would apply to a stored target — **Critical once customer targets exist**
 
 `EgressPolicy.Check` lets a loopback address through when the origin is in `TrustedLocalOrigins`
-(`src/Testo.Worker/Egress/EgressPolicy.cs`, the `isTrustedLocal && reach == Reach.Loopback` branch).
-`RunDispatcher` sets that list from the run's own `TargetOrigin` (`src/Testo.Application/Execution/RunDispatcher.cs:140`).
+(`src/Autestiq.Worker/Egress/EgressPolicy.cs`, the `isTrustedLocal && reach == Reach.Loopback` branch).
+`RunDispatcher` sets that list from the run's own `TargetOrigin` (`src/Autestiq.Application/Execution/RunDispatcher.cs:140`).
 Today `TargetOrigin` comes from configuration (`ExecutionService.cs:231,287`), so the exception only
 ever admits our demo target. The first customer-supplied URL would turn it into a route to whatever
 listens on the worker host's loopback interface.

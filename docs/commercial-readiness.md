@@ -286,7 +286,23 @@ No checklist item is a claim about compliance. Items 14 and 15 need documents an
 
 These change what the next milestone should be, so they are questions rather than assumptions:
 
-1. **Product name. Open.** The owner chose *Autestiq*, then asked for a recommendation. Findings
+1. **Product name. Decided 2026-11-15: *Autestiq*, adopted on the owner's decision, with clearance
+   incomplete.** The rename is done on this branch: the product, namespaces, projects and paths now say
+   Autestiq, and the GitHub repository is still named Testo. What was checked, and what was not:
+   - **Checked:** one EUIPO search for the exact term *Autestiq*, with no trademarks found. The search
+     mode and Nice classes were not recorded, so this does not show that classes 9 and 42, software
+     and testing services, were covered.
+   - **Not checked:** DPMA (Germany, where the first customers are likely to be), USPTO, similar-sound
+     search on EUIPO, and any registration for the Grazitti product *AutoTestIQ*.
+   - **Unresolved conflict:** AutoTestIQ is one letter away and in the same category. Buyers may confuse
+     the two, and a trademark attorney's opinion is still recommended before the product is sold under
+     this name.
+
+   Earlier findings (2026-11-15), kept for the record: *Testo* is a registered trademark of Testo SE & Co. KGaA for measuring apparatus, in
+   the same test-and-measurement space, so it was a poor choice. *Autestiq* has no exact match, but it is
+   one letter from **AutoTestIQ** (Grazitti), a live AI software-testing product in the same category,
+   and it is close to **AutonomIQ**, another autonomous-testing company. A clearance search was needed
+   before the rename.
    (2026-11-15): *Testo* is a registered trademark of Testo SE & Co. KGaA for measuring apparatus, in
    the same test-and-measurement space, so it is a poor choice. *Autestiq* has no exact match, but it is
    one letter from **AutoTestIQ** (Grazitti), a live AI software-testing product in the same category,

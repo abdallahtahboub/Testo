@@ -201,7 +201,7 @@ Two things learned while building them, which apply to every component from here
 
 **Milestone 2 remaining scope, now in Milestone 4:**
 
-All in `Testo.UI.Shared`, prefixed `T` (e.g., `TButton`) so they don't clash with Fluent's `Fluent*` names.
+All in `Autestiq.UI.Shared`, prefixed `T` (e.g., `TButton`) so they don't clash with Fluent's `Fluent*` names.
 
 | Component | Variants / notes | Built on |
 |---|---|---|

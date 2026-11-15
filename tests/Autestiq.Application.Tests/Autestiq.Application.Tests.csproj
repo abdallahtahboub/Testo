@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The rules that protect customer data: tenant isolation, the permission table, and the
+       use cases around joining and leaving. These run against a real PostgreSQL, because the
+       isolation being tested is partly the database's. -->
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Npgsql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Autestiq.Application\Autestiq.Application.csproj" />
+
+    <!-- The provider adapter is not referenced by Autestiq.Application: the use cases depend on
+         IScenarioPlanner in Contracts, and the host chooses the adapter. The tests see both. -->
+    <ProjectReference Include="..\..\src\Autestiq.Ai\Autestiq.Ai.csproj" />
+  </ItemGroup>
+
+</Project>

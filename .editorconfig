@@ -45,7 +45,7 @@ dotnet_naming_style.underscore_camel.required_prefix = _
 # CA2007: ConfigureAwait(false) is wrong for Blazor components (they need their sync context)
 #         and pointless in ASP.NET Core, which has none.
 dotnet_diagnostic.CA2007.severity = none
-# CA1716: "Shared" (Testo.UI.Shared) is a Visual Basic keyword; no VB code consumes these assemblies.
+# CA1716: "Shared" (Autestiq.UI.Shared) is a Visual Basic keyword; no VB code consumes these assemblies.
 dotnet_diagnostic.CA1716.severity = none
 # CA1054/CA1055/CA1056: relative URLs and route templates are strings throughout Blazor.
 dotnet_diagnostic.CA1054.severity = none
@@ -60,5 +60,5 @@ dotnet_diagnostic.CA1515.severity = none
 
 # EF Core writes the migrations; they are generated code, not code we style or review line by
 # line. Correcting them by hand would be undone the next time one is scaffolded.
-[src/Testo.Persistence/Migrations/**.cs]
+[src/Autestiq.Persistence/Migrations/**.cs]
 generated_code = true

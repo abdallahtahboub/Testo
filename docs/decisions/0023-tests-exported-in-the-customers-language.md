@@ -24,18 +24,24 @@ ADR-0020: every claim about a generated test rests on evidence from a run.
 4. **Every exporter is verified against our own applications.** An exported test is run against the
    demo shop, the clinic and the invoice desk, with each defect off and on, and must give the same
    verdict as the plan. A language is offered only after its exporter passes that.
-5. **Secrets stay names.** An exported test reads a secret from the customer's own environment by name;
+5. **The language is the client's choice, per project.** A client may have projects in different
+   languages, with different preferences, so the language is a setting of each project, not of the
+   product or the account. Exporters sit behind one interface, so adding a language adds an exporter and
+   changes nothing else. Which exporters are built, and in what order, follows what clients ask for.
+6. **Secrets stay names.** An exported test reads a secret from the customer's own environment by name;
    no value is ever written into exported code.
 
 ## Consequences
 - **Easier:** customers own their tests, in their language, with no runtime dependency on us.
-- **Harder:** one exporter and one verification suite per language. Python first is the suggestion:
-  the most common choice for test automation, and the one the owner named.
+- **Harder:** one exporter and one verification suite per language. The first one built is the
+  suggestion of Python, the most common choice for test automation; it is not a default, and a project
+  chooses its own.
 - **Must remember:** an exported test runs outside our isolation, on the customer's machines, against
   whatever they point it at. That is their decision; the export carries the same plan, not more.
 
 ## Open questions for the owner
-- Which language first: Python is suggested.
+- Which exporter to build first: Python is suggested. Every project chooses its own language once more
+  than one exists.
 - Is the exported code a feature of every plan, or only of plans a person has approved?
 
 ## A finding from the independent application (2026-11-15)

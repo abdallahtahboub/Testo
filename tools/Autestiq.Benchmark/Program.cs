@@ -29,14 +29,19 @@ var options = BenchmarkOptions.From(args);
 // Three targets, each run in this process so that its state and its defects are set from here: the demo
 // shop (the first application), the booking clinic (the second) and the invoice desk (the third, built
 // after the explorer's rules were settled).
-using var host = options.Target switch
-{
-    "booking" => InProcessHost.Start(app => Autestiq.BookingShop.BookingShopRoutes.Map(app)),
-    "invoices" => InProcessHost.Start(app => Autestiq.InvoiceDesk.InvoiceDeskRoutes.Map(app)),
-    _ => null,
-};
-using var demo = host is null ? DemoShopHost.Start() : null;
-var origin = host?.Origin ?? demo?.Origin ?? throw new InvalidOperationException("No target started.");
+// --without-test-ids serves the target with its test ids removed, to see what the product makes of an
+// application that has none, as most do.
+var withoutTestIds = args.Contains("--without-test-ids", StringComparer.Ordinal);
+
+using var host = InProcessHost.Start(
+    options.Target switch
+    {
+        "booking" => app => Autestiq.BookingShop.BookingShopRoutes.Map(app),
+        "invoices" => app => Autestiq.InvoiceDesk.InvoiceDeskRoutes.Map(app),
+        _ => app => DemoShopRoutes.Map(app),
+    },
+    withoutTestIds);
+var origin = host.Origin;
 
 Console.WriteLine(options.Target switch
 {
@@ -102,6 +107,17 @@ if (args.Contains("--explore", StringComparer.Ordinal))
         var route = page.ReachedBy is { Count: > 0 } steps ? string.Join(" > ", steps) : "(by link)";
         Console.WriteLine($"  {page.Path,-48} {route}  [{page.Elements.Count} elements]");
     }
+
+    // What a plan could name, with the vocabulary as it stands (ADR-0019): an element with a test id, or one
+    // with a role a target may have and a name no other element of that role on its page shares.
+    string[] nameableRoles = ["button", "link", "textbox", "checkbox", "radio", "combobox", "heading"];
+    var all = snapshot.Pages.SelectMany(page => page.Elements.Select(element => (page, element))).ToList();
+    var byTestId = all.Count(item => item.element.TestId is { Length: > 0 });
+    var byRole = all.Count(item => item.element.TestId is not { Length: > 0 }
+        && nameableRoles.Contains(item.element.Role)
+        && item.page.Elements.Count(other => other.Role == item.element.Role && other.Name == item.element.Name) == 1);
+
+    Console.WriteLine($"Elements described: {all.Count}. A plan could name {byTestId} by test id and {byRole} more by role and a unique name; {all.Count - byTestId - byRole} not at all.");
 
     return 0;
 }
@@ -307,43 +323,3 @@ internal sealed record BenchmarkOptions(
     }
 }
 
-/// <summary>The demo shop, started in this process on a port of its own.</summary>
-internal sealed class DemoShopHost : IDisposable
-{
-    private readonly WebApplication _app;
-
-    private DemoShopHost(WebApplication app, string origin)
-    {
-        _app = app;
-        Origin = origin;
-    }
-
-    /// <summary>Where it is listening.</summary>
-    public string Origin { get; }
-
-    /// <summary>
-    /// Starts it. The shop's own <c>Program</c> is an executable, so the benchmark builds the same
-    /// routes through its public helpers rather than shelling out to it.
-    /// </summary>
-    public static DemoShopHost Start()
-    {
-        var builder = WebApplication.CreateSlimBuilder();
-        builder.WebHost.UseUrls("http://127.0.0.1:0");
-        builder.Logging.ClearProviders();
-
-        var app = builder.Build();
-        DemoShopRoutes.Map(app);
-        app.StartAsync().GetAwaiter().GetResult();
-
-        var addresses = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()
-            ?? throw new InvalidOperationException("The shop does not report its address.");
-
-        return new DemoShopHost(app, addresses.Addresses.First().TrimEnd('/'));
-    }
-
-    public void Dispose()
-    {
-        _app.StopAsync().GetAwaiter().GetResult();
-        ((IDisposable)_app).Dispose();
-    }
-}

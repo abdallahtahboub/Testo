@@ -45,6 +45,11 @@ internal static class SelfCheck
             var status = measurement.Attempts.Count > 0 ? measurement.Attempts[0].Status.ToString() : "not run";
             Console.WriteLine($"    {measurement.Source,-10} defect={(measurement.DefectOn ? "on " : "off")} "
                 + $"verdict={measurement.Verdict} status={status}");
+            var reason = measurement.Attempts.Count > 0 ? measurement.Attempts[0].Reason : null;
+            if (!string.IsNullOrWhiteSpace(reason))
+            {
+                Console.WriteLine($"      because: {reason.Split('\n')[0]}");
+            }
         }
 
         if (measurements.Any(measurement => measurement.Verdict == Verdict.Inconclusive))

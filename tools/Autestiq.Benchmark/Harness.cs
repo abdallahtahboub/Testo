@@ -40,7 +40,8 @@ public enum Verdict
 /// <param name="Verdict">What to make of it.</param>
 /// <param name="Status">What the run actually reported.</param>
 /// <param name="Elapsed">How long the execution took.</param>
-public sealed record Attempt(Verdict Verdict, RunStatus Status, TimeSpan Elapsed);
+/// <param name="Reason">What went wrong, when the worker said so. Kept so a browser that will not start says why.</param>
+public sealed record Attempt(Verdict Verdict, RunStatus Status, TimeSpan Elapsed, string? Reason = null);
 
 /// <summary>Everything measured about one scenario, in one defect state, for one planner.</summary>
 /// <param name="Scenario">Which scenario.</param>
@@ -270,7 +271,7 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
             // answered the scenario. The product applies the same rule; this is the same function.
             var status = PlanOutcome.Reconcile(result.Status, coverage);
 
-            attempts.Add(new Attempt(Judge(status, defectOn), status, clock.Elapsed));
+            attempts.Add(new Attempt(Judge(status, defectOn), status, clock.Elapsed, result.FailureReason));
         }
 
         return new Measurement(scenario, defectOn, source, attempts, planning, planningErrors, notes);

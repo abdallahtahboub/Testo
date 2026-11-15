@@ -1,4 +1,5 @@
 using Autestiq.Contracts.Execution;
+using Autestiq.Worker;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
@@ -39,6 +40,35 @@ Console.WriteLine(booking
 if (options.SelfCheck)
 {
     return await SelfCheck.RunAsync(origin) ? 0 : 1;
+}
+
+// What the crawl sees of the target, printed, with no planner and nothing spent. The way to check the
+// crawl against an application without a key.
+if (args.Contains("--explore", StringComparer.Ordinal))
+{
+    var job = new WorkerJob(
+        RunId: Guid.CreateVersion7(),
+        ScenarioId: "explore",
+        TargetOrigin: origin,
+        AllowedOrigins: [],
+        TrustedLocalOrigins: [origin],
+        Budget: Harness.ExplorationBudget,
+        ArtifactDirectory: Directory.CreateTempSubdirectory("autestiq-explore-").FullName,
+        Task: WorkerTask.Explore,
+        ExploreStates: true);
+
+    var explored = await new ScenarioRunner(TimeProvider.System).RunAsync(job, CancellationToken.None);
+    var snapshot = explored.Snapshot;
+
+    Console.WriteLine($"Status {explored.Status}. {snapshot?.Pages.Count ?? 0} page(s), truncated: {snapshot?.Truncated}.");
+
+    foreach (var page in snapshot?.Pages ?? [])
+    {
+        var route = page.ReachedBy is { Count: > 0 } steps ? string.Join(" > ", steps) : "(by link)";
+        Console.WriteLine($"  {page.Path,-48} {route}  [{page.Elements.Count} elements]");
+    }
+
+    return 0;
 }
 
 var planner = Planner(options);
@@ -117,7 +147,7 @@ var harness = new Harness(origin, planner, options.Repetitions, options.Recordin
     },
 };
 
-using var stopping = new CancellationTokenSource(TimeSpan.FromMinutes(options.Smoke ? 5 : 60));
+using var stopping = new CancellationTokenSource(TimeSpan.FromMinutes(options.Smoke ? 5 : 180));
 var measurements = await harness.RunAsync(scenarios, stopping.Token);
 
 Console.WriteLine($"\nFinished in {clock.Elapsed.TotalMinutes:0.0} minutes.");

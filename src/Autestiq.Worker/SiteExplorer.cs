@@ -39,8 +39,13 @@ internal static partial class SiteExplorer
     /// <summary>How many click paths are tried, in all. Each one is a fresh visit, so this is what exploring costs.</summary>
     private const int MaxReplays = 300;
 
-    /// <summary>How many actions one path may take. Three reaches a basket with two products: add one, back to the catalogue, add another.</summary>
-    private const int MaxPathDepth = 3;
+    /// <summary>
+    /// How many actions one path may take. Three reaches a basket with two products (add one, back to the
+    /// catalogue, add another). Four reaches a clinic's details form from its home page (services, a book
+    /// link, a date, a time). Five would reach three products in a basket, and it multiplies the pages a
+    /// plan is shown without adding a state a scenario needs.
+    /// </summary>
+    private const int MaxPathDepth = 4;
 
     /// <summary>How many controls of one state are pressed. The rest are described, not exercised.</summary>
     private const int MaxControlsPerState = 8;
@@ -154,6 +159,7 @@ internal static partial class SiteExplorer
 
         // What is already in the snapshot. Only used to keep the output free of repeats.
         var known = new HashSet<string>(crawled.Select(Signature), StringComparer.Ordinal);
+        var expanded = new HashSet<string>(StringComparer.Ordinal);
         var found = new List<PageSnapshot>();
         var queue = new Queue<(List<string> Path, PageSnapshot State)>();
         queue.Enqueue((new List<string>(), start));
@@ -189,16 +195,27 @@ internal static partial class SiteExplorer
                 }
 
                 var described = next with { ReachedBy = reached.Select(testId => "click " + testId).ToList() };
+                var shape = Signature(described);
 
-                // Every path is followed, even to a page that looks like one already found. The
-                // catalogue reads the same whether the basket holds a teapot or a cup, and the cup
-                // is only reachable through the teapot's path. Only the snapshot is kept free of repeats.
-                if (known.Add(Signature(described)))
+                // The snapshot holds each shape once, including the shapes the crawl already read, so a plan
+                // is not shown the same page twice. The same page reached by a different date is the same page
+                // for a plan, and listing every date would only fill the prompt.
+                if (known.Add(shape))
                 {
                     found.Add(described);
                 }
 
-                queue.Enqueue((reached, described));
+                // Expansion is tracked separately, and only for pages reached by pressing. A page the crawl
+                // already read has not been pressed on yet, so it is still expanded here. A page reached again
+                // from the same kind of page is not followed again: that is what stops the clinic's menu being
+                // pressed in every combination.
+                // The page it was reached from is part of the key. The catalogue after a teapot and the catalogue
+                // after a tea read the same, but the basket before the last click does not, and that is the
+                // difference between a basket with a teapot and a cup and one with a tea and a cup.
+                if (expanded.Add(shape + " <- " + Signature(state)))
+                {
+                    queue.Enqueue((reached, described));
+                }
             }
         }
 
@@ -261,12 +278,19 @@ internal static partial class SiteExplorer
             return null;
         }
 
-        return await DescribeAsync(page, here.AbsolutePath).ConfigureAwait(false);
+        return await DescribeAsync(page, here.PathAndQuery).ConfigureAwait(false);
     }
 
     /// <summary>What makes two states the same: where they are and what is on them.</summary>
     private static string Signature(PageSnapshot state) =>
-        state.Path + "|" + string.Join(',', state.Elements.Select(element => element.TestId ?? element.Name));
+        Masked(state.Path) + "|"
+        + string.Join(',', state.Elements.Select(element => Masked(element.TestId ?? element.Name)));
+
+    /// <summary>Numbers, as in a date or a time, are the same shape whatever their value.</summary>
+    private static string Masked(string text) => DigitsPattern().Replace(text, "#");
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"\d+")]
+    private static partial System.Text.RegularExpressions.Regex DigitsPattern();
 
     /// <summary>
     /// The paths the application lists in its own <c>sitemap.xml</c>, if it has one.
@@ -319,7 +343,7 @@ internal static partial class SiteExplorer
                     origin.GetLeftPart(UriPartial.Authority),
                     StringComparison.OrdinalIgnoreCase))
             {
-                paths.Add(absolute.AbsolutePath);
+                paths.Add(absolute.PathAndQuery);
             }
         }
 
@@ -330,7 +354,7 @@ internal static partial class SiteExplorer
     private static partial System.Text.RegularExpressions.Regex LocationPattern();
 
     [System.Text.RegularExpressions.GeneratedRegex(
-        @"order|pay|purchase|place|delete|sign-?out|log-?out|submit|confirm|send",
+        @"order|pay|purchase|place|delete|cancel|sign-?out|log-?out|submit|confirm|send",
         System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.CultureInvariant)]
     private static partial System.Text.RegularExpressions.Regex ConsequentialPattern();
 
@@ -457,7 +481,7 @@ internal static partial class SiteExplorer
                 continue;
             }
 
-            paths.Add(absolute.AbsolutePath);
+            paths.Add(absolute.PathAndQuery);
         }
 
         return paths;

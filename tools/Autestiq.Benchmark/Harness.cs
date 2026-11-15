@@ -321,7 +321,7 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
     }
 
     /// <summary>Exploring presses many controls, one fresh visit each, and needs more time than a single run.</summary>
-    private static readonly RunBudget ExplorationBudget = new(TimeSpan.FromMinutes(10), 100, 50 * 1024 * 1024);
+    internal static readonly RunBudget ExplorationBudget = new(TimeSpan.FromMinutes(10), 100, 50 * 1024 * 1024);
 
     private WorkerJob Job(BenchmarkScenario scenario, WorkerTask task, IReadOnlyList<PlannedAction>? plan) => new(
         RunId: Guid.CreateVersion7(),

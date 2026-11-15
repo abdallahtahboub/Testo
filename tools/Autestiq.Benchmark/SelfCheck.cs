@@ -27,7 +27,9 @@ internal static class SelfCheck
 
         var harness = new Harness(origin, new LazyPlanner(), repetitions: 1, recordingDirectory: null);
 
-        using var stopping = new CancellationTokenSource(TimeSpan.FromMinutes(3));
+        // The crawl presses many controls before a plan runs, so the whole check needs more than the
+        // run budget of one plan. A three-minute limit here expired during the crawl.
+        using var stopping = new CancellationTokenSource(TimeSpan.FromMinutes(15));
         var measurements = await harness.RunAsync([scenario], stopping.Token).ConfigureAwait(false);
 
         var pretending = measurements

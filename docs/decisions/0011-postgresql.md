@@ -4,7 +4,7 @@
 - **Date:** 2026-11-12
 
 ## Context
-Testo needs persistence. It is sold as a service, so every database instance is a cost we
+Autestiq needs persistence. It is sold as a service, so every database instance is a cost we
 carry, not something the customer installs. The first market is Germany, where customers
 ask where their data physically sits.
 

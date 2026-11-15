@@ -6,7 +6,7 @@
 
 ## Context
 
-Testo's purpose is to open a browser against a web application and act on it. A browser executes
+Autestiq's purpose is to open a browser against a web application and act on it. A browser executes
 content written by somebody else, by design; the page under test is therefore hostile input, and
 so is anything it links to, redirects to, embeds or fetches.
 

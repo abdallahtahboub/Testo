@@ -1,4 +1,4 @@
-# Who uses Testo
+# Who uses Autestiq
 
 Five people. The first three use it daily; the other two visit it to make a decision or
 to fix something. A feature that serves none of them does not get built.
@@ -111,6 +111,6 @@ smaller company.
 | **Worst day** | Discovering a contractor still has access three months after leaving |
 | **Succeeds when** | Setup is done once, correctly, and never surprises him again |
 
-He appears because Testo is sold to businesses. His screens are rare but high-stakes: a
+He appears because Autestiq is sold to businesses. His screens are rare but high-stakes: a
 mistake here is a security incident, so destructive actions are explicit and everything is
 written to the audit log.

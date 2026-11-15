@@ -15,8 +15,8 @@ Sign in, sign out, the password reset, the one-time code and accepting an invita
 
 They carry `[HasForm]`, so they keep their antiforgery token (ADR-0009).
 
-The split runs through the code as well. `Testo.Application` decides **whether** somebody may in
-and hands back a `SignInTicket`; `Testo.Web` decides **how** the session is carried and turns
+The split runs through the code as well. `Autestiq.Application` decides **whether** somebody may in
+and hands back a `SignInTicket`; `Autestiq.Web` decides **how** the session is carried and turns
 that ticket into a cookie. Only the host ever touches `HttpContext`.
 
 ## Consequences

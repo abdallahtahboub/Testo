@@ -5,7 +5,7 @@ like the same product.
 
 | Document | What it answers |
 |---|---|
-| [`users.md`](users.md) | Who uses Testo, what each person is trying to get done, and what makes their day worse |
+| [`users.md`](users.md) | Who uses Autestiq, what each person is trying to get done, and what makes their day worse |
 | [`flows.md`](flows.md) | The end-to-end paths through the product, from signing in to signing off a release |
 | [`patterns.md`](patterns.md) | How the interface behaves: states, forms, tables, feedback, AI suggestions, permissions |
 | [`content.md`](content.md) | How we write: voice, microcopy, and the English/German terminology |
@@ -43,7 +43,7 @@ are welcome, but they do not belong in version control where they can quietly go
 
 ## What we are optimizing for
 
-Testo is used all day by people whose job is finding problems. The product should feel
+Autestiq is used all day by people whose job is finding problems. The product should feel
 like a calm instrument, not a dashboard competing for attention.
 
 1. **Trust over delight.** A QA engineer stakes their professional judgment on what this

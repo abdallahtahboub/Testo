@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="App_Header_Home" xml:space="preserve">
+    <value>{0} app home</value>
+  </data>
+  <data name="App_Header_Website" xml:space="preserve">
+    <value>Website</value>
+  </data>
+  <data name="App_Nav_Empty" xml:space="preserve">
+    <value>Modules appear here once they are switched on.</value>
+  </data>
+  <data name="App_Nav_Label" xml:space="preserve">
+    <value>App navigation</value>
+  </data>
+  <data name="Breadcrumbs_Label" xml:space="preserve">
+    <value>Breadcrumb</value>
+  </data>
+  <data name="Confirm_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="ErrorState_Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="ErrorState_Retry" xml:space="preserve">
+    <value>Try again</value>
+  </data>
+  <data name="ErrorState_Text" xml:space="preserve">
+    <value>Try again in a moment. If it keeps happening, tell your administrator.</value>
+  </data>
+  <data name="ErrorState_Title" xml:space="preserve">
+    <value>Could not load this</value>
+  </data>
+  <data name="Field_Required" xml:space="preserve">
+    <value>required</value>
+  </data>
+  <data name="LanguageSwitch_Label" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="Loading_Label" xml:space="preserve">
+    <value>Loading…</value>
+  </data>
+  <data name="Pagination_Label" xml:space="preserve">
+    <value>Pages</value>
+  </data>
+  <data name="Pagination_Next" xml:space="preserve">
+    <value>Next page</value>
+  </data>
+  <data name="Pagination_Previous" xml:space="preserve">
+    <value>Previous page</value>
+  </data>
+  <data name="Pagination_Status" xml:space="preserve">
+    <value>{0} to {1} of {2}</value>
+  </data>
+  <data name="Severity_Critical" xml:space="preserve">
+    <value>Critical</value>
+  </data>
+  <data name="Severity_Major" xml:space="preserve">
+    <value>Major</value>
+  </data>
+  <data name="Severity_Minor" xml:space="preserve">
+    <value>Minor</value>
+  </data>
+  <data name="Severity_Trivial" xml:space="preserve">
+    <value>Trivial</value>
+  </data>
+  <data name="Site_Footer_Copyright" xml:space="preserve">
+    <value>© {0} {1}</value>
+  </data>
+  <data name="Site_Header_Home" xml:space="preserve">
+    <value>{0} home page</value>
+  </data>
+  <data name="SkipLink_Text" xml:space="preserve">
+    <value>Skip to main content</value>
+  </data>
+  <data name="Stale_Notice" xml:space="preserve">
+    <value>These figures are from {0}.</value>
+  </data>
+  <data name="Stale_Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Status_Blocked" xml:space="preserve">
+    <value>Blocked</value>
+  </data>
+  <data name="Status_Failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="Status_Flaky" xml:space="preserve">
+    <value>Flaky</value>
+  </data>
+  <data name="Status_NotRun" xml:space="preserve">
+    <value>Not run</value>
+  </data>
+  <data name="Status_Passed" xml:space="preserve">
+    <value>Passed</value>
+  </data>
+  <data name="Status_Running" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="Status_Skipped" xml:space="preserve">
+    <value>Skipped</value>
+  </data>
+  <data name="ThemeSwitch_Dark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="ThemeSwitch_Label" xml:space="preserve">
+    <value>Color theme</value>
+  </data>
+  <data name="ThemeSwitch_Light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="ThemeSwitch_System" xml:space="preserve">
+    <value>Same as system</value>
+  </data>
+  <data name="App_Header_SignOut" xml:space="preserve">
+    <value>Sign out</value>
+  </data>
+  <data name="App_Header_SignedInAs" xml:space="preserve">
+    <value>Signed in as {0}</value>
+  </data>
+  <data name="Site_Header_Nav" xml:space="preserve">
+    <value>Main navigation</value>
+  </data>
+  <data name="Site_Header_SignIn" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
+  <data name="Site_Header_RequestDemo" xml:space="preserve">
+    <value>Request a demo</value>
+  </data>
+  <data name="Site_Placeholder" xml:space="preserve">
+    <value>Placeholder</value>
+  </data>
+  <data name="Site_Footer_Nav" xml:space="preserve">
+    <value>Footer navigation</value>
+  </data>
+  <data name="Brand_Tagline" xml:space="preserve">
+    <value>Autonomous Testing. Intelligent Quality.</value>
+  </data>
+  <data name="Site_Footer_Pitch" xml:space="preserve">
+    <value>{0} covers the whole testing journey, from a requirement to a release you can defend.</value>
+  </data>
+  <data name="Site_Footer_Newsletter_Label" xml:space="preserve">
+    <value>Product news</value>
+  </data>
+  <data name="Site_Footer_Newsletter_Placeholder" xml:space="preserve">
+    <value>you@company.example</value>
+  </data>
+  <data name="Site_Footer_Newsletter_Action" xml:space="preserve">
+    <value>Keep me posted</value>
+  </data>
+  <data name="Site_Footer_Newsletter_Note" xml:space="preserve">
+    <value>This field is part of the design and is not connected to anything yet, so nothing is stored and nothing is sent.</value>
+  </data>
+  <data name="Cookie_Label" xml:space="preserve">
+    <value>About cookies on this site</value>
+  </data>
+  <data name="Cookie_Text" xml:space="preserve">
+    <value>This site sets three cookies and no others: your language, your theme, and — once you sign in — your session. All three are necessary for the site to work, so there is nothing here to agree to.</value>
+  </data>
+  <data name="Cookie_More" xml:space="preserve">
+    <value>Read the privacy notice</value>
+  </data>
+</root>

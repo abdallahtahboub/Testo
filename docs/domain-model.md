@@ -3,7 +3,7 @@
 > Status: **Accepted.** The identity and tenancy part is built (Milestone 3); the testing-journey
 > entities are built one stage at a time in Milestone 5.
 
-What Testo stores, and how the pieces relate. This is the expensive thing to get wrong:
+What Autestiq stores, and how the pieces relate. This is the expensive thing to get wrong:
 the user interface can be rewritten in an afternoon, a schema that leaks one customer's
 data into another's cannot be unwritten.
 

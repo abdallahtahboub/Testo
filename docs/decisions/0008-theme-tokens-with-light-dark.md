@@ -9,12 +9,13 @@ never flash (first the wrong one, then the right one), also not on static pages 
 JavaScript, and the two themes must not drift apart.
 
 ## Decision
-- All design tokens live in `Testo.UI.Shared/wwwroot/css/tokens.css`.
+- All design tokens live in `Autestiq.UI.Shared/wwwroot/css/tokens.css`.
 - A color token carries both values side by side: `--color-bg: light-dark(#FFFFFF, #0E1124)`.
   Which one applies follows the CSS `color-scheme`:
   - default: `light dark`, so the browser follows the operating system;
   - `<html data-theme="light|dark">`: the visitor's explicit choice.
-- The choice is stored in the cookie `testo.theme`. The **server** reads it and renders
+- The choice is stored in the cookie `autestiq.theme` (named `testo.theme` before the rename to
+  Autestiq, ADR-0020). The **server** reads it and renders
   the attribute, so the first paint is already right. "Same as system" needs no cookie.
 - The theme switch is a plain form (works without JavaScript). `theme.js` only makes it
   instant where JavaScript runs (ADR-0004).

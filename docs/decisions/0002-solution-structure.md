@@ -10,11 +10,11 @@ Blazor types (component `Type`, `RenderFragment`), and the future backend must r
 `Contracts` without depending on Blazor.
 
 ## Decision
-- `Testo.Contracts`: DTOs + data service interfaces only, no UI dependencies.
-- `Testo.Platform` (new): `IFeatureModule`, `ITestCapability`, registries, route constants, event bus.
-- `Testo.Website` (new): all public marketing pages as a static-SSR Razor class library.
-- `Testo.Modules.Settings` (new): settings area that hosts capability settings UIs.
-- `Testo.Web` is only the composition root.
+- `Autestiq.Contracts`: DTOs + data service interfaces only, no UI dependencies.
+- `Autestiq.Platform` (new): `IFeatureModule`, `ITestCapability`, registries, route constants, event bus.
+- `Autestiq.Website` (new): all public marketing pages as a static-SSR Razor class library.
+- `Autestiq.Modules.Settings` (new): settings area that hosts capability settings UIs.
+- `Autestiq.Web` is only the composition root.
 - Monitoring & control and test completion live in `Modules.Reporting`; test implementation
   and regression/maintenance live in `Modules.Execution`, until they are big enough to split.
 - Dependency rules are enforced by an automated test.
@@ -27,3 +27,10 @@ Blazor types (component `Type`, `RenderFragment`), and the future backend must r
 ## Alternatives considered
 - Keep everything in `Contracts`: forces a Blazor dependency on the backend.
 - One project per ISTQB stage from day one (10 modules): several would be nearly empty.
+
+## Note, 2026-11-14 — the project prefix
+
+The company and the product became **Autestiq**, and every project moved from `Testo.*` to
+`Autestiq.*` with it. The structure, the dependency rules and the reasoning above are unchanged:
+only the prefix moved, as this ADR's own wording always allowed for. The project names in the text
+above have been updated so that they match the solution a reader is looking at.

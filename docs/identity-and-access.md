@@ -3,7 +3,7 @@
 > Status: **Accepted**, and built in Milestone 3 except where this document says otherwise.
 > Decisions recorded in ADR-0011 to ADR-0014 and ADR-0016.
 
-Who can sign in, what they may do, and how that is proved. Testo is sold to businesses, so
+Who can sign in, what they may do, and how that is proved. Autestiq is sold to businesses, so
 this is a sales topic as much as a technical one: a security questionnaire will ask most of
 these questions before a contract is signed.
 

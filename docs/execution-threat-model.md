@@ -4,7 +4,7 @@
 > [ADR-0018](decisions/0018-execution-isolation.md).
 > Written before any code opens a browser, which is the only time this document is cheap.
 
-Testo's purpose is to open a browser, visit a web application and act on it. That is the product,
+Autestiq's purpose is to open a browser, visit a web application and act on it. That is the product,
 and it is also the most dangerous thing the product will ever do. Everything the platform holds —
 every customer's test data, evidence and credentials — sits behind code that deliberately executes
 content written by somebody else.
@@ -46,7 +46,7 @@ the ordinary case is entirely benign. The hostile parties are:
 ```
    ┌─────────────────────────────── our trust ───────────────────────────────┐
    │                                                                          │
-   │   Testo.Web ──► Testo.Application ──► PostgreSQL                        │
+   │   Autestiq.Web ──► Autestiq.Application ──► PostgreSQL                        │
    │        │                  │                                              │
    │        │                  └──► run queue                                 │
    │        │                            │                                    │

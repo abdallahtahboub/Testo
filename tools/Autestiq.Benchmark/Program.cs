@@ -42,6 +42,14 @@ if (options.SelfCheck)
     return await SelfCheck.RunAsync(origin) ? 0 : 1;
 }
 
+// How much of what the baseline plans need the crawl shows: no key, nothing spent.
+if (args.Contains("--coverage", StringComparer.Ordinal))
+{
+    var snapshot = await Coverage.ExploreAsync(origin);
+    Coverage.Print(booking ? BookingScenarios.All : BenchmarkScenarios.All, snapshot, Console.Out);
+    return 0;
+}
+
 // What the crawl sees of the target, printed, with no planner and nothing spent. The way to check the
 // crawl against an application without a key.
 if (args.Contains("--explore", StringComparer.Ordinal))

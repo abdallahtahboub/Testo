@@ -1,6 +1,6 @@
 # 0026 — A sealed container for every run, with the proxy outside it
 
-- **Status:** Proposed
+- **Status:** Accepted by the owner on 2026-11-16
 - **Date:** 2026-11-16
 
 ## Context

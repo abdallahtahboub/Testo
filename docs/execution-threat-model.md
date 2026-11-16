@@ -195,6 +195,13 @@ until the switch is lifted), and a run already in progress is stopped within abo
 cancelled, with the reason. `KillSwitchTests` covers all three, including a real dispatcher stopping a real
 process.
 
+**Stuck runs are reaped (Milestone 3.5, 2026-11-16).** A dispatcher writes a heartbeat on each run it is
+carrying out (`test_runs.heartbeat_at`, every `Execution:HeartbeatInterval`, 5 seconds by default). Every
+`Execution:ReapInterval` (30 seconds) a dispatcher ends any running run whose heartbeat is older than
+`Execution:LeaseTimeout` (2 minutes) as an infrastructure error, saying it was lost rather than that it
+failed, and audits it. Before this a run whose dispatcher died stayed "running" for ever. `RunReaperTests`
+covers it, including a dispatcher that stops mid-run and a second one that reaps its run.
+
 ### 4.8 Downloads
 
 A test that clicks "export" gets a file. A hostile page offers one unasked.

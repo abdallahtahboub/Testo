@@ -42,6 +42,12 @@ public sealed class TestRun : Entity, IBelongsToOrganization
     /// <summary>When it stopped.</summary>
     public DateTimeOffset? FinishedAt { get; set; }
 
+    /// <summary>
+    /// When the dispatcher carrying the run out last said it still was. A running run whose last word is older
+    /// than the lease has lost its dispatcher, and is reaped as an infrastructure error rather than left running.
+    /// </summary>
+    public DateTimeOffset? HeartbeatAt { get; set; }
+
     /// <summary>Set when a person asks for the run to stop; the dispatcher acts on it.</summary>
     public bool CancellationRequested { get; set; }
 

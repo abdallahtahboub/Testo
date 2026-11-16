@@ -40,10 +40,19 @@ public sealed class RunDispatcher(
     {
         using var running = new SemaphoreSlim(options.CurrentValue.MaxConcurrentRuns);
 
+        // Reaped first: a run left running by a dispatcher that stopped, this one or another, is not running.
+        var nextReap = timeProvider.GetUtcNow();
+
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
+                if (timeProvider.GetUtcNow() >= nextReap)
+                {
+                    await ReapAsync(stoppingToken).ConfigureAwait(false);
+                    nextReap = timeProvider.GetUtcNow() + options.CurrentValue.ReapInterval;
+                }
+
                 var runId = await ClaimAsync(stoppingToken).ConfigureAwait(false);
 
                 if (runId is null)
@@ -93,6 +102,7 @@ public sealed class RunDispatcher(
 
         run.Status = RunStatus.Running;
         run.StartedAt = timeProvider.GetUtcNow();
+        run.HeartbeatAt = run.StartedAt;
 
         try
         {
@@ -108,6 +118,115 @@ public sealed class RunDispatcher(
         }
 
         return run.Id;
+    }
+
+    private async Task ReapAsync(CancellationToken cancellationToken)
+    {
+        await using var scope = scopes.CreateAsyncScope();
+
+        var reaped = await ReapAbandonedAsync(
+                scope.ServiceProvider.GetRequiredService<AutestiqDbContext>(),
+                scope.ServiceProvider.GetRequiredService<TenantWriteScope>(),
+                timeProvider,
+                options.CurrentValue.LeaseTimeout,
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        if (reaped > 0)
+        {
+            DispatcherLog.Reaped(logger, reaped);
+        }
+    }
+
+    /// <summary>
+    /// Ends every running run whose dispatcher has gone quiet for longer than the lease, as an infrastructure
+    /// error: the run did not fail, we lost it. Without this a run whose dispatcher died stayed "running" for
+    /// ever, holding its place and saying something untrue. Returns how many were reaped.
+    /// </summary>
+    public static async Task<int> ReapAbandonedAsync(
+        AutestiqDbContext database,
+        TenantWriteScope writeScope,
+        TimeProvider clock,
+        TimeSpan leaseTimeout,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(database);
+        ArgumentNullException.ThrowIfNull(writeScope);
+        ArgumentNullException.ThrowIfNull(clock);
+
+        var now = clock.GetUtcNow();
+        var cutoff = now - leaseTimeout;
+
+        // Across organizations by necessity, like the claim: the dispatcher serves all of them, and each reaped run
+        // is written back under its own organization below.
+        var abandoned = await database.TestRuns
+            .IgnoreQueryFilters()
+            .Where(run => run.Status == RunStatus.Running && (run.HeartbeatAt ?? run.StartedAt ?? run.QueuedAt) < cutoff)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        foreach (var run in abandoned)
+        {
+            run.Status = RunStatus.InfrastructureError;
+            run.FailureReason = "Abandoned: the dispatcher carrying it out stopped answering. The run did not fail; it was lost.";
+            run.FinishedAt = now;
+
+            new Audit.AuditWriter(database, clock).Record(
+                run.OrganizationId,
+                actorUserId: null,
+                actorEmail: null,
+                Audit.AuditActions.RunFinished,
+                nameof(TestRun),
+                run.Id,
+                $"{run.ScenarioId} #{run.Number}",
+                after: new { Status = run.Status.ToString() });
+
+            using (writeScope.AllowWritingTo(run.OrganizationId))
+            {
+                try
+                {
+                    await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    // Its dispatcher answered after all, or another reaper got there first. Either way not ours.
+                    database.ChangeTracker.Clear();
+                }
+            }
+        }
+
+        return abandoned.Count;
+    }
+
+    /// <summary>Says that a run is still being carried out.</summary>
+    private async Task BeatAsync(Guid runId, CancellationToken cancellationToken)
+    {
+        await using var scope = scopes.CreateAsyncScope();
+        var database = scope.ServiceProvider.GetRequiredService<AutestiqDbContext>();
+        var writeScope = scope.ServiceProvider.GetRequiredService<TenantWriteScope>();
+
+        var run = await database.TestRuns.IgnoreQueryFilters()
+            .FirstOrDefaultAsync(candidate => candidate.Id == runId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (run is null || run.Status != RunStatus.Running)
+        {
+            return;
+        }
+
+        run.HeartbeatAt = timeProvider.GetUtcNow();
+
+        using (writeScope.AllowWritingTo(run.OrganizationId))
+        {
+            try
+            {
+                await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // Somebody cancelled it in the same instant; the next heartbeat, or the result, settles it.
+            }
+        }
     }
 
     /// <summary>
@@ -276,9 +395,16 @@ public sealed class RunDispatcher(
     private async Task<Stop> WaitOrStopAsync(Process process, Guid runId, Guid organizationId, CancellationToken stoppingToken)
     {
         var finished = process.WaitForExitAsync(stoppingToken);
+        var nextBeat = timeProvider.GetUtcNow() + options.CurrentValue.HeartbeatInterval;
 
         while (!finished.IsCompleted)
         {
+            if (timeProvider.GetUtcNow() >= nextBeat)
+            {
+                await BeatAsync(runId, stoppingToken).ConfigureAwait(false);
+                nextBeat = timeProvider.GetUtcNow() + options.CurrentValue.HeartbeatInterval;
+            }
+
             var completed = await Task.WhenAny(finished, Task.Delay(TimeSpan.FromMilliseconds(500), timeProvider, stoppingToken))
                 .ConfigureAwait(false);
 
@@ -480,6 +606,9 @@ internal static partial class DispatcherLog
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Run {RunId} was asked to stop.")]
     public static partial void Cancelling(ILogger logger, Guid runId);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Reaped {Count} run(s) whose dispatcher stopped answering.")]
+    public static partial void Reaped(ILogger logger, int count);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Run {RunId} ended as {Status}.")]
     public static partial void Finished(ILogger logger, Guid runId, RunStatus status);

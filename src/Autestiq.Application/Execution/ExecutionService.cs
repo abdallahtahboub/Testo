@@ -317,6 +317,18 @@ public sealed class ExecutionOptions
     /// <summary>Whether an organization's runs are stopped, by either switch.</summary>
     public bool IsPaused(Guid organizationId) => Paused || PausedOrganizations.Contains(organizationId);
 
+    /// <summary>How often a dispatcher says a run it is carrying out is still going.</summary>
+    public TimeSpan HeartbeatInterval { get; set; } = TimeSpan.FromSeconds(5);
+
+    /// <summary>
+    /// How long a running run may go without a heartbeat before it is taken to have lost its dispatcher and is
+    /// reaped. Several heartbeats long, so that one slow write does not end a healthy run.
+    /// </summary>
+    public TimeSpan LeaseTimeout { get; set; } = TimeSpan.FromMinutes(2);
+
+    /// <summary>How often a dispatcher looks for runs that lost theirs.</summary>
+    public TimeSpan ReapInterval { get; set; } = TimeSpan.FromSeconds(30);
+
     /// <summary>Where the worker executable is, for the dispatcher to launch.</summary>
     public string? WorkerPath { get; set; }
 

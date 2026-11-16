@@ -106,6 +106,20 @@ public sealed class TenantIsolationTests : IAsyncLifetime
             IdempotencyKey = $"seed-{Guid.CreateVersion7():N}",
             Source = "seed",
         },
+        [typeof(Domain.Costs.RunCost)] = seed => new Domain.Costs.RunCost
+        {
+            OrganizationId = seed.OrganizationId,
+            RunId = seed.RunId,
+            Item = Domain.Costs.CostItems.BrowserSecond,
+            Quantity = 60,
+            Price = 0.10m,
+            Per = Domain.Costs.PriceCatalog.SecondsPerHour,
+            Amount = 0.001667m,
+            Currency = Domain.Costs.PriceCatalog.Currency,
+            PriceVersionId = Domain.Costs.PriceCatalog.FirstVersionId,
+            Period = "2026-11",
+            IdempotencyKey = $"seed-{Guid.CreateVersion7():N}",
+        },
         [typeof(OriginProof)] = seed => new OriginProof
         {
             OrganizationId = seed.OrganizationId,

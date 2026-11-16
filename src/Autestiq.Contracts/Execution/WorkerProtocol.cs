@@ -16,6 +16,13 @@ public enum WorkerTask
 
     /// <summary>Carry out a plan, action by action, with no model in the loop.</summary>
     Planned = 3,
+
+    /// <summary>
+    /// Fetch the origin's proof file and compare it with <see cref="WorkerJob.OriginProof"/>: whether the
+    /// organization that asked controls the origin (Milestone 3.5). Done by the worker, behind its egress proxy,
+    /// so that the application never fetches a URL a customer named.
+    /// </summary>
+    VerifyOrigin = 4,
 }
 
 /// <summary>
@@ -58,6 +65,10 @@ public enum WorkerTask
 /// the benchmark marks the applications it runs itself. A customer's application never has it
 /// (<c>ExplorationPolicy</c>), whatever the job asks for.
 /// </param>
+/// <param name="OriginProof">
+/// For <see cref="WorkerTask.VerifyOrigin"/>: the token the origin's proof file must hold. Not a secret: it is
+/// published on the customer's own site, and it proves nothing to anybody but the organization it was issued to.
+/// </param>
 public sealed record WorkerJob(
     Guid RunId,
     string ScenarioId,
@@ -70,7 +81,15 @@ public sealed record WorkerJob(
     IReadOnlyList<PlannedAction>? Plan = null,
     IReadOnlyDictionary<string, string>? Secrets = null,
     bool ExploreStates = false,
-    bool SubmitForms = false);
+    bool SubmitForms = false,
+    string? OriginProof = null);
+
+/// <summary>Where an origin's proof file is, and what it is called.</summary>
+public static class OriginProofFile
+{
+    /// <summary>The path of the proof file on the origin, under the standard place for such files (RFC 8615).</summary>
+    public const string Path = "/.well-known/autestiq-verification.txt";
+}
 
 /// <summary>What a run may spend. Exceeding any one of these ends the run with a status that says which.</summary>
 /// <param name="WallClock">How long the whole run may take.</param>

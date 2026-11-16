@@ -19,7 +19,7 @@ namespace Autestiq.Application.Execution;
 internal sealed class ExecutionService(
     AutestiqDbContext database,
     ArtifactLinks links,
-    IOptions<ExecutionOptions> options,
+    IOptionsMonitor<ExecutionOptions> options,
     ICurrentUser currentUser,
     IOrganizationContext organizationContext,
     TimeProvider timeProvider)
@@ -138,6 +138,11 @@ internal sealed class ExecutionService(
             return OperationResult.Failure<Guid>("Execution_Error_NoSuchProject");
         }
 
+        if (options.CurrentValue.IsPaused(project.OrganizationId))
+        {
+            return OperationResult.Failure<Guid>("Execution_Error_Paused");
+        }
+
         return OperationResult.With(
             await QueueAsync(project.Id, scenarioId, attempt: 1, rerunOf: null, cancellationToken)
                 .ConfigureAwait(false));
@@ -197,6 +202,11 @@ internal sealed class ExecutionService(
             return OperationResult.Failure<Guid>("Execution_Error_NoSuchRun");
         }
 
+        if (options.CurrentValue.IsPaused(original.OrganizationId))
+        {
+            return OperationResult.Failure<Guid>("Execution_Error_Paused");
+        }
+
         return OperationResult.With(
             await QueueAsync(
                     original.ProjectId,
@@ -228,7 +238,7 @@ internal sealed class ExecutionService(
             ProjectId = projectId,
             Number = lastNumber + 1,
             ScenarioId = scenarioId,
-            TargetOrigin = options.Value.TargetOrigin,
+            TargetOrigin = options.CurrentValue.TargetOrigin,
             Status = RunStatus.Queued,
             Attempt = attempt,
             RerunOf = rerunOf,
@@ -285,6 +295,54 @@ public sealed class ExecutionOptions
     /// name their own (ADR-0018).
     /// </summary>
     public string TargetOrigin { get; set; } = "http://127.0.0.1:5090";
+
+    /// <summary>
+    /// Our own applications on the worker's machine, which a run may reach on loopback. Configuration only:
+    /// a run's stored target is never added (R-11). Empty means the one configured <see cref="TargetOrigin"/>.
+    /// </summary>
+    public List<string> LocalOrigins { get; init; } = [];
+
+    /// <summary>The origins a run may reach on loopback: <see cref="LocalOrigins"/>, or the configured target.</summary>
+    public IReadOnlyList<string> TrustedLocalOrigins() => LocalOrigins.Count > 0 ? [.. LocalOrigins] : [TargetOrigin];
+
+    /// <summary>
+    /// The kill switch for every organization: no run starts, none is claimed, and running ones are stopped.
+    /// Read live, so changing the configuration takes effect without a restart.
+    /// </summary>
+    public bool Paused { get; set; }
+
+    /// <summary>The kill switch for some organizations only. The others carry on.</summary>
+    public List<Guid> PausedOrganizations { get; init; } = [];
+
+    /// <summary>Whether an organization's runs are stopped, by either switch.</summary>
+    public bool IsPaused(Guid organizationId) => Paused || PausedOrganizations.Contains(organizationId);
+
+    /// <summary>How often a dispatcher says a run it is carrying out is still going.</summary>
+    public TimeSpan HeartbeatInterval { get; set; } = TimeSpan.FromSeconds(5);
+
+    /// <summary>
+    /// How long a running run may go without a heartbeat before it is taken to have lost its dispatcher and is
+    /// reaped. Several heartbeats long, so that one slow write does not end a healthy run.
+    /// </summary>
+    public TimeSpan LeaseTimeout { get; set; } = TimeSpan.FromMinutes(2);
+
+    /// <summary>How long a verified proof of origin control counts before the origin must be checked again.</summary>
+    public TimeSpan ProofValidity { get; set; } = TimeSpan.FromDays(30);
+
+    /// <summary>How often a dispatcher looks for runs that lost theirs.</summary>
+    public TimeSpan ReapInterval { get; set; } = TimeSpan.FromSeconds(30);
+
+    /// <summary>
+    /// How workers run (ADR-0026). <see cref="WorkerIsolation.Container"/> is required before any origin that is not
+    /// ours may be a target; <see cref="WorkerIsolation.Process"/> is for development, tests and the benchmark.
+    /// </summary>
+    public WorkerIsolation Isolation { get; set; } = WorkerIsolation.Process;
+
+    /// <summary>The worker image, for <see cref="WorkerIsolation.Container"/>.</summary>
+    public string WorkerImage { get; set; } = "autestiq-worker:latest";
+
+    /// <summary>The Docker command line, for <see cref="WorkerIsolation.Container"/>.</summary>
+    public string Docker { get; set; } = "docker";
 
     /// <summary>Where the worker executable is, for the dispatcher to launch.</summary>
     public string? WorkerPath { get; set; }

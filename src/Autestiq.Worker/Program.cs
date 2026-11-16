@@ -11,6 +11,11 @@ using Autestiq.Worker;
 
 var cancellation = new CancellationTokenSource();
 
+if (args is ["--proxy", .. var origins])
+{
+    return await OuterProxy.RunAsync(origins, cancellation.Token).ConfigureAwait(false);
+}
+
 Console.CancelKeyPress += (_, eventArgs) =>
 {
     // A stop is an outcome, not a crash: cancel the run and let it report what it managed.

@@ -76,6 +76,27 @@ public sealed class EgressPolicy(IReadOnlyList<string> allowedOrigins, IReadOnly
         return EgressDecision.Allow;
     }
 
+    /// <summary>
+    /// Whether the run may reach this origin at all, judged by name only. For a proxy whose connections go through
+    /// another one (ADR-0026): the outer proxy resolves the name and judges every address, and this one cannot
+    /// resolve anything from inside a sealed network. Trusted-local origins do not count here, because the outer
+    /// proxy trusts nothing local.
+    /// </summary>
+    public EgressDecision CheckOrigin(string host, int port, string scheme)
+    {
+        if (!scheme.Equals("http", StringComparison.OrdinalIgnoreCase)
+            && !scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
+        {
+            return EgressDecision.Refuse($"the scheme '{scheme}' is not http or https");
+        }
+
+        var origin = $"{scheme.ToLowerInvariant()}://{host.ToLowerInvariant()}:{port}";
+
+        return _allowed.Contains(origin)
+            ? EgressDecision.Allow
+            : EgressDecision.Refuse($"{origin} is not an origin this run may reach");
+    }
+
     /// <summary>Whether an address is one the internet can reach, or something closer to home.</summary>
     public static Reach Classify(IPAddress address)
     {

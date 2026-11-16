@@ -27,13 +27,15 @@ public sealed class EgressProxy : IAsyncDisposable
     private readonly Action<string> _onRefused;
     private readonly CancellationTokenSource _stopping = new();
     private readonly Task _accepting;
+    private readonly DnsEndPoint? _upstream;
     private long _bytesDownloaded;
 
-    private EgressProxy(TcpListener listener, EgressPolicy policy, Action<string> onRefused)
+    private EgressProxy(TcpListener listener, EgressPolicy policy, Action<string> onRefused, DnsEndPoint? upstream)
     {
         _listener = listener;
         _policy = policy;
         _onRefused = onRefused;
+        _upstream = upstream;
         _accepting = AcceptAsync();
     }
 
@@ -46,14 +48,28 @@ public sealed class EgressProxy : IAsyncDisposable
     /// <summary>Starts listening on a free loopback port.</summary>
     /// <param name="policy">What may be reached.</param>
     /// <param name="onRefused">Told about every refusal, so the run can say what was blocked.</param>
-    public static EgressProxy Start(EgressPolicy policy, Action<string> onRefused)
+    public static EgressProxy Start(EgressPolicy policy, Action<string> onRefused) =>
+        Start(policy, onRefused, IPAddress.Loopback, port: 0, upstream: null);
+
+    /// <summary>Starts listening where it is told, and optionally sends everything through another proxy.</summary>
+    /// <param name="policy">What may be reached.</param>
+    /// <param name="onRefused">Told about every refusal.</param>
+    /// <param name="address">Where to listen: loopback for the worker's own proxy, all addresses for the outer one.</param>
+    /// <param name="port">The port, or 0 for any free one.</param>
+    /// <param name="upstream">
+    /// The outer proxy (ADR-0026). When set, this proxy judges each request by its origin only and opens no
+    /// connection of its own: everything goes through the outer proxy, which resolves names and judges addresses,
+    /// and is the only thing a sealed run network lets the worker reach.
+    /// </param>
+    public static EgressProxy Start(EgressPolicy policy, Action<string> onRefused, IPAddress address, int port, DnsEndPoint? upstream)
     {
         ArgumentNullException.ThrowIfNull(policy);
+        ArgumentNullException.ThrowIfNull(address);
 
-        var listener = new TcpListener(IPAddress.Loopback, 0);
+        var listener = new TcpListener(address, port);
         listener.Start();
 
-        return new EgressProxy(listener, policy, onRefused);
+        return new EgressProxy(listener, policy, onRefused, upstream);
     }
 
     private async Task AcceptAsync()
@@ -117,6 +133,12 @@ public sealed class EgressProxy : IAsyncDisposable
     /// <summary>A CONNECT tunnel: the browser's own TLS, through a socket we opened for it.</summary>
     private async Task TunnelAsync(NetworkStream browser, Request request)
     {
+        if (_upstream is { } outer)
+        {
+            await TunnelThroughAsync(browser, request, outer).ConfigureAwait(false);
+            return;
+        }
+
         var target = await ApproveAsync(request.Host, request.Port, "https").ConfigureAwait(false);
 
         if (target is null)
@@ -143,6 +165,12 @@ public sealed class EgressProxy : IAsyncDisposable
         if (!Uri.TryCreate(request.Target, UriKind.Absolute, out var uri))
         {
             await RefuseAsync(browser).ConfigureAwait(false);
+            return;
+        }
+
+        if (_upstream is { } outer)
+        {
+            await ForwardThroughAsync(browser, request, uri, outer).ConfigureAwait(false);
             return;
         }
 
@@ -217,6 +245,89 @@ public sealed class EgressProxy : IAsyncDisposable
         }
 
         return addresses;
+    }
+
+    /// <summary>A CONNECT tunnel opened through the outer proxy, which judges the addresses.</summary>
+    private async Task TunnelThroughAsync(NetworkStream browser, Request request, DnsEndPoint outer)
+    {
+        if (!Approved(request.Host, request.Port, "https"))
+        {
+            await RefuseAsync(browser).ConfigureAwait(false);
+            return;
+        }
+
+        using var upstream = new TcpClient();
+        await upstream.ConnectAsync(outer.Host, outer.Port).ConfigureAwait(false);
+        var stream = upstream.GetStream();
+
+        var authority = $"{request.Host}:{request.Port.ToString(CultureInfo.InvariantCulture)}";
+        await stream.WriteAsync(Encoding.ASCII.GetBytes($"CONNECT {authority} HTTP/1.1\r\nHost: {authority}\r\n\r\n"))
+            .ConfigureAwait(false);
+
+        // The outer proxy's answer, read to the end of its head and no further, so nothing of the tunnel is lost.
+        var answer = await ReadRequestHeadAsync(stream).ConfigureAwait(false);
+
+        if (answer is not { Target: "200" })
+        {
+            _onRefused($"https://{authority} — refused by the outer proxy");
+            await RefuseAsync(browser).ConfigureAwait(false);
+            return;
+        }
+
+        await browser.WriteAsync(Encoding.ASCII.GetBytes("HTTP/1.1 200 Connection Established\r\n\r\n")).ConfigureAwait(false);
+
+        var up = CopyAsync(browser, stream, counting: false);
+        var down = CopyAsync(stream, browser, counting: true);
+
+        await Task.WhenAny(up, down).ConfigureAwait(false);
+    }
+
+    /// <summary>A plain HTTP request passed on to the outer proxy as one, so that it judges it as http.</summary>
+    private async Task ForwardThroughAsync(NetworkStream browser, Request request, Uri uri, DnsEndPoint outer)
+    {
+        if (!Approved(uri.Host, uri.Port, uri.Scheme))
+        {
+            await RefuseAsync(browser).ConfigureAwait(false);
+            return;
+        }
+
+        using var upstream = new TcpClient();
+        await upstream.ConnectAsync(outer.Host, outer.Port).ConfigureAwait(false);
+        var stream = upstream.GetStream();
+
+        var head = new StringBuilder()
+            .Append(CultureInfo.InvariantCulture, $"{request.Method} {uri.AbsoluteUri} HTTP/1.1\r\n")
+            .Append(CultureInfo.InvariantCulture, $"Host: {uri.Authority}\r\n");
+
+        foreach (var header in request.Headers)
+        {
+            if (!header.StartsWith("Host:", StringComparison.OrdinalIgnoreCase)
+                && !header.StartsWith("Proxy-", StringComparison.OrdinalIgnoreCase))
+            {
+                head.Append(CultureInfo.InvariantCulture, $"{header}\r\n");
+            }
+        }
+
+        head.Append("\r\n");
+        await stream.WriteAsync(Encoding.ASCII.GetBytes(head.ToString())).ConfigureAwait(false);
+
+        var up = CopyAsync(browser, stream, counting: false);
+        var down = CopyAsync(stream, browser, counting: true);
+
+        await Task.WhenAny(up, down).ConfigureAwait(false);
+    }
+
+    /// <summary>The origin check this proxy can make without resolving anything.</summary>
+    private bool Approved(string host, int port, string scheme)
+    {
+        var decision = _policy.CheckOrigin(host, port, scheme);
+
+        if (!decision.Allowed)
+        {
+            _onRefused($"{scheme}://{host}:{port} — {decision.Reason}");
+        }
+
+        return decision.Allowed;
     }
 
     private static async Task RefuseAsync(NetworkStream browser) =>

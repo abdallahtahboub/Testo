@@ -21,6 +21,27 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
     public const string BrowserPathVariable = "AUTESTIQ_BROWSER_PATH";
 
     /// <summary>
+    /// Where the outer proxy is, as <c>host:port</c>, when the worker runs in a sealed container (ADR-0026). Set by
+    /// the dispatcher, never by a job. With it, the worker's own proxy opens no connection of its own.
+    /// </summary>
+    public const string UpstreamProxyVariable = "AUTESTIQ_UPSTREAM_PROXY";
+
+    /// <summary>The worker's own proxy: on its own, or in front of the outer one when the container has one.</summary>
+    private static EgressProxy StartProxy(WorkerJob job, List<string> refusals)
+    {
+        var policy = new EgressPolicy(job.AllowedOrigins, job.TrustedLocalOrigins);
+
+        if (Environment.GetEnvironmentVariable(UpstreamProxyVariable) is { Length: > 0 } upstream
+            && upstream.LastIndexOf(':') is var colon and > 0
+            && int.TryParse(upstream[(colon + 1)..], System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var port))
+        {
+            return EgressProxy.Start(policy, refusals.Add, System.Net.IPAddress.Loopback, 0, new System.Net.DnsEndPoint(upstream[..colon], port));
+        }
+
+        return EgressProxy.Start(policy, refusals.Add);
+    }
+
+    /// <summary>
     /// Puts the target back to its starting state. Called before every visit an exploration makes to
     /// press something, so that no visit inherits what an earlier one did.
     /// </summary>
@@ -50,9 +71,7 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
         }
 
         var refusals = new List<string>();
-        await using var proxy = EgressProxy.Start(
-            new EgressPolicy(job.AllowedOrigins, job.TrustedLocalOrigins),
-            refusals.Add);
+        await using var proxy = StartProxy(job, refusals);
 
         // The budget is the run's, not a step's: a scenario that spends it all on one slow page
         // has still spent it.
@@ -87,6 +106,7 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
     {
         WorkerTask.Planned => job.Plan is { Count: > 0 } plan ? PlannedScenario.From(job, plan) : null,
         WorkerTask.Explore => ExploreScenario,
+        WorkerTask.VerifyOrigin => job.OriginProof is { Length: > 0 } proof ? OriginProofScenario.For(proof) : null,
         _ => DemoShopScenarios.Find(job.ScenarioId),
     };
 

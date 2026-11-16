@@ -111,6 +111,30 @@ on it from our IP range. We are then the attacker, with logs to prove it.
 record or a file we fetch at a well-known path, re-checked periodically. Milestone 3.3 sidesteps
 this entirely by shipping its own target, which is why it is safe to build first.
 
+**The container gate (Milestone 3.5, 2026-11-16).** With `Execution:Isolation = Container` every run gets
+a sealed network of its own, the outer proxy in a container of its own as the only thing on it, and a
+locked-down worker; customer targets are refused in any other mode. `SealedContainerTests` checks the
+gate on every CI run (ADR-0026).
+
+**Built (Milestone 3.5, 2026-11-16), by file; the owner chose the file method first.**
+- An organization asks for a token for an origin (`IOriginProofService`), 256 random bits, one per
+  organization and origin. A second organization asking for the same origin gets a token of its own.
+- It publishes the token as `/.well-known/autestiq-verification.txt` on the origin and asks for a check.
+- **The application never fetches the file.** The check is queued, and a worker carries it out
+  (`WorkerTask.VerifyOrigin`) behind its egress proxy, with the origin as the only one allowed and none
+  trusted-local. So an origin that resolves to a private, loopback or metadata address is refused before
+  anything is fetched, which keeps the check itself from becoming a way to reach our own network.
+- A match verifies the proof for `Execution:ProofValidity` (30 days). After that the origin must be
+  checked again.
+- Before any run, the dispatcher refuses a target that is neither one of our configured origins nor
+  proved, unexpired, by the run's own organization. No worker is started; the run is cancelled with
+  the reason.
+- `OriginProofTests` (application and worker) cover each refusal, and the dispatcher test fails
+  without the check.
+
+**Not yet:** no screen asks for a token or shows a proof's state (that comes with projects and
+environments in Milestone 5), nothing re-checks a proof before it expires, and the DNS method is not built.
+
 ### 4.3 A hostile page talking to the model
 
 Once a model reads page content to decide what to do next, the page is in the prompt. A page can
@@ -186,6 +210,21 @@ concurrent runs and monthly spend sit above that.
 
 **Partly built.** Wall clock, steps and bytes in Milestone 3.3; tokens and money in Milestone 3.4.
 The per-organization monthly limit waits for billing to exist (R-10).
+
+**Kill switch (Milestone 3.5, 2026-11-16).** Two settings, read live so that a change takes effect without a
+restart: `Execution:Paused` stops every organization, and `Execution:PausedOrganizations` (a list of
+organization ids) stops only those. While either applies, starting or re-running a run is refused with
+`Execution_Error_Paused`, the dispatcher claims none of that organization's queued runs (they stay queued
+until the switch is lifted), and a run already in progress is stopped within about a second and recorded as
+cancelled, with the reason. `KillSwitchTests` covers all three, including a real dispatcher stopping a real
+process.
+
+**Stuck runs are reaped (Milestone 3.5, 2026-11-16).** A dispatcher writes a heartbeat on each run it is
+carrying out (`test_runs.heartbeat_at`, every `Execution:HeartbeatInterval`, 5 seconds by default). Every
+`Execution:ReapInterval` (30 seconds) a dispatcher ends any running run whose heartbeat is older than
+`Execution:LeaseTimeout` (2 minutes) as an infrastructure error, saying it was lost rather than that it
+failed, and audits it. Before this a run whose dispatcher died stayed "running" for ever. `RunReaperTests`
+covers it, including a dispatcher that stops mid-run and a second one that reaps its run.
 
 ### 4.8 Downloads
 

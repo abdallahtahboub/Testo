@@ -267,7 +267,12 @@ actual infrastructure. Deliberately not configured blind: trusting `X-Forwarded-
 unknown source lets anybody claim any address and escape the limit entirely, which is worse than
 the blunt version.
 
-### R-11 · The loopback exception would apply to a stored target — **Critical once customer targets exist**
+### R-11 · The loopback exception would apply to a stored target — **Fixed (2026-11-16, Milestone 3.5)**
+
+**Fixed.** `RunDispatcher.JobFor` takes the trusted-local origins from `ExecutionOptions` only: the configured
+`LocalOrigins`, or the one configured `TargetOrigin`. A run's stored target is never added.
+`TrustedLocalOriginsTests` writes a loopback origin to a run and expects it not to be trusted; it fails with
+the old code. What follows is the finding as it was recorded.
 
 `EgressPolicy.Check` lets a loopback address through when the origin is in `TrustedLocalOrigins`
 (`src/Autestiq.Worker/Egress/EgressPolicy.cs`, the `isTrustedLocal && reach == Reach.Loopback` branch).

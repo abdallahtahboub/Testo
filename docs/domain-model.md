@@ -92,6 +92,7 @@ request, is a separate and deliberate operation (GDPR Article 17).
 | Entity | Holds | Notes |
 |---|---|---|
 | `TestRun` | Key, suite, environment, release, capability, trigger, status, started, finished, who | One execution of a suite |
+| `OriginProof` *(built, 3.5)* | Organization, origin, token, status, verified, expires | That an organization controls an origin a run may be aimed at |
 | `TestCaseResult` | Run, test case, version executed, status, duration, assigned defect | Status: passed, failed, blocked, skipped, not run |
 | `StepResult` | Case result, step, status, duration, actual result, message | What the live view streams |
 | `Evidence` | Step or case result, kind, storage key, captured at | Screenshots, logs, video, traces. The file lives in object storage; this row points at it |

@@ -46,6 +46,17 @@ internal static class Jobs
         IReadOnlyDictionary<string, string>? secrets = null) =>
         RunAsync(Job(origin, "planned", WorkerTask.Planned, null) with { Plan = plan, Secrets = secrets }, out artifacts);
 
+    /// <summary>Checks an origin's proof file. Trusted-local only when a test says so: a real job never is.</summary>
+    public static Task<WorkerResult> VerifyAsync(string origin, string proof, bool trustLocal) =>
+        RunAsync(
+            Job(origin, "verify-origin", WorkerTask.VerifyOrigin, null) with
+            {
+                OriginProof = proof,
+                AllowedOrigins = trustLocal ? [] : [origin],
+                TrustedLocalOrigins = trustLocal ? [origin] : [],
+            },
+            out _);
+
     private static WorkerJob Job(string origin, string scenarioId, WorkerTask task, RunBudget? budget) => new(
         RunId: Guid.CreateVersion7(),
         scenarioId,

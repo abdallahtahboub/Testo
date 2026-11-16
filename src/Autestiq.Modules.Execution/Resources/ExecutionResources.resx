@@ -142,6 +142,9 @@
   <data name="Execution_Error_MinutesUsedUp" xml:space="preserve">
     <value>This organization has used all of its browser minutes for the month. Runs can start again next month, or after a plan change.</value>
   </data>
+  <data name="Execution_Error_TooManyStarts" xml:space="preserve">
+    <value>Too many requests in the last minute. Please wait a moment and try again.</value>
+  </data>
   <data name="Execution_Error_AlreadyFinished" xml:space="preserve">
     <value>That run has already finished.</value>
   </data>

@@ -142,6 +142,9 @@
   <data name="Execution_Error_MinutesUsedUp" xml:space="preserve">
     <value>Diese Organisation hat alle Browser-Minuten dieses Monats verbraucht. Testläufe sind ab dem nächsten Monat oder nach einem Tarifwechsel wieder möglich.</value>
   </data>
+  <data name="Execution_Error_TooManyStarts" xml:space="preserve">
+    <value>Zu viele Anfragen in der letzten Minute. Bitte warten Sie einen Moment und versuchen Sie es erneut.</value>
+  </data>
   <data name="Execution_Error_AlreadyFinished" xml:space="preserve">
     <value>Dieser Lauf ist bereits beendet.</value>
   </data>

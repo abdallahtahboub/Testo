@@ -149,9 +149,7 @@ internal sealed class ExecutionService(
             return OperationResult.Failure<Guid>("Execution_Error_MinutesUsedUp");
         }
 
-        return OperationResult.With(
-            await QueueAsync(project.Id, scenarioId, attempt: 1, rerunOf: null, cancellationToken)
-                .ConfigureAwait(false));
+        return await QueueAsync(project.Id, scenarioId, attempt: 1, rerunOf: null, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -218,17 +216,16 @@ internal sealed class ExecutionService(
             return OperationResult.Failure<Guid>("Execution_Error_MinutesUsedUp");
         }
 
-        return OperationResult.With(
-            await QueueAsync(
-                    original.ProjectId,
-                    original.ScenarioId,
-                    original.Attempt + 1,
-                    original.RerunOf ?? original.Id,
-                    cancellationToken)
-                .ConfigureAwait(false));
+        return await QueueAsync(
+                original.ProjectId,
+                original.ScenarioId,
+                original.Attempt + 1,
+                original.RerunOf ?? original.Id,
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
-    private async Task<Guid> QueueAsync(
+    private async Task<OperationResult<Guid>> QueueAsync(
         Guid projectId,
         string scenarioId,
         int attempt,
@@ -236,6 +233,18 @@ internal sealed class ExecutionService(
         CancellationToken cancellationToken)
     {
         var organizationId = organizationContext.RequireOrganizationId();
+
+        // The rate limit is counted and the run added under the organization's lock, so parallel requests cannot
+        // both pass the count (ADR-0027).
+        await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+        await Usage.StartLimits.LockAsync(database, organizationId, cancellationToken).ConfigureAwait(false);
+
+        if (await Usage.StartLimits.RunStartsExceededAsync(
+                database, organizationId, currentUser.UserId, usage.CurrentValue, timeProvider.GetUtcNow(), cancellationToken)
+            .ConfigureAwait(false))
+        {
+            return OperationResult.Failure<Guid>("Execution_Error_TooManyStarts");
+        }
 
         // Numbered within the project, which is how people refer to a run out loud.
         var lastNumber = await database.TestRuns
@@ -254,13 +263,15 @@ internal sealed class ExecutionService(
             Attempt = attempt,
             RerunOf = rerunOf,
             QueuedAt = timeProvider.GetUtcNow(),
+            RequestedBy = currentUser.UserId,
         };
 
         database.TestRuns.Add(run);
         Record(AuditActions.RunStarted, run);
 
         await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        return run.Id;
+        await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+        return OperationResult.With(run.Id);
     }
 
     /// <summary>Whether the organization has used all of this month's browser minutes: the hard stop (ADR-0027).</summary>

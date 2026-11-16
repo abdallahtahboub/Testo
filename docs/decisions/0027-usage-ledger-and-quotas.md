@@ -76,3 +76,14 @@ catalog and per-run cost records are later milestones (3.7, 3.8, Phase D).
 
   The first two fail without the limit, and the next two without the cap on the reservation. The row lock is not
   provable that way: without it the race test makes a double claim likely, not certain.
+- **Step 4, rate limits:** `StartLimits` counts an organization's and a person's starts in the last minute
+  (runs now record `requested_by`), and an organization's proof tokens and checks, under the same organization
+  row lock, so parallel requests cannot pass the count. Refusals are `Execution_Error_TooManyStarts`, in English
+  and German. Defaults: 30 a minute per organization, 10 per person (`Usage:StartsPerOrganizationPerMinute`,
+  `Usage:StartsPerUserPerMinute`). Tests (`StartLimitsTests`):
+  - past the organization's limit is refused and queues nothing;
+  - a person past their own limit is refused while a colleague can still start;
+  - ten parallel starts against a limit of five queue exactly five;
+  - proofs past the limit are refused.
+
+  Without the check the first three fail; without the lock the parallel one fails.

@@ -657,11 +657,9 @@ namespace Autestiq.Persistence.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("name");
 
-                    b.Property<string>("Plan")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("character varying(40)")
-                        .HasColumnName("plan");
+                    b.Property<Guid>("PlanVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("plan_version_id");
 
                     b.Property<bool>("RequiresTwoFactor")
                         .HasColumnType("boolean")
@@ -695,6 +693,9 @@ namespace Autestiq.Persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_organizations");
+
+                    b.HasIndex("PlanVersionId")
+                        .HasDatabaseName("ix_organizations_plan_version_id");
 
                     b.HasIndex("Slug")
                         .IsUnique()
@@ -867,6 +868,191 @@ namespace Autestiq.Persistence.Migrations
                         .HasDatabaseName("ix_users_normalized_email");
 
                     b.ToTable("users");
+                });
+
+            modelBuilder.Entity("Autestiq.Domain.Plans.Plan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_plans");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_plans_code");
+
+                    b.ToTable("plans");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("01a1e500-0000-7000-8000-000000000001"),
+                            Code = "developer",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Developer",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("01a1e500-0000-7000-8000-000000000002"),
+                            Code = "starter",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Starter",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("01a1e500-0000-7000-8000-000000000003"),
+                            Code = "growth",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Growth",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("01a1e500-0000-7000-8000-000000000004"),
+                            Code = "scale",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Scale",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        });
+                });
+
+            modelBuilder.Entity("Autestiq.Domain.Plans.PlanVersion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("ConcurrentRuns")
+                        .HasColumnType("integer")
+                        .HasColumnName("concurrent_runs");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset>("EffectiveFrom")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("effective_from");
+
+                    b.Property<int?>("MaxProjects")
+                        .HasColumnType("integer")
+                        .HasColumnName("max_projects");
+
+                    b.Property<long>("MonthlyBrowserMinutes")
+                        .HasColumnType("bigint")
+                        .HasColumnName("monthly_browser_minutes");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("integer")
+                        .HasColumnName("number");
+
+                    b.Property<Guid>("PlanId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("plan_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_plan_versions");
+
+                    b.HasIndex("PlanId", "Number")
+                        .IsUnique()
+                        .HasDatabaseName("ix_plan_versions_plan_id_number");
+
+                    b.ToTable("plan_versions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("01a1e500-0000-7000-8000-000000000101"),
+                            ConcurrentRuns = 1,
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            EffectiveFrom = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            MaxProjects = 1,
+                            MonthlyBrowserMinutes = 100L,
+                            Number = 1,
+                            PlanId = new Guid("01a1e500-0000-7000-8000-000000000001"),
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("01a1e500-0000-7000-8000-000000000102"),
+                            ConcurrentRuns = 2,
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            EffectiveFrom = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            MaxProjects = 3,
+                            MonthlyBrowserMinutes = 500L,
+                            Number = 1,
+                            PlanId = new Guid("01a1e500-0000-7000-8000-000000000002"),
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("01a1e500-0000-7000-8000-000000000103"),
+                            ConcurrentRuns = 5,
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            EffectiveFrom = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            MaxProjects = 10,
+                            MonthlyBrowserMinutes = 2500L,
+                            Number = 1,
+                            PlanId = new Guid("01a1e500-0000-7000-8000-000000000003"),
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("01a1e500-0000-7000-8000-000000000104"),
+                            ConcurrentRuns = 10,
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            EffectiveFrom = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            MonthlyBrowserMinutes = 10000L,
+                            Number = 1,
+                            PlanId = new Guid("01a1e500-0000-7000-8000-000000000004"),
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        });
                 });
 
             modelBuilder.Entity("Autestiq.Domain.Projects.Project", b =>
@@ -1091,6 +1277,16 @@ namespace Autestiq.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Autestiq.Domain.Identity.Organization", b =>
+                {
+                    b.HasOne("Autestiq.Domain.Plans.PlanVersion", null)
+                        .WithMany()
+                        .HasForeignKey("PlanVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_organizations_plan_versions_plan_version_id");
+                });
+
             modelBuilder.Entity("Autestiq.Domain.Identity.PasswordReset", b =>
                 {
                     b.HasOne("Autestiq.Domain.Identity.User", "User")
@@ -1101,6 +1297,16 @@ namespace Autestiq.Persistence.Migrations
                         .HasConstraintName("fk_password_resets_users_user_id");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Autestiq.Domain.Plans.PlanVersion", b =>
+                {
+                    b.HasOne("Autestiq.Domain.Plans.Plan", null)
+                        .WithMany("Versions")
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_plan_versions_plans_plan_id");
                 });
 
             modelBuilder.Entity("Autestiq.Domain.Projects.Project", b =>
@@ -1126,6 +1332,11 @@ namespace Autestiq.Persistence.Migrations
             modelBuilder.Entity("Autestiq.Domain.Identity.User", b =>
                 {
                     b.Navigation("Memberships");
+                });
+
+            modelBuilder.Entity("Autestiq.Domain.Plans.Plan", b =>
+                {
+                    b.Navigation("Versions");
                 });
 #pragma warning restore 612, 618
         }

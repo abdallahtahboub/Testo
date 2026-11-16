@@ -200,7 +200,7 @@ public sealed class ContainerDispatcherTests : IAsyncLifetime
         });
 
         await using var services = _database.NewServices();
-        var dispatcher = new RunDispatcher(services.GetRequiredService<IServiceScopeFactory>(), options, ExecutionSupport.Usage(), TimeProvider.System, NullLogger<RunDispatcher>.Instance);
+        var dispatcher = new RunDispatcher(services.GetRequiredService<IServiceScopeFactory>(), options, TimeProvider.System, NullLogger<RunDispatcher>.Instance);
         var runId = await ExecutionSupport.RunAsync(_database, _organization, _project);
 
         await dispatcher.StartAsync(TestContext.Current.CancellationToken);

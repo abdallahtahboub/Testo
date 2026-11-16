@@ -276,7 +276,7 @@ internal sealed class ExecutionService(
 
     /// <summary>Whether the organization has used all of this month's browser minutes: the hard stop (ADR-0027).</summary>
     private async Task<bool> UsedUpAsync(Guid organizationId, CancellationToken cancellationToken) =>
-        (await RunDispatcher.RoomForAsync(database, organizationId, usage.CurrentValue, timeProvider.GetUtcNow(), cancellationToken).ConfigureAwait(false)).UsedUp;
+        (await RunDispatcher.RoomForAsync(database, organizationId, timeProvider.GetUtcNow(), cancellationToken).ConfigureAwait(false)).UsedUp;
 
     private void Record(string action, TestRun run) =>
         new AuditWriter(database, timeProvider).Record(

@@ -67,7 +67,7 @@ public sealed class TenantGuardInterceptor(
         if (entry.Entity is IAppendOnly && entry.State is EntityState.Modified or EntityState.Deleted)
         {
             throw new InvalidOperationException(
-                $"The {(entry.Entity is AuditEntry ? "audit log" : "usage ledger")} is append-only: an entry cannot be changed or deleted. "
+                $"The {(entry.Entity switch { AuditEntry => "audit log", Domain.Plans.PlanVersion => "plan catalog", _ => "usage ledger" })} is append-only: an entry cannot be changed or deleted. "
                 + "If an entry is wrong, write another one that says so.");
         }
     }

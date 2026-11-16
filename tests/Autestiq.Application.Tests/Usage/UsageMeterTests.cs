@@ -60,19 +60,4 @@ public class UsageMeterTests
         Assert.All(events, usage => Assert.True(usage.Billable));
         Assert.Equal(UsageMeter.ForRun(run, Result(RunStatus.Passed, 1), true, 0, Start)[0].IdempotencyKey, events[0].IdempotencyKey);
     }
-
-    [Theory]
-    [InlineData("trial", 100, 1)]
-    [InlineData("Starter", 500, 2)]
-    [InlineData("growth", 2_500, 5)]
-    [InlineData("scale", 10_000, 10)]
-    [InlineData("platinum-typo", 100, 1)]
-    [InlineData(null, 100, 1)]
-    public void For_APlanName_GivesItsLimits_AndAnUnknownNameTheSmallest(string? plan, long minutes, int concurrent)
-    {
-        var limit = new UsageOptions().For(plan);
-
-        Assert.Equal(minutes, limit.MonthlyBrowserMinutes);
-        Assert.Equal(concurrent, limit.ConcurrentRuns);
-    }
 }

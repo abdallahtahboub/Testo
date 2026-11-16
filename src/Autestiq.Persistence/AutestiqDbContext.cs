@@ -66,6 +66,12 @@ public class AutestiqDbContext(DbContextOptions<AutestiqDbContext> options, IOrg
     /// <summary>Executions of scenarios.</summary>
     public DbSet<TestRun> TestRuns => Set<TestRun>();
 
+    /// <summary>The plans customers can be on.</summary>
+    public DbSet<Domain.Plans.Plan> Plans => Set<Domain.Plans.Plan>();
+
+    /// <summary>What each plan allows, by version; never changed once written.</summary>
+    public DbSet<Domain.Plans.PlanVersion> PlanVersions => Set<Domain.Plans.PlanVersion>();
+
     /// <summary>The usage ledger: what each organization used, recorded once, never changed.</summary>
     public DbSet<UsageEvent> UsageEvents => Set<UsageEvent>();
 

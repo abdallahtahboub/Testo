@@ -326,6 +326,9 @@ public sealed class ExecutionOptions
     /// </summary>
     public TimeSpan LeaseTimeout { get; set; } = TimeSpan.FromMinutes(2);
 
+    /// <summary>How long a verified proof of origin control counts before the origin must be checked again.</summary>
+    public TimeSpan ProofValidity { get; set; } = TimeSpan.FromDays(30);
+
     /// <summary>How often a dispatcher looks for runs that lost theirs.</summary>
     public TimeSpan ReapInterval { get; set; } = TimeSpan.FromSeconds(30);
 

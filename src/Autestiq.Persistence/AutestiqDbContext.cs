@@ -65,6 +65,9 @@ public class AutestiqDbContext(DbContextOptions<AutestiqDbContext> options, IOrg
     /// <summary>Executions of scenarios.</summary>
     public DbSet<TestRun> TestRuns => Set<TestRun>();
 
+    /// <summary>Organizations' proofs that they control the origins they want tested.</summary>
+    public DbSet<OriginProof> OriginProofs => Set<OriginProof>();
+
     /// <summary>The steps of those executions.</summary>
     public DbSet<TestRunStep> TestRunSteps => Set<TestRunStep>();
 

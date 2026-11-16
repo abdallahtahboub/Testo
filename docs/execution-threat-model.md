@@ -111,6 +111,25 @@ on it from our IP range. We are then the attacker, with logs to prove it.
 record or a file we fetch at a well-known path, re-checked periodically. Milestone 3.3 sidesteps
 this entirely by shipping its own target, which is why it is safe to build first.
 
+**Built (Milestone 3.5, 2026-11-16), by file; the owner chose the file method first.**
+- An organization asks for a token for an origin (`IOriginProofService`), 256 random bits, one per
+  organization and origin. A second organization asking for the same origin gets a token of its own.
+- It publishes the token as `/.well-known/autestiq-verification.txt` on the origin and asks for a check.
+- **The application never fetches the file.** The check is queued, and a worker carries it out
+  (`WorkerTask.VerifyOrigin`) behind its egress proxy, with the origin as the only one allowed and none
+  trusted-local. So an origin that resolves to a private, loopback or metadata address is refused before
+  anything is fetched, which keeps the check itself from becoming a way to reach our own network.
+- A match verifies the proof for `Execution:ProofValidity` (30 days). After that the origin must be
+  checked again.
+- Before any run, the dispatcher refuses a target that is neither one of our configured origins nor
+  proved, unexpired, by the run's own organization. No worker is started; the run is cancelled with
+  the reason.
+- `OriginProofTests` (application and worker) cover each refusal, and the dispatcher test fails
+  without the check.
+
+**Not yet:** no screen asks for a token or shows a proof's state (that comes with projects and
+environments in Milestone 5), nothing re-checks a proof before it expires, and the DNS method is not built.
+
 ### 4.3 A hostile page talking to the model
 
 Once a model reads page content to decide what to do next, the page is in the prompt. A page can

@@ -34,6 +34,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<IInvitationService, InvitationService>();
         services.AddScoped<IAuditLog, AuditLog>();
         services.AddScoped<IExecutionService, ExecutionService>();
+        services.AddScoped<IOriginProofService, OriginProofService>();
 
         // Artifacts: a directory today, object storage when there is more than one machine
         // (ADR-0018). Keys begin with the organization either way.

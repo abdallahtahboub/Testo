@@ -54,8 +54,9 @@ public sealed class RunDispatcher(
                 }
 
                 var runId = await ClaimAsync(stoppingToken).ConfigureAwait(false);
+                var checkId = runId is null ? await ClaimProofCheckAsync(stoppingToken).ConfigureAwait(false) : null;
 
-                if (runId is null)
+                if (runId is null && checkId is null)
                 {
                     await Task.Delay(TimeSpan.FromMilliseconds(250), timeProvider, stoppingToken).ConfigureAwait(false);
                     continue;
@@ -63,7 +64,9 @@ public sealed class RunDispatcher(
 
                 await running.WaitAsync(stoppingToken).ConfigureAwait(false);
 
-                _ = CarryOutAsync(runId.Value, stoppingToken).ContinueWith(
+                var work = runId is { } run ? CarryOutAsync(run, stoppingToken) : CheckOriginAsync(checkId!.Value, stoppingToken); // one of the two is set: checked above.
+
+                _ = work.ContinueWith(
                     _ => running.Release(),
                     TaskScheduler.Default);
             }
@@ -195,7 +198,34 @@ public sealed class RunDispatcher(
             }
         }
 
-        return abandoned.Count;
+        // Checks too: a check whose dispatcher went quiet is a failed check, and can be asked for again.
+        var lostChecks = await database.OriginProofs
+            .IgnoreQueryFilters()
+            .Where(proof => proof.Status == OriginProofStatus.Checking && proof.CheckStartedAt < cutoff)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        foreach (var proof in lostChecks)
+        {
+            proof.Status = OriginProofStatus.Failed;
+            proof.CheckStartedAt = null;
+            proof.CheckedAt = now;
+            proof.FailureReason = "The check was lost: the dispatcher carrying it out stopped answering. Ask for it again.";
+
+            using (writeScope.AllowWritingTo(proof.OrganizationId))
+            {
+                try
+                {
+                    await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    database.ChangeTracker.Clear();
+                }
+            }
+        }
+
+        return abandoned.Count + lostChecks.Count;
     }
 
     /// <summary>Says that a run is still being carried out.</summary>
@@ -270,6 +300,13 @@ public sealed class RunDispatcher(
                 return;
             }
 
+            if (!await MayTargetAsync(database, run, options.CurrentValue, timeProvider.GetUtcNow(), stoppingToken).ConfigureAwait(false))
+            {
+                // Not ours, and not proved by the organization that asked: no worker is started at all.
+                await RefuseAsync(scope.ServiceProvider, run, stoppingToken).ConfigureAwait(false);
+                return;
+            }
+
             var job = JobFor(run, options.CurrentValue, workspace.FullName);
 
             var (result, stopped) = await RunWorkerAsync(job, run.OrganizationId, stoppingToken).ConfigureAwait(false);
@@ -304,6 +341,200 @@ public sealed class RunDispatcher(
             {
                 // The artifacts are already copied out; a leftover temp directory is not worth failing for.
             }
+        }
+    }
+
+    /// <summary>
+    /// Whether a run may be aimed at its target: one of our own configured origins, or an origin the run's own
+    /// organization has proved it controls, with a proof that has not expired. Another organization's proof of the
+    /// same origin counts for nothing.
+    /// </summary>
+    public static async Task<bool> MayTargetAsync(
+        AutestiqDbContext database,
+        TestRun run,
+        ExecutionOptions options,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(database);
+        ArgumentNullException.ThrowIfNull(run);
+        ArgumentNullException.ThrowIfNull(options);
+
+        if (Origins.Normalize(run.TargetOrigin) is not { } target)
+        {
+            return false;
+        }
+
+        if (options.TrustedLocalOrigins().Any(origin => Origins.Normalize(origin) == target))
+        {
+            return true;
+        }
+
+        // Across the filter, because the dispatcher has no organization of its own; held to the run's below.
+        var proof = await database.OriginProofs
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(candidate => candidate.OrganizationId == run.OrganizationId && candidate.Origin == target, cancellationToken)
+            .ConfigureAwait(false);
+
+        return proof is not null && proof.CountsAt(now);
+    }
+
+    private async Task RefuseAsync(IServiceProvider services, TestRun run, CancellationToken cancellationToken)
+    {
+        var database = services.GetRequiredService<AutestiqDbContext>();
+        var writeScope = services.GetRequiredService<TenantWriteScope>();
+
+        run.Status = RunStatus.Cancelled;
+        run.FailureReason = $"Refused: this organization has not proved that it controls {run.TargetOrigin}, or its proof has expired.";
+        run.FinishedAt = timeProvider.GetUtcNow();
+
+        using (writeScope.AllowWritingTo(run.OrganizationId))
+        {
+            await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        DispatcherLog.Refused(logger, run.Id);
+    }
+
+    /// <summary>Takes the next waiting proof check, so two dispatchers cannot take the same one.</summary>
+    private async Task<Guid?> ClaimProofCheckAsync(CancellationToken cancellationToken)
+    {
+        await using var scope = scopes.CreateAsyncScope();
+        var database = scope.ServiceProvider.GetRequiredService<AutestiqDbContext>();
+        var writeScope = scope.ServiceProvider.GetRequiredService<TenantWriteScope>();
+        var current = options.CurrentValue;
+
+        if (current.Paused)
+        {
+            return null;
+        }
+
+        var paused = current.PausedOrganizations.ToList();
+
+        // Across organizations, like the claim of a run, and written back under the one it belongs to.
+        var proof = await database.OriginProofs
+            .IgnoreQueryFilters()
+            .Where(candidate => candidate.Status == OriginProofStatus.Checking && candidate.CheckStartedAt == null)
+            .Where(candidate => !paused.Contains(candidate.OrganizationId))
+            .OrderBy(candidate => candidate.CheckRequestedAt)
+            .FirstOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        if (proof is null)
+        {
+            return null;
+        }
+
+        proof.CheckStartedAt = timeProvider.GetUtcNow();
+
+        try
+        {
+            using (writeScope.AllowWritingTo(proof.OrganizationId))
+            {
+                await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return null;
+        }
+
+        return proof.Id;
+    }
+
+    /// <summary>Has a worker check an origin's proof file, and writes back what it found.</summary>
+    private async Task CheckOriginAsync(Guid proofId, CancellationToken stoppingToken)
+    {
+        var workspace = Directory.CreateTempSubdirectory($"autestiq-proof-{proofId:N}-");
+
+        try
+        {
+            await using var scope = scopes.CreateAsyncScope();
+            var database = scope.ServiceProvider.GetRequiredService<AutestiqDbContext>();
+            var writeScope = scope.ServiceProvider.GetRequiredService<TenantWriteScope>();
+
+            var proof = await database.OriginProofs
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(candidate => candidate.Id == proofId, stoppingToken)
+                .ConfigureAwait(false);
+
+            if (proof is null)
+            {
+                return;
+            }
+
+            WorkerResult result;
+
+            try
+            {
+                (result, _) = await RunWorkerAsync(ProofJobFor(proof, workspace.FullName), proof.OrganizationId, stoppingToken).ConfigureAwait(false);
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                DispatcherLog.CheckFailed(logger, proofId, exception);
+                result = new WorkerResult(proofId, RunStatus.InfrastructureError, "The check could not be carried out.", timeProvider.GetUtcNow(), timeProvider.GetUtcNow(), [], 0);
+            }
+
+            ApplyProofResult(proof, result, timeProvider.GetUtcNow(), options.CurrentValue.ProofValidity);
+
+            using (writeScope.AllowWritingTo(proof.OrganizationId))
+            {
+                await database.SaveChangesAsync(stoppingToken).ConfigureAwait(false);
+            }
+        }
+        finally
+        {
+            try
+            {
+                workspace.Delete(recursive: true);
+            }
+            catch (IOException)
+            {
+                // Nothing in it is kept; a leftover temporary directory is not worth failing for.
+            }
+        }
+    }
+
+    /// <summary>
+    /// The job for checking an origin's proof. The origin is the one origin allowed and is never trusted-local, so
+    /// one that resolves to a private, loopback or metadata address is refused by the worker's proxy (R-11).
+    /// </summary>
+    public static WorkerJob ProofJobFor(OriginProof proof, string workspace)
+    {
+        ArgumentNullException.ThrowIfNull(proof);
+
+        return new WorkerJob(
+            proof.Id,
+            "verify-origin",
+            proof.Origin,
+            AllowedOrigins: [proof.Origin],
+            TrustedLocalOrigins: [],
+            new RunBudget(TimeSpan.FromSeconds(30), MaxSteps: 5, MaxBytesDownloaded: 1024 * 1024),
+            workspace,
+            WorkerTask.VerifyOrigin,
+            OriginProof: proof.Token);
+    }
+
+    /// <summary>What a worker's check means for the proof: verified for a while, or failed with the reason.</summary>
+    public static void ApplyProofResult(OriginProof proof, WorkerResult result, DateTimeOffset now, TimeSpan validity)
+    {
+        ArgumentNullException.ThrowIfNull(proof);
+        ArgumentNullException.ThrowIfNull(result);
+
+        proof.CheckedAt = now;
+        proof.CheckStartedAt = null;
+
+        if (result.RunId == proof.Id && result.Status == RunStatus.Passed)
+        {
+            proof.Status = OriginProofStatus.Verified;
+            proof.VerifiedAt = now;
+            proof.ExpiresAt = now + validity;
+            proof.FailureReason = null;
+        }
+        else
+        {
+            proof.Status = OriginProofStatus.Failed;
+            proof.FailureReason = result.RunId == proof.Id ? FirstLine(result.FailureReason ?? "The origin did not hold the token.") : "The worker answered about a different check.";
         }
     }
 
@@ -607,7 +838,13 @@ internal static partial class DispatcherLog
     [LoggerMessage(Level = LogLevel.Information, Message = "Run {RunId} was asked to stop.")]
     public static partial void Cancelling(ILogger logger, Guid runId);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Reaped {Count} run(s) whose dispatcher stopped answering.")]
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Run {RunId} was refused: its target is not proved.")]
+    public static partial void Refused(ILogger logger, Guid runId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "The check of proof {ProofId} could not be carried out.")]
+    public static partial void CheckFailed(ILogger logger, Guid proofId, Exception exception);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Reaped {Count} run(s) or check(s) whose dispatcher stopped answering.")]
     public static partial void Reaped(ILogger logger, int count);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Run {RunId} ended as {Status}.")]

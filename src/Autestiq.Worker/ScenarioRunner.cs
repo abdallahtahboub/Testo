@@ -87,6 +87,7 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
     {
         WorkerTask.Planned => job.Plan is { Count: > 0 } plan ? PlannedScenario.From(job, plan) : null,
         WorkerTask.Explore => ExploreScenario,
+        WorkerTask.VerifyOrigin => job.OriginProof is { Length: > 0 } proof ? OriginProofScenario.For(proof) : null,
         _ => DemoShopScenarios.Find(job.ScenarioId),
     };
 

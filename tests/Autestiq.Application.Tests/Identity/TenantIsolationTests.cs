@@ -95,6 +95,13 @@ public sealed class TenantIsolationTests : IAsyncLifetime
             ContentType = "image/png",
             CapturedAt = DateTimeOffset.UtcNow,
         },
+        [typeof(OriginProof)] = seed => new OriginProof
+        {
+            OrganizationId = seed.OrganizationId,
+            Origin = "https://shop.example:443",
+            Token = $"seed-{Guid.CreateVersion7():N}",
+            IssuedAt = DateTimeOffset.UtcNow,
+        },
     };
 
     /// <inheritdoc />

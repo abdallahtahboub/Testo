@@ -369,8 +369,7 @@ internal static partial class SiteExplorer
                     }
                 }
 
-                await target.ClickAsync(new LocatorClickOptions { Timeout = ActionTimeout }).ConfigureAwait(false);
-                await page.WaitForLoadStateAsync(LoadState.Load).ConfigureAwait(false);
+                await PressAndSettleAsync(page, target).ConfigureAwait(false);
             }
         }
         catch (Exception exception) when (exception is PlaywrightException or TimeoutException)
@@ -389,6 +388,53 @@ internal static partial class SiteExplorer
         }
 
         return new Visit(await LookAtAsync(page, here.PathAndQuery, described).ConfigureAwait(false), form);
+    }
+
+    /// <summary>
+    /// Presses a control and waits for what it leads to.
+    /// </summary>
+    /// <remarks>
+    /// The navigation is listened for before the click, not after it. Waiting for the page to be loaded once the
+    /// click has returned found the page from before the click still loaded, because the browser had not begun
+    /// the new navigation yet: on a quiet machine it began within a millisecond and the new page was read, and on
+    /// a busy one the old page was read or the read failed halfway. The same application was then described
+    /// differently from one run to the next. A control that leads nowhere costs <see cref="ActionTimeout"/>.
+    /// </remarks>
+    private static async Task PressAndSettleAsync(IPage page, ILocator target)
+    {
+        var navigated = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        void OnNavigated(object? sender, IFrame frame)
+        {
+            if (frame == page.MainFrame)
+            {
+                navigated.TrySetResult();
+            }
+        }
+
+        page.FrameNavigated += OnNavigated;
+
+        try
+        {
+            // A click that fails fails the visit, as before: only the wait for a navigation may time out quietly.
+            await target.ClickAsync(new LocatorClickOptions { Timeout = ActionTimeout }).ConfigureAwait(false);
+
+            try
+            {
+                await navigated.Task.WaitAsync(TimeSpan.FromMilliseconds(ActionTimeout), TimeProvider.System).ConfigureAwait(false);
+            }
+            catch (TimeoutException)
+            {
+                // Nothing navigated within the limit: the control changed the page in place, or did nothing, and the
+                // page as it now is is the one to read.
+            }
+        }
+        finally
+        {
+            page.FrameNavigated -= OnNavigated;
+        }
+
+        await page.WaitForLoadStateAsync(LoadState.Load).ConfigureAwait(false);
     }
 
     /// <summary>

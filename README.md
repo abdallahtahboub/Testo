@@ -56,8 +56,11 @@ dependency. The one piece of JavaScript is a small ES module for the static head
 
 You need the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) and a
 **PostgreSQL 16** to point it at. The product keeps accounts, organizations and roles in a
-database, so it will not start without one — and if it cannot reach the server it says which
-one it tried and how to get one running, rather than printing a connection error.
+database, so it will not start without one. If it cannot use the database it says which server
+it tried and which of three things went wrong, rather than printing a connection error: no
+server answered, the server answered but the database does not exist, or the server refused the
+user and password. The last one usually means another PostgreSQL already holds the port, with a
+password of its own.
 
 The quickest way to get one:
 
@@ -97,8 +100,10 @@ reports "No test projects were found".
 dotnet run --project src/Autestiq.Web
 ```
 
-On the first run in development it creates the schema and seeds an organization, so there is
-somebody to sign in as. The log says who:
+On the first run in development it creates the database (`autestiq_dev`, from
+`appsettings.Development.json`) if the server does not have it yet, applies the migrations and
+seeds an organization, so there is somebody to sign in as. Outside development a missing
+database is refused instead: creating one is the deployment's job. The log says who to sign in as:
 
 ```
 Seeded the development database with Northwind Software.

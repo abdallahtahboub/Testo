@@ -47,6 +47,36 @@ public class PlanPromptTests
         Assert.Contains("your plan types what the scenario calls for", system, StringComparison.Ordinal);
     }
 
+    /// <summary>The system prompt with every run of white space as one space, so a rule is found however it is wrapped.</summary>
+    private static string SystemOnOneLine => System.Text.RegularExpressions.Regex.Replace(PlanPrompt.System, @"\s+", " ");
+
+    [Fact]
+    public void System_PutsTheScenariosOrderAboveTheCrawlsRoute()
+    {
+        // The held-out run of 2026-11-16 passed a broken shop: the plan added the tea before the tray,
+        // copying the crawl's route, and in that order a "removes the first line" defect cannot show.
+        Assert.Contains("Do things in the order the description gives them.", SystemOnOneLine, StringComparison.Ordinal);
+        Assert.Contains("not the order the scenario wants: where the two differ, follow the scenario.", SystemOnOneLine, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void System_ForbidsChecksOnWhatNobodySaw_ButNotValuesThatFollowFromWhatWasShown()
+    {
+        // The booking run of 2026-11-16 failed a working clinic on an address the plan made up.
+        Assert.Contains("Do not add a check that it did not ask for on something no page shown to you contains", SystemOnOneLine, StringComparison.Ordinal);
+        Assert.Contains("such as a total from prices you were shown, are not guesses.", SystemOnOneLine, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void System_PartialIsAboutTheChecks_AndDoubtCountsAsACheck()
+    {
+        // Loosening "partial" is the direction a false pass would come from, so the rule that keeps it
+        // conservative is pinned beside the one that loosens it.
+        Assert.Contains("Partial is about the checks", SystemOnOneLine, StringComparison.Ordinal);
+        Assert.Contains("Whenever you are unsure whether something is a check, treat it as one.", SystemOnOneLine, StringComparison.Ordinal);
+        Assert.Contains("A partial plan that passes is reported as inconclusive, never as a pass", SystemOnOneLine, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void User_APageReachedByALink_SaysNothingAboutItsPath()
     {

@@ -28,7 +28,7 @@ namespace Autestiq.Application.Execution;
 /// </remarks>
 public sealed class RunDispatcher(
     IServiceScopeFactory scopes,
-    IOptions<ExecutionOptions> options,
+    IOptionsMonitor<ExecutionOptions> options,
     TimeProvider timeProvider,
     ILogger<RunDispatcher> logger)
     : BackgroundService
@@ -38,7 +38,7 @@ public sealed class RunDispatcher(
     /// <inheritdoc />
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var running = new SemaphoreSlim(options.Value.MaxConcurrentRuns);
+        using var running = new SemaphoreSlim(options.CurrentValue.MaxConcurrentRuns);
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -82,10 +82,7 @@ public sealed class RunDispatcher(
 
         // No request, so no organization: the dispatcher works across all of them by necessity and
         // writes back only to the one on the run it claimed.
-        var run = await database.TestRuns
-            .IgnoreQueryFilters()
-            .Where(candidate => candidate.Status == RunStatus.Queued && !candidate.CancellationRequested)
-            .OrderBy(candidate => candidate.QueuedAt)
+        var run = await Claimable(database.TestRuns.IgnoreQueryFilters(), options.CurrentValue)
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
 
@@ -113,6 +110,28 @@ public sealed class RunDispatcher(
         return run.Id;
     }
 
+    /// <summary>
+    /// The queued runs a dispatcher may take, oldest first. None while every organization is paused, and none of a
+    /// paused organization's: they stay queued until the switch is lifted.
+    /// </summary>
+    public static IQueryable<TestRun> Claimable(IQueryable<TestRun> runs, ExecutionOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(runs);
+        ArgumentNullException.ThrowIfNull(options);
+
+        if (options.Paused)
+        {
+            return runs.Where(_ => false);
+        }
+
+        var paused = options.PausedOrganizations.ToList();
+
+        return runs
+            .Where(candidate => candidate.Status == RunStatus.Queued && !candidate.CancellationRequested)
+            .Where(candidate => !paused.Contains(candidate.OrganizationId))
+            .OrderBy(candidate => candidate.QueuedAt);
+    }
+
     private async Task CarryOutAsync(Guid runId, CancellationToken stoppingToken)
     {
         var workspace = Directory.CreateTempSubdirectory($"autestiq-run-{runId:N}-");
@@ -132,9 +151,21 @@ public sealed class RunDispatcher(
                 return;
             }
 
-            var job = JobFor(run, options.Value, workspace.FullName);
+            var job = JobFor(run, options.CurrentValue, workspace.FullName);
 
-            var result = await RunWorkerAsync(job, runId, stoppingToken).ConfigureAwait(false);
+            var (result, stopped) = await RunWorkerAsync(job, run.OrganizationId, stoppingToken).ConfigureAwait(false);
+
+            if (stopped != Stop.None)
+            {
+                // Said on the run as it is written back: the copy loaded before the worker started knows nothing
+                // of a cancellation asked for since, and a paused run is stopped the same way.
+                run.CancellationRequested = true;
+
+                if (stopped == Stop.Paused)
+                {
+                    result = result with { FailureReason = "Stopped: runs were paused by an operator." };
+                }
+            }
 
             await IngestAsync(scope.ServiceProvider, run, result, workspace.FullName, stoppingToken)
                 .ConfigureAwait(false);
@@ -180,9 +211,10 @@ public sealed class RunDispatcher(
     }
 
     /// <summary>Launches the worker, feeds it the job, and waits for its result or a cancellation.</summary>
-    private async Task<WorkerResult> RunWorkerAsync(WorkerJob job, Guid runId, CancellationToken stoppingToken)
+    private async Task<(WorkerResult Result, Stop Stopped)> RunWorkerAsync(WorkerJob job, Guid organizationId, CancellationToken stoppingToken)
     {
-        var workerPath = options.Value.WorkerPath
+        var runId = job.RunId;
+        var workerPath = options.CurrentValue.WorkerPath
             ?? throw new InvalidOperationException(
                 $"No worker is configured. Set {ExecutionOptions.SectionName}:{nameof(ExecutionOptions.WorkerPath)} "
                 + "to the Autestiq.Worker executable.");
@@ -206,7 +238,7 @@ public sealed class RunDispatcher(
         var output = process.StandardOutput.ReadToEndAsync(stoppingToken);
         var errors = process.StandardError.ReadToEndAsync(stoppingToken);
 
-        await WaitOrCancelAsync(process, runId, stoppingToken).ConfigureAwait(false);
+        var stopped = await WaitOrStopAsync(process, runId, organizationId, stoppingToken).ConfigureAwait(false);
 
         var text = (await output.ConfigureAwait(false)).Trim();
 
@@ -214,26 +246,34 @@ public sealed class RunDispatcher(
         {
             var why = (await errors.ConfigureAwait(false)).Trim();
 
-            return new WorkerResult(
+            return (new WorkerResult(
                 job.RunId,
                 RunStatus.InfrastructureError,
                 why.Length > 0 ? FirstLine(why) : "The worker produced no result.",
                 timeProvider.GetUtcNow(),
                 timeProvider.GetUtcNow(),
                 [],
-                0);
+                0), stopped);
         }
 
-        return JsonSerializer.Deserialize<WorkerResult>(text, Wire)
-            ?? throw new JsonException("The worker's result could not be read.");
+        return (JsonSerializer.Deserialize<WorkerResult>(text, Wire)
+            ?? throw new JsonException("The worker's result could not be read."), stopped);
+    }
+
+    /// <summary>Why a worker was stopped before it finished.</summary>
+    private enum Stop
+    {
+        None,
+        Cancelled,
+        Paused,
     }
 
     /// <summary>
-    /// Waits for the worker, watching for somebody asking the run to stop. A stop kills the
-    /// process; the worker's own handler reports what it managed, and if it cannot, the result is
-    /// empty and becomes a cancellation here.
+    /// Waits for the worker, watching for somebody asking the run to stop, and for the kill switch. A stop kills
+    /// the process; the worker's own handler reports what it managed, and if it cannot, the result is empty and
+    /// becomes a cancellation here.
     /// </summary>
-    private async Task WaitOrCancelAsync(Process process, Guid runId, CancellationToken stoppingToken)
+    private async Task<Stop> WaitOrStopAsync(Process process, Guid runId, Guid organizationId, CancellationToken stoppingToken)
     {
         var finished = process.WaitForExitAsync(stoppingToken);
 
@@ -244,10 +284,15 @@ public sealed class RunDispatcher(
 
             if (completed == finished)
             {
-                return;
+                return Stop.None;
             }
 
-            if (await IsCancellationRequestedAsync(runId, stoppingToken).ConfigureAwait(false))
+            // The switch first: it is read from memory, and a paused run should not wait on a database round trip.
+            var stop = options.CurrentValue.IsPaused(organizationId) ? Stop.Paused
+                : await IsCancellationRequestedAsync(runId, stoppingToken).ConfigureAwait(false) ? Stop.Cancelled
+                : Stop.None;
+
+            if (stop != Stop.None)
             {
                 DispatcherLog.Cancelling(logger, runId);
 
@@ -261,9 +306,11 @@ public sealed class RunDispatcher(
                 }
 
                 await finished.ConfigureAwait(false);
-                return;
+                return stop;
             }
         }
+
+        return Stop.None;
     }
 
     private async Task<bool> IsCancellationRequestedAsync(Guid runId, CancellationToken cancellationToken)

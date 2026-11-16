@@ -130,6 +130,9 @@
   <data name="Execution_Error_NoSuchRun" xml:space="preserve">
     <value>Einen solchen Lauf gibt es nicht.</value>
   </data>
+  <data name="Execution_Error_Paused" xml:space="preserve">
+    <value>Testläufe sind gerade angehalten. Bitte versuchen Sie es später erneut.</value>
+  </data>
   <data name="Execution_Error_AlreadyFinished" xml:space="preserve">
     <value>Dieser Lauf ist bereits beendet.</value>
   </data>

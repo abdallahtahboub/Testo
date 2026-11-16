@@ -187,6 +187,14 @@ concurrent runs and monthly spend sit above that.
 **Partly built.** Wall clock, steps and bytes in Milestone 3.3; tokens and money in Milestone 3.4.
 The per-organization monthly limit waits for billing to exist (R-10).
 
+**Kill switch (Milestone 3.5, 2026-11-16).** Two settings, read live so that a change takes effect without a
+restart: `Execution:Paused` stops every organization, and `Execution:PausedOrganizations` (a list of
+organization ids) stops only those. While either applies, starting or re-running a run is refused with
+`Execution_Error_Paused`, the dispatcher claims none of that organization's queued runs (they stay queued
+until the switch is lifted), and a run already in progress is stopped within about a second and recorded as
+cancelled, with the reason. `KillSwitchTests` covers all three, including a real dispatcher stopping a real
+process.
+
 ### 4.8 Downloads
 
 A test that clicks "export" gets a file. A hostile page offers one unasked.

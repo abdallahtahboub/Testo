@@ -130,6 +130,9 @@
   <data name="Execution_Error_NoSuchRun" xml:space="preserve">
     <value>There is no such run.</value>
   </data>
+  <data name="Execution_Error_Paused" xml:space="preserve">
+    <value>Runs are paused at the moment. Please try again later.</value>
+  </data>
   <data name="Execution_Error_AlreadyFinished" xml:space="preserve">
     <value>That run has already finished.</value>
   </data>

@@ -19,7 +19,7 @@ namespace Autestiq.Application.Execution;
 internal sealed class ExecutionService(
     AutestiqDbContext database,
     ArtifactLinks links,
-    IOptions<ExecutionOptions> options,
+    IOptionsMonitor<ExecutionOptions> options,
     ICurrentUser currentUser,
     IOrganizationContext organizationContext,
     TimeProvider timeProvider)
@@ -138,6 +138,11 @@ internal sealed class ExecutionService(
             return OperationResult.Failure<Guid>("Execution_Error_NoSuchProject");
         }
 
+        if (options.CurrentValue.IsPaused(project.OrganizationId))
+        {
+            return OperationResult.Failure<Guid>("Execution_Error_Paused");
+        }
+
         return OperationResult.With(
             await QueueAsync(project.Id, scenarioId, attempt: 1, rerunOf: null, cancellationToken)
                 .ConfigureAwait(false));
@@ -197,6 +202,11 @@ internal sealed class ExecutionService(
             return OperationResult.Failure<Guid>("Execution_Error_NoSuchRun");
         }
 
+        if (options.CurrentValue.IsPaused(original.OrganizationId))
+        {
+            return OperationResult.Failure<Guid>("Execution_Error_Paused");
+        }
+
         return OperationResult.With(
             await QueueAsync(
                     original.ProjectId,
@@ -228,7 +238,7 @@ internal sealed class ExecutionService(
             ProjectId = projectId,
             Number = lastNumber + 1,
             ScenarioId = scenarioId,
-            TargetOrigin = options.Value.TargetOrigin,
+            TargetOrigin = options.CurrentValue.TargetOrigin,
             Status = RunStatus.Queued,
             Attempt = attempt,
             RerunOf = rerunOf,
@@ -294,6 +304,18 @@ public sealed class ExecutionOptions
 
     /// <summary>The origins a run may reach on loopback: <see cref="LocalOrigins"/>, or the configured target.</summary>
     public IReadOnlyList<string> TrustedLocalOrigins() => LocalOrigins.Count > 0 ? [.. LocalOrigins] : [TargetOrigin];
+
+    /// <summary>
+    /// The kill switch for every organization: no run starts, none is claimed, and running ones are stopped.
+    /// Read live, so changing the configuration takes effect without a restart.
+    /// </summary>
+    public bool Paused { get; set; }
+
+    /// <summary>The kill switch for some organizations only. The others carry on.</summary>
+    public List<Guid> PausedOrganizations { get; init; } = [];
+
+    /// <summary>Whether an organization's runs are stopped, by either switch.</summary>
+    public bool IsPaused(Guid organizationId) => Paused || PausedOrganizations.Contains(organizationId);
 
     /// <summary>Where the worker executable is, for the dispatcher to launch.</summary>
     public string? WorkerPath { get; set; }

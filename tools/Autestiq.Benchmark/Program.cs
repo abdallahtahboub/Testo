@@ -291,15 +291,28 @@ static IScenarioPlanner? Planner(BenchmarkOptions options)
         return RecordedPlanner.FromDirectory(options.RecordingDirectory ?? "", "recorded");
     }
 
+    var model = Environment.GetEnvironmentVariable("PLANNER__MODEL") ?? "claude-sonnet-5-5";
+
+    // The model's prices come from the price book's first version (ADR-0029), so that the benchmark's cost per plan and
+    // the product's cost rows use the same figures.
+    var prices = Autestiq.Domain.Costs.PriceCatalog.FirstPrices;
     var planner = new PlannerOptions
     {
         ApiKey = Environment.GetEnvironmentVariable("PLANNER__APIKEY"),
-        Model = Environment.GetEnvironmentVariable("PLANNER__MODEL") ?? "claude-sonnet-5-5",
+        Model = model,
+        InputCostPerMillion = prices.FirstOrDefault(price => price.Item == Autestiq.Domain.Costs.CostItems.ModelInputToken(model))?.Price,
+        OutputCostPerMillion = prices.FirstOrDefault(price => price.Item == Autestiq.Domain.Costs.CostItems.ModelOutputToken(model))?.Price,
     };
+
+    if (string.IsNullOrWhiteSpace(planner.ApiKey))
+    {
+        return null;
+    }
 
     if (!planner.IsConfigured)
     {
-        return null;
+        throw new InvalidOperationException(
+            $"The price book has no price for {model}, so its cost could not be counted. Use a model it prices, or publish its prices first.");
     }
 
     var client = new HttpClient { Timeout = planner.Timeout };

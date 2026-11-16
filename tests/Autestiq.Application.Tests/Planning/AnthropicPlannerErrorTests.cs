@@ -14,7 +14,7 @@ public class AnthropicPlannerErrorTests
     {
         using var handler = new FixedAnswer(status, body);
         using var client = new HttpClient(handler);
-        var planner = new AnthropicPlanner(client, new PlannerOptions { ApiKey = "test-key" }, TimeProvider.System);
+        var planner = new AnthropicPlanner(client, new PlannerOptions { ApiKey = "test-key", InputCostPerMillion = 2m, OutputCostPerMillion = 10m }, TimeProvider.System);
 
         return await planner.PlanAsync(
             PlanRequest.First("Check the basket", SiteSnapshot.Empty("http://127.0.0.1:5090"), [], maxActions: 10, maxTokens: 1000),
@@ -66,9 +66,30 @@ public class AnthropicPlannerErrorTests
         Assert.Equal([PlanningErrors.ProviderUnavailable], result.Errors);
     }
 
+    [Fact]
+    public async Task AKeyWithoutTheModelsPrices_IsNoPlanner_AndAsksNothing()
+    {
+        // Without prices the planning budget's cost limit cannot be kept (ADR-0029), so the planner must not spend.
+        using var handler = new FixedAnswer(HttpStatusCode.OK, "");
+        using var client = new HttpClient(handler);
+        var planner = new AnthropicPlanner(client, new PlannerOptions { ApiKey = "test-key" }, TimeProvider.System);
+
+        var result = await planner.PlanAsync(
+            PlanRequest.First("Check the basket", SiteSnapshot.Empty("http://127.0.0.1:5090"), [], maxActions: 10, maxTokens: 1000),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal([PlanningErrors.NoPlanner], result.Errors);
+        Assert.Equal(0, handler.Asked);
+    }
+
     private sealed class FixedAnswer(HttpStatusCode status, string body) : HttpMessageHandler
     {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) =>
-            Task.FromResult(new HttpResponseMessage(status) { Content = new StringContent(body) });
+        public int Asked { get; private set; }
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            Asked++;
+            return Task.FromResult(new HttpResponseMessage(status) { Content = new StringContent(body) });
+        }
     }
 }

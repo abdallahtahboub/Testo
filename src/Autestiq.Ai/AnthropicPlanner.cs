@@ -30,17 +30,23 @@ public sealed class PlannerOptions
     /// <summary>The provider's wire version.</summary>
     public string ApiVersion { get; set; } = "2023-06-01";
 
-    /// <summary>What a million input tokens costs, in US dollars, from the provider's price list.</summary>
-    public decimal InputCostPerMillion { get; set; } = 3.00m;
+    /// <summary>
+    /// What a million input tokens of <see cref="Model"/> cost, in US dollars. Taken from the price book (ADR-0029),
+    /// never written here: without it the planning budget's cost limit could not be kept, so there is no planner.
+    /// </summary>
+    public decimal? InputCostPerMillion { get; set; }
 
-    /// <summary>What a million output tokens costs, in US dollars.</summary>
-    public decimal OutputCostPerMillion { get; set; } = 15.00m;
+    /// <summary>What a million output tokens of <see cref="Model"/> cost, in US dollars, from the price book.</summary>
+    public decimal? OutputCostPerMillion { get; set; }
 
     /// <summary>How long to wait for an answer.</summary>
     public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(90);
 
-    /// <summary>Whether a key is configured at all, so a caller can say "no planner" rather than fail.</summary>
-    public bool IsConfigured => !string.IsNullOrWhiteSpace(ApiKey);
+    /// <summary>
+    /// Whether a key and the model's prices are configured, so a caller can say "no planner" rather than fail. A
+    /// planner whose cost cannot be counted is not configured.
+    /// </summary>
+    public bool IsConfigured => !string.IsNullOrWhiteSpace(ApiKey) && InputCostPerMillion is not null && OutputCostPerMillion is not null;
 }
 
 /// <summary>
@@ -175,7 +181,7 @@ public sealed class AnthropicPlanner(HttpClient client, PlannerOptions options, 
         input,
         output,
         Attempts: 1,
-        Cost: (input * options.InputCostPerMillion / 1_000_000m) + (output * options.OutputCostPerMillion / 1_000_000m),
+        Cost: (input * (options.InputCostPerMillion ?? 0m) / 1_000_000m) + (output * (options.OutputCostPerMillion ?? 0m) / 1_000_000m),
         Elapsed: timeProvider.GetElapsedTime(started));
 
     private sealed record Ask(

@@ -147,6 +147,52 @@ public class PlanValidatorTests
     }
 
     [Fact]
+    public void Review_ASelectWithNoOption_IsRefused()
+    {
+        // Choosing "something" from a list is not a step anybody can review or repeat.
+        var review = PlanValidator.Review(
+            Plan(
+                Goto("/"),
+                new PlannedAction(ActionKind.Select, "Choose a brand", ActionTarget.ByTestId("brand")),
+                new PlannedAction(ActionKind.AssertUrl, "Still on the catalogue", Path: "/")),
+            Shop,
+            maxActions: 20);
+
+        Assert.Contains(PlanningErrors.Incomplete, review.Errors);
+    }
+
+    [Fact]
+    public void Review_ASelectOfAListTheCrawlSaw_IsAllowed()
+    {
+        var withList = Shop with
+        {
+            Pages = [new PageSnapshot("/", "Catalogue", "Catalogue", [new SnapshotElement("combobox", "Brand", Text: "All | .NET")])],
+        };
+
+        var review = PlanValidator.Review(
+            Plan(
+                Goto("/"),
+                new PlannedAction(ActionKind.Select, "Choose .NET", ActionTarget.ByRole("combobox", "Brand"), Text: ".NET"),
+                new PlannedAction(ActionKind.AssertUrl, "Still on the catalogue", Path: "/")),
+            withList,
+            maxActions: 20);
+
+        Assert.Empty(review.Errors);
+    }
+
+    [Fact]
+    public void Review_ATextTargetMatchingAListsOptions_IsNotAMatch()
+    {
+        // A list's options are carried in its Text, and are not words the page shows as text.
+        var withList = Shop with
+        {
+            Pages = [new PageSnapshot("/", "Catalogue", "Catalogue", [new SnapshotElement("combobox", "Brand", Text: "All | .NET")])],
+        };
+
+        Assert.False(withList.Offers(ActionTarget.ByText("All | .NET")));
+    }
+
+    [Fact]
     public void Review_ARoleTargetWithNoRole_IsRefused()
     {
         var review = PlanValidator.Review(
@@ -246,5 +292,37 @@ public class PlanValidatorTests
     {
         Assert.Contains(PlanningErrors.Unreadable, PlanValidator.Review(null, Shop, 20).Errors);
         Assert.Contains(PlanningErrors.Unreadable, PlanValidator.Review(Plan(), Shop, 20).Errors);
+    }
+
+    [Fact]
+    public void Review_ATextTargetWithinAContainer_IsAllowed()
+    {
+        var review = PlanValidator.Review(
+            Plan(
+                Goto("/"),
+                new PlannedAction(ActionKind.Click, "Add the teapot", ActionTarget.ByRole("button", "Add to basket").InsideOf("Cast iron teapot")),
+                new PlannedAction(ActionKind.AssertVisible, "It costs £42.00", ActionTarget.ByText("£42.00"))),
+            Shop,
+            maxActions: 20);
+
+        Assert.True(review.Allowed);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Review_ATargetWhoseTextIsADocumentRatherThanAFewWords_IsRefused(bool inWithin)
+    {
+        // A name or a container's text is a few words a person can read. Two hundred characters is
+        // somewhere to hide something.
+        var long_ = new string('a', 201);
+        var target = inWithin ? ActionTarget.ByText("£42.00").InsideOf(long_) : ActionTarget.ByText(long_);
+
+        var review = PlanValidator.Review(
+            Plan(Goto("/"), new PlannedAction(ActionKind.AssertVisible, "Check it", target)),
+            Shop,
+            maxActions: 20);
+
+        Assert.Contains(PlanningErrors.UnknownTarget, review.Errors);
     }
 }

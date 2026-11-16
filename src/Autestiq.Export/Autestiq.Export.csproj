@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Writes validated plans out as test code in a customer's language (ADR-0023), by fixed templates.
+       Contracts only: an exporter reads a plan and writes text, and has no business with a browser, a
+       database or a model. -->
+
+  <ItemGroup>
+    <ProjectReference Include="../Autestiq.Contracts/Autestiq.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -130,7 +130,7 @@ public static class PlanJson
 
     private static PlannedAction? Convert(WireAction action)
     {
-        if (Kind(action.Kind) is not { } kind || string.IsNullOrWhiteSpace(action.Description))
+        if (KindForWord(action.Kind) is not { } kind || string.IsNullOrWhiteSpace(action.Description))
         {
             return null;
         }
@@ -156,8 +156,28 @@ public static class PlanJson
             Blank(action.SecretName));
     }
 
-    /// <summary>The nine words a plan may use for an action. Anything else is not a plan.</summary>
-    private static ActionKind? Kind(string? kind) => kind?.Trim().ToLowerInvariant() switch
+    /// <summary>The word a plan uses for an action: the inverse of <see cref="Kind"/>, for writing plans out.</summary>
+    /// <remarks>
+    /// Exhaustive on purpose. A new action without a word fails here, and the round-trip test fails
+    /// with it, rather than a recording crashing halfway through a paid benchmark run.
+    /// </remarks>
+    public static string Word(ActionKind kind) => kind switch
+    {
+        ActionKind.Goto => "goto",
+        ActionKind.Click => "click",
+        ActionKind.Type => "type",
+        ActionKind.Press => "press",
+        ActionKind.WaitFor => "waitfor",
+        ActionKind.AssertText => "asserttext",
+        ActionKind.AssertVisible => "assertvisible",
+        ActionKind.AssertNotVisible => "assertnotvisible",
+        ActionKind.AssertUrl => "asserturl",
+        ActionKind.Select => "select",
+        _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "There is no word for that action."),
+    };
+
+    /// <summary>The ten words a plan may use for an action. Anything else is not a plan.</summary>
+    public static ActionKind? KindForWord(string? kind) => kind?.Trim().ToLowerInvariant() switch
     {
         "goto" => ActionKind.Goto,
         "click" => ActionKind.Click,
@@ -168,6 +188,7 @@ public static class PlanJson
         "assertvisible" => ActionKind.AssertVisible,
         "assertnotvisible" => ActionKind.AssertNotVisible,
         "asserturl" => ActionKind.AssertUrl,
+        "select" => ActionKind.Select,
         _ => null,
     };
 
@@ -178,15 +199,23 @@ public static class PlanJson
             return null;
         }
 
-        return target.Kind?.Trim().ToLowerInvariant() switch
+        var converted = target.Kind?.Trim().ToLowerInvariant() switch
         {
             "testid" => ActionTarget.ByTestId(target.Value.Trim()),
 
             "roleandname" when !string.IsNullOrWhiteSpace(target.Role) =>
                 ActionTarget.ByRole(target.Role.Trim().ToLowerInvariant(), target.Value.Trim()),
 
+            // Exactly the text an element shows. Kept as written apart from the ends: the browser
+            // compares it with the page's own words, so it is never read as anything but text.
+            "text" => ActionTarget.ByText(target.Value.Trim()),
+
             _ => null,
         };
+
+        return converted is not null && !string.IsNullOrWhiteSpace(target.Within)
+            ? converted.InsideOf(target.Within.Trim())
+            : converted;
     }
 
     private static string? Blank(string? value) => string.IsNullOrWhiteSpace(value) ? null : value;
@@ -219,5 +248,5 @@ public static class PlanJson
         string? Text,
         [property: JsonPropertyName("secretName")] string? SecretName);
 
-    private sealed record WireTarget(string? Kind, string? Value, string? Role);
+    private sealed record WireTarget(string? Kind, string? Value, string? Role, string? Within);
 }

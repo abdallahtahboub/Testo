@@ -213,6 +213,9 @@ src/
   Autestiq.Ai               The planner: prompt, parsing, the provider adapter.
   Autestiq.Worker           Drives Chromium out of process, behind its own egress proxy.
   Autestiq.DemoShop         A small web shop with switchable defects, to run tests against.
+  Autestiq.BookingShop      A clinic booking site, the second application tests run against.
+  Autestiq.InvoiceDesk      An invoice desk, the third, built to measure on something new.
+  Autestiq.Export           Writes validated plans out as tests in a customer's language.
   Autestiq.Mocks            Deterministic in-memory data.
   Autestiq.Web              The host: composition root only.
 tools/

@@ -175,4 +175,40 @@ public class PlannedRunTests(DemoShopFixture shop)
         Assert.Equal(RunStatus.InfrastructureError, result.Status);
         Assert.Contains("carries none", result.FailureReason!, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public async Task APlanThatNamesElementsByWhatTheySay_Passes()
+    {
+        // ADR-0024. The demo shop has test ids, and this plan does not use one: four buttons all say "Add to
+        // basket", so the teapot's is named by the item it is in, and the result by its text.
+        PlannedAction[] plan =
+        [
+            new(ActionKind.Goto, "Open the catalogue", Path: "/"),
+            new(ActionKind.Click, "Add the teapot", ActionTarget.ByRole("button", "Add to basket").InsideOf("Cast iron teapot")),
+            new(ActionKind.AssertUrl, "The basket opens", Path: "/basket"),
+            new(ActionKind.AssertVisible, "The teapot is in it", ActionTarget.ByText("Cast iron teapot")),
+            new(ActionKind.AssertNotVisible, "The cup is not", ActionTarget.ByText("Porcelain cup")),
+        ];
+
+        var result = await Jobs.PlannedAsync(shop.Origin, plan);
+
+        Assert.Equal(RunStatus.Passed, result.Status);
+    }
+
+    [Fact]
+    public async Task APlanThatNamesARepeatWithoutSayingWhichOne_Fails_RatherThanPickingOne()
+    {
+        // Four buttons say "Add to basket". Without "within", the target is ambiguous, and an ambiguous
+        // target is a failed step, never a guess.
+        PlannedAction[] plan =
+        [
+            new(ActionKind.Goto, "Open the catalogue", Path: "/"),
+            new(ActionKind.Click, "Add something", ActionTarget.ByRole("button", "Add to basket")),
+            new(ActionKind.AssertUrl, "The basket opens", Path: "/basket"),
+        ];
+
+        var result = await Jobs.PlannedAsync(shop.Origin, plan);
+
+        Assert.Equal(RunStatus.Failed, result.Status);
+    }
 }

@@ -9,6 +9,26 @@ namespace Autestiq.Application.Tests.Planning;
 /// </summary>
 public class PlanJsonTests
 {
+    [Theory]
+    [MemberData(nameof(EveryActionKind))]
+    public void Word_RoundTripsThroughTheParser_ForEveryAction(ActionKind kind)
+    {
+        // A new action without a word, or a word the parser does not read, fails here before any
+        // recording is written or any model is paid for.
+        Assert.Equal(kind, PlanJson.KindForWord(PlanJson.Word(kind)));
+    }
+
+    public static TheoryData<ActionKind> EveryActionKind()
+    {
+        var data = new TheoryData<ActionKind>();
+        foreach (var kind in Enum.GetValues<ActionKind>())
+        {
+            data.Add(kind);
+        }
+
+        return data;
+    }
+
     [Fact]
     public void Read_AnOrdinaryAnswer_BecomesAPlan()
     {
@@ -223,5 +243,33 @@ public class PlanJsonTests
         Assert.NotNull(plan);
         Assert.Equal("password", plan.Actions[0].SecretName);
         Assert.Null(plan.Actions[0].Text);
+    }
+
+    [Fact]
+    public void Read_ATextTargetWithinAContainer_BecomesThatTarget()
+    {
+        // ADR-0024: an application without test ids is named by what it says, and a repeat by where it is.
+        var plan = PlanJson.Read(
+            """
+            { "actions": [
+              { "kind": "click", "description": "Add the teapot", "target": { "kind": "roleAndName", "role": "button", "value": "Add to basket", "within": "Cast iron teapot" } },
+              { "kind": "assertVisible", "description": "It costs £42.00", "target": { "kind": "text", "value": "£42.00" } }
+            ] }
+            """);
+
+        Assert.NotNull(plan);
+        Assert.Equal(ActionTarget.ByRole("button", "Add to basket").InsideOf("Cast iron teapot"), plan.Actions[0].Target);
+        Assert.Equal(ActionTarget.ByText("£42.00"), plan.Actions[1].Target);
+    }
+
+    [Fact]
+    public void Read_ABlankWithin_IsNoWithin()
+    {
+        var plan = PlanJson.Read(
+            """
+            { "actions": [ { "kind": "assertVisible", "description": "It is there", "target": { "kind": "text", "value": "£42.00", "within": "  " } } ] }
+            """);
+
+        Assert.Null(Assert.IsType<TestPlan>(plan).Actions[0].Target!.Within);
     }
 }

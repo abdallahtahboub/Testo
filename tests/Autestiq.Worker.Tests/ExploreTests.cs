@@ -8,6 +8,12 @@ namespace Autestiq.Worker.Tests;
 /// The crawl that describes an application before anything is planned against it. Deterministic on
 /// purpose: a plan is only reproducible if its input is (ADR-0019 §5).
 /// </summary>
+/// <remarks>
+/// In the collection that runs one at a time. The shop's defects are switched for the whole process,
+/// and a crawl made while another test has one switched on describes a different shop: comparing two
+/// crawls would then fail for a reason that has nothing to do with the crawl.
+/// </remarks>
+[Collection(Serially.Name)]
 public class ExploreTests(DemoShopFixture shop)
 {
     [Fact]

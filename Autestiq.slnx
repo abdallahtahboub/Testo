@@ -1,10 +1,13 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Autestiq.Ai/Autestiq.Ai.csproj" />
+    <Project Path="src/Autestiq.Export/Autestiq.Export.csproj" />
     <Project Path="src/Autestiq.Application/Autestiq.Application.csproj" />
     <Project Path="src/Autestiq.Capabilities.E2EWeb/Autestiq.Capabilities.E2EWeb.csproj" />
     <Project Path="src/Autestiq.Contracts/Autestiq.Contracts.csproj" />
     <Project Path="src/Autestiq.DemoShop/Autestiq.DemoShop.csproj" />
+    <Project Path="src/Autestiq.BookingShop/Autestiq.BookingShop.csproj" />
+    <Project Path="src/Autestiq.InvoiceDesk/Autestiq.InvoiceDesk.csproj" />
     <Project Path="src/Autestiq.Domain/Autestiq.Domain.csproj" />
     <Project Path="src/Autestiq.Mocks/Autestiq.Mocks.csproj" />
     <Project Path="src/Autestiq.Modules.Analysis/Autestiq.Modules.Analysis.csproj" />

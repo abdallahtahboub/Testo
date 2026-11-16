@@ -1,4 +1,5 @@
 using System.Text;
+using Autestiq.Ai;
 using Autestiq.Contracts.Planning;
 
 namespace Autestiq.Benchmark;
@@ -47,9 +48,14 @@ public static class PlanRecording
 
         if (action.Target is { } target)
         {
-            fields.Add(target.Kind == TargetKind.TestId
-                ? $"\"target\": {{ \"kind\": \"testId\", \"value\": {Quote(target.Value)} }}"
-                : $"\"target\": {{ \"kind\": \"roleAndName\", \"role\": {Quote(target.Role ?? "")}, \"value\": {Quote(target.Value)} }}");
+            var within = target.Within is { Length: > 0 } scope ? $", \"within\": {Quote(scope)}" : "";
+
+            fields.Add(target.Kind switch
+            {
+                TargetKind.TestId => $"\"target\": {{ \"kind\": \"testId\", \"value\": {Quote(target.Value)}{within} }}",
+                TargetKind.Text => $"\"target\": {{ \"kind\": \"text\", \"value\": {Quote(target.Value)}{within} }}",
+                _ => $"\"target\": {{ \"kind\": \"roleAndName\", \"role\": {Quote(target.Role ?? "")}, \"value\": {Quote(target.Value)}{within} }}",
+            });
         }
 
         if (action.Path is { } path)
@@ -70,19 +76,8 @@ public static class PlanRecording
         return "{ " + string.Join(", ", fields) + " }";
     }
 
-    /// <summary>The word a model writes for an action.</summary>
-    private static string Kind(ActionKind kind) => kind switch
-    {
-        ActionKind.Goto => "goto",
-        ActionKind.Click => "click",
-        ActionKind.Type => "type",
-        ActionKind.Press => "press",
-        ActionKind.WaitFor => "waitFor",
-        ActionKind.AssertText => "assertText",
-        ActionKind.AssertVisible => "assertVisible",
-        ActionKind.AssertUrl => "assertUrl",
-        _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "There is no word for that action."),
-    };
+    /// <summary>The word a model writes for an action, the same one the parser reads.</summary>
+    private static string Kind(ActionKind kind) => PlanJson.Word(kind);
 
     private static string Quote(string value) => System.Text.Json.JsonSerializer.Serialize(value);
 }

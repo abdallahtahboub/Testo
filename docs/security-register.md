@@ -236,7 +236,10 @@ using a model on input we did not write.
 **Bounded — [ADR-0019](decisions/0019-the-planner-boundary.md).** The model plans once, before the
 browser opens, so there is no prompt to inject into while a run is under way; its output is a closed
 vocabulary with no field in which a selector or a script could be written; and the plan is validated
-against what the crawl actually observed, so an invented target or a foreign origin is refused. The
+against what the crawl actually observed. A foreign origin is refused. An invented target is **not**
+refused: the validator only notes it, and the run goes ahead, so a guessed identifier reaches the
+browser. Found in the 2026-11-15 benchmark, where five plans acted on identifiers the crawl never saw
+(see `docs/ai-benchmark.md`). Closing that gap is part of the analysis work, not this register's claim.
 prompt also says the page content is data, which is advisory and recorded as such: the things that
 hold are the type, the validator and the proxy, none of which depend on the model behaving.
 
@@ -267,11 +270,16 @@ the blunt version.
 ### R-11 · The loopback exception would apply to a stored target — **Critical once customer targets exist**
 
 `EgressPolicy.Check` lets a loopback address through when the origin is in `TrustedLocalOrigins`
-(`src/Testo.Worker/Egress/EgressPolicy.cs`, the `isTrustedLocal && reach == Reach.Loopback` branch).
-`RunDispatcher` sets that list from the run's own `TargetOrigin` (`src/Testo.Application/Execution/RunDispatcher.cs:140`).
+(`src/Autestiq.Worker/Egress/EgressPolicy.cs`, the `isTrustedLocal && reach == Reach.Loopback` branch).
+`RunDispatcher` sets that list from the run's own `TargetOrigin` (`src/Autestiq.Application/Execution/RunDispatcher.cs:140`).
 Today `TargetOrigin` comes from configuration (`ExecutionService.cs:231,287`), so the exception only
 ever admits our demo target. The first customer-supplied URL would turn it into a route to whatever
 listens on the worker host's loopback interface.
+
+**It now guards a second thing.** Whether an exploration may press an application's controls and fill
+its forms is decided from the same list ([ADR-0022](decisions/0022-filling-forms-while-exploring.md)).
+The policy also requires a loopback address written as a number, so a customer's application on the
+internet is refused whatever the list says. A customer-supplied loopback address would pass both.
 
 **Fix before any customer target.** Trusted-local origins come from configuration only, never from a
 stored run. A regression test writes a loopback origin to a run row and expects a refusal.

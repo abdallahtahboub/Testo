@@ -41,6 +41,9 @@ public sealed record PlanReview(IReadOnlyList<string> Errors, IReadOnlyList<stri
 public static class PlanValidator
 {
     /// <summary>Judges a plan against the schema, the budget and the application as it was found.</summary>
+    /// <summary>How long a target's name, text, or the text it is looked for within, may be.</summary>
+    private const int MaxTargetText = 200;
+
     public static PlanReview Review(TestPlan? plan, SiteSnapshot site, int maxActions)
     {
         ArgumentNullException.ThrowIfNull(site);
@@ -120,6 +123,7 @@ public static class PlanValidator
 
             case ActionKind.Press:
             case ActionKind.AssertText:
+            case ActionKind.Select:
                 if (action.Text is null or "")
                 {
                     yield return PlanningErrors.Incomplete;
@@ -187,6 +191,13 @@ public static class PlanValidator
         if (target.Kind == TargetKind.RoleAndName && string.IsNullOrWhiteSpace(target.Role))
         {
             yield return PlanningErrors.Incomplete;
+        }
+
+        // A name, a text or the text a target is looked for within is a few words a person can read, never a
+        // document. A long one is somewhere to hide something, so it is refused (ADR-0024).
+        if (target.Value.Length > MaxTargetText || target.Within is { Length: > MaxTargetText })
+        {
+            yield return PlanningErrors.UnknownTarget;
         }
     }
 

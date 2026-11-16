@@ -2,7 +2,7 @@ using Autestiq.DemoShop;
 
 // A deliberately small web shop for test runs to act on.
 //
-// It is not a demo of Autestiq. It is the thing Autestiq points at, and it exists so that execution
+// It is not a demo of Autestiq. It is the thing Autestiq points at, and it exists so that execution can
 // be built and measured without aiming a browser at anybody else's website
 // (docs/execution-threat-model.md §4.2).
 //

@@ -185,10 +185,15 @@ public sealed class EgressProxy : IAsyncDisposable
     }
 
     /// <summary>
-    /// Resolves, asks the policy about every address, and returns the one address to connect to.
-    /// Nothing resolves again afterwards.
+    /// Resolves, asks the policy about every address, and returns the addresses to connect to, in the order the
+    /// name gave them. Nothing resolves again afterwards.
     /// </summary>
-    private async Task<IPAddress?> ApproveAsync(string host, int port, string scheme)
+    /// <remarks>
+    /// All of them, not the first: the policy allows a name only when every address it resolves to is allowed, so
+    /// any of them is as approved as the others. "localhost" resolves to ::1 before 127.0.0.1 on many machines,
+    /// and an application listening on IPv4 alone refused the first and was never tried on the second.
+    /// </remarks>
+    private async Task<IPAddress[]?> ApproveAsync(string host, int port, string scheme)
     {
         IPAddress[] addresses;
 
@@ -211,7 +216,7 @@ public sealed class EgressProxy : IAsyncDisposable
             return null;
         }
 
-        return addresses[0];
+        return addresses;
     }
 
     private static async Task RefuseAsync(NetworkStream browser) =>

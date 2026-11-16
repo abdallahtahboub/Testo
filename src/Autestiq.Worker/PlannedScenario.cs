@@ -55,36 +55,43 @@ internal static class PlannedScenario
                 break;
 
             case ActionKind.Click:
-                await Locate(page, action).ClickAsync().ConfigureAwait(false);
+                await (await LocateAsync(page, action).ConfigureAwait(false)).ClickAsync().ConfigureAwait(false);
                 break;
 
             case ActionKind.Type:
-                await Locate(page, action).FillAsync(TextToType(action, secrets)).ConfigureAwait(false);
+                await (await LocateAsync(page, action).ConfigureAwait(false)).FillAsync(TextToType(action, secrets)).ConfigureAwait(false);
                 break;
 
             case ActionKind.Press:
-                await Locate(page, action).PressAsync(Required(action.Text, action)).ConfigureAwait(false);
+                await (await LocateAsync(page, action).ConfigureAwait(false)).PressAsync(Required(action.Text, action)).ConfigureAwait(false);
+                break;
+
+            case ActionKind.Select:
+                // By the option's label, the words the crawl read and the plan copied; never by a value.
+                await (await LocateAsync(page, action).ConfigureAwait(false))
+                    .SelectOptionAsync(new SelectOptionValue { Label = Required(action.Text, action) })
+                    .ConfigureAwait(false);
                 break;
 
             case ActionKind.WaitFor:
-                await Locate(page, action).WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Attached })
+                await (await LocateAsync(page, action).ConfigureAwait(false)).WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Attached })
                     .ConfigureAwait(false);
                 break;
 
             case ActionKind.AssertText:
-                await Assertions.Expect(Locate(page, action))
+                await Assertions.Expect(await LocateAsync(page, action).ConfigureAwait(false))
                     .ToHaveTextAsync(Required(action.Text, action))
                     .ConfigureAwait(false);
                 break;
 
             case ActionKind.AssertVisible:
-                await Assertions.Expect(Locate(page, action)).ToBeVisibleAsync().ConfigureAwait(false);
+                await Assertions.Expect(await LocateAsync(page, action).ConfigureAwait(false)).ToBeVisibleAsync().ConfigureAwait(false);
                 break;
 
             case ActionKind.AssertNotVisible:
                 // A waiting assertion, like the others: "not there" has to mean "not there once the
                 // page has settled", or every absence passes on a page that has not finished.
-                await Assertions.Expect(Locate(page, action)).ToBeHiddenAsync().ConfigureAwait(false);
+                await Assertions.Expect(await LocateAsync(page, action).ConfigureAwait(false)).ToBeHiddenAsync().ConfigureAwait(false);
                 break;
 
             case ActionKind.AssertUrl:
@@ -120,41 +127,11 @@ internal static class PlannedScenario
             : throw new PlaywrightException($"This run was not given a value called '{name}'.");
     }
 
-    /// <summary>
-    /// A target becomes a locator. Two shapes, both of which Playwright has a first-class way to
-    /// express, so nothing is concatenated into a selector.
-    /// </summary>
-    private static ILocator Locate(IPage page, PlannedAction action)
-    {
-        var target = action.Target
-            ?? throw new PlaywrightException($"The step '{action.Description}' does not say what to act on.");
-
-        return target.Kind switch
-        {
-            TargetKind.TestId => page.GetByTestId(target.Value),
-
-            TargetKind.RoleAndName => page.GetByRole(
-                Role(target.Role),
-                new PageGetByRoleOptions { Name = target.Value, Exact = false }),
-
-            _ => throw new PlaywrightException($"The step '{action.Description}' names its target in a way this worker does not know."),
-        };
-    }
-
-    /// <summary>
-    /// The roles a plan may name. A closed list again: an unknown role is a refusal, not a guess.
-    /// </summary>
-    private static AriaRole Role(string? role) => role?.ToLowerInvariant() switch
-    {
-        "button" => AriaRole.Button,
-        "link" => AriaRole.Link,
-        "textbox" => AriaRole.Textbox,
-        "checkbox" => AriaRole.Checkbox,
-        "radio" => AriaRole.Radio,
-        "combobox" => AriaRole.Combobox,
-        "heading" => AriaRole.Heading,
-        _ => throw new PlaywrightException($"'{role}' is not a role a plan may name."),
-    };
+    /// <summary>A target becomes a locator, in the one place that decides how (<see cref="Targets"/>).</summary>
+    private static Task<ILocator> LocateAsync(IPage page, PlannedAction action) =>
+        Targets.LocateForStepAsync(
+            page,
+            action.Target ?? throw new PlaywrightException($"The step '{action.Description}' does not say what to act on."));
 
     private static string Required(string? value, PlannedAction action) =>
         value is { Length: > 0 }

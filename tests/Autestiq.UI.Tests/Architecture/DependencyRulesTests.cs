@@ -13,8 +13,11 @@ public class DependencyRulesTests
     private const string Persistence = "Autestiq.Persistence";
     private const string Application = "Autestiq.Application";
     private const string Ai = "Autestiq.Ai";
+    private const string Export = "Autestiq.Export";
     private const string Worker = "Autestiq.Worker";
     private const string DemoShop = "Autestiq.DemoShop";
+    private const string BookingShop = "Autestiq.BookingShop";
+    private const string InvoiceDesk = "Autestiq.InvoiceDesk";
     private const string Platform = "Autestiq.Platform";
     private const string UiShared = "Autestiq.UI.Shared";
     private const string Host = "Autestiq.Web";
@@ -30,11 +33,21 @@ public class DependencyRulesTests
         // The provider adapters. Contracts only, so that swapping provider cannot reach into the
         // use cases and a wire format cannot leak out of here (ADR-0019 §4).
         (Ai, [Contracts]),
+
+        // Writes plans out as test code by fixed templates (ADR-0023). It reads a plan and writes text.
+        (Export, [Contracts]),
         (Worker, [Contracts]),
 
         // Not part of the product: the application the execution slice runs against, so that a
         // browser is never pointed at anybody else's website to build it (ADR-0018).
         (DemoShop, []),
+
+        // The second application the held-out benchmark measures against. A target, like the first.
+        (BookingShop, []),
+
+        // The third, built after the explorer's rules were settled, so that it can be measured on an
+        // application those rules were not worked out on.
+        (InvoiceDesk, []),
         (Platform, [Contracts]),
         (UiShared, [Contracts, Platform]),
         ("Autestiq.Website", [Contracts, Platform, UiShared]),

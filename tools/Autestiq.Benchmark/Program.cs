@@ -1,3 +1,5 @@
+using Autestiq.Contracts.Execution;
+using Autestiq.Worker;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
@@ -24,18 +26,159 @@ using Autestiq.DemoShop;
 
 var options = BenchmarkOptions.From(args);
 
-using var shop = DemoShopHost.Start();
-var origin = shop.Origin;
+// Three targets, each run in this process so that its state and its defects are set from here: the demo
+// shop (the first application), the booking clinic (the second) and the invoice desk (the third, built
+// after the explorer's rules were settled).
+// --without-test-ids serves the target with its test ids removed, to see what the product makes of an
+// application that has none, as most do.
+var withoutTestIds = args.Contains("--without-test-ids", StringComparer.Ordinal);
 
-Console.WriteLine($"The demo shop is at {origin}.");
+Action<WebApplication> map = options.Target switch
+{
+    "booking" => app => Autestiq.BookingShop.BookingShopRoutes.Map(app),
+    "invoices" => app => Autestiq.InvoiceDesk.InvoiceDeskRoutes.Map(app),
+    _ => app => DemoShopRoutes.Map(app),
+};
+
+// eShopOnWeb (Microsoft's sample, ADR-0024) is not ours: it runs on its own, and --origin says where. It has no
+// test ids and no defect switches, so it measures planning on a sound application nobody here wrote.
+var external = options.Target == "eshop"
+    ? BenchmarkOptions.Value(args, "--origin") ?? "http://127.0.0.1:5106"
+    : null;
+
+using var host = external is null ? InProcessHost.Start(map, withoutTestIds) : null;
+var origin = external ?? host!.Origin; // host is started exactly when there is no external origin.
+
+Console.WriteLine(options.Target switch
+{
+    "booking" => $"The booking clinic is at {origin}.",
+    "invoices" => $"The invoice desk is at {origin}.",
+    "eshop" => $"eShopOnWeb is expected at {origin}; it is started separately.",
+    _ => $"The demo shop is at {origin}.",
+});
 
 if (options.SelfCheck)
 {
     return await SelfCheck.RunAsync(origin) ? 0 : 1;
 }
 
+// The clinic and the desk keep their state on the server, so anything that explores or runs against
+// them puts them back first.
+Func<Task>? startAfresh = options.Target switch
+{
+    "booking" => () =>
+    {
+        Autestiq.BookingShop.Clinic.Reset();
+        return Task.CompletedTask;
+    },
+    "invoices" => () =>
+    {
+        Autestiq.InvoiceDesk.Ledger.Reset();
+        return Task.CompletedTask;
+    },
+    _ => null,
+};
+
+Func<IReadOnlyList<string>, bool> setDefects = options.Target switch
+{
+    "booking" => names => Autestiq.BookingShop.Defects.Set(names),
+    "invoices" => names => Autestiq.InvoiceDesk.Defects.Set(names),
+    "eshop" => names => names.Count == 0,
+    _ => names => Autestiq.DemoShop.Defects.Set(names),
+};
+
+IReadOnlyList<BenchmarkScenario> targetScenarios = options.Target switch
+{
+    "booking" => BookingScenarios.All,
+    "invoices" => InvoiceScenarios.All,
+    "eshop" => EshopScenarios.All,
+    _ => options.HeldOut ? HeldOutScenarios.All : BenchmarkScenarios.All,
+};
+
+// How much of what the baseline plans need the exploration shows: no key, nothing spent.
+if (args.Contains("--coverage", StringComparer.Ordinal))
+{
+    var (snapshot, said) = await Coverage.ExploreAsync(origin, startAfresh);
+    Console.WriteLine(said);
+
+    if (withoutTestIds)
+    {
+        // The baselines name elements by test id, which this copy has lost. A second copy, with them,
+        // says what each test id is: its role, its name, its text. The question is whether the copy without
+        // them still shows that element.
+        using var reference = InProcessHost.Start(map, withoutTestIds: false);
+        var (withIds, _) = await Coverage.ExploreAsync(reference.Origin, startAfresh);
+        Coverage.PrintWithoutTestIds(targetScenarios, snapshot, withIds, Console.Out);
+    }
+    else
+    {
+        Coverage.Print(targetScenarios, snapshot, Console.Out);
+    }
+
+    return 0;
+}
+
+// ADR-0023 §4: every baseline exported to Python, run by pytest with each defect off and on, must give the plan's
+// verdict. --python names the interpreter that has pytest-playwright installed.
+if (BenchmarkOptions.Value(args, "--export-check") is { } language)
+{
+    if (!string.Equals(language, "python", StringComparison.OrdinalIgnoreCase))
+    {
+        Console.WriteLine($"There is no exporter for '{language}'. Built so far: python.");
+        return 2;
+    }
+
+    return await ExportCheck.RunAsync(
+        origin,
+        targetScenarios,
+        setDefects,
+        startAfresh,
+        BenchmarkOptions.Value(args, "--python") ?? "python3",
+        Console.Out) ? 0 : 1;
+}
+
+// What the exploration sees of the target, printed, with no planner and nothing spent. The way to check
+// the crawl against an application without a key.
+if (args.Contains("--explore", StringComparer.Ordinal))
+{
+    var (snapshot, said) = await Coverage.ExploreAsync(origin, startAfresh);
+    Console.WriteLine(said);
+
+    foreach (var page in snapshot.Pages)
+    {
+        var route = page.ReachedBy is { Count: > 0 } steps ? string.Join(" > ", steps) : "(by link)";
+        Console.WriteLine($"  {page.Path,-48} {route}  [{page.Elements.Count} elements]");
+    }
+
+    // What a plan could name (ADR-0019, ADR-0024): by test id; else by role and name, or by exact text,
+    // when that is unique on its page or the element carries the text of the container it is in.
+    var all = snapshot.Pages.SelectMany(page => page.Elements.Select(element => (page, element))).ToList();
+
+    // Settled by the crawl against the page, element by element (NamedBy).
+    var byTestId = all.Count(item => item.element.NamedBy == TargetKind.TestId);
+    var byRole = all.Count(item => item.element.NamedBy == TargetKind.RoleAndName);
+    var byText = all.Count(item => item.element.NamedBy == TargetKind.Text);
+
+    Console.WriteLine($"Elements described: {all.Count}. A plan could name {byTestId} by test id, {byRole} by role and name, "
+        + $"{byText} by text; {all.Count - byTestId - byRole - byText} not at all.");
+
+    // What nothing reaches reliably, so that it can be looked at: where a test id would help most.
+    foreach (var (page, element) in all.Where(item => item.element.NamedBy is null).Take(25))
+    {
+        Console.WriteLine($"    not reachable: {page.Path} {element.Role} \"{element.Name}\"" + (element.Within is { } w ? $" within \"{w}\"" : ""));
+    }
+
+    return 0;
+}
+
 var planner = Planner(options);
-var scenarios = options.Smoke ? [BenchmarkScenarios.All[0]] : BenchmarkScenarios.All;
+// The held-out set is measured once, against the frozen scenarios and baselines (HeldOutScenarios).
+IReadOnlyList<BenchmarkScenario> scenarios = targetScenarios;
+
+if (options.Smoke && options.Target == "demo" && !options.HeldOut)
+{
+    scenarios = [BenchmarkScenarios.All[0]];
+}
 
 Console.WriteLine(planner is null
     ? "No planner: measuring the baseline only."
@@ -59,6 +202,8 @@ var clock = System.Diagnostics.Stopwatch.StartNew();
 var harness = new Harness(origin, planner, options.Repetitions, options.RecordingDirectory)
 {
     Say = Console.WriteLine,
+    SetDefects = setDefects,
+    ResetTarget = startAfresh,
     Measured = measurement =>
     {
         // The reason, not just "no plan". Somebody watching lines scroll past should not have to
@@ -74,15 +219,28 @@ var harness = new Harness(origin, planner, options.Repetitions, options.Recordin
         Console.WriteLine(
             $"  {measurement.Scenario.Id,-34} defect={(measurement.DefectOn ? "on " : "off")} "
             + $"{measurement.Source,-18} {outcome}{cost}");
+
+        // Why a run that did not pass did not pass. A failure that is only a missing element looks the
+        // same as a failure to find the defect, and only the reason tells them apart.
+        if (measurement.Attempts.Count > 0
+            && measurement.Attempts[0].Status != RunStatus.Passed
+            && measurement.Attempts[0].Reason is { Length: > 0 } reason)
+        {
+            Console.WriteLine($"      because: {reason.Split('\n')[0]}");
+        }
     },
 };
 
-using var stopping = new CancellationTokenSource(TimeSpan.FromMinutes(options.Smoke ? 5 : 60));
+using var stopping = new CancellationTokenSource(TimeSpan.FromMinutes(options.Smoke ? 5 : 180));
 var measurements = await harness.RunAsync(scenarios, stopping.Token);
 
 Console.WriteLine($"\nFinished in {clock.Elapsed.TotalMinutes:0.0} minutes.");
 
-var report = Report.Write(measurements, options.Repetitions, DateTimeOffset.UtcNow);
+var report = Report.Write(
+    measurements,
+    options.Repetitions,
+    DateTimeOffset.UtcNow,
+    external is null ? "an application of our own" : "eShopOnWeb, Microsoft's sample shop, which nobody here wrote");
 
 if (options.Smoke)
 {
@@ -112,6 +270,8 @@ static string Explain(string error) => error switch
     PlanningErrors.ProviderRefusedTheKey =>
         "the provider refused the key (401 or 403): it is wrong, truncated, expired or revoked",
     PlanningErrors.ProviderUnavailable => "the provider could not be reached",
+    PlanningErrors.ProviderOutOfCredit => "the provider account is out of credit: the run is incomplete, not failed",
+    PlanningErrors.ProviderRateLimited => "the provider asked for fewer requests (429): wait and run again",
     PlanningErrors.NoPlanner => "no planner is configured",
     PlanningErrors.Unreadable => "the answer was not a plan",
     PlanningErrors.ForeignOrigin => "the plan named somewhere other than the shop",
@@ -154,7 +314,9 @@ internal sealed record BenchmarkOptions(
     int Repetitions,
     string ReportPath,
     string? RecordingDirectory,
-    bool FailOnFalsePositive)
+    bool FailOnFalsePositive,
+    bool HeldOut,
+    string Target)
 {
     /// <summary>Reads the arguments. Plain switches; this is a tool, not a product.</summary>
     public static BenchmarkOptions From(string[] args)
@@ -173,16 +335,28 @@ internal sealed record BenchmarkOptions(
             recorded,
             args.Contains("--self-check", StringComparer.Ordinal),
             repetitions,
-            Value(args, "--report") ?? Path.Combine(root, "docs", "ai-benchmark.md"),
+            // The held-out run has its own report, so that it can never overwrite the first one.
+            Value(args, "--report")
+                ?? Path.Combine(root, "docs", ReportFileName(args)),
 
             // Where a run against a provider writes its answers, so that a later --recorded run
             // can replay them for nothing. Nothing is committed here yet and CI does not replay
             // them: it runs --self-check only.
             Value(args, "--recordings") ?? Path.Combine(root, "tools", "Autestiq.Benchmark", "recordings"),
-            args.Contains("--fail-on-false-positive", StringComparer.Ordinal));
+            args.Contains("--fail-on-false-positive", StringComparer.Ordinal),
+            args.Contains("--held-out", StringComparer.Ordinal),
+            Value(args, "--target") ?? "demo");
     }
 
-    private static string? Value(string[] args, string name)
+    /// <summary>Each target and each set has its own report, so no run can overwrite another's.</summary>
+    private static string ReportFileName(string[] args) =>
+        Value(args, "--target") == "booking" ? "ai-benchmark-booking.md"
+        : Value(args, "--target") == "invoices" ? "ai-benchmark-invoices.md"
+        : Value(args, "--target") == "eshop" ? "ai-benchmark-eshop.md"
+        : args.Contains("--held-out", StringComparer.Ordinal) ? "ai-benchmark-held-out.md"
+        : "ai-benchmark.md";
+
+    internal static string? Value(string[] args, string name)
     {
         var index = Array.IndexOf(args, name);
         return index >= 0 && index + 1 < args.Length ? args[index + 1] : null;
@@ -203,43 +377,3 @@ internal sealed record BenchmarkOptions(
     }
 }
 
-/// <summary>The demo shop, started in this process on a port of its own.</summary>
-internal sealed class DemoShopHost : IDisposable
-{
-    private readonly WebApplication _app;
-
-    private DemoShopHost(WebApplication app, string origin)
-    {
-        _app = app;
-        Origin = origin;
-    }
-
-    /// <summary>Where it is listening.</summary>
-    public string Origin { get; }
-
-    /// <summary>
-    /// Starts it. The shop's own <c>Program</c> is an executable, so the benchmark builds the same
-    /// routes through its public helpers rather than shelling out to it.
-    /// </summary>
-    public static DemoShopHost Start()
-    {
-        var builder = WebApplication.CreateSlimBuilder();
-        builder.WebHost.UseUrls("http://127.0.0.1:0");
-        builder.Logging.ClearProviders();
-
-        var app = builder.Build();
-        DemoShopRoutes.Map(app);
-        app.StartAsync().GetAwaiter().GetResult();
-
-        var addresses = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()
-            ?? throw new InvalidOperationException("The shop does not report its address.");
-
-        return new DemoShopHost(app, addresses.Addresses.First().TrimEnd('/'));
-    }
-
-    public void Dispose()
-    {
-        _app.StopAsync().GetAwaiter().GetResult();
-        ((IDisposable)_app).Dispose();
-    }
-}

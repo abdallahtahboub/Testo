@@ -13,6 +13,10 @@
 
     <!-- The target the slice runs against. A test project may reference it; it references nothing. -->
     <ProjectReference Include="..\..\src\Autestiq.DemoShop\Autestiq.DemoShop.csproj" />
+
+    <!-- The second target. Under an alias: each target has a Program class of its own, and without
+         one the demo shop's fixture could not say which it means. -->
+    <ProjectReference Include="..\..\src\Autestiq.BookingShop\Autestiq.BookingShop.csproj" Aliases="clinic" />
   </ItemGroup>
 
   <!-- Browser tests are heavy. Two at a time keeps them from being killed for want of memory,

@@ -47,6 +47,17 @@ public enum WorkerTask
 /// The values this one run may type, by name, so that a plan can say "type the password" without
 /// containing one. Never logged, never put in a step's message, and masked out of screenshots.
 /// </param>
+/// <param name="ExploreStates">
+/// For <see cref="WorkerTask.Explore"/>: press the application's own controls and describe what each
+/// path reaches. Off unless the caller asks, because pressing controls on somebody else's application
+/// is an action on it, and only a target we have chosen to exercise may have it.
+/// </param>
+/// <param name="SubmitForms">
+/// For <see cref="WorkerTask.Explore"/> with <see cref="ExploreStates"/>: also submit forms, typing fixed
+/// test values into them first. Honoured only for a target this job names as trusted-local, which is how
+/// the benchmark marks the applications it runs itself. A customer's application never has it
+/// (<c>ExplorationPolicy</c>), whatever the job asks for.
+/// </param>
 public sealed record WorkerJob(
     Guid RunId,
     string ScenarioId,
@@ -57,7 +68,9 @@ public sealed record WorkerJob(
     string ArtifactDirectory,
     WorkerTask Task = WorkerTask.Scripted,
     IReadOnlyList<PlannedAction>? Plan = null,
-    IReadOnlyDictionary<string, string>? Secrets = null);
+    IReadOnlyDictionary<string, string>? Secrets = null,
+    bool ExploreStates = false,
+    bool SubmitForms = false);
 
 /// <summary>What a run may spend. Exceeding any one of these ends the run with a status that says which.</summary>
 /// <param name="WallClock">How long the whole run may take.</param>

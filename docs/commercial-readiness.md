@@ -1,10 +1,9 @@
 # Commercial readiness
 
-> Status: **Proposal, not accepted.** Written 2026-11-15 from the founder directive (Phase A to
-> Phase E), against commit `5f6179d` on `claude/exciting-mayer-gzv57w`. Every claim below cites
-> code or a document in this repository. Items that were not checked are marked **Not verified**.
-> Nothing here changes code. The roadmap insertions in §6 wait for the owner's approval, as
-> `CLAUDE.md` requires at each milestone boundary.
+> Status: **§6 accepted by the owner on 2026-11-15**; the product name and the first-customer details
+> remain open (§9). Written 2026-11-15 from the founder directive (Phase A to Phase E), against commit
+> `5f6179d`. Every claim below cites code or a document in this repository. Items that were not checked
+> are marked **Not verified**.
 
 The directive's test for every decision is one question: does it protect customer safety, security,
 execution correctness, or cost control before it adds anything else? The current order of work in
@@ -27,20 +26,20 @@ This session did not run the test suite; the counts below come from grep and the
 
 | Capability | Evidence |
 |---|---|
-| Organizations, memberships, invitations, roles, permission matrix | `src/Testo.Domain/Identity/`, `src/Testo.Application/Identity/`, `tests/Testo.Application.Tests/Identity/PermissionMatrixTests.cs` |
+| Organizations, memberships, invitations, roles, permission matrix | `src/Autestiq.Domain/Identity/`, `src/Autestiq.Application/Identity/`, `tests/Autestiq.Application.Tests/Identity/PermissionMatrixTests.cs` |
 | Tenant isolation at the query layer | `IBelongsToOrganization` on entities; query filter and save guard. Two of three layers are the database's own (ADR-0012) |
 | Sign-in is required on app pages | D-1 fixed in Milestone 3.1 ([`security-register.md`](security-register.md)) |
 | Cross-tenant tenant-id trust, tokens in logs, rate limiting on sign-in | D-2, D-3, D-4 fixed in Milestone 3.1, each with a test that fails without the fix |
-| Append-only audit entries, enforced through EF | `src/Testo.Domain/Audit/AuditEntry.cs`, `TenantGuardInterceptor`. Raw SQL can still rewrite it (R-4) |
-| Test runs: queue, claim with optimistic concurrency, cancel that survives restart | `src/Testo.Application/Execution/RunDispatcher.cs`, `test_runs` table (R-2) |
-| Worker out of process, default-deny egress proxy, judged per resolved address | `src/Testo.Worker/Egress/EgressPolicy.cs`, 45 tests in `tests/Testo.Worker.Tests/Egress` (R-1) |
-| Artifact links: signed, expiring, tenant-filtered | `src/Testo.Application/Execution/ArtifactLinks.cs`, `ExecutionIsolationTests`, `ArtifactAccessTests` (R-3) |
-| Planner boundary: model plans once, closed vocabulary, validator | `src/Testo.Ai/`, `src/Testo.Application/Planning/`, ADR-0019 |
+| Append-only audit entries, enforced through EF | `src/Autestiq.Domain/Audit/AuditEntry.cs`, `TenantGuardInterceptor`. Raw SQL can still rewrite it (R-4) |
+| Test runs: queue, claim with optimistic concurrency, cancel that survives restart | `src/Autestiq.Application/Execution/RunDispatcher.cs`, `test_runs` table (R-2) |
+| Worker out of process, default-deny egress proxy, judged per resolved address | `src/Autestiq.Worker/Egress/EgressPolicy.cs`, 45 tests in `tests/Autestiq.Worker.Tests/Egress` (R-1) |
+| Artifact links: signed, expiring, tenant-filtered | `src/Autestiq.Application/Execution/ArtifactLinks.cs`, `ExecutionIsolationTests`, `ArtifactAccessTests` (R-3) |
+| Planner boundary: model plans once, closed vocabulary, validator | `src/Autestiq.Ai/`, `src/Autestiq.Application/Planning/`, ADR-0019 |
 | Per-run token and money ceilings ending as `BudgetExceeded` | ADR-0019 §6 |
-| Planner cost arithmetic per call | `src/Testo.Ai/AnthropicPlanner.cs:144-148` |
-| Measured planner benchmark with a self-check | `tools/Testo.Benchmark`, CI step "Check the benchmark can catch a planner that only pretends" (`.github/workflows/ci.yml`) |
+| Planner cost arithmetic per call | `src/Autestiq.Ai/AnthropicPlanner.cs:144-148` |
+| Measured planner benchmark with a self-check | `tools/Autestiq.Benchmark`, CI step "Check the benchmark can catch a planner that only pretends" (`.github/workflows/ci.yml`) |
 | CI: build with warnings as errors, all tests against PostgreSQL 16, Playwright browser tests | `.github/workflows/ci.yml` |
-| Public website, 29 routes, EN and DE, labeled placeholders | `src/Testo.Website/`, Milestone 4 in [`roadmap.md`](roadmap.md) |
+| Public website, 29 routes, EN and DE, labeled placeholders | `src/Autestiq.Website/`, Milestone 4 in [`roadmap.md`](roadmap.md) |
 
 Approximate size: about 525 `[Fact]`/`[Theory]` attributes across `tests/` (grep count, not a run).
 
@@ -48,7 +47,7 @@ Approximate size: about 525 `[Fact]`/`[Theory]` attributes across `tests/` (grep
 
 | Capability | What exists | What is missing |
 |---|---|---|
-| Plans and entitlements | `Organization.Plan` is a free string, default `"trial"` (`src/Testo.Domain/Identity/Organization.cs:20`) | No catalog, no versions, no limits. Nothing reads `Plan` except persistence (grep `\.Plan\b`) |
+| Plans and entitlements | `Organization.Plan` is a free string, default `"trial"` (`src/Autestiq.Domain/Identity/Organization.cs:20`) | No catalog, no versions, no limits. Nothing reads `Plan` except persistence (grep `\.Plan\b`) |
 | Concurrency control | `MaxConcurrentRuns = 2` in `ExecutionService.cs:293`, enforced by a per-process `SemaphoreSlim` in `RunDispatcher` | Not per organization. Not across processes. No tenant-level cap |
 | Cost control | Per-run planner budget (ADR-0019 §6); per-call cost computed | No per-organization spend limit (R-10). Prices are hard-coded options (`AnthropicPlanner.cs:34,37`), not a price version. No usage record |
 | Artifact storage | `IArtifactStore` with a local directory (`FileSystemArtifactStore`), one folder per organization and run | Object storage, retention, redaction (R-3). No deletion job exists (grep for purge or retention found nothing) |
@@ -56,7 +55,7 @@ Approximate size: about 525 `[Fact]`/`[Theory]` attributes across `tests/` (grep
 | Rate limiting | `AccountRateLimiting` on sign-in | Forwarded-address handling behind a proxy (R-8). Not on run starts or planner calls |
 | Organization data region | `Organization.DataRegion`, chosen at creation (`Organization.cs:14-17`) | Not enforced in routing or storage. No second region exists |
 | Two-factor | `Organization.RequiresTwoFactor` flag | Authenticator enrollment deferred (roadmap inventory) |
-| Projects | `Project` entity with `KeyPrefix` and `Status` (`src/Testo.Domain/Projects/Project.cs`) | No service, no UI, no project-scoped quota |
+| Projects | `Project` entity with `KeyPrefix` and `Status` (`src/Autestiq.Domain/Projects/Project.cs`) | No service, no UI, no project-scoped quota |
 | Email | Invitation and reset links are written to the log outside development (D-3 fixed by refusing to start that way in production) | Email delivery is deferred. Customers cannot yet be onboarded without an operator |
 
 ### Missing
@@ -76,7 +75,7 @@ Approximate size: about 525 `[Fact]`/`[Theory]` attributes across `tests/` (grep
   §5). Not built. Currently moot because `TargetOrigin` comes from configuration
   (`ExecutionService.cs:231,287`).
 - **Container per run.** Required before any browser runs against a customer target (R-1). Not built.
-- **GitHub and CI integration.** None. No API for CI (`tools/` lists `Testo.Api` as planned only).
+- **GitHub and CI integration.** None. No API for CI (`tools/` lists `Autestiq.Api` as planned only).
 - **Usage and quota dashboard for customers.** None.
 - **Product analytics.** None. Activation, retention and conversion cannot be measured yet.
 - **Autonomous exploration and self-healing.** Not built. The planner exists only as a measured
@@ -157,7 +156,7 @@ impact are judgements, not measurements.
 
 | Directive risk | Severity | Probability (now) | Business impact | Current mitigation | Missing mitigation | Required action | Verification |
 |---|---|---|---|---|---|---|---|
-| 01 AI produces unreliable results | Critical | **Certain**, measured: 7 of 12 false negatives | Trust collapse | Benchmark; closed vocabulary; validator; `Inconclusive` for partial plans | Re-measurement after four fixes; confidence only from data | Re-run benchmark with a model key (developer machine); publish result beside baseline | `tools/Testo.Benchmark` self-check in CI; published rates |
+| 01 AI produces unreliable results | Critical | **Certain**, measured: 7 of 12 false negatives | Trust collapse | Benchmark; closed vocabulary; validator; `Inconclusive` for partial plans | Re-measurement after four fixes; confidence only from data | Re-run benchmark with a model key (developer machine); publish result beside baseline | `tools/Autestiq.Benchmark` self-check in CI; published rates |
 | 02 Tenant leakage | Critical | Low given current scope (demo target only) | Existential | Query filter; save guard; D-1, D-2 fixed; isolation tests against PostgreSQL | No cross-tenant test for worker and artifact paths in a second org beyond the current set; no fuzz | Add second-organization adversarial tests to each new path | `ExecutionIsolationTests`, `ArtifactAccessTests` extended per path |
 | 03 Uncontrolled cost | Critical | High once paid plans exist | Loss per customer | Per-run budget; concurrency of 2 per process | G4 kill switch; G6–G8 ledger, quota, reservation; R-10 | Gaps G4, G6, G7, G8, G14 | Concurrency and quota tests with parallel starts |
 | 04 Unsafe autonomous actions and injection | Critical | Medium once customer targets exist | Customer data, abuse of our address | Default-deny egress; no selectors as code; prompt injection test; worker has no database or credentials | G1 proof of origin; G2 loopback; G3 container per run | Gates in execution-threat-model §5 | Egress tests; container tests; G2 regression test |
@@ -287,17 +286,56 @@ No checklist item is a claim about compliance. Items 14 and 15 need documents an
 
 These change what the next milestone should be, so they are questions rather than assumptions:
 
-1. **Product name.** Keep *Testo* as the working name, or switch to *Autestiq*? A rename is mechanical; the
-   timing is the decision.
-2. **Accept §6.** Insert 3.5 and 3.6 before Milestone 5? This is the only change that alters current
-   order.
+1. **Product name. Decided 2026-11-15: *Autestiq*, adopted on the owner's decision, with clearance
+   incomplete.** The rename is done on this branch: the product, namespaces, projects and paths now say
+   Autestiq, and the GitHub repository is still named Testo. What was checked, and what was not:
+   - **Checked:** one EUIPO search for the exact term *Autestiq*, with no trademarks found. The search
+     mode and Nice classes were not recorded, so this does not show that classes 9 and 42, software
+     and testing services, were covered.
+   - **Not checked:** DPMA (Germany, where the first customers are likely to be), USPTO, similar-sound
+     search on EUIPO, and any registration for the Grazitti product *AutoTestIQ*.
+   - **Unresolved conflict:** AutoTestIQ is one letter away and in the same category. Buyers may confuse
+     the two, and a trademark attorney's opinion is still recommended before the product is sold under
+     this name.
+
+   Earlier findings (2026-11-15), kept for the record: *Testo* is a registered trademark of Testo SE & Co. KGaA for measuring apparatus, in
+   the same test-and-measurement space, so it was a poor choice. *Autestiq* has no exact match, but it is
+   one letter from **AutoTestIQ** (Grazitti), a live AI software-testing product in the same category,
+   and it is close to **AutonomIQ**, another autonomous-testing company. A clearance search was needed
+   before the rename.
+   (2026-11-15): *Testo* is a registered trademark of Testo SE & Co. KGaA for measuring apparatus, in
+   the same test-and-measurement space, so it is a poor choice. *Autestiq* has no exact match, but it is
+   one letter from **AutoTestIQ** (Grazitti), a live AI software-testing product in the same category,
+   and it is close to **AutonomIQ**, another autonomous-testing company. A clearance search is needed
+   before the rename. Until then, nothing is renamed.
+
+   **Check run 2026-11-15, not a clearance.** Web search found no registration for *Autestiq* on
+   USPTO, EUIPO or DPMA results, though the tool does not query EUIPO or DPMA directly, so this is not
+   conclusive. No DNS record for autestiq.com, .io, .de or .ai (an unregistered domain and an
+   unpublished one look the same from here). No GitHub user, organization or repository with the name.
+   Near marks found: AUTOTECHIQ (pending, automotive repair information, 2022–2023), AUTOTEQ (pending,
+   2025), AUTOIQ and AUTHENIQ. No registration found for the Grazitti product *AutoTestIQ*; whether it is
+   registered is unknown, and an unregistered product name can still be protected in use. Judgement:
+   AutoTestIQ is the same category as ours, so the conflict is real for buyers even before a legal
+   question. Recommend a trademark attorney's clearance opinion before any name is adopted.
+2. **Accept §6.** **Accepted 2026-11-15.** Recorded in [`roadmap.md`](roadmap.md) under Order of work.
 3. **Pilot scope.** Which first design partner, and do they accept a demo target only, or do they need
    their own staging URL soon? A staging URL makes G1 to G3 urgent.
-4. **Billable failures.** Directive §7 asks us to define them. Proposed default, pending approval:
-   a run that fails because of the target, the test, or the customer's own configuration is billable; a
-   run that fails because of our infrastructure, the proxy, a worker crash or a planner outage is not.
+4. **Billable failures. Decided 2026-11-15: option B.** Runs that reach the customer's application are billable; our proxy, worker and planner failures are not. The owner first confirmed both A and B, which exclude each other, and then chose B when asked. Options considered:
+   - **A. Bill every started run** (simplest, what most per-minute test services do). Customers pay for
+     what they started, and our own faults are the cost of doing business. Risk: a customer disputes a
+     bill for our outage.
+   - **B. Bill only runs that reached the target** (recommended). A run counts once the browser reaches
+     the customer's application. Failures of the target, the test, or the customer's configuration are
+     billable. Failures from our proxy, worker crash, or planner outage are not. Risk: needs a clear
+     "reached" definition and the ledger to record it, which 3.6 builds.
+   - **C. Bill only passing runs.** Rejected: it rewards tests that never reach a verdict and makes
+     failures free, which invites abuse.
+   Recommendation: B. It is what the ledger in 3.6 can actually measure, and it is the easiest to
+   explain on an invoice. Needs the owner's decision before 3.6 begins.
 5. **Retention periods.** 90 days for screenshots is the ADR-0018 figure. Confirm before any real customer data.
-6. **Billing provider.** Stripe Billing in test mode is the proposed candidate. Confirm before an ADR is written.
+6. **Billing provider. Confirmed 2026-11-15:** Stripe Billing, test mode only. An ADR must be written
+   before any code calls it, and no live charges until the security and financial-correctness gates pass.
 7. **Data region.** Which region for the first customers? `DataRegion` exists but only one value is in use.
 8. **Model re-run.** Who will run the planner benchmark with a model key, and when?
 

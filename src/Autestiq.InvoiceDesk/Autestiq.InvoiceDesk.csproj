@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!-- The third application the benchmark measures against (ADR-0020): a small business's invoice desk.
+       Built after the explorer's rules were settled, so that it can be measured on an application those
+       rules were not worked out on. A target, not part of the product: it references nothing of ours. -->
+
+</Project>

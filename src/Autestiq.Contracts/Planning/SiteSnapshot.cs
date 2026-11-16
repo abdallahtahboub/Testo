@@ -10,19 +10,40 @@ namespace Autestiq.Contracts.Planning;
 /// <param name="Role">Its ARIA role: <c>button</c>, <c>link</c>, <c>textbox</c>, <c>heading</c>.</param>
 /// <param name="Name">Its accessible name — what a person would call it.</param>
 /// <param name="TestId">Its <c>data-testid</c>, when it has one. The stable way to name it.</param>
-/// <param name="Text">What it reads, trimmed, when that is not already its name.</param>
-public sealed record SnapshotElement(string Role, string Name, string? TestId = null, string? Text = null);
+/// <param name="Text">What it reads, trimmed, when that is not already its name. For a list (combobox), its option labels, separated by " | ".</param>
+/// <param name="Within">
+/// When other elements on the page share its role and name, the text of the row, item, form or section it
+/// sits in, which is how a target tells it apart (ADR-0024). Absent when the element is unique.
+/// </param>
+/// <param name="NamedBy">
+/// How a plan should name it: the first of test id, role and name, or exact text, that the browser confirmed
+/// finds this element and no other, with <see cref="Within"/> when that was needed. Null when nothing does,
+/// and then a plan cannot name it reliably (ADR-0024).
+/// </param>
+public sealed record SnapshotElement(
+    string Role,
+    string Name,
+    string? TestId = null,
+    string? Text = null,
+    string? Within = null,
+    TargetKind? NamedBy = null);
 
 /// <summary>One page as a deterministic crawl found it.</summary>
 /// <param name="Path">The path within the origin, such as <c>/basket</c>.</param>
 /// <param name="Title">The page's title.</param>
 /// <param name="Heading">Its one <c>h1</c>, when it has one.</param>
 /// <param name="Elements">What is on it that a plan could act on or check.</param>
+/// <param name="ReachedBy">
+/// The actions that led here from the start page, when the crawl acted on the application rather
+/// than only reading it: for example <c>click add-pot</c>, then <c>click to-catalogue</c>. Empty for
+/// a page the crawl reached by following a link.
+/// </param>
 public sealed record PageSnapshot(
     string Path,
     string Title,
     string? Heading,
-    IReadOnlyList<SnapshotElement> Elements);
+    IReadOnlyList<SnapshotElement> Elements,
+    IReadOnlyList<string>? ReachedBy = null);
 
 /// <summary>
 /// The application as a crawl found it: the pages that were reachable, and what is on each.
@@ -81,8 +102,19 @@ public sealed record SiteSnapshot(string Origin, IReadOnlyList<PageSnapshot> Pag
         // A name is what a person reads, so it is compared the way a person would.
         TargetKind.RoleAndName =>
             string.Equals(element.Role, target.Role, StringComparison.OrdinalIgnoreCase)
-            && string.Equals(element.Name, target.Value, StringComparison.OrdinalIgnoreCase),
+            && string.Equals(element.Name, target.Value, StringComparison.OrdinalIgnoreCase)
+            && WithinMatches(element, target),
+
+        // A list's Text is its options, not words the page shows as text.
+        TargetKind.Text =>
+            element.Role != "combobox"
+            && string.Equals(element.Text ?? element.Name, target.Value, StringComparison.Ordinal)
+            && WithinMatches(element, target),
 
         _ => false,
     };
+
+    private static bool WithinMatches(SnapshotElement element, ActionTarget target) =>
+        target.Within is not { Length: > 0 } within
+        || string.Equals(element.Within, within, StringComparison.OrdinalIgnoreCase);
 }

@@ -20,6 +20,17 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
     /// <summary>Where the browser is, when the container puts it somewhere Playwright would not look.</summary>
     public const string BrowserPathVariable = "AUTESTIQ_BROWSER_PATH";
 
+    /// <summary>
+    /// Puts the target back to its starting state. Called before every visit an exploration makes to
+    /// press something, so that no visit inherits what an earlier one did.
+    /// </summary>
+    /// <remarks>
+    /// Only a caller in the same process as the target can supply one, which is the benchmark and the
+    /// tests, running an application of ours. An application whose state lives in the browser needs
+    /// none: the cookies are cleared before every visit anyway.
+    /// </remarks>
+    public Func<Task>? StartAfresh { get; init; }
+
     /// <summary>Runs the job and returns its result. Never throws for an ordinary failure.</summary>
     public async Task<WorkerResult> RunAsync(WorkerJob job, CancellationToken cancellationToken)
     {
@@ -190,14 +201,14 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
 
         try
         {
-            var snapshot = await SiteExplorer.ExploreAsync(page, job, budget).ConfigureAwait(false);
+            var exploration = await SiteExplorer.ExploreAsync(page, job, StartAfresh, budget).ConfigureAwait(false);
+            var snapshot = exploration.Snapshot;
 
             steps[0] = step with
             {
                 Status = StepStatus.Passed,
                 FinishedAt = timeProvider.GetUtcNow(),
-                Message = $"Described {snapshot.Pages.Count} page(s)"
-                    + (snapshot.Truncated ? $", stopping at the budget of {job.Budget.MaxPagesCrawled}." : "."),
+                Message = Said(exploration),
             };
 
             return Finish(job, RunStatus.Passed, startedAt, steps, proxy, failureReason: null) with
@@ -377,6 +388,26 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
         EgressProxy proxy,
         string? failureReason) =>
         new(job.RunId, status, failureReason, startedAt, timeProvider.GetUtcNow(), steps, proxy.BytesDownloaded);
+
+    /// <summary>What an exploration did, in a sentence or two, for the person reading the run.</summary>
+    private static string Said(Exploration exploration)
+    {
+        var said = $"Described {exploration.Snapshot.Pages.Count} page(s)"
+            + (exploration.Snapshot.Truncated ? ", stopping at a budget." : ".");
+
+        if (exploration.Visits > 0)
+        {
+            said += $" Pressed controls in {exploration.Visits} visit(s)"
+                + (exploration.VisitsFailed > 0 ? $", {exploration.VisitsFailed} of which could not be carried out." : ".");
+        }
+
+        if (exploration.PressingRefused)
+        {
+            said += " Pressing controls was asked for and refused: the target is not an application we run ourselves.";
+        }
+
+        return said;
+    }
 
     private WorkerResult Infrastructure(
         WorkerJob job,

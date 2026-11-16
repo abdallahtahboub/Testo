@@ -56,7 +56,10 @@ src/
   Autestiq.Application              // BUILT (M3): use cases; implements the Contracts interfaces
   Autestiq.Persistence              // BUILT (M3): EF Core, PostgreSQL, migrations
   Autestiq.Ai                       // BUILT (M3.4): the provider adapters. Contracts only
+  Autestiq.Export                   // BUILT (ADR-0023): plans written out as test code by fixed templates. Contracts only
   Autestiq.DemoShop                 // BUILT (M3.3): the website the slice runs against. Not the product
+  Autestiq.InvoiceDesk          // BUILT: the third target, for a clean measurement. Not part of the product
+  Autestiq.BookingShop          // BUILT (ADR-0020): the second target, for the held-out benchmark. Not part of the product
   Autestiq.Worker                   // BUILT (M3.3): drives a browser, out of process, in a container
 
 tools/
@@ -127,7 +130,10 @@ project (ADR-0013).
 | `Domain` | `Contracts` | anything UI, EF Core, ASP.NET Core Identity |
 | `Persistence` | `Domain`, `Contracts`, EF Core, Identity stores | anything UI, the application layer |
 | `Application` | `Domain`, `Persistence`, `Contracts` | anything UI, ASP.NET Core Identity |
-| `DemoShop` | nothing of ours | It is a target, not part of the product. The one other project that uses the ASP.NET Core server framework, because it is a website |
+| `DemoShop` | nothing of ours | It is a target, not part of the product. The targets (this one, `BookingShop` and `InvoiceDesk`) are the only other projects that use the ASP.NET Core server framework, because they are websites |
+| `InvoiceDesk` | nothing of ours | The third target, for a measurement on an application the explorer's rules were not worked out on (ADR-0022). Not part of the product |
+| `BookingShop` | nothing of ours | The second target, for the held-out benchmark (ADR-0020). Like `DemoShop`, it is not part of the product and references nothing of ours |
+| `Export` | `Contracts` | everything else. It reads a plan and writes text (ADR-0023) |
 | `Worker` | `Contracts`, Playwright | **everything else.** No database, no Identity, no UI, no Application. It is treated as already compromised (ADR-0018) |
 | `Api` *(planned)* | `Application`, `Contracts` | anything UI |
 | `Web` | everything (composition root only, no business UI) | — |

@@ -72,6 +72,16 @@ ordinary rather than noteworthy, since an absence the crawl also did not see is 
 Growing the vocabulary stays a decision recorded here, and `PlanVocabularyTests` is where an
 unrecorded one gets noticed.
 
+**Amended 2026-11-16 (approved by the owner): `select` was added, after measuring.** Writing scenarios
+for eShopOnWeb, the first application measured that nobody here wrote, showed that a shop's brand and
+type filters could not be used by any plan: they are lists, and there was no way to choose from one.
+`select` names a list by the same targets as every other action and chooses the option whose label is
+exactly the plan's text, through Playwright's own option selection, by label and never by value. The
+crawl reads each list's option labels from the page and the prompt shows them (`options="All | .NET"`),
+so a plan chooses from what is there rather than guessing. Like `assert-not-visible` it adds no
+capability on the boundary: the executor locates the element as before and sets a form field the page
+already offers. Since ADR-0024 a target may also be an exact text, narrowed to a container.
+
 This is a property of the type, not of a check somewhere: there is no field in which a selector or a
 script could be written, so `page.evaluate(what_the_model_said)` is not something we have decided
 not to do. It is something the plan cannot say. The line from §4.3 — **no model output is ever

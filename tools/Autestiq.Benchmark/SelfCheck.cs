@@ -27,7 +27,9 @@ internal static class SelfCheck
 
         var harness = new Harness(origin, new LazyPlanner(), repetitions: 1, recordingDirectory: null);
 
-        using var stopping = new CancellationTokenSource(TimeSpan.FromMinutes(3));
+        // The crawl presses many controls before a plan runs, so the whole check needs more than the
+        // run budget of one plan. A three-minute limit here expired during the crawl.
+        using var stopping = new CancellationTokenSource(TimeSpan.FromMinutes(15));
         var measurements = await harness.RunAsync([scenario], stopping.Token).ConfigureAwait(false);
 
         var pretending = measurements
@@ -37,6 +39,27 @@ internal static class SelfCheck
         var baseline = measurements
             .Where(measurement => measurement.DefectOn && string.Equals(measurement.Source, "baseline", StringComparison.Ordinal))
             .ToList();
+
+        // Every run, not only the verdict that decides pass or fail. A run that never reached a
+        // verdict looks like a missed defect otherwise, and it is the browser, not the shop.
+        foreach (var measurement in measurements)
+        {
+            var status = measurement.Attempts.Count > 0 ? measurement.Attempts[0].Status.ToString() : "not run";
+            Console.WriteLine($"    {measurement.Source,-10} defect={(measurement.DefectOn ? "on " : "off")} "
+                + $"verdict={measurement.Verdict} status={status}");
+            var reason = measurement.Attempts.Count > 0 ? measurement.Attempts[0].Reason : null;
+            if (!string.IsNullOrWhiteSpace(reason))
+            {
+                Console.WriteLine($"      because: {reason.Split('\n')[0]}");
+            }
+        }
+
+        if (measurements.Any(measurement => measurement.Verdict == Verdict.Inconclusive))
+        {
+            Console.WriteLine("    Some runs never reached a verdict. Usually the browser did not start: set "
+                + "AUTESTIQ_BROWSER_PATH to a Chromium, or install the test browser with "
+                + "`dotnet build tests/Autestiq.E2E -t:InstallTestBrowser`.");
+        }
 
         var caught = pretending.Count > 0 && pretending.All(measurement => measurement.Verdict == Verdict.FalsePositive);
         var baselineCorrect = baseline.Count > 0 && baseline.All(measurement => measurement.Verdict == Verdict.Correct);

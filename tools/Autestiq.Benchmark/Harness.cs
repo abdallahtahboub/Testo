@@ -5,6 +5,7 @@ using Autestiq.Application.Planning;
 using Autestiq.Contracts.Execution;
 using Autestiq.Contracts.Planning;
 using Autestiq.DemoShop;
+using DemoShopDefects = Autestiq.DemoShop.Defects;
 using Autestiq.Worker;
 
 namespace Autestiq.Benchmark;
@@ -40,7 +41,8 @@ public enum Verdict
 /// <param name="Verdict">What to make of it.</param>
 /// <param name="Status">What the run actually reported.</param>
 /// <param name="Elapsed">How long the execution took.</param>
-public sealed record Attempt(Verdict Verdict, RunStatus Status, TimeSpan Elapsed);
+/// <param name="Reason">What went wrong, when the worker said so. Kept so a browser that will not start says why.</param>
+public sealed record Attempt(Verdict Verdict, RunStatus Status, TimeSpan Elapsed, string? Reason = null);
 
 /// <summary>Everything measured about one scenario, in one defect state, for one planner.</summary>
 /// <param name="Scenario">Which scenario.</param>
@@ -103,6 +105,18 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
     /// <summary>Called as each measurement finishes, so a long run reports itself.</summary>
     public Action<Measurement>? Measured { get; set; }
 
+    /// <summary>
+    /// Switches the target's defects on and off. The demo shop by default; the held-out target
+    /// supplies its own. Returns false for a name the target does not have.
+    /// </summary>
+    public Func<IReadOnlyList<string>, bool> SetDefects { get; init; } = names => DemoShopDefects.Set(names);
+
+    /// <summary>
+    /// Starts the target afresh before each run, when the target keeps state between runs. The demo
+    /// shop does not need it, because its basket lives in each browser's cookies.
+    /// </summary>
+    public Func<Task>? ResetTarget { get; init; }
+
     private readonly PlanningService? _planning =
         planner is null ? null : new PlanningService(planner, NullLogger<PlanningService>.Instance);
 
@@ -154,7 +168,7 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
             }
         }
 
-        Defects.Set([]);
+        SetDefects([]);
         return measurements;
     }
 
@@ -196,6 +210,8 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
     }
 
     /// <summary>Keeps a measurement and says so, so a long run is not a blank terminal.</summary>
+    private Task ResetAsync() => ResetTarget is null ? Task.CompletedTask : ResetTarget();
+
     private void Report(List<Measurement> measurements, Measurement measurement)
     {
         measurements.Add(measurement);
@@ -208,8 +224,10 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
     /// </summary>
     private async Task<PlannedResult> PlanAsync(BenchmarkScenario scenario, CancellationToken cancellationToken)
     {
-        var explored = await new ScenarioRunner(TimeProvider.System)
-            .RunAsync(Job(scenario, WorkerTask.Explore, null), cancellationToken)
+        await ResetAsync().ConfigureAwait(false);
+
+        var explored = await new ScenarioRunner(TimeProvider.System) { StartAfresh = ResetTarget }
+            .RunAsync(Job(scenario, WorkerTask.Explore, null) with { Budget = ExplorationBudget }, cancellationToken)
             .ConfigureAwait(false);
 
         var site = explored.Snapshot ?? SiteSnapshot.Empty(origin);
@@ -258,6 +276,8 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
 
         for (var repetition = 0; repetition < repetitions; repetition++)
         {
+            await ResetAsync().ConfigureAwait(false);
+
             var clock = Stopwatch.StartNew();
 
             var result = await new ScenarioRunner(TimeProvider.System)
@@ -270,7 +290,7 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
             // answered the scenario. The product applies the same rule; this is the same function.
             var status = PlanOutcome.Reconcile(result.Status, coverage);
 
-            attempts.Add(new Attempt(Judge(status, defectOn), status, clock.Elapsed));
+            attempts.Add(new Attempt(Judge(status, defectOn), status, clock.Elapsed, result.FailureReason));
         }
 
         return new Measurement(scenario, defectOn, source, attempts, planning, planningErrors, notes);
@@ -292,13 +312,20 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
         _ => Verdict.Inconclusive,
     };
 
-    private static void Switch(BenchmarkScenario scenario, bool defectOn)
+    private void Switch(BenchmarkScenario scenario, bool defectOn)
     {
-        if (!Defects.Set(defectOn && scenario.Defect is { } defect ? [defect] : []))
+        if (!SetDefects(defectOn && scenario.Defect is { } defect ? [defect] : []))
         {
             throw new InvalidOperationException($"'{scenario.Defect}' is not a defect this shop has.");
         }
     }
+
+    /// <summary>
+    /// Exploring presses many controls, one fresh visit each, so it needs more time than a single run.
+    /// It also reads more pages than a run's default of twelve: the clinic has seventeen kinds of page.
+    /// </summary>
+    internal static readonly RunBudget ExplorationBudget =
+        new(TimeSpan.FromMinutes(10), 100, 50 * 1024 * 1024, MaxPagesCrawled: 24);
 
     private WorkerJob Job(BenchmarkScenario scenario, WorkerTask task, IReadOnlyList<PlannedAction>? plan) => new(
         RunId: Guid.CreateVersion7(),
@@ -310,5 +337,10 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
         Directory.CreateTempSubdirectory("autestiq-benchmark-").FullName,
         task,
         plan,
-        scenario.Secrets);
+        scenario.Secrets,
+        // Every target this tool measures is one it started itself, so it asks for the controls to be
+        // pressed and the forms to be filled. Whether that is allowed is not decided here: the worker's
+        // own policy decides, from the address (Autestiq.Worker.ExplorationPolicy).
+        ExploreStates: task == WorkerTask.Explore,
+        SubmitForms: task == WorkerTask.Explore);
 }

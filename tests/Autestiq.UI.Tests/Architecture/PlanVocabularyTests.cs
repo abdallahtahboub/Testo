@@ -30,7 +30,7 @@ public class PlanVocabularyTests
             Fields(typeof(PlannedAction)).Select(property => property.Name).Order(StringComparer.Ordinal));
 
         Assert.Equal(
-            ["Kind", "Role", "Value"],
+            ["Kind", "Role", "Value", "Within"],
             Fields(typeof(ActionTarget)).Select(property => property.Name).Order(StringComparer.Ordinal));
     }
 
@@ -72,7 +72,7 @@ public class PlanVocabularyTests
         string[] expected =
         [
             "Goto", "Click", "Type", "Press", "WaitFor", "AssertText", "AssertVisible", "AssertUrl",
-            "AssertNotVisible",
+            "AssertNotVisible", "Select",
         ];
 
         Assert.Equal(expected.Order(StringComparer.Ordinal), Enum.GetNames<ActionKind>().Order(StringComparer.Ordinal));
@@ -91,12 +91,16 @@ public class PlanVocabularyTests
     public void SnapshotElement_SaysOnlyWhatAPersonWouldRead()
     {
         // The snapshot is untrusted input that goes into a prompt on purpose (ADR-0019 §5), so its
-        // fields are attack surface. Four of them, all plain text.
+        // fields are attack surface. What the page says is plain text; NamedBy is the explorer's own verdict on
+        // how to reach the element (ADR-0024), one of a closed set, and nothing the page can write into.
         Assert.Equal(
-            ["Name", "Role", "TestId", "Text"],
+            ["Name", "NamedBy", "Role", "TestId", "Text", "Within"],
             Fields(typeof(SnapshotElement)).Select(property => property.Name).Order(StringComparer.Ordinal));
 
-        Assert.All(Fields(typeof(SnapshotElement)), property => Assert.Equal(typeof(string), property.PropertyType));
+        Assert.All(
+            Fields(typeof(SnapshotElement)).Where(property => property.Name != nameof(SnapshotElement.NamedBy)),
+            property => Assert.Equal(typeof(string), property.PropertyType));
+        Assert.Equal(typeof(TargetKind?), Assert.IsType<System.Reflection.PropertyInfo>(typeof(SnapshotElement).GetProperty(nameof(SnapshotElement.NamedBy)), exactMatch: false).PropertyType);
     }
 
     [Fact]

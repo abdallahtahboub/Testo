@@ -206,24 +206,27 @@ public static class BenchmarkScenarios
             Secrets: new Dictionary<string, string>(StringComparer.Ordinal) { ["password"] = Shop.Password }),
     ];
 
-    private static PlannedAction Goto(string description, string path) =>
+    internal static PlannedAction Goto(string description, string path) =>
         new(ActionKind.Goto, description, Path: path);
 
-    private static PlannedAction Click(string description, string testId) =>
+    internal static PlannedAction Click(string description, string testId) =>
         new(ActionKind.Click, description, ActionTarget.ByTestId(testId));
 
-    private static PlannedAction Type(string description, string testId, string text) =>
+    internal static PlannedAction Type(string description, string testId, string text) =>
         new(ActionKind.Type, description, ActionTarget.ByTestId(testId), Text: text);
 
-    private static PlannedAction Secret(string description, string testId, string secretName) =>
+    internal static PlannedAction Secret(string description, string testId, string secretName) =>
         new(ActionKind.Type, description, ActionTarget.ByTestId(testId), SecretName: secretName);
 
-    private static PlannedAction Assert(string description, string testId, string text) =>
+    internal static PlannedAction Assert(string description, string testId, string text) =>
         new(ActionKind.AssertText, description, ActionTarget.ByTestId(testId), Text: text);
 
-    private static PlannedAction AssertVisible(string description, string testId) =>
+    internal static PlannedAction AssertVisible(string description, string testId) =>
         new(ActionKind.AssertVisible, description, ActionTarget.ByTestId(testId));
 
-    private static PlannedAction AssertUrl(string description, string path) =>
+    internal static PlannedAction AssertUrl(string description, string path) =>
         new(ActionKind.AssertUrl, description, Path: path);
+
+    internal static PlannedAction AssertHidden(string description, string testId) =>
+        new(ActionKind.AssertNotVisible, description, ActionTarget.ByTestId(testId));
 }

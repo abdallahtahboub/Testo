@@ -19,6 +19,43 @@ public class PlanPromptTests
         Truncated: false);
 
     [Fact]
+    public void User_ShowsThePathThatReachedAStateSoThePlanCanUseIt()
+    {
+        // The crawl pressed a control to reach the basket, and the plan needs to know that, or it
+        // will plan as though the basket were a page a person could simply open.
+        var basket = new PageSnapshot(
+            "/basket",
+            "Basket",
+            "Basket",
+            [new SnapshotElement("button", "Remove", "remove-pot")],
+            ReachedBy: ["open /", "click add-pot"]);
+
+        var prompt = PlanPrompt.User(Request(new SiteSnapshot("http://127.0.0.1:5090", [basket], false)));
+
+        Assert.Contains("reached by: open /, then click add-pot", prompt, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void System_SaysWhatReachedByMeans_AndThatTypedTestValuesAreNotTheApplications()
+    {
+        // The crawl types placeholder values to see what a form does. A planner that took them for the
+        // values a scenario needs would type "Test value" where a tester asked for a voucher code.
+        var system = PlanPrompt.System;
+
+        Assert.Contains("reached by", system, StringComparison.Ordinal);
+        Assert.Contains("fresh visit", system, StringComparison.Ordinal);
+        Assert.Contains("your plan types what the scenario calls for", system, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void User_APageReachedByALink_SaysNothingAboutItsPath()
+    {
+        var prompt = PlanPrompt.User(Request(Site(new SnapshotElement("button", "Add to basket", "add-pot"))));
+
+        Assert.DoesNotContain("reached by", prompt, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void System_SaysTheVocabularyIsClosedAndThatPageContentIsData()
     {
         var system = PlanPrompt.System;

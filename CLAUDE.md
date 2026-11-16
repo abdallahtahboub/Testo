@@ -153,7 +153,7 @@ folder `dotnet test` reports "No test projects were found".
 
 ```bash
 dotnet build
-dotnet test                                    # all tests, including the browser tests
+dotnet test --max-parallel-test-modules 1      # all tests, including the browser tests
 dotnet test --project tests/Autestiq.UI.Tests     # one test project
 dotnet test --project tests/Autestiq.E2E --filter-class "Autestiq.E2E.Pages.ThemeTests"
 dotnet run --project src/Autestiq.Web             # http://localhost:5080
@@ -167,6 +167,10 @@ their own per class and find the server through `AUTESTIQ_TEST_DB`.
   `dotnet publish src/Autestiq.Worker -c Release -o artifacts/worker -p:UseAppHost=false`, then
   `docker build -f src/Autestiq.Worker/Dockerfile -t autestiq-worker:dev artifacts/worker`. Without them those tests fail,
   by design: a gate that is skipped is not a gate.
+- Run the whole suite with `--max-parallel-test-modules 1`, as CI does. Plain `dotnet test` runs the test projects
+  side by side, and the sealed-run tests then create Docker networks while the browser tests run: Chromium
+  takes each new host interface for a network change and fails requests in flight with `ERR_NETWORK_CHANGED`.
+  Chromium has no documented switch to ignore it. Tests inside one project still run in parallel.
 - Tests run on Microsoft.Testing.Platform (xUnit v3): filters are `--filter-class`, `--filter-method`, `--filter-namespace`; reports are `--report-xunit-trx` and `--report-xunit-html`.
 - The browser tests start the application themselves; nothing needs to run beforehand.
 - Browser for the tests, once per machine after a build: `pwsh tests/Autestiq.E2E/bin/Debug/net10.0/playwright.ps1 install chromium`. Or point `E2E_BROWSER_PATH` at an existing Chromium executable.

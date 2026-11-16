@@ -190,7 +190,7 @@ public sealed class OriginProofTests : IAsyncLifetime
         var options = new ChangeableOptions(new ExecutionOptions { WorkerPath = MarkingWorker(marker), MaxConcurrentRuns = 1 });
 
         await using var services = _database.NewServices();
-        var dispatcher = new RunDispatcher(services.GetRequiredService<IServiceScopeFactory>(), options, TimeProvider.System, NullLogger<RunDispatcher>.Instance);
+        var dispatcher = new RunDispatcher(services.GetRequiredService<IServiceScopeFactory>(), options, ExecutionSupport.Usage(), TimeProvider.System, NullLogger<RunDispatcher>.Instance);
 
         var runId = await ExecutionSupport.RunAsync(_database, _first, _firstProject, run => run.TargetOrigin = Shop);
         await dispatcher.StartAsync(TestContext.Current.CancellationToken);

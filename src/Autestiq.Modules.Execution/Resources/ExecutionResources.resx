@@ -139,6 +139,9 @@
   <data name="Execution_Error_NoSuchProof" xml:space="preserve">
     <value>No proof was asked for for that address yet.</value>
   </data>
+  <data name="Execution_Error_MinutesUsedUp" xml:space="preserve">
+    <value>This organization has used all of its browser minutes for the month. Runs can start again next month, or after a plan change.</value>
+  </data>
   <data name="Execution_Error_AlreadyFinished" xml:space="preserve">
     <value>That run has already finished.</value>
   </data>

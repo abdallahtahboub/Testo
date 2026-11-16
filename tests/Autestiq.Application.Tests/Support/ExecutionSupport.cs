@@ -63,6 +63,14 @@ internal static class ExecutionSupport
             .SingleAsync(run => run.Id == runId, TestContext.Current.CancellationToken);
     }
 
+    /// <summary>The plans' limits, as configured by default or as a test changes them.</summary>
+    public static IOptionsMonitor<Autestiq.Application.Usage.UsageOptions> Usage(Action<Autestiq.Application.Usage.UsageOptions>? change = null)
+    {
+        var options = new Autestiq.Application.Usage.UsageOptions();
+        change?.Invoke(options);
+        return new FixedOptions<Autestiq.Application.Usage.UsageOptions>(options);
+    }
+
     /// <summary>Polls a run's stored status until it is the one expected or the time is up.</summary>
     public static async Task<RunStatus> StatusOnceItIsAsync(TestDatabase database, Guid runId, RunStatus expected, TimeSpan within)
     {
@@ -130,6 +138,16 @@ internal static class ExecutionSupport
         File.SetUnixFileMode(script, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
         return script;
     }
+}
+
+/// <summary>Options a test fixes for the dispatcher to read.</summary>
+internal sealed class FixedOptions<T>(T value) : IOptionsMonitor<T>
+{
+    public T CurrentValue { get; } = value;
+
+    public T Get(string? name) => CurrentValue;
+
+    public IDisposable? OnChange(Action<T, string?> listener) => null;
 }
 
 /// <summary>Options a test can change while the dispatcher reads them, as a configuration reload would.</summary>

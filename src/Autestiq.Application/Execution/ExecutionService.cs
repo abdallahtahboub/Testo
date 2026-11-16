@@ -20,6 +20,7 @@ internal sealed class ExecutionService(
     AutestiqDbContext database,
     ArtifactLinks links,
     IOptionsMonitor<ExecutionOptions> options,
+    IOptionsMonitor<Usage.UsageOptions> usage,
     ICurrentUser currentUser,
     IOrganizationContext organizationContext,
     TimeProvider timeProvider)
@@ -143,6 +144,11 @@ internal sealed class ExecutionService(
             return OperationResult.Failure<Guid>("Execution_Error_Paused");
         }
 
+        if (await UsedUpAsync(project.OrganizationId, cancellationToken).ConfigureAwait(false))
+        {
+            return OperationResult.Failure<Guid>("Execution_Error_MinutesUsedUp");
+        }
+
         return OperationResult.With(
             await QueueAsync(project.Id, scenarioId, attempt: 1, rerunOf: null, cancellationToken)
                 .ConfigureAwait(false));
@@ -207,6 +213,11 @@ internal sealed class ExecutionService(
             return OperationResult.Failure<Guid>("Execution_Error_Paused");
         }
 
+        if (await UsedUpAsync(original.OrganizationId, cancellationToken).ConfigureAwait(false))
+        {
+            return OperationResult.Failure<Guid>("Execution_Error_MinutesUsedUp");
+        }
+
         return OperationResult.With(
             await QueueAsync(
                     original.ProjectId,
@@ -251,6 +262,10 @@ internal sealed class ExecutionService(
         await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return run.Id;
     }
+
+    /// <summary>Whether the organization has used all of this month's browser minutes: the hard stop (ADR-0027).</summary>
+    private async Task<bool> UsedUpAsync(Guid organizationId, CancellationToken cancellationToken) =>
+        (await RunDispatcher.RoomForAsync(database, organizationId, usage.CurrentValue, timeProvider.GetUtcNow(), cancellationToken).ConfigureAwait(false)).UsedUp;
 
     private void Record(string action, TestRun run) =>
         new AuditWriter(database, timeProvider).Record(

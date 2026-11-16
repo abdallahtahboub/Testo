@@ -96,7 +96,7 @@ public sealed class RunReaperTests : IAsyncLifetime
         });
 
         await using var services = _database.NewServices();
-        var dispatcher = new RunDispatcher(services.GetRequiredService<IServiceScopeFactory>(), options, TimeProvider.System, NullLogger<RunDispatcher>.Instance);
+        var dispatcher = new RunDispatcher(services.GetRequiredService<IServiceScopeFactory>(), options, ExecutionSupport.Usage(), TimeProvider.System, NullLogger<RunDispatcher>.Instance);
         var runId = await ExecutionSupport.RunAsync(_database, _organization, _project);
 
         await dispatcher.StartAsync(TestContext.Current.CancellationToken);
@@ -126,7 +126,7 @@ public sealed class RunReaperTests : IAsyncLifetime
 
         await using var services = _database.NewServices();
         var scopes = services.GetRequiredService<IServiceScopeFactory>();
-        var first = new RunDispatcher(scopes, Options(), TimeProvider.System, NullLogger<RunDispatcher>.Instance);
+        var first = new RunDispatcher(scopes, Options(), ExecutionSupport.Usage(), TimeProvider.System, NullLogger<RunDispatcher>.Instance);
 
         var runId = await ExecutionSupport.RunAsync(_database, _organization, _project);
         await first.StartAsync(TestContext.Current.CancellationToken);
@@ -141,7 +141,7 @@ public sealed class RunReaperTests : IAsyncLifetime
         await first.StopAsync(CancellationToken.None);
         Assert.Equal(RunStatus.Running, (await ExecutionSupport.StoredAsync(_database, runId)).Status);
 
-        var second = new RunDispatcher(scopes, Options(), TimeProvider.System, NullLogger<RunDispatcher>.Instance);
+        var second = new RunDispatcher(scopes, Options(), ExecutionSupport.Usage(), TimeProvider.System, NullLogger<RunDispatcher>.Instance);
         await second.StartAsync(TestContext.Current.CancellationToken);
 
         try

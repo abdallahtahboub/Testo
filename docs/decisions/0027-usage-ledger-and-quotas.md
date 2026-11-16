@@ -57,3 +57,22 @@ catalog and per-run cost records are later milestones (3.7, 3.8, Phase D).
   The dispatcher records a run's usage with its result. Tests: the same key is refused by the database; an event
   cannot be changed; a run's usage is recorded once and billable as the rule says (fails if the dispatcher records
   nothing); the month adds up billable seconds only and rounds once.
+- **Steps 2 and 3, concurrency and quota at the claim:** `TryClaimAsync` locks the organization's row with
+  `SELECT … FOR UPDATE` inside the claim's transaction, then reads `RoomForAsync`:
+  - its plan's limits, less its running runs, its billable seconds this month and what its running runs reserve;
+  - at its limit, a run waits in the queue, and the oldest run of each other organization is tried instead;
+  - with the month used up it is refused, the hard stop;
+  - otherwise it reserves its whole budget or what is left, whichever is less, and the worker is given exactly that
+    much time.
+
+  Starting or re-running a run is refused with `Execution_Error_MinutesUsedUp` once the month is used up.
+  Tests (`ClaimLimitsTests`):
+  - an organization at its limit waits while another's run starts;
+  - two dispatchers racing never exceed one organization's limit;
+  - a run reserves no more than what is left;
+  - a used-up month refuses a queued run and a new start;
+  - two runs cannot overspend the last 90 seconds;
+  - a finished run, and a lost one, hold nothing.
+
+  The first two fail without the limit, and the next two without the cap on the reservation. The row lock is not
+  provable that way: without it the race test makes a double claim likely, not certain.

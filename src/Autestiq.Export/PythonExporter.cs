@@ -186,7 +186,7 @@ public sealed class PythonExporter : ITestExporter
 
         foreach (var character in value)
         {
-            text.Append(char.IsControl(character) || character is ' ' or ' ' ? ' ' : character);
+            text.Append(char.IsControl(character) || character is '\u2028' or '\u2029' ? ' ' : character);
         }
 
         return text.ToString().Trim();

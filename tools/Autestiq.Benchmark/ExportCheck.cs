@@ -87,7 +87,7 @@ public static class ExportCheck
     /// </summary>
     private static async Task<bool> HostileExportStaysDataAsync(PythonExporter exporter, string directory, string python, TextWriter output)
     {
-        const string Hostile = "\"); import os; os.system(\"echo pwned\") #\n__import__('os').system('x')\r\"\"\" x";
+        const string Hostile = "\"); import os; os.system(\"echo pwned\") #\n__import__('os').system('x')\r\"\"\"\u2028x";
 
         PlannedAction[] actions =
         [
@@ -185,7 +185,7 @@ public static class ExportCheck
         body = tests[0].body
         assert len(body) == int(sys.argv[2]), "expected %s statements, found %d" % (sys.argv[2], len(body))
         assert all(isinstance(statement, ast.Expr) and isinstance(statement.value, ast.Call) for statement in body), "a statement is not a call"
-        names = {node.id for node in ast.walk(tests[0]) if isinstance(node, ast.Name)}
+        names = {node.id for statement in body for node in ast.walk(statement) if isinstance(node, ast.Name)}
         assert names <= {"page", "target", "expect", "re", "os"}, "unexpected names: %s" % (names - {"page", "target", "expect", "re", "os"})
         """;
 }

@@ -1,6 +1,6 @@
 # 0023 — Tests exported in the customer's language; the plan stays the source of truth
 
-- **Status:** Proposed
+- **Status:** Accepted by the owner on 2026-11-16 ("let's carry on"); the Python exporter is built and verified
 - **Date:** 2026-11-15
 
 ## Context
@@ -51,3 +51,32 @@ exploration would press nothing, and plans would have to name every element by r
 Many customer applications will look like this. Whether the product requires test ids, or explores and
 plans by role and name as well, is a product decision this export work depends on too: an exported test
 names elements the same way the plan does.
+
+## Built: the Python exporter (2026-11-16)
+- **Shape.** `ITestExporter` and `ExportLanguage` in `Autestiq.Contracts.Export`; the exporters in
+  `Autestiq.Export`, which references `Contracts` only. `PythonExporter` writes one pytest file per plan,
+  using Playwright for Python: one fixed statement per action, the step's description as a comment above it.
+- **Locating, as our runs do.** Every file carries a small `target()` helper with the worker's rules
+  (ADR-0024): a test id, a role with its exact accessible name, or an exact text, narrowed to the innermost
+  container that holds both a "within" text and the element; and a looser name only when nothing has the
+  exact one within two seconds. So the file needs nothing of ours to run, and finds what our run found.
+- **Nothing from a plan becomes code.** Every value that came from a plan is written as a Python string
+  literal in which everything but printable ASCII is an escape and no quote is unescaped, or as a comment
+  stripped of anything that could end a line. The check below also exports a plan whose every string tries
+  to become code and has Python's own parser confirm the test function is one call per action and names
+  nothing but `page`, `target`, `expect`, `re` and `os`.
+- **Secrets are names.** A secret is read from `AUTESTIQ_SECRET_<NAME>` in the customer's environment, and
+  the export lists the variables it needs. No value is ever in a file.
+- **Verified as §4 requires** (`--export-check python --python <interpreter with pytest-playwright>`): every
+  baseline of every set exported, run by pytest against the application with each defect off and on.
+  **107 of 107 runs gave the plan's verdict**: demo shop 18 of 18, held-out set 26 of 26, clinic 26 of 26,
+  invoice desk 26 of 26, eShopOnWeb 11 of 11. Every defect a plan catches, its exported test catches, and no
+  exported test fails an application the plan passes. Measured with Playwright for Python 1.65.2, pytest
+  8.4.2 and pytest-playwright 0.7.1, in a virtual environment outside the repository; nothing in the product
+  depends on Python.
+
+**Not built yet.** The language is to be a setting of each project, and projects do not exist yet
+(Milestone 5): until they do, the exporter is reached through the benchmark tool only, and nothing in the
+product offers an export. TypeScript, Java and C# are not built; each needs its own exporter and the same
+107-run check before it is offered. The second open question above — whether export is offered for every
+plan or only for plans a person has approved — is still the owner's.

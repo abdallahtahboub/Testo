@@ -330,9 +330,17 @@ namespace Autestiq.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("queued_at");
 
+                    b.Property<Guid?>("RequestedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("requested_by");
+
                     b.Property<Guid?>("RerunOf")
                         .HasColumnType("uuid")
                         .HasColumnName("rerun_of");
+
+                    b.Property<long>("ReservedSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("reserved_seconds");
 
                     b.Property<string>("ScenarioId")
                         .IsRequired()
@@ -931,6 +939,90 @@ namespace Autestiq.Persistence.Migrations
                         .HasDatabaseName("ix_projects_organization_id_status");
 
                     b.ToTable("projects");
+                });
+
+            modelBuilder.Entity("Autestiq.Domain.Usage.UsageEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("Billable")
+                        .HasColumnType("boolean")
+                        .HasColumnName("billable");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("category");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("idempotency_key");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<string>("Period")
+                        .IsRequired()
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)")
+                        .HasColumnName("period");
+
+                    b.Property<Guid?>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<long>("Quantity")
+                        .HasColumnType("bigint")
+                        .HasColumnName("quantity");
+
+                    b.Property<Guid?>("RunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("run_id");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("source");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_usage_events");
+
+                    b.HasIndex("OrganizationId", "IdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ix_usage_events_organization_id_idempotency_key");
+
+                    b.HasIndex("OrganizationId", "Period", "Category")
+                        .HasDatabaseName("ix_usage_events_organization_id_period_category");
+
+                    b.ToTable("usage_events");
                 });
 
             modelBuilder.Entity("Autestiq.Domain.Execution.Artifact", b =>

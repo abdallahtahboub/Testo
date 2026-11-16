@@ -43,6 +43,16 @@ public sealed class TestRun : Entity, IBelongsToOrganization
     public DateTimeOffset? FinishedAt { get; set; }
 
     /// <summary>
+    /// Browser seconds held against the organization's monthly quota while the run goes: its whole time budget, set
+    /// when it is claimed and released when its result is written back. Counted only while the run is running, so a
+    /// run that is reaped or cancelled releases its reservation with nothing else to do.
+    /// </summary>
+    public long ReservedSeconds { get; set; }
+
+    /// <summary>Who asked for the run, for the per-person limit on starts. Empty for a run nobody started by hand.</summary>
+    public Guid? RequestedBy { get; set; }
+
+    /// <summary>
     /// When the dispatcher carrying the run out last said it still was. A running run whose last word is older
     /// than the lease has lost its dispatcher, and is reaped as an infrastructure error rather than left running.
     /// </summary>

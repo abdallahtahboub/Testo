@@ -86,6 +86,7 @@ var connectionString = builder.Configuration.GetConnectionString("Autestiq")
 
 builder.Services.AddAutestiqApplication(connectionString);
 builder.Services.Configure<ExecutionOptions>(builder.Configuration.GetSection(ExecutionOptions.SectionName));
+builder.Services.Configure<Autestiq.Application.Usage.UsageOptions>(builder.Configuration.GetSection(Autestiq.Application.Usage.UsageOptions.SectionName));
 builder.Services.Configure<ArtifactStoreOptions>(builder.Configuration.GetSection(ArtifactStoreOptions.SectionName));
 
 // Runs are carried out by a worker process, outside this one (ADR-0018).

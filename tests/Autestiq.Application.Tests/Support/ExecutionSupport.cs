@@ -85,6 +85,34 @@ internal static class ExecutionSupport
         return status;
     }
 
+    /// <summary>
+    /// A worker that reads its job, waits, and reports a result of its own: a status, the bytes it fetched, and a
+    /// start and finish that many seconds apart. A shell script, so it needs Linux or macOS, as CI and the worker are.
+    /// </summary>
+    public static string ReportingWorker(RunStatus status, long bytesDownloaded, int seconds = 1, int waitSeconds = 1)
+    {
+        var directory = Directory.CreateTempSubdirectory("autestiq-reporting-worker-").FullName;
+        var script = Path.Combine(directory, "worker.sh");
+        var finished = new DateTimeOffset(2026, 11, 16, 12, 0, 0, TimeSpan.Zero).AddSeconds(seconds).ToString("O", System.Globalization.CultureInfo.InvariantCulture);
+
+        File.WriteAllText(script, string.Join('\n',
+        [
+            "#!/bin/sh",
+            "job=$(cat)",
+            """id=$(printf '%s' "$job" | sed -E 's/.*"runId":"([^"]+)".*/\1/')""",
+            $"sleep {waitSeconds}",
+            $$"""printf '{"runId":"%s","status":{{(int)status}},"failureReason":null,"startedAt":"2026-11-16T12:00:00.0000000+00:00","finishedAt":"{{finished}}","steps":[],"bytesDownloaded":{{bytesDownloaded}}}\n' "$id" """,
+            "",
+        ]));
+
+        if (!OperatingSystem.IsWindows())
+        {
+            File.SetUnixFileMode(script, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
+
+        return script;
+    }
+
     /// <summary>An executable that waits a minute and says nothing: a run that stays running until stopped.</summary>
     public static string WaitingWorker()
     {

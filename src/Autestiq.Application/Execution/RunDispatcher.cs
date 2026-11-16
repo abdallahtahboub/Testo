@@ -373,7 +373,9 @@ public sealed class RunDispatcher(
                 }
             }
 
-            await IngestAsync(scope.ServiceProvider, run, result, workspace.FullName, stoppingToken)
+            var billable = Usage.UsageMeter.IsBillable(result, stoppedByOperator: stopped == Stop.Paused);
+
+            await IngestAsync(scope.ServiceProvider, run, result, billable, workspace.FullName, stoppingToken)
                 .ConfigureAwait(false);
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
@@ -860,6 +862,7 @@ public sealed class RunDispatcher(
         IServiceProvider services,
         TestRun run,
         WorkerResult result,
+        bool billable,
         string workspace,
         CancellationToken cancellationToken)
     {
@@ -886,11 +889,17 @@ public sealed class RunDispatcher(
 
         using (writeScope.AllowWritingTo(run.OrganizationId))
         {
+            long artifactBytes = 0;
+
             foreach (var step in result.Steps)
             {
                 var screenshot = await StoreScreenshotAsync(
                         artifacts, database, run, step, workspace, cancellationToken)
                     .ConfigureAwait(false);
+
+                artifactBytes += database.ChangeTracker.Entries<Artifact>()
+                    .Where(entry => entry.State == EntityState.Added && entry.Entity.Id == screenshot)
+                    .Sum(entry => entry.Entity.SizeBytes);
 
                 database.TestRunSteps.Add(new TestRunStep
                 {
@@ -915,6 +924,22 @@ public sealed class RunDispatcher(
                 run.Id,
                 $"{run.ScenarioId} #{run.Number}",
                 after: new { Status = run.Status.ToString() });
+
+            // What the run used, in the same save as its result, so neither is ever written without the other. Each
+            // event's key names the run, so a result written back twice records nothing twice.
+            foreach (var usage in Usage.UsageMeter.ForRun(run, result, billable, artifactBytes, timeProvider.GetUtcNow()))
+            {
+                var known = await database.UsageEvents.IgnoreQueryFilters()
+                    .AnyAsync(existing => existing.OrganizationId == usage.OrganizationId && existing.IdempotencyKey == usage.IdempotencyKey, cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (!known)
+                {
+                    database.UsageEvents.Add(usage);
+                }
+            }
+
+            run.ReservedSeconds = 0;
 
             await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }

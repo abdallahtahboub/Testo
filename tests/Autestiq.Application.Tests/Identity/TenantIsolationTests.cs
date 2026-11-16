@@ -95,6 +95,17 @@ public sealed class TenantIsolationTests : IAsyncLifetime
             ContentType = "image/png",
             CapturedAt = DateTimeOffset.UtcNow,
         },
+        [typeof(Domain.Usage.UsageEvent)] = seed => new Domain.Usage.UsageEvent
+        {
+            OrganizationId = seed.OrganizationId,
+            RunId = seed.RunId,
+            Category = Contracts.Usage.UsageCategory.Run,
+            Quantity = 1,
+            Period = "2026-11",
+            OccurredAt = DateTimeOffset.UtcNow,
+            IdempotencyKey = $"seed-{Guid.CreateVersion7():N}",
+            Source = "seed",
+        },
         [typeof(OriginProof)] = seed => new OriginProof
         {
             OrganizationId = seed.OrganizationId,

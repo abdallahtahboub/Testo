@@ -16,6 +16,7 @@
     <!-- The provider adapter is not referenced by Autestiq.Application: the use cases depend on
          IScenarioPlanner in Contracts, and the host chooses the adapter. The tests see both. -->
     <ProjectReference Include="..\..\src\Autestiq.Ai\Autestiq.Ai.csproj" />
+    <ProjectReference Include="..\..\src\Autestiq.Export\Autestiq.Export.csproj" />
   </ItemGroup>
 
 </Project>

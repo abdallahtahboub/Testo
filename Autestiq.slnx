@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Autestiq.Ai/Autestiq.Ai.csproj" />
+    <Project Path="src/Autestiq.Export/Autestiq.Export.csproj" />
     <Project Path="src/Autestiq.Application/Autestiq.Application.csproj" />
     <Project Path="src/Autestiq.Capabilities.E2EWeb/Autestiq.Capabilities.E2EWeb.csproj" />
     <Project Path="src/Autestiq.Contracts/Autestiq.Contracts.csproj" />

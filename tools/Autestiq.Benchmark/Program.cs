@@ -118,6 +118,25 @@ if (args.Contains("--coverage", StringComparer.Ordinal))
     return 0;
 }
 
+// ADR-0023 §4: every baseline exported to Python, run by pytest with each defect off and on, must give the plan's
+// verdict. --python names the interpreter that has pytest-playwright installed.
+if (BenchmarkOptions.Value(args, "--export-check") is { } language)
+{
+    if (!string.Equals(language, "python", StringComparison.OrdinalIgnoreCase))
+    {
+        Console.WriteLine($"There is no exporter for '{language}'. Built so far: python.");
+        return 2;
+    }
+
+    return await ExportCheck.RunAsync(
+        origin,
+        targetScenarios,
+        setDefects,
+        startAfresh,
+        BenchmarkOptions.Value(args, "--python") ?? "python3",
+        Console.Out) ? 0 : 1;
+}
+
 // What the exploration sees of the target, printed, with no planner and nothing spent. The way to check
 // the crawl against an application without a key.
 if (args.Contains("--explore", StringComparer.Ordinal))

@@ -151,12 +151,25 @@ Changed on 2026-11-13 by ADR-0017, with the owner's approval. The milestones bel
 numbers; only the order changed. New work is inserted as 3.1 to 3.4 rather than renumbering,
 because renumbering is what put the issue tracker a number behind this document.
 
-**Proposed, not accepted (2026-11-15):** milestones 3.5 (customer-target safety), 3.6 (usage ledger
-and quotas), 3.7 (plan catalog), 3.8 (cost and evidence retention) and a pilot gate, placed before
-Milestone 5. See [`commercial-readiness.md`](commercial-readiness.md) §6. This order does not change
-until the owner accepts it.
+**Accepted by the owner (2026-11-15):** milestones 3.5 (customer-target safety), 3.6 (usage ledger
+and quotas), 3.7 (plan catalog) and 3.8 (cost and evidence retention) sit between 3.4 and Milestone 4.
+Milestone 4 is already built and awaits review, so it stays where it is in the list above. The pilot
+gate and the billing sandbox (Phase D, Stripe Billing in test mode) are not milestones; they are gates
+that come after 3.8. Scope is in [`commercial-readiness.md`](commercial-readiness.md) §6.
 
-**3.1 → 3.2 → 3.3 → 3.4 → 4 → 5 → 6 → 7 → 8**
+**Order, updated:** 3.1 → 3.2 → 3.3 → 3.4 → 3.5 → 3.6 → 3.7 → 3.8 → 3.9 → 4 → 5 → 6 → 7 → 8.
+
+**Product scope (ADR-0020, accepted 2026-11-15):** the first product is AI-generated E2E UI tests.
+**Milestone 3.9 — validation gate:** re-measure the planner on an expanded benchmark, using a developer
+machine with a model key, and publish the result beside the baseline. The thresholds are in ADR-0020,
+confirmed by the owner on 2026-11-15. Milestone 5 is narrowed to projects, environments,
+generated test cases and suites, run history and reports. The other modules wait until after the
+first pilot. The business model is in [`business/BUSINESS_MODEL.md`](business/BUSINESS_MODEL.md).
+
+*(Restored on 2026-11-16: the merge of the rebrand into this branch took the rebrand's copy of this file
+and dropped this section for a day.)*
+
+**3.1 → 3.2 → 3.3 → 3.4 → 4 → 5 → 6 → 7 → 8** *(the order before 2026-11-15, kept for the record)*
 
 ### Milestone 3.1 — Milestone 3 debt
 The confirmed defects in [`security-register.md`](security-register.md): the authorization gate

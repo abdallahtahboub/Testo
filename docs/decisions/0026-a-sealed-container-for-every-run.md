@@ -88,6 +88,41 @@ Developers who run those tests locally need Docker, as the owner accepted.
   - Container mode is the only mode in which a customer target may be reached. Process mode must never
     be used in production once customer targets exist.
 
+## Built (2026-11-16)
+- **Commands:** `SealedRun` holds every Docker command, so the dispatcher and the gate tests start
+  containers the same way. `DockerCommand` runs them as argument lists, never through a shell.
+- **Dispatcher:** with `Execution:Isolation = Container`, `RunDispatcher`:
+  - creates the network, starts the outer proxy, joins it to the network, and waits for it to say ready;
+  - runs the worker with the job on standard input;
+  - on a stop or the kill switch, kills the worker's container, not only the client attached to it;
+  - removes everything at the end.
+- **Leftovers:** the clean-up pass removes labelled containers and networks whose run or check is no
+  longer going.
+- **Customer targets:** `MayTargetAsync` refuses any origin that is not ours unless the isolation is
+  `Container`.
+- **The worker image** (`src/Autestiq.Worker/Dockerfile`) is built from the published worker on top of
+  Playwright's image at the package's version, so it needs no compiler and no package feed.
+  - Playwright marks its bundled driver executable the first time it runs, which a read-only root
+    forbids, so the image does it when it is built.
+  - The outer proxy is the same image with `--proxy` and the allowed origins as arguments. It never
+    sees the job, so it never sees the run's secrets.
+- **The gate tests** (`SealedContainerTests`) start a real proxy and worker and probe from inside the
+  worker. They check:
+  - the proxy answers;
+  - a service on the Docker host, the database port, the metadata address and the internet are all
+    refused;
+  - asking the proxy to fetch the host is refused;
+  - the worker is not root, cannot write its root and holds no credential;
+  - the run's network has `inhibit_ipv4`.
+- **The end-to-end test:** `ContainerDispatcherTests` carries a run out in container mode and checks
+  that it ends with a verdict and leaves no container or network.
+- **CI** builds the image before the tests.
+- **A bug the end-to-end test found**, which was not the container's: the dispatcher wrote a run's
+  result back over the copy it loaded before the worker started. Since step 3 the heartbeat changes
+  that row while the run goes, so every run longer than one heartbeat ended as an infrastructure
+  error. It now reads the run again first. `ARunLongerThanSeveralHeartbeats_KeepsTheResultItsWorkerGave`
+  fails without that.
+
 ## Alternatives considered
 - **Proxy inside the worker container only.** Rejected: the policy would again be enforced by code in
   the compromised process, which is the problem this ADR exists to fix.

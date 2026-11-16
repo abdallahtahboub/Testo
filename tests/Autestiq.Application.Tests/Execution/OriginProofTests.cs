@@ -127,11 +127,20 @@ public sealed class OriginProofTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task MayTarget_TheOrganizationsOwnVerifiedProof_IsAllowed()
+    public async Task MayTarget_TheOrganizationsOwnVerifiedProof_IsAllowed_FromASealedContainer()
     {
         await ProofAsync(_first, verifiedUntil: Now + TimeSpan.FromDays(10));
 
-        Assert.True(await MayTargetAsync("HTTPS://shop.example/"));
+        Assert.True(await MayTargetAsync("HTTPS://shop.example/", WorkerIsolation.Container));
+    }
+
+    [Fact]
+    public async Task MayTarget_AVerifiedProof_IsNotEnough_WhenWorkersRunAsProcesses()
+    {
+        // ADR-0026: a customer's origin is reached only from a sealed container, whatever the proof says.
+        await ProofAsync(_first, verifiedUntil: Now + TimeSpan.FromDays(10));
+
+        Assert.False(await MayTargetAsync(Shop, WorkerIsolation.Process));
     }
 
     [Fact]
@@ -207,13 +216,13 @@ public sealed class OriginProofTests : IAsyncLifetime
         return await act(scope.ServiceProvider.GetRequiredService<IOriginProofService>());
     }
 
-    private async Task<bool> MayTargetAsync(string target)
+    private async Task<bool> MayTargetAsync(string target, WorkerIsolation isolation = WorkerIsolation.Container)
     {
         await using var database = _database.NewContext();
         var run = new TestRun { OrganizationId = _first, ScenarioId = "basket", TargetOrigin = target };
 
         return await RunDispatcher.MayTargetAsync(
-            database, run, new ExecutionOptions { TargetOrigin = "http://127.0.0.1:5090" }, Now, TestContext.Current.CancellationToken);
+            database, run, new ExecutionOptions { TargetOrigin = "http://127.0.0.1:5090", Isolation = isolation }, Now, TestContext.Current.CancellationToken);
     }
 
     private async Task ProofAsync(Guid organization, DateTimeOffset verifiedUntil)

@@ -332,6 +332,18 @@ public sealed class ExecutionOptions
     /// <summary>How often a dispatcher looks for runs that lost theirs.</summary>
     public TimeSpan ReapInterval { get; set; } = TimeSpan.FromSeconds(30);
 
+    /// <summary>
+    /// How workers run (ADR-0026). <see cref="WorkerIsolation.Container"/> is required before any origin that is not
+    /// ours may be a target; <see cref="WorkerIsolation.Process"/> is for development, tests and the benchmark.
+    /// </summary>
+    public WorkerIsolation Isolation { get; set; } = WorkerIsolation.Process;
+
+    /// <summary>The worker image, for <see cref="WorkerIsolation.Container"/>.</summary>
+    public string WorkerImage { get; set; } = "autestiq-worker:latest";
+
+    /// <summary>The Docker command line, for <see cref="WorkerIsolation.Container"/>.</summary>
+    public string Docker { get; set; } = "docker";
+
     /// <summary>Where the worker executable is, for the dispatcher to launch.</summary>
     public string? WorkerPath { get; set; }
 

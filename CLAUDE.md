@@ -161,6 +161,10 @@ The product needs PostgreSQL. `docker run -e POSTGRES_PASSWORD=postgres -p 5432:
 or point `ConnectionStrings__Autestiq` elsewhere. The data and browser tests create a database of
 their own per class and find the server through `AUTESTIQ_TEST_DB`.
 
+- The sealed-run tests (ADR-0026) need Docker and the worker image, built once after a change to the worker:
+  `dotnet publish src/Autestiq.Worker -c Release -o artifacts/worker -p:UseAppHost=false`, then
+  `docker build -f src/Autestiq.Worker/Dockerfile -t autestiq-worker:dev artifacts/worker`. Without them those tests fail,
+  by design: a gate that is skipped is not a gate.
 - Tests run on Microsoft.Testing.Platform (xUnit v3): filters are `--filter-class`, `--filter-method`, `--filter-namespace`; reports are `--report-xunit-trx` and `--report-xunit-html`.
 - The browser tests start the application themselves; nothing needs to run beforehand.
 - Browser for the tests, once per machine after a build: `pwsh tests/Autestiq.E2E/bin/Debug/net10.0/playwright.ps1 install chromium`. Or point `E2E_BROWSER_PATH` at an existing Chromium executable.

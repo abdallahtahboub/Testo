@@ -139,6 +139,51 @@ public sealed class RunDispatcher(
         {
             DispatcherLog.Reaped(logger, reaped);
         }
+
+        if (options.CurrentValue.Isolation == WorkerIsolation.Container)
+        {
+            await RemoveLeftoversAsync(scope.ServiceProvider.GetRequiredService<AutestiqDbContext>(), cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// Removes the containers and networks of runs and checks that are no longer going: what a dispatcher that died
+    /// mid-run left behind. Found by their label, which holds the run's or the check's id.
+    /// </summary>
+    private async Task RemoveLeftoversAsync(AutestiqDbContext database, CancellationToken cancellationToken)
+    {
+        var docker = new DockerCommand(options.CurrentValue.Docker);
+        var ids = new HashSet<Guid>();
+
+        foreach (var command in new[] { SealedRun.ListContainers(), SealedRun.ListNetworks() })
+        {
+            var (exitCode, output, _) = await docker.RunAsync(command, cancellationToken).ConfigureAwait(false);
+
+            if (exitCode != 0)
+            {
+                return;
+            }
+
+            foreach (var line in output.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                if (Guid.TryParse(line, out var id))
+                {
+                    ids.Add(id);
+                }
+            }
+        }
+
+        foreach (var id in ids)
+        {
+            // Across organizations: the dispatcher serves all of them, and only reads here.
+            var going = await database.TestRuns.IgnoreQueryFilters().AnyAsync(run => run.Id == id && run.Status == RunStatus.Running, cancellationToken).ConfigureAwait(false)
+                || await database.OriginProofs.IgnoreQueryFilters().AnyAsync(proof => proof.Id == id && proof.Status == OriginProofStatus.Checking, cancellationToken).ConfigureAwait(false);
+
+            if (!going)
+            {
+                await RemoveSealedRunAsync(docker, id).ConfigureAwait(false);
+            }
+        }
     }
 
     /// <summary>
@@ -311,6 +356,11 @@ public sealed class RunDispatcher(
 
             var (result, stopped) = await RunWorkerAsync(job, run.OrganizationId, stoppingToken).ConfigureAwait(false);
 
+            // Read again before writing back: while the worker ran, heartbeats and perhaps a cancellation changed the
+            // row, and saving the copy loaded before it started is refused as a stale write. That turned every run
+            // longer than a heartbeat into an infrastructure error.
+            await database.Entry(run).ReloadAsync(stoppingToken).ConfigureAwait(false);
+
             if (stopped != Stop.None)
             {
                 // Said on the run as it is written back: the copy loaded before the worker started knows nothing
@@ -368,6 +418,13 @@ public sealed class RunDispatcher(
         if (options.TrustedLocalOrigins().Any(origin => Origins.Normalize(origin) == target))
         {
             return true;
+        }
+
+        // An origin that is not ours is reached only from a sealed container (ADR-0026). A proof is not enough on
+        // its own: in process mode a browser exploit could reach whatever this machine can.
+        if (options.Isolation != WorkerIsolation.Container)
+        {
+            return false;
         }
 
         // Across the filter, because the dispatcher has no organization of its own; held to the run's below.
@@ -550,18 +607,29 @@ public sealed class RunDispatcher(
         ArgumentNullException.ThrowIfNull(run);
         ArgumentNullException.ThrowIfNull(options);
 
+        var trusted = options.TrustedLocalOrigins();
+        var target = Origins.Normalize(run.TargetOrigin);
+        var ours = trusted.Any(origin => Origins.Normalize(origin) == target);
+
         return new WorkerJob(
             run.Id,
             run.ScenarioId,
             run.TargetOrigin,
-            AllowedOrigins: [],
-            TrustedLocalOrigins: options.TrustedLocalOrigins(),
+
+            // A target that is not ours is allowed by name, and every address it resolves to is judged as public.
+            AllowedOrigins: ours || target is null ? [] : [target],
+            TrustedLocalOrigins: trusted,
             RunBudget.Default,
             workspace);
     }
 
     /// <summary>Launches the worker, feeds it the job, and waits for its result or a cancellation.</summary>
-    private async Task<(WorkerResult Result, Stop Stopped)> RunWorkerAsync(WorkerJob job, Guid organizationId, CancellationToken stoppingToken)
+    private Task<(WorkerResult Result, Stop Stopped)> RunWorkerAsync(WorkerJob job, Guid organizationId, CancellationToken stoppingToken) =>
+        options.CurrentValue.Isolation == WorkerIsolation.Container
+            ? RunInContainerAsync(job, organizationId, stoppingToken)
+            : RunAsProcessAsync(job, organizationId, stoppingToken);
+
+    private async Task<(WorkerResult Result, Stop Stopped)> RunAsProcessAsync(WorkerJob job, Guid organizationId, CancellationToken stoppingToken)
     {
         var runId = job.RunId;
         var workerPath = options.CurrentValue.WorkerPath
@@ -588,27 +656,137 @@ public sealed class RunDispatcher(
         var output = process.StandardOutput.ReadToEndAsync(stoppingToken);
         var errors = process.StandardError.ReadToEndAsync(stoppingToken);
 
-        var stopped = await WaitOrStopAsync(process, runId, organizationId, stoppingToken).ConfigureAwait(false);
+        var stopped = await WaitOrStopAsync(process, runId, organizationId, () => KillProcess(process), stoppingToken).ConfigureAwait(false);
 
-        var text = (await output.ConfigureAwait(false)).Trim();
+        return (ResultOf(job, (await output.ConfigureAwait(false)).Trim(), (await errors.ConfigureAwait(false)).Trim()), stopped);
+    }
 
-        if (text.Length == 0)
+    private static Task KillProcess(Process process)
+    {
+        try
         {
-            var why = (await errors.ConfigureAwait(false)).Trim();
-
-            return (new WorkerResult(
-                job.RunId,
-                RunStatus.InfrastructureError,
-                why.Length > 0 ? FirstLine(why) : "The worker produced no result.",
-                timeProvider.GetUtcNow(),
-                timeProvider.GetUtcNow(),
-                [],
-                0), stopped);
+            process.Kill(entireProcessTree: true);
+        }
+        catch (InvalidOperationException)
+        {
+            // It finished between the check and the kill.
         }
 
-        return (JsonSerializer.Deserialize<WorkerResult>(text, Wire)
-            ?? throw new JsonException("The worker's result could not be read."), stopped);
+        return Task.CompletedTask;
     }
+
+    /// <summary>
+    /// Carries a run out in a sealed container (ADR-0026): a network of its own, the outer proxy on it as the only
+    /// way out, the worker locked down on it, and all three removed afterwards however the run ended.
+    /// </summary>
+    private async Task<(WorkerResult Result, Stop Stopped)> RunInContainerAsync(WorkerJob job, Guid organizationId, CancellationToken stoppingToken)
+    {
+        var current = options.CurrentValue;
+        var docker = new DockerCommand(current.Docker);
+        var runId = job.RunId;
+
+        try
+        {
+            if (await PrepareSealedRunAsync(docker, job, current.WorkerImage, stoppingToken).ConfigureAwait(false) is not { } proxy)
+            {
+                return (Infrastructure(job, "The run's sealed container could not be prepared."), Stop.None);
+            }
+
+            // The worker runs as an unprivileged user and writes its screenshots into the run's own folder.
+            if (!OperatingSystem.IsWindows())
+            {
+                File.SetUnixFileMode(job.ArtifactDirectory, (UnixFileMode)0b111_111_111);
+            }
+
+            using var process = Process.Start(docker.Start(SealedRun.RunWorker(runId, current.WorkerImage, job.ArtifactDirectory, proxy), input: true))
+                ?? throw new InvalidOperationException("The worker's container would not start.");
+
+            // Inside the container the workspace is at a fixed place; the worker names files relative to it.
+            await process.StandardInput.WriteAsync(JsonSerializer.Serialize(job with { ArtifactDirectory = SealedRun.Workspace }, Wire)).ConfigureAwait(false);
+            process.StandardInput.Close();
+
+            var output = process.StandardOutput.ReadToEndAsync(stoppingToken);
+            var errors = process.StandardError.ReadToEndAsync(stoppingToken);
+
+            // A stop kills the container, not only the client attached to it, which would leave the browser running.
+            var stopped = await WaitOrStopAsync(
+                    process,
+                    runId,
+                    organizationId,
+                    () => docker.RunAsync(SealedRun.KillWorker(runId), CancellationToken.None),
+                    stoppingToken)
+                .ConfigureAwait(false);
+
+            return (ResultOf(job, (await output.ConfigureAwait(false)).Trim(), (await errors.ConfigureAwait(false)).Trim()), stopped);
+        }
+        finally
+        {
+            // Whatever happened. A dispatcher that dies before this line leaves labelled leftovers, which the clean-up
+            // pass removes.
+            await RemoveSealedRunAsync(docker, runId).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>The run's network and outer proxy, ready; the proxy's address on the network, or null.</summary>
+    private async Task<string?> PrepareSealedRunAsync(DockerCommand docker, WorkerJob job, string image, CancellationToken cancellationToken)
+    {
+        var runId = job.RunId;
+        var origins = job.AllowedOrigins.Count > 0 ? job.AllowedOrigins : [Origins.Normalize(job.TargetOrigin) ?? job.TargetOrigin];
+
+        foreach (var command in new[] { SealedRun.CreateNetwork(runId), SealedRun.RunProxy(runId, image, origins), SealedRun.ConnectProxy(runId) })
+        {
+            var (exitCode, _, errors) = await docker.RunAsync(command, cancellationToken).ConfigureAwait(false);
+
+            if (exitCode != 0)
+            {
+                DispatcherLog.ContainerStep(logger, runId, command[0] + " " + command[1], FirstLine(errors));
+                return null;
+            }
+        }
+
+        var address = (await docker.RunAsync(SealedRun.ProxyAddress(runId), cancellationToken).ConfigureAwait(false)).Output;
+
+        if (address.Length == 0)
+        {
+            return null;
+        }
+
+        // Ready when it says so, and not before: a worker that starts first finds nothing to talk to.
+        var deadline = timeProvider.GetUtcNow() + TimeSpan.FromSeconds(20);
+
+        while (timeProvider.GetUtcNow() < deadline)
+        {
+            if ((await docker.RunAsync(SealedRun.ProxyLogs(runId), cancellationToken).ConfigureAwait(false)).Output.Contains(SealedRun.ProxyReady, StringComparison.Ordinal))
+            {
+                return $"{address}:{SealedRun.ProxyPort.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+            }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(200), timeProvider, cancellationToken).ConfigureAwait(false);
+        }
+
+        return null;
+    }
+
+    private static async Task RemoveSealedRunAsync(DockerCommand docker, Guid runId)
+    {
+        await docker.RunAsync(SealedRun.RemoveContainers(runId), CancellationToken.None).ConfigureAwait(false);
+        await docker.RunAsync(SealedRun.RemoveNetwork(runId), CancellationToken.None).ConfigureAwait(false);
+    }
+
+    /// <summary>What a worker's standard output says, or an infrastructure error saying why there is nothing.</summary>
+    private WorkerResult ResultOf(WorkerJob job, string output, string errors)
+    {
+        if (output.Length == 0)
+        {
+            return Infrastructure(job, errors.Length > 0 ? FirstLine(errors) : "The worker produced no result.");
+        }
+
+        return JsonSerializer.Deserialize<WorkerResult>(output, Wire)
+            ?? throw new JsonException("The worker's result could not be read.");
+    }
+
+    private WorkerResult Infrastructure(WorkerJob job, string reason) =>
+        new(job.RunId, RunStatus.InfrastructureError, reason, timeProvider.GetUtcNow(), timeProvider.GetUtcNow(), [], 0);
 
     /// <summary>Why a worker was stopped before it finished.</summary>
     private enum Stop
@@ -623,7 +801,7 @@ public sealed class RunDispatcher(
     /// the process; the worker's own handler reports what it managed, and if it cannot, the result is empty and
     /// becomes a cancellation here.
     /// </summary>
-    private async Task<Stop> WaitOrStopAsync(Process process, Guid runId, Guid organizationId, CancellationToken stoppingToken)
+    private async Task<Stop> WaitOrStopAsync(Process process, Guid runId, Guid organizationId, Func<Task> kill, CancellationToken stoppingToken)
     {
         var finished = process.WaitForExitAsync(stoppingToken);
         var nextBeat = timeProvider.GetUtcNow() + options.CurrentValue.HeartbeatInterval;
@@ -653,15 +831,7 @@ public sealed class RunDispatcher(
             {
                 DispatcherLog.Cancelling(logger, runId);
 
-                try
-                {
-                    process.Kill(entireProcessTree: true);
-                }
-                catch (InvalidOperationException)
-                {
-                    // It finished between the check and the kill.
-                }
-
+                await kill().ConfigureAwait(false);
                 await finished.ConfigureAwait(false);
                 return stop;
             }
@@ -837,6 +1007,9 @@ internal static partial class DispatcherLog
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Run {RunId} was asked to stop.")]
     public static partial void Cancelling(ILogger logger, Guid runId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Run {RunId}: preparing its sealed container failed at '{Step}': {Reason}")]
+    public static partial void ContainerStep(ILogger logger, Guid runId, string step, string reason);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Run {RunId} was refused: its target is not proved.")]
     public static partial void Refused(ILogger logger, Guid runId);

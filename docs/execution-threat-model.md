@@ -111,6 +111,11 @@ on it from our IP range. We are then the attacker, with logs to prove it.
 record or a file we fetch at a well-known path, re-checked periodically. Milestone 3.3 sidesteps
 this entirely by shipping its own target, which is why it is safe to build first.
 
+**The container gate (Milestone 3.5, 2026-11-16).** With `Execution:Isolation = Container` every run gets
+a sealed network of its own, the outer proxy in a container of its own as the only thing on it, and a
+locked-down worker; customer targets are refused in any other mode. `SealedContainerTests` checks the
+gate on every CI run (ADR-0026).
+
 **Built (Milestone 3.5, 2026-11-16), by file; the owner chose the file method first.**
 - An organization asks for a token for an origin (`IOriginProofService`), 256 random bits, one per
   organization and origin. A second organization asking for the same origin gets a token of its own.

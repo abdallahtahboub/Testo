@@ -61,6 +61,12 @@ jobs:
       - name: Build
         run: dotnet build Autestiq.slnx --configuration Release --no-restore
 
+      # The sealed-run gate tests (ADR-0026) start real containers from this image, and fail without it.
+      - name: Build the worker image
+        run: |
+          dotnet publish src/Autestiq.Worker --configuration Release --output artifacts/worker -p:UseAppHost=false
+          docker build --file src/Autestiq.Worker/Dockerfile --tag autestiq-worker:dev artifacts/worker
+
       - name: Install the browser for the Playwright tests
         run: >
           dotnet build tests/Autestiq.E2E --configuration Release --no-restore

@@ -112,6 +112,331 @@ namespace Autestiq.Persistence.Migrations
                     b.ToTable("audit_entries");
                 });
 
+            modelBuilder.Entity("Autestiq.Domain.Costs.PriceVersion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<DateTimeOffset>("EffectiveFrom")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("effective_from");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("note");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("integer")
+                        .HasColumnName("number");
+
+                    b.Property<string>("PublishedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("published_by");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_price_versions");
+
+                    b.HasIndex("Number")
+                        .IsUnique()
+                        .HasDatabaseName("ix_price_versions_number");
+
+                    b.ToTable("price_versions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("01a1e500-0000-7000-8000-000000000201"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Currency = "USD",
+                            EffectiveFrom = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Note = "Machine and storage are estimates until hosting is chosen; model prices are Anthropic's list prices on 2026-11-16.",
+                            Number = 1,
+                            PublishedBy = "seed",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        });
+                });
+
+            modelBuilder.Entity("Autestiq.Domain.Costs.RunCost", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("amount");
+
+                    b.Property<bool>("Billable")
+                        .HasColumnType("boolean")
+                        .HasColumnName("billable");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<bool>("Estimate")
+                        .HasColumnType("boolean")
+                        .HasColumnName("estimate");
+
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("idempotency_key");
+
+                    b.Property<string>("Item")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("item");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<long>("Per")
+                        .HasColumnType("bigint")
+                        .HasColumnName("per");
+
+                    b.Property<string>("Period")
+                        .IsRequired()
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)")
+                        .HasColumnName("period");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(18, 9)
+                        .HasColumnType("numeric(18,9)")
+                        .HasColumnName("price");
+
+                    b.Property<Guid>("PriceVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("price_version_id");
+
+                    b.Property<long>("Quantity")
+                        .HasColumnType("bigint")
+                        .HasColumnName("quantity");
+
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("run_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_run_costs");
+
+                    b.HasIndex("PriceVersionId")
+                        .HasDatabaseName("ix_run_costs_price_version_id");
+
+                    b.HasIndex("RunId")
+                        .HasDatabaseName("ix_run_costs_run_id");
+
+                    b.HasIndex("OrganizationId", "IdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ix_run_costs_organization_id_idempotency_key");
+
+                    b.HasIndex("OrganizationId", "Period")
+                        .HasDatabaseName("ix_run_costs_organization_id_period");
+
+                    b.ToTable("run_costs");
+                });
+
+            modelBuilder.Entity("Autestiq.Domain.Costs.UnitPrice", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<bool>("Estimate")
+                        .HasColumnType("boolean")
+                        .HasColumnName("estimate");
+
+                    b.Property<string>("Item")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("item");
+
+                    b.Property<long>("Per")
+                        .HasColumnType("bigint")
+                        .HasColumnName("per");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(18, 9)
+                        .HasColumnType("numeric(18,9)")
+                        .HasColumnName("price");
+
+                    b.Property<Guid>("PriceVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("price_version_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_unit_prices");
+
+                    b.HasIndex("PriceVersionId", "Item")
+                        .IsUnique()
+                        .HasDatabaseName("ix_unit_prices_price_version_id_item");
+
+                    b.ToTable("unit_prices", t =>
+                        {
+                            t.HasCheckConstraint("ck_unit_prices_per_positive", "per > 0");
+                        });
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("01a1e500-0000-7000-8000-000000000211"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Estimate = true,
+                            Item = "browser-second",
+                            Per = 3600L,
+                            Price = 0.10m,
+                            PriceVersionId = new Guid("01a1e500-0000-7000-8000-000000000201"),
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("01a1e500-0000-7000-8000-000000000212"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Estimate = true,
+                            Item = "storage-byte-month",
+                            Per = 1073741824L,
+                            Price = 0.023m,
+                            PriceVersionId = new Guid("01a1e500-0000-7000-8000-000000000201"),
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("01a1e500-0000-7000-8000-000000000213"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Estimate = false,
+                            Item = "model-input-token:claude-sonnet-5-5",
+                            Per = 1000000L,
+                            Price = 2.00m,
+                            PriceVersionId = new Guid("01a1e500-0000-7000-8000-000000000201"),
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("01a1e500-0000-7000-8000-000000000214"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Estimate = false,
+                            Item = "model-output-token:claude-sonnet-5-5",
+                            Per = 1000000L,
+                            Price = 10.00m,
+                            PriceVersionId = new Guid("01a1e500-0000-7000-8000-000000000201"),
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("01a1e500-0000-7000-8000-000000000215"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Estimate = false,
+                            Item = "model-input-token:claude-opus-5-5",
+                            Per = 1000000L,
+                            Price = 4.00m,
+                            PriceVersionId = new Guid("01a1e500-0000-7000-8000-000000000201"),
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("01a1e500-0000-7000-8000-000000000216"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Estimate = false,
+                            Item = "model-output-token:claude-opus-5-5",
+                            Per = 1000000L,
+                            Price = 20.00m,
+                            PriceVersionId = new Guid("01a1e500-0000-7000-8000-000000000201"),
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("01a1e500-0000-7000-8000-000000000217"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Estimate = false,
+                            Item = "model-input-token:claude-haiku-5-5",
+                            Per = 1000000L,
+                            Price = 0.10m,
+                            PriceVersionId = new Guid("01a1e500-0000-7000-8000-000000000201"),
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("01a1e500-0000-7000-8000-000000000218"),
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Estimate = false,
+                            Item = "model-output-token:claude-haiku-5-5",
+                            Per = 1000000L,
+                            Price = 0.50m,
+                            PriceVersionId = new Guid("01a1e500-0000-7000-8000-000000000201"),
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        });
+                });
+
             modelBuilder.Entity("Autestiq.Domain.Execution.Artifact", b =>
                 {
                     b.Property<Guid>("Id")
@@ -292,6 +617,11 @@ namespace Autestiq.Persistence.Migrations
                     b.Property<bool>("CancellationRequested")
                         .HasColumnType("boolean")
                         .HasColumnName("cancellation_requested");
+
+                    b.Property<decimal?>("Cost")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("cost");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1211,6 +1541,26 @@ namespace Autestiq.Persistence.Migrations
                     b.ToTable("usage_events");
                 });
 
+            modelBuilder.Entity("Autestiq.Domain.Costs.RunCost", b =>
+                {
+                    b.HasOne("Autestiq.Domain.Costs.PriceVersion", null)
+                        .WithMany()
+                        .HasForeignKey("PriceVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_run_costs_price_versions_price_version_id");
+                });
+
+            modelBuilder.Entity("Autestiq.Domain.Costs.UnitPrice", b =>
+                {
+                    b.HasOne("Autestiq.Domain.Costs.PriceVersion", null)
+                        .WithMany("Prices")
+                        .HasForeignKey("PriceVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_unit_prices_price_versions_price_version_id");
+                });
+
             modelBuilder.Entity("Autestiq.Domain.Execution.Artifact", b =>
                 {
                     b.HasOne("Autestiq.Domain.Execution.TestRun", null)
@@ -1317,6 +1667,11 @@ namespace Autestiq.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_projects_organizations_organization_id");
+                });
+
+            modelBuilder.Entity("Autestiq.Domain.Costs.PriceVersion", b =>
+                {
+                    b.Navigation("Prices");
                 });
 
             modelBuilder.Entity("Autestiq.Domain.Execution.TestRun", b =>

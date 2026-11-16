@@ -15,6 +15,7 @@ internal sealed class TestRunConfiguration : IEntityTypeConfiguration<TestRun>
         builder.Property(run => run.TargetOrigin).HasMaxLength(500).IsRequired();
         builder.Property(run => run.Status).HasConversion<string>().HasMaxLength(30).IsRequired();
         builder.Property(run => run.FailureReason).HasMaxLength(2000);
+        builder.Property(run => run.Cost).HasPrecision(18, 6);
 
         // Runs are numbered within a project, which is how people refer to them.
         builder.HasIndex(run => new { run.OrganizationId, run.ProjectId, run.Number }).IsUnique();

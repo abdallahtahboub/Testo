@@ -49,6 +49,12 @@ public sealed class TestRun : Entity, IBelongsToOrganization
     /// </summary>
     public long ReservedSeconds { get; set; }
 
+    /// <summary>
+    /// What the run cost us, in the price book's currency: the sum of its cost rows, written in the same save as they
+    /// are (ADR-0029). <c>null</c> until its result is written back.
+    /// </summary>
+    public decimal? Cost { get; set; }
+
     /// <summary>Who asked for the run, for the per-person limit on starts. Empty for a run nobody started by hand.</summary>
     public Guid? RequestedBy { get; set; }
 

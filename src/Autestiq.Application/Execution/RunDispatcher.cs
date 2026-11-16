@@ -9,6 +9,7 @@ using Autestiq.Contracts.Execution;
 using Autestiq.Domain.Execution;
 using Autestiq.Application.Usage;
 using Autestiq.Contracts.Usage;
+using Autestiq.Domain.Usage;
 using Autestiq.Persistence;
 
 namespace Autestiq.Application.Execution;
@@ -1042,7 +1043,9 @@ public sealed class RunDispatcher(
 
             // What the run used, in the same save as its result, so neither is ever written without the other. Each
             // event's key names the run, so a result written back twice records nothing twice.
-            foreach (var usage in Usage.UsageMeter.ForRun(run, result, billable, artifactBytes, timeProvider.GetUtcNow()))
+            var used = Usage.UsageMeter.ForRun(run, result, billable, artifactBytes, timeProvider.GetUtcNow());
+
+            foreach (var usage in used)
             {
                 var known = await database.UsageEvents.IgnoreQueryFilters()
                     .AnyAsync(existing => existing.OrganizationId == usage.OrganizationId && existing.IdempotencyKey == usage.IdempotencyKey, cancellationToken)
@@ -1054,12 +1057,50 @@ public sealed class RunDispatcher(
                 }
             }
 
+            await RecordCostAsync(database, run, used, result.FinishedAt, cancellationToken).ConfigureAwait(false);
+
             run.ReservedSeconds = 0;
 
             await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         DispatcherLog.Finished(logger, run.Id, run.Status);
+    }
+
+    /// <summary>
+    /// What the run cost us, in the same save as its usage (ADR-0029): each quantity at the price in force when the run
+    /// finished. Rows already recorded for the run are kept as they are, so a result written back twice, or after a
+    /// new price version, changes no cost already recorded; the run's total is the sum of what is stored.
+    /// </summary>
+    private async Task RecordCostAsync(AutestiqDbContext database, TestRun run, IReadOnlyList<UsageEvent> used, DateTimeOffset finishedAt, CancellationToken cancellationToken)
+    {
+        // Prices are shared by every organization; they are outside the tenant boundary and carry no filter to skip.
+        var prices = await Costs.CostMeter.InForceAsync(database, finishedAt, cancellationToken).ConfigureAwait(false);
+
+        if (prices is null)
+        {
+            DispatcherLog.NoPriceInForce(logger, run.Id, finishedAt);
+            return;
+        }
+
+        // Cost rows are the run's organization's; the dispatcher has no organization in context, so it names the run.
+        var recorded = await database.RunCosts.IgnoreQueryFilters()
+            .Where(cost => cost.OrganizationId == run.OrganizationId && cost.RunId == run.Id)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        var unpriced = new List<string>();
+        var added = Costs.CostMeter.ForRun(run, used, prices, unpriced)
+            .Where(cost => recorded.TrueForAll(known => known.IdempotencyKey != cost.IdempotencyKey))
+            .ToList();
+
+        foreach (var item in unpriced)
+        {
+            DispatcherLog.Unpriced(logger, run.Id, item, prices.Number);
+        }
+
+        database.RunCosts.AddRange(added);
+        run.Cost = recorded.Sum(cost => cost.Amount) + added.Sum(cost => cost.Amount);
     }
 
     private static async Task<Guid?> StoreScreenshotAsync(
@@ -1139,6 +1180,12 @@ public sealed class RunDispatcher(
 /// <summary>What the dispatcher says about itself.</summary>
 internal static partial class DispatcherLog
 {
+    [LoggerMessage(Level = LogLevel.Error, Message = "Run {RunId} finished at {FinishedAt}, before any price version took effect: its cost is not recorded.")]
+    public static partial void NoPriceInForce(ILogger logger, Guid runId, DateTimeOffset finishedAt);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Run {RunId} used {Item}, which price version {Version} has no price for: that part of its cost is not recorded.")]
+    public static partial void Unpriced(ILogger logger, Guid runId, string item, int version);
+
     [LoggerMessage(Level = LogLevel.Error, Message = "The run dispatcher's loop failed.")]
     public static partial void LoopFailed(ILogger logger, Exception exception);
 

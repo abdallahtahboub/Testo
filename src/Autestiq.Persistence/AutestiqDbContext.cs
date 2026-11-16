@@ -75,6 +75,15 @@ public class AutestiqDbContext(DbContextOptions<AutestiqDbContext> options, IOrg
     /// <summary>The usage ledger: what each organization used, recorded once, never changed.</summary>
     public DbSet<UsageEvent> UsageEvents => Set<UsageEvent>();
 
+    /// <summary>What things cost us, by version; never changed once written.</summary>
+    public DbSet<Domain.Costs.PriceVersion> PriceVersions => Set<Domain.Costs.PriceVersion>();
+
+    /// <summary>The prices in each price version.</summary>
+    public DbSet<Domain.Costs.UnitPrice> UnitPrices => Set<Domain.Costs.UnitPrice>();
+
+    /// <summary>What each run cost us, item by item, recorded once, never changed.</summary>
+    public DbSet<Domain.Costs.RunCost> RunCosts => Set<Domain.Costs.RunCost>();
+
     /// <summary>Organizations' proofs that they control the origins they want tested.</summary>
     public DbSet<OriginProof> OriginProofs => Set<OriginProof>();
 

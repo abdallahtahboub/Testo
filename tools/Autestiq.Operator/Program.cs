@@ -1,42 +1,28 @@
+using System.Globalization;
 using Microsoft.Extensions.DependencyInjection;
 using Autestiq.Application;
+using Autestiq.Application.Costs;
 using Autestiq.Application.Usage;
 using Autestiq.Contracts.Identity;
+using Autestiq.Domain.Costs;
 using Autestiq.Persistence;
 
-// Commands for operators, against the product's database (ADR-0028).
+// Commands for operators, against the product's database (ADR-0028, ADR-0029).
 //
-//   dotnet run --project tools/Autestiq.Operator -- set-plan <organization-slug> <plan-code> [version] --by <name>
+//   set-plan <organization-slug> <plan-code> [version] --by <name>
+//   set-prices [--browser-hour <usd>] [--storage-gb-month <usd>] [--model <id> <input-usd> <output-usd>]...
+//              [--estimate] [--from <yyyy-MM-ddTHH:mm:ssZ>] --note <text> --by <name>
+//   cost-report [yyyy-MM] [--eur-rate <euros per dollar>]
 //
-// The database is the one ConnectionStrings__Autestiq names. --by is who made the change, for the audit log.
+// Run them with: dotnet run --project tools/Autestiq.Operator -- <command> ...
+// The database is the one ConnectionStrings__Autestiq names. --by is who made the change, for the record.
 
-if (args is not ["set-plan", var slug, var plan, .. var rest])
-{
-    Console.Error.WriteLine("Usage: set-plan <organization-slug> <plan-code> [version] --by <name>");
-    return 2;
-}
-
-var by = Option(rest, "--by");
-var versionText = rest.FirstOrDefault(argument => !argument.StartsWith("--", StringComparison.Ordinal) && argument != by);
 var connection = Environment.GetEnvironmentVariable("ConnectionStrings__Autestiq");
 
-if (by is null || connection is null)
+if (connection is null)
 {
-    Console.Error.WriteLine("Say who is making the change with --by, and set ConnectionStrings__Autestiq.");
+    Console.Error.WriteLine("Set ConnectionStrings__Autestiq to the product's database.");
     return 2;
-}
-
-int? version = null;
-
-if (versionText is not null)
-{
-    if (!int.TryParse(versionText, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var number))
-    {
-        Console.Error.WriteLine($"'{versionText}' is not a version number.");
-        return 2;
-    }
-
-    version = number;
 }
 
 var services = new ServiceCollection()
@@ -49,16 +35,53 @@ var services = new ServiceCollection()
 await using (services.ConfigureAwait(false))
 {
     using var scope = services.CreateScope();
+    var database = scope.ServiceProvider.GetRequiredService<AutestiqDbContext>();
 
-    var outcome = await PlanAssignment.MoveAsync(
-            scope.ServiceProvider.GetRequiredService<AutestiqDbContext>(),
-            scope.ServiceProvider.GetRequiredService<TenantWriteScope>(),
-            TimeProvider.System,
-            slug,
-            plan,
-            version,
-            by,
-            CancellationToken.None)
+    return args switch
+    {
+        ["set-plan", var slug, var plan, .. var rest] => await SetPlanAsync(database, scope.ServiceProvider.GetRequiredService<TenantWriteScope>(), slug, plan, rest).ConfigureAwait(false),
+        ["set-prices", .. var rest] => await SetPricesAsync(database, rest).ConfigureAwait(false),
+        ["cost-report", .. var rest] => await CostReportAsync(database, rest).ConfigureAwait(false),
+        _ => Usage(),
+    };
+}
+
+static int Usage()
+{
+    Console.Error.WriteLine("""
+        Usage:
+          set-plan <organization-slug> <plan-code> [version] --by <name>
+          set-prices [--browser-hour <usd>] [--storage-gb-month <usd>] [--model <id> <input-usd> <output-usd>]... [--estimate] [--from <instant>] --note <text> --by <name>
+          cost-report [yyyy-MM] [--eur-rate <euros per dollar>]
+        """);
+    return 2;
+}
+
+static async Task<int> SetPlanAsync(AutestiqDbContext database, TenantWriteScope writeScope, string slug, string plan, string[] rest)
+{
+    var by = Option(rest, "--by");
+    var versionText = rest.FirstOrDefault(argument => !argument.StartsWith("--", StringComparison.Ordinal) && argument != by);
+
+    if (by is null)
+    {
+        Console.Error.WriteLine("Say who is making the change with --by.");
+        return 2;
+    }
+
+    int? version = null;
+
+    if (versionText is not null)
+    {
+        if (!int.TryParse(versionText, NumberStyles.None, CultureInfo.InvariantCulture, out var number))
+        {
+            Console.Error.WriteLine($"'{versionText}' is not a version number.");
+            return 2;
+        }
+
+        version = number;
+    }
+
+    var outcome = await PlanAssignment.MoveAsync(database, writeScope, TimeProvider.System, slug, plan, version, by, CancellationToken.None)
         .ConfigureAwait(false);
 
     Console.WriteLine(outcome switch
@@ -72,6 +95,124 @@ await using (services.ConfigureAwait(false))
     });
 
     return outcome is PlanChange.Moved or PlanChange.Unchanged ? 0 : 1;
+}
+
+static async Task<int> SetPricesAsync(AutestiqDbContext database, string[] rest)
+{
+    var by = Option(rest, "--by");
+    var note = Option(rest, "--note");
+
+    if (by is null || note is null)
+    {
+        Console.Error.WriteLine("Say who is publishing the prices with --by, and where they came from with --note.");
+        return 2;
+    }
+
+    // --estimate marks the machine and storage figures given here as estimates; model prices are list prices.
+    var estimate = rest.Contains("--estimate", StringComparer.Ordinal);
+    var changes = new List<PriceChange>();
+
+    if (Option(rest, "--browser-hour") is { } hour)
+    {
+        if (Money(hour) is not { } price)
+        {
+            return NotMoney(hour);
+        }
+
+        changes.Add(new PriceChange(CostItems.BrowserSecond, price, PriceCatalog.SecondsPerHour, estimate));
+    }
+
+    if (Option(rest, "--storage-gb-month") is { } storage)
+    {
+        if (Money(storage) is not { } price)
+        {
+            return NotMoney(storage);
+        }
+
+        changes.Add(new PriceChange(CostItems.StorageByteMonth, price, PriceCatalog.BytesPerGigabyte, estimate));
+    }
+
+    for (var index = Array.IndexOf(rest, "--model"); index >= 0; index = Array.IndexOf(rest, "--model", index + 1))
+    {
+        if (index + 3 >= rest.Length || Money(rest[index + 2]) is not { } input || Money(rest[index + 3]) is not { } output)
+        {
+            Console.Error.WriteLine("--model takes a model id, then its input and output price per million tokens.");
+            return 2;
+        }
+
+        changes.Add(new PriceChange(CostItems.ModelInputToken(rest[index + 1]), input, PriceCatalog.TokensPerMillion, Estimate: false));
+        changes.Add(new PriceChange(CostItems.ModelOutputToken(rest[index + 1]), output, PriceCatalog.TokensPerMillion, Estimate: false));
+    }
+
+    DateTimeOffset? from = null;
+
+    if (Option(rest, "--from") is { } fromText)
+    {
+        if (!DateTimeOffset.TryParse(fromText, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var parsed))
+        {
+            Console.Error.WriteLine($"'{fromText}' is not an instant.");
+            return 2;
+        }
+
+        from = parsed;
+    }
+
+    if (changes.Count == 0)
+    {
+        Console.Error.WriteLine("Give at least one price to change.");
+        return 2;
+    }
+
+    var (outcome, version) = await PriceBook.PublishAsync(database, TimeProvider.System, changes, from, note, by, CancellationToken.None)
+        .ConfigureAwait(false);
+
+    Console.WriteLine(outcome switch
+    {
+        PricePublication.Published when version is not null => $"Published price version {version.Number}, in force from {version.EffectiveFrom:u}. Costs already recorded keep their prices.",
+        PricePublication.InThePast => "A price version cannot take effect in the past: costs already recorded used the prices in force then.",
+        PricePublication.NotAPrice => "Every price must be zero or more.",
+        PricePublication.Unchanged => "Those are the prices already in the latest version. Nothing was published.",
+        _ => outcome.ToString(),
+    });
+
+    return outcome == PricePublication.Published ? 0 : 1;
+}
+
+static async Task<int> CostReportAsync(AutestiqDbContext database, string[] rest)
+{
+    var month = rest.FirstOrDefault(argument => !argument.StartsWith("--", StringComparison.Ordinal) && argument != Option(rest, "--eur-rate"))
+        ?? UsageMeter.PeriodOf(TimeProvider.System.GetUtcNow());
+
+    if (!DateTime.TryParseExact(month, "yyyy-MM", CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
+    {
+        Console.Error.WriteLine($"'{month}' is not a month: write it as yyyy-MM.");
+        return 2;
+    }
+
+    decimal? euros = null;
+
+    if (Option(rest, "--eur-rate") is { } rateText)
+    {
+        if (Money(rateText) is not { } rate || rate == 0)
+        {
+            return NotMoney(rateText);
+        }
+
+        euros = rate;
+    }
+
+    var lines = await CostReport.ForMonthAsync(database, month, CancellationToken.None).ConfigureAwait(false);
+    Console.Write(CostReportText.Write(month, lines, euros));
+    return 0;
+}
+
+static decimal? Money(string text) =>
+    decimal.TryParse(text, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var value) ? value : null;
+
+static int NotMoney(string text)
+{
+    Console.Error.WriteLine($"'{text}' is not an amount: write it with a point, such as 0.10.");
+    return 2;
 }
 
 static string? Option(string[] arguments, string name)

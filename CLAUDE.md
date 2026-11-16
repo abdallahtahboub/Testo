@@ -2,7 +2,7 @@
 
 **Autestiq** is an AI-assisted QA platform covering the whole ISTQB testing journey.
 
-**Current state (2026-11-16, after Milestones 3.5 and 3.6).** Identity, organizations, memberships,
+**Current state (2026-11-16, after Milestones 3.5 to 3.8 part 1).** Identity, organizations, memberships,
 invitations, roles and the audit log are **real**, on PostgreSQL. The design system and the public website
 (29 routes, English and German, placeholders labeled) are real. **Test runs are real** against our own target
 applications: the demo shop, a clinic and an invoice desk, each with switchable defects. **Customer-site safety
@@ -10,7 +10,9 @@ is built (3.5)**: proof of site ownership, a kill switch, reaping of stuck runs,
 (ADR-0026). Customer origins are refused outside container mode, and no screen asks for one until Milestone 5.
 **Usage and quotas are built (3.6)**: an append-only usage ledger, per-organization concurrency and monthly
 minutes with reservation, and rate limits on starts (ADR-0027). **The plan catalog is built (3.7)**: versioned
-plans in the database, each organization on a version it keeps until an operator moves it (ADR-0028). **The AI planner is built and measured, not yet in the product**: on runs recorded before
+plans in the database, each organization on a version it keeps until an operator moves it (ADR-0028). **Cost per run
+is built (3.8, part 1)**: a price book of versions that never change, cost rows per run at the price in force when it
+finished, and an operator cost report (ADR-0029); machine and storage prices are estimates until hosting is chosen. **The AI planner is built and measured, not yet in the product**: on runs recorded before
 the locator work it was correct on 32 of 36 runs of the first twelve scenarios and 50 of 52 of the held-out
 twenty, with no false positives, below the ADR-0020 gate on the first set. Nothing in the product calls a
 model, and no claim about AI-found defects is supported. **Exporting plans as tests** is built for Python and
@@ -59,6 +61,7 @@ Project and namespace prefix is `Autestiq.`. The `T` prefix on design-system com
 - `Autestiq.Web` is the composition root only: DI, routing, `App.razor`, dashboard host page. It is the **only** project that references the ASP.NET Core server framework; libraries never use `HttpContext` or other server-only types.
 - A new project needs a rule in `DependencyRulesTests` and a row in `docs/architecture.md` §4.
 - Each module exposes **one** public `IFeatureModule` class named `<Name>Module`, with a lowercase id and the flag `Module.<Name>` (listed in `appsettings.json`); everything else is `internal` where possible. The host registers it with one line: `builder.Services.AddAutestiqModule<NameModule>()`.
+- **Prices live in the price book, never in code** (ADR-0029). A cost is a stored row at the price in force when its run finished; a price change is a new version from `set-prices`, effective now or later. The planner gets its token prices from the book and does not plan without them.
 - Nav items, dashboard widgets and capabilities are **registered**, never hard-coded in the shell.
 - All data access via interfaces from `Contracts`. Components never `new` a service or touch mock data directly.
 - Service methods: async, `CancellationToken` last parameter, return Contracts DTOs (`record`s), lists via `PagedResult<T>`.

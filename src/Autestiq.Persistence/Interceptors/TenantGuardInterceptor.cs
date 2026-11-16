@@ -63,11 +63,11 @@ public sealed class TenantGuardInterceptor(
 
     private static void RefuseToRewriteHistory(EntityEntry entry)
     {
-        // The audit log and the usage ledger: written once, never changed or deleted.
+        // The audit log, the ledgers and the catalogs: written once, never changed or deleted.
         if (entry.Entity is IAppendOnly && entry.State is EntityState.Modified or EntityState.Deleted)
         {
             throw new InvalidOperationException(
-                $"The {(entry.Entity switch { AuditEntry => "audit log", Domain.Plans.PlanVersion => "plan catalog", _ => "usage ledger" })} is append-only: an entry cannot be changed or deleted. "
+                $"The {(entry.Entity switch { AuditEntry => "audit log", Domain.Plans.PlanVersion => "plan catalog", Domain.Costs.PriceVersion or Domain.Costs.UnitPrice => "price book", Domain.Costs.RunCost => "cost ledger", _ => "usage ledger" })} is append-only: an entry cannot be changed or deleted. "
                 + "If an entry is wrong, write another one that says so.");
         }
     }

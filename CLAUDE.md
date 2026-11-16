@@ -12,9 +12,11 @@ is built (3.5)**: proof of site ownership, a kill switch, reaping of stuck runs,
 minutes with reservation, and rate limits on starts (ADR-0027). **The plan catalog is built (3.7)**: versioned
 plans in the database, each organization on a version it keeps until an operator moves it (ADR-0028). **Cost per run
 is built (3.8, part 1)**: a price book of versions that never change, cost rows per run at the price in force when it
-finished, and an operator cost report (ADR-0029); machine and storage prices are estimates until hosting is chosen. **The AI planner is built and measured, not yet in the product**: on runs recorded before
-the locator work it was correct on 32 of 36 runs of the first twelve scenarios and 50 of 52 of the held-out
-twenty, with no false positives, below the ADR-0020 gate on the first set. Nothing in the product calls a
+finished, and an operator cost report (ADR-0029); machine and storage prices are estimates until hosting is chosen.
+**The AI planner is built and measured, not yet in the product**: after the prompt fix of 2026-11-16,
+the four benchmark sets (96 runs) give 92% correct on sound applications, 100% of defects caught where a
+verdict was reached, and no false positive. The held-out set shaped that fix, so **the ADR-0020 gate is not
+yet passed**: a new held-out set decides. Nothing in the product calls a
 model, and no claim about AI-found defects is supported. **Exporting plans as tests** is built for Python and
 verified (ADR-0023), reachable through the benchmark tool only. Everything else about the testing journey —
 plans, requirements, cases, suites, environments, defects, reporting — **does not exist yet**: six of the

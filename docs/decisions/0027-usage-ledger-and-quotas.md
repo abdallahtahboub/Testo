@@ -25,7 +25,8 @@ catalog and per-run cost records are later milestones (3.7, 3.8, Phase D).
 5. **A hard stop at the quota for now** (the owner's choice): when a month's billable minutes and the time reserved
    by running runs reach the plan's allowance, new runs are refused until the next month or a plan change. Overage
    waits for billing.
-6. **Limits from configuration until the plan catalog exists** (`Usage:Plans`, confirmed by the owner, not
+6. **Limits from configuration until the plan catalog exists** *(superseded by ADR-0028 on 2026-11-16: limits now
+   come from the plan version an organization holds; the figures are unchanged)* (`Usage:Plans`, confirmed by the owner, not
    published): Developer 100 minutes a month and 1 run at once, Starter 500 and 2, Growth 2,500 and 5, Scale 10,000
    and 10. Every organization's plan is "trial" today, which is the Developer plan. An unknown plan name gets the
    smallest plan, never an unlimited one.

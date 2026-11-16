@@ -22,12 +22,16 @@ public enum UsageCategory
 /// <param name="BrowserMinutesAllowed">The plan's monthly allowance.</param>
 /// <param name="BillableRuns">Runs that reached the customer's application and did not end by our fault.</param>
 /// <param name="ConcurrentRunsAllowed">How many runs the plan lets run at once.</param>
+/// <param name="PlanName">The plan the organization is on.</param>
+/// <param name="PlanVersion">The version of it, which is what the limits come from.</param>
 public sealed record OrganizationUsage(
     string Month,
     long BrowserMinutesUsed,
     long BrowserMinutesAllowed,
     long BillableRuns,
-    int ConcurrentRunsAllowed);
+    int ConcurrentRunsAllowed,
+    string PlanName,
+    int PlanVersion);
 
 /// <summary>Reading an organization's usage. Requires <see cref="Identity.Permission.Read"/>.</summary>
 public interface IUsageService

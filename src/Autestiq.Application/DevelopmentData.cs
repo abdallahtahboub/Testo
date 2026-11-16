@@ -63,7 +63,6 @@ public static class DevelopmentData
             Name = "Northwind Software",
             Slug = "northwind",
             DataRegion = "eu-central",
-            Plan = "trial",
         };
 
         database.Organizations.Add(organization);

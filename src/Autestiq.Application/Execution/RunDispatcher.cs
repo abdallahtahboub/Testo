@@ -31,7 +31,6 @@ namespace Autestiq.Application.Execution;
 public sealed class RunDispatcher(
     IServiceScopeFactory scopes,
     IOptionsMonitor<ExecutionOptions> options,
-    IOptionsMonitor<UsageOptions> usage,
     TimeProvider timeProvider,
     ILogger<RunDispatcher> logger)
     : BackgroundService
@@ -152,7 +151,7 @@ public sealed class RunDispatcher(
             return false;
         }
 
-        var room = await RoomForAsync(database, organizationId, usage.CurrentValue, timeProvider.GetUtcNow(), cancellationToken).ConfigureAwait(false);
+        var room = await RoomForAsync(database, organizationId, timeProvider.GetUtcNow(), cancellationToken).ConfigureAwait(false);
 
         if (room.UsedUp)
         {
@@ -199,28 +198,20 @@ public sealed class RunDispatcher(
     public readonly record struct Room(int ConcurrentRunsLeft, long SecondsLeft, bool UsedUp);
 
     /// <summary>
-    /// An organization's room: its plan's limits, less its running runs, its billable seconds this month and the
+    /// An organization's room: its plan version's limits (ADR-0028), less its running runs, its billable seconds this month and the
     /// seconds its running runs have reserved. Only running runs count, so a run that finished, was cancelled or was
     /// reaped holds nothing.
     /// </summary>
     public static async Task<Room> RoomForAsync(
         AutestiqDbContext database,
         Guid organizationId,
-        UsageOptions usageOptions,
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(database);
-        ArgumentNullException.ThrowIfNull(usageOptions);
 
         // The dispatcher has no organization in context; every query below is held to the one it asks about.
-        var plan = await database.Organizations
-            .Where(organization => organization.Id == organizationId)
-            .Select(organization => organization.Plan)
-            .FirstOrDefaultAsync(cancellationToken)
-            .ConfigureAwait(false);
-
-        var limit = usageOptions.For(plan);
+        var limit = await Entitlements.ForAsync(database, organizationId, cancellationToken).ConfigureAwait(false);
         var period = UsageMeter.PeriodOf(now);
 
         var running = await database.TestRuns.IgnoreQueryFilters()

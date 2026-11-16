@@ -9,8 +9,8 @@ applications: the demo shop, a clinic and an invoice desk, each with switchable 
 is built (3.5)**: proof of site ownership, a kill switch, reaping of stuck runs, and a sealed container per run
 (ADR-0026). Customer origins are refused outside container mode, and no screen asks for one until Milestone 5.
 **Usage and quotas are built (3.6)**: an append-only usage ledger, per-organization concurrency and monthly
-minutes with reservation, and rate limits on starts (ADR-0027). Plan limits come from configuration until the
-plan catalog (3.7). **The AI planner is built and measured, not yet in the product**: on runs recorded before
+minutes with reservation, and rate limits on starts (ADR-0027). **The plan catalog is built (3.7)**: versioned
+plans in the database, each organization on a version it keeps until an operator moves it (ADR-0028). **The AI planner is built and measured, not yet in the product**: on runs recorded before
 the locator work it was correct on 32 of 36 runs of the first twelve scenarios and 50 of 52 of the held-out
 twenty, with no false positives, below the ADR-0020 gate on the first set. Nothing in the product calls a
 model, and no claim about AI-found defects is supported. **Exporting plans as tests** is built for Python and

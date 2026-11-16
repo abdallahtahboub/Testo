@@ -65,6 +65,8 @@ src/
 tools/
   Autestiq.Benchmark                // BUILT (M3.4): measures the planner against the baseline.
                                  // Not shipped; run by hand, and in CI for its self-check
+  Autestiq.Operator                 // BUILT (M3.7): operator commands against the database, such as
+                                 // moving an organization to another plan version (ADR-0028). Not shipped
   Autestiq.Api                      // PLANNED: REST host for CI integrations, over the same use cases
 tests/
   Autestiq.UI.Tests                 // bUnit: UI.Shared components + module components

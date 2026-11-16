@@ -121,8 +121,8 @@ Found by opening it in a browser rather than by a test, and worth remembering:
 
 ## Inventory — what is actually built
 
-> Last verified on 2026-11-16, after Milestones 3.5 and 3.6: `dotnet build` clean, every test green locally,
-> and 3.5 green in CI.
+> Last verified on 2026-11-16, after Milestone 3.7: `dotnet build` clean, every test green locally; 3.5 and
+> 3.6 green in CI.
 > This table is authoritative. Where another document disagrees with it, this one is right.
 
 | Area | State |
@@ -135,7 +135,8 @@ Found by opening it in a browser rather than by a test, and worth remembering:
 | App area | **One placeholder page** at `/app`, plus the two execution pages. Signing in is required everywhere (D-1 closed in Milestone 3.1) |
 | Test runs: start, stop, rerun, steps, screenshots | **Real** for three scripted scenarios against our own demo target. No customer targets yet: no screen asks for one until Milestone 5 |
 | Customer-site safety (3.5) | **Real.** Proof of site ownership, kill switch, stuck-run reaping, loopback from configuration only, a sealed container per run (ADR-0026). Customer origins are refused outside container mode |
-| Usage and quotas (3.6) | **Real.** Append-only usage ledger, per-organization concurrency and monthly minutes with reservation, rate limits on starts (ADR-0027). Limits from configuration until the plan catalog (3.7); no screen shows usage yet |
+| Usage and quotas (3.6) | **Real.** Append-only usage ledger, per-organization concurrency and monthly minutes with reservation, rate limits on starts (ADR-0027). No screen shows usage yet |
+| Plan catalog (3.7) | **Real.** Versioned plans in the database, organizations on a version they keep until an operator moves them, limits read from that version (ADR-0028). No prices; an operator command changes plans; no screen |
 | Exporting tests (ADR-0023) | **Built, not in the product.** Python, verified 107 of 107; reached through the benchmark tool only |
 | AI planning: interface, vocabulary, validator, provider adapter, benchmark | **Built and measured; the planner is not usable.** 5 of 12 plans work on a sound application, 1 of 6 defects genuinely caught, 1 missed. Four faults the measurement exposed are fixed and **not yet re-measured**. Nothing in the product calls a model |
 | Browser execution: worker out of process, egress proxy, signed artifact links | **Real.** A sealed container per run in container mode (ADR-0026); process mode for development and tests |

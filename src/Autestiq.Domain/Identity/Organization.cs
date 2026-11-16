@@ -17,8 +17,12 @@ public sealed class Organization : Entity
     /// </summary>
     public required string DataRegion { get; set; }
 
-    /// <summary>A placeholder until billing exists (<c>docs/domain-model.md</c> §6).</summary>
-    public string Plan { get; set; } = "trial";
+    /// <summary>
+    /// The plan version the organization is on, which says what it may use (ADR-0028). It keeps this version until an
+    /// operator moves it; a new version of the same plan does not change it. New organizations start on
+    /// <see cref="Plans.PlanCatalog.StartingVersion"/>.
+    /// </summary>
+    public Guid PlanVersionId { get; set; } = Plans.PlanCatalog.StartingVersion;
 
     /// <summary>Whether the organization may be used.</summary>
     public OrganizationStatus Status { get; set; } = OrganizationStatus.Active;

@@ -7,6 +7,7 @@ using Autestiq.Application.Usage;
 using Autestiq.Contracts.Execution;
 using Autestiq.Contracts.Identity;
 using Autestiq.Contracts.Usage;
+using Autestiq.Domain.Plans;
 using Autestiq.Domain.Usage;
 
 namespace Autestiq.Application.Tests.Usage;
@@ -39,7 +40,6 @@ public sealed class ClaimLimitsTests : IAsyncLifetime
     private static RunDispatcher Dispatcher(ServiceProvider services, string? worker = null) => new(
         services.GetRequiredService<IServiceScopeFactory>(),
         new ChangeableOptions(new ExecutionOptions { WorkerPath = worker ?? ExecutionSupport.WaitingWorker(), MaxConcurrentRuns = 10 }),
-        ExecutionSupport.Usage(),
         TimeProvider.System,
         NullLogger<RunDispatcher>.Instance);
 
@@ -160,7 +160,7 @@ public sealed class ClaimLimitsTests : IAsyncLifetime
     public async Task ParallelRuns_CannotOverspend_TheSecondWaitsWhileTheFirstHoldsWhatIsLeft()
     {
         // Two at a time allowed, 90 seconds left: the first holds all 90, so the second has nothing to start with.
-        await PlanAsync(_first, "starter");
+        await PlanAsync(_first, PlanCatalog.StarterV1);
         await UsedAsync(_first, seconds: (500 * 60) - 90);
         var first = await ExecutionSupport.RunAsync(_database, _first, _firstProject);
         var second = await ExecutionSupport.RunAsync(_database, _first, _firstProject);
@@ -204,7 +204,7 @@ public sealed class ClaimLimitsTests : IAsyncLifetime
         Assert.Equal(0, (await ExecutionSupport.StoredAsync(_database, runId)).ReservedSeconds);
 
         await using var database = _database.NewContext();
-        var room = await RunDispatcher.RoomForAsync(database, _first, new UsageOptions(), DateTimeOffset.UtcNow, TestContext.Current.CancellationToken);
+        var room = await RunDispatcher.RoomForAsync(database, _first, DateTimeOffset.UtcNow, TestContext.Current.CancellationToken);
         Assert.Equal((100 * 60) - 5, room.SecondsLeft);
         Assert.Equal(1, room.ConcurrentRunsLeft);
     }
@@ -220,7 +220,7 @@ public sealed class ClaimLimitsTests : IAsyncLifetime
         });
 
         await using var database = _database.NewContext();
-        var room = await RunDispatcher.RoomForAsync(database, _first, new UsageOptions(), DateTimeOffset.UtcNow, TestContext.Current.CancellationToken);
+        var room = await RunDispatcher.RoomForAsync(database, _first, DateTimeOffset.UtcNow, TestContext.Current.CancellationToken);
 
         Assert.Equal(100 * 60, room.SecondsLeft);
         Assert.Equal(1, room.ConcurrentRunsLeft);
@@ -248,11 +248,11 @@ public sealed class ClaimLimitsTests : IAsyncLifetime
         }
     }
 
-    private async Task PlanAsync(Guid organization, string plan)
+    private async Task PlanAsync(Guid organization, Guid version)
     {
         await using var database = _database.NewContext();
         var stored = await database.Organizations.SingleAsync(candidate => candidate.Id == organization, TestContext.Current.CancellationToken);
-        stored.Plan = plan;
+        stored.PlanVersionId = version;
 
         using (_database.WriteScope.AllowWritingTo(organization))
         {

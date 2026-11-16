@@ -42,7 +42,8 @@ ADR-0020: every claim about a generated test rests on evidence from a run.
 ## Open questions for the owner
 - Which exporter to build first: Python is suggested. Every project chooses its own language once more
   than one exists.
-- Is the exported code a feature of every plan, or only of plans a person has approved?
+- ~~Is the exported code a feature of every plan, or only of plans a person has approved?~~ Decided on
+  2026-11-16: only approved plans; see "Decision: export only what a person approved" below.
 
 ## A finding from the independent application (2026-11-15)
 Microsoft's eShopOnWeb, the independent application chosen for a clean measurement, has no `data-testid`
@@ -78,5 +79,29 @@ names elements the same way the plan does.
 **Not built yet.** The language is to be a setting of each project, and projects do not exist yet
 (Milestone 5): until they do, the exporter is reached through the benchmark tool only, and nothing in the
 product offers an export. TypeScript, Java and C# are not built; each needs its own exporter and the same
-107-run check before it is offered. The second open question above — whether export is offered for every
-plan or only for plans a person has approved — is still the owner's.
+107-run check before it is offered.
+
+## Decision: export only what a person approved (2026-11-16)
+Decided by the owner on 2026-11-16, following the recommendation. A validated plan is not a correct plan:
+the validator checks that a plan can run, not that it checks the right thing. Inside the product a doubtful
+result is labelled (a partial plan that passes is inconclusive, a run carries its evidence). An exported test
+runs in the customer's CI on every build, without us and without those labels, so it must not leave the
+product before a person has confirmed it. Four ways an unapproved export goes wrong:
+- the model asserts the value the page shows today, and the page has a defect, so the test locks the defect
+  in and passes on every build: a false positive in the customer's CI;
+- a partial plan covering half of its scenario exports as an ordinary green test;
+- a plan checks the right message on the wrong form, and passes while testing nothing that was asked;
+- a timing-dependent plan exports as a flaky test, and the team learns to ignore red builds.
+
+**The rules, for when projects and approvals are built (Milestone 5):**
+1. **Every plan can be previewed as code** in the product, in the project's language, approved or not. A
+   preview is read, not downloaded or committed.
+2. **Only an approved plan can be exported**, and only after at least one run of it in the product, so that
+   the exported test rests on recorded evidence (ADR-0020 §3).
+3. **The file says who approved it**: the exported header carries the approver, the date, and the run it
+   passed, so that any test in a customer's repository can be traced to a person and to evidence.
+4. **A changed plan is unapproved.** Any edit, by a person or by a new planning run, clears the approval, and
+   the plan must be approved again before it can be exported again.
+
+Nothing in the product offers an export yet, so nothing changes in code today. These rules hold the
+`Autestiq.Export` exporter's eventual caller, not the exporter: it stays a pure template from plan to text.

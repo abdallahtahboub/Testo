@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 [assembly: AssemblyFixture(typeof(Autestiq.Worker.Tests.Support.DemoShopFixture))]
 
@@ -27,6 +28,16 @@ public sealed class DemoShopFixture : WebApplicationFactory<Program>, IAsyncLife
     public static string? BrowserPath =>
         Environment.GetEnvironmentVariable(ScenarioRunner.BrowserPathVariable)
         ?? Environment.GetEnvironmentVariable("E2E_BROWSER_PATH");
+
+    /// <summary>
+    /// Warnings and errors only. The shop logged every request it served, and in CI that buried the one line
+    /// naming a failed test under thousands of them, beyond what the log viewer shows.
+    /// </summary>
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        builder.ConfigureLogging(logging => logging.SetMinimumLevel(LogLevel.Warning));
+    }
 
     public ValueTask InitializeAsync()
     {

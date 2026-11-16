@@ -39,6 +39,7 @@ public static class PlanPrompt
             { "kind": "assertText",    "description": "...", "target": { "kind": "testId", "value": "basket-total" }, "text": "£53.25" },
             { "kind": "assertVisible", "description": "...", "target": { "kind": "testId", "value": "line-pot" } },
             { "kind": "assertNotVisible", "description": "...", "target": { "kind": "testId", "value": "line-pot" } },
+            { "kind": "select",        "description": "...", "target": { "kind": "roleAndName", "role": "combobox", "value": "Brand" }, "text": ".NET" },
             { "kind": "assertUrl",     "description": "...", "path": "/checkout" }
           ]
         }
@@ -54,6 +55,8 @@ public static class PlanPrompt
           or use=text, with within="..." when that was needed. The crawl tried them in that order and
           kept the first one that finds that element and nothing else, so name it exactly that way.
           use=none means nothing names it reliably: do not build a step on it.
+        - "select" chooses an option of a combobox: "text" is the option's label exactly as one of the
+          combobox's options="..." lists it.
         - "path" is a path within the application under test, starting with "/". You cannot name
           another host; a plan that tries is refused before it runs.
         - Every plan must check something. A plan with no assert* action is refused, because a run
@@ -157,6 +160,12 @@ public static class PlanPrompt
                 }
 
                 text.Append(" name=\"").Append(Sanitize(element.Name)).Append('"');
+
+                // A list's options, read from the page, so that a plan can choose one by its label.
+                if (element.Role == "combobox" && element.Text is { Length: > 0 } options)
+                {
+                    text.Append(" options=\"").Append(Sanitize(options)).Append('"');
+                }
 
                 if (element.Within is { Length: > 0 } within)
                 {

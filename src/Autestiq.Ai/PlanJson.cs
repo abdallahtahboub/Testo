@@ -172,10 +172,11 @@ public static class PlanJson
         ActionKind.AssertVisible => "assertvisible",
         ActionKind.AssertNotVisible => "assertnotvisible",
         ActionKind.AssertUrl => "asserturl",
+        ActionKind.Select => "select",
         _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "There is no word for that action."),
     };
 
-    /// <summary>The nine words a plan may use for an action. Anything else is not a plan.</summary>
+    /// <summary>The ten words a plan may use for an action. Anything else is not a plan.</summary>
     public static ActionKind? KindForWord(string? kind) => kind?.Trim().ToLowerInvariant() switch
     {
         "goto" => ActionKind.Goto,
@@ -187,6 +188,7 @@ public static class PlanJson
         "assertvisible" => ActionKind.AssertVisible,
         "assertnotvisible" => ActionKind.AssertNotVisible,
         "asserturl" => ActionKind.AssertUrl,
+        "select" => ActionKind.Select,
         _ => null,
     };
 

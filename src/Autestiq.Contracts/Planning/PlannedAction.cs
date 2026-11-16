@@ -47,6 +47,13 @@ public enum ActionKind
     /// the executor already has to locate the element either way.
     /// </remarks>
     AssertNotVisible = 9,
+
+    /// <summary>Choose the option of a list (a <c>select</c>) whose visible label is exactly the text.</summary>
+    /// <remarks>
+    /// Added on 2026-11-16, after eShopOnWeb showed that a shop's brand and type filters could not be used by any
+    /// plan. The option is named by its label, which the crawl reads from the page, never by a value.
+    /// </remarks>
+    Select = 10,
 }
 
 /// <summary>How a target is named. Two ways, both stable, neither of them a selector language.</summary>

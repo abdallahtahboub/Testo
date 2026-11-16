@@ -66,6 +66,13 @@ internal static class PlannedScenario
                 await (await LocateAsync(page, action).ConfigureAwait(false)).PressAsync(Required(action.Text, action)).ConfigureAwait(false);
                 break;
 
+            case ActionKind.Select:
+                // By the option's label, the words the crawl read and the plan copied; never by a value.
+                await (await LocateAsync(page, action).ConfigureAwait(false))
+                    .SelectOptionAsync(new SelectOptionValue { Label = Required(action.Text, action) })
+                    .ConfigureAwait(false);
+                break;
+
             case ActionKind.WaitFor:
                 await (await LocateAsync(page, action).ConfigureAwait(false)).WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Attached })
                     .ConfigureAwait(false);

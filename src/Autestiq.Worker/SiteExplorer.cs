@@ -57,6 +57,9 @@ internal static partial class SiteExplorer
     /// <summary>How many things a container says are tried as a scope before an element is called unreachable.</summary>
     private const int MaxLabelsTried = 8;
 
+    /// <summary>How many of a list's options are described. A country list has two hundred.</summary>
+    private const int MaxOptionsDescribed = 25;
+
     /// <summary>Elements that hold text and nothing else: what a test checks when nothing has a test id.</summary>
     private const string LeafTextSelector =
         "td:not(:has(*)), th:not(:has(*)), li:not(:has(*)), p:not(:has(*)), dd:not(:has(*)), dt:not(:has(*)), "
@@ -274,6 +277,11 @@ internal static partial class SiteExplorer
     {
         string text;
 
+        // In a tab of its own, closed afterwards. When there is no sitemap the browser shows its own error page
+        // a moment after the 404, and in the crawl's tab that late navigation interrupted the first real page,
+        // which was then left out: an application with no sitemap was described as having no pages at all.
+        var probe = await page.Context.NewPageAsync().ConfigureAwait(false);
+
         try
         {
             // Through the browser, not through Playwright's own request context: that context
@@ -281,7 +289,7 @@ internal static partial class SiteExplorer
             // the run's egress proxy and answered 403 without the request ever reaching the
             // application. Every connection a run makes goes through the proxy ADR-0018 gives it,
             // and the browser is what that proxy is attached to.
-            var response = await page.GotoAsync(
+            var response = await probe.GotoAsync(
                 new Uri(origin, "/sitemap.xml").AbsoluteUri,
                 new PageGotoOptions { WaitUntil = WaitUntilState.DOMContentLoaded }).ConfigureAwait(false);
 
@@ -296,6 +304,10 @@ internal static partial class SiteExplorer
         {
             // An application without a sitemap is the normal case, not a fault.
             return [];
+        }
+        finally
+        {
+            await probe.CloseAsync().ConfigureAwait(false);
         }
 
         var paths = new List<string>();
@@ -329,15 +341,29 @@ internal static partial class SiteExplorer
     /// </summary>
     private static async Task<IResponse?> Open(IPage page, string path)
     {
-        try
+        for (var attempt = 1; ; attempt++)
         {
-            return await page.GotoAsync(path, new PageGotoOptions { WaitUntil = WaitUntilState.Load });
-        }
-        catch (Exception exception) when (exception is PlaywrightException or TimeoutException)
-        {
-            return null;
+            try
+            {
+                return await page.GotoAsync(path, new PageGotoOptions { WaitUntil = WaitUntilState.Load });
+            }
+            catch (PlaywrightException exception) when (attempt < MaxOpenAttempts && WasInterrupted(exception))
+            {
+                // Another navigation took over before this one finished. The page asked for is fine, and is
+                // opened again rather than left out of the description.
+            }
+            catch (Exception exception) when (exception is PlaywrightException or TimeoutException)
+            {
+                return null;
+            }
         }
     }
+
+    /// <summary>How many times a page is opened when another navigation keeps taking over.</summary>
+    private const int MaxOpenAttempts = 3;
+
+    private static bool WasInterrupted(PlaywrightException exception) =>
+        exception.Message.Contains("interrupted by another navigation", StringComparison.Ordinal);
 
     private static async Task<PageSnapshot> DescribeAsync(IPage page, string path)
     {
@@ -375,7 +401,10 @@ internal static partial class SiteExplorer
                 // "searchbox", and a target by role "textbox" would never find it.
                 var described = ariaRole is { } given && Targets.NameableRoles.Contains(given) ? given : role;
 
-                found.Add((new SnapshotElement(described, name ?? testId ?? "", testId), element));
+                // A list says what it offers, so that a plan can choose by label.
+                var options = described == "combobox" ? await OptionsOfAsync(element).ConfigureAwait(false) : null;
+
+                found.Add((new SnapshotElement(described, name ?? testId ?? "", testId, options), element));
             }
         }
 
@@ -496,7 +525,10 @@ internal static partial class SiteExplorer
             ? ActionTarget.ByRole(element.Role, element.Name)
             : null;
 
-        var text = element.Text ?? (element.Role is "text" or "button" or "link" or "heading" ? element.Name : null);
+        // A list's Text is its options, not text it shows.
+        var text = element.Role == "combobox"
+            ? null
+            : element.Text ?? (element.Role is "text" or "button" or "link" or "heading" ? element.Name : null);
 
         return (byRole, text is { Length: > 0 } ? ActionTarget.ByText(text) : null);
     }
@@ -694,6 +726,24 @@ internal static partial class SiteExplorer
         }
 
         return await FirstTextAsync(element).ConfigureAwait(false);
+    }
+
+    /// <summary>A list's option labels, separated by " | ", as many as fit: the words a select action chooses by.</summary>
+    private static async Task<string?> OptionsOfAsync(ILocator list)
+    {
+        try
+        {
+            var labels = (await list.Locator("option").AllTextContentsAsync().ConfigureAwait(false))
+                .Select(Trim)
+                .OfType<string>()
+                .Take(MaxOptionsDescribed);
+
+            return Trim(string.Join(" | ", labels));
+        }
+        catch (Exception exception) when (exception is PlaywrightException or TimeoutException)
+        {
+            return null;
+        }
     }
 
     /// <summary>

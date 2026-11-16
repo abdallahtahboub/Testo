@@ -10,7 +10,7 @@ namespace Autestiq.Contracts.Planning;
 /// <param name="Role">Its ARIA role: <c>button</c>, <c>link</c>, <c>textbox</c>, <c>heading</c>.</param>
 /// <param name="Name">Its accessible name — what a person would call it.</param>
 /// <param name="TestId">Its <c>data-testid</c>, when it has one. The stable way to name it.</param>
-/// <param name="Text">What it reads, trimmed, when that is not already its name.</param>
+/// <param name="Text">What it reads, trimmed, when that is not already its name. For a list (combobox), its option labels, separated by " | ".</param>
 /// <param name="Within">
 /// When other elements on the page share its role and name, the text of the row, item, form or section it
 /// sits in, which is how a target tells it apart (ADR-0024). Absent when the element is unique.
@@ -105,8 +105,10 @@ public sealed record SiteSnapshot(string Origin, IReadOnlyList<PageSnapshot> Pag
             && string.Equals(element.Name, target.Value, StringComparison.OrdinalIgnoreCase)
             && WithinMatches(element, target),
 
+        // A list's Text is its options, not words the page shows as text.
         TargetKind.Text =>
-            string.Equals(element.Text ?? element.Name, target.Value, StringComparison.Ordinal)
+            element.Role != "combobox"
+            && string.Equals(element.Text ?? element.Name, target.Value, StringComparison.Ordinal)
             && WithinMatches(element, target),
 
         _ => false,

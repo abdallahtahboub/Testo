@@ -123,6 +123,7 @@ public static class PlanValidator
 
             case ActionKind.Press:
             case ActionKind.AssertText:
+            case ActionKind.Select:
                 if (action.Text is null or "")
                 {
                     yield return PlanningErrors.Incomplete;

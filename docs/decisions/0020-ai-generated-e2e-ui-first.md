@@ -44,6 +44,28 @@ runs were measured. Of those: 24 of 32 sound-desk runs correct (75%), the other 
 false negative; both defects measured were caught in both executions; no false positives. Below the gate
 on the sound desk. Four of the six defects are unmeasured. Recorded in `docs/ai-benchmark-invoices.md`.
 
+**Result, all four sets (2026-11-16), after the locator work (ADR-0024):** Claude Sonnet 5.5, run by the
+owner, one plan per scenario and defect state, two executions each; 72 sound-application runs and 24 with a
+defect on, across the demo shop (12 scenarios), its held-out set (20), the clinic (20) and the invoice desk (20).
+
+| | Demo | Held-out | Clinic | Invoices | Together |
+|---|---|---|---|---|---|
+| Correct on the sound application | 11/12 | 20/20 | 17/20 | 18/20 | 66/72 (92%) |
+| Defects caught where a verdict was reached | 6/6 | 5/6 | 5/5 | 6/6 | 22/23 (96%) |
+| False positives (a broken application passed) | 0 | 1 | 0 | 0 | **1** |
+
+**Not passed:** the gate allows no false positive. The one, `removing-tea-keeps-the-tray`, was a thorough
+plan that added the tea before the tray, copying the crawl's route instead of the scenario's order; in that
+order the "removes the first line" defect cannot show. The other misses: one false negative (an invented
+check on an address the clinic never uses), one run the provider could not be reached for, and five
+inconclusive runs, each a plan that declined to guess and said so: three about states the crawl never saw,
+one about a value generated at run time, and one too cautious about what "partial" means.
+Model cost per plan, at Sonnet 5.5's prices (ADR-0029): about $0.02 on the demo shop to $0.06 on the desk.
+
+**After this result the held-out set is no longer held out:** the prompt was changed because of it (order,
+invented checks, what partial means). A rerun of the four sets checks for regressions; the gate is decided
+by a new held-out set written after the planner is frozen.
+
 **Validation gate (confirmed by the owner on 2026-11-15):** before the first paid pilot, the planner
 is re-measured on the benchmark, with more scenarios than the current 12, and a published result is
 required that shows at least:

@@ -1,7 +1,8 @@
-# 0020 — The rename to Autestiq, and what was deliberately left alone
+# 0025 — The rename to Autestiq, and what was deliberately left alone
 
 - **Status:** Accepted
 - **Date:** 2026-11-14
+- **Number:** written as 0020 on the rebrand branch; renumbered 0025 when it met ADR-0020 to 0024 from the commercial-readiness branch, which already had those numbers in use.
 
 ## Context
 

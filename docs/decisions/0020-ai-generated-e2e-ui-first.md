@@ -66,6 +66,25 @@ Model cost per plan, at Sonnet 5.5's prices (ADR-0029): about $0.02 on the demo 
 invented checks, what partial means). A rerun of the four sets checks for regressions; the gate is decided
 by a new held-out set written after the planner is frozen.
 
+**Rerun after the prompt fix (2026-11-16), same sets, same model:**
+
+| | Demo | Held-out | Clinic | Invoices | Together |
+|---|---|---|---|---|---|
+| Correct on the sound application | 11/12 | 20/20 | 16/20 | 19/20 | 66/72 (92%) |
+| Defects caught where a verdict was reached | 6/6 | 6/6 | 5/5 | 6/6 | 23/23 (100%) |
+| False positives | 0 | 0 | 0 | 0 | **0** |
+| False negatives | 0 | 0 | 0 | 0 | 0 |
+
+The false positive and the false negative are gone; no correct run became wrong. Every remaining miss is an
+inconclusive run, one of two limits the prompt cannot fix without inviting guesses: a value the application
+generates at run time, which no action can read (the clinic's booking reference), and a state the crawl
+never saw (a signed-in page, a cancelled booking, a booked slot). Three clinic plans that passed before by
+guessing the reference BK-1001 now say the guess would prove nothing and end inconclusive, which is the
+honest answer. Model cost per plan: $0.02 (demo shop) to $0.05 (invoice desk).
+
+These figures meet the gate's numbers, **but they do not pass it**: the held-out set shaped the fix. The
+gate is decided by a new held-out set, written after this prompt and run against it unchanged.
+
 **Validation gate (confirmed by the owner on 2026-11-15):** before the first paid pilot, the planner
 is re-measured on the benchmark, with more scenarios than the current 12, and a published result is
 required that shows at least:

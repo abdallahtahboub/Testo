@@ -132,14 +132,7 @@ public sealed class RunDispatcher(
                 return;
             }
 
-            var job = new WorkerJob(
-                run.Id,
-                run.ScenarioId,
-                run.TargetOrigin,
-                AllowedOrigins: [],
-                TrustedLocalOrigins: [run.TargetOrigin],
-                RunBudget.Default,
-                workspace.FullName);
+            var job = JobFor(run, options.Value, workspace.FullName);
 
             var result = await RunWorkerAsync(job, runId, stoppingToken).ConfigureAwait(false);
 
@@ -162,6 +155,28 @@ public sealed class RunDispatcher(
                 // The artifacts are already copied out; a leftover temp directory is not worth failing for.
             }
         }
+    }
+
+    /// <summary>The job a worker is given for a run.</summary>
+    /// <remarks>
+    /// The origins the worker may reach on its own machine come from configuration only, never from the run
+    /// (R-11). A run's target is stored data, and once a customer can name one, taking it as trusted would
+    /// make the loopback exception a route to whatever listens on the worker's host. A stored target that
+    /// configuration does not name is reached, if at all, as any other address is: never on loopback.
+    /// </remarks>
+    public static WorkerJob JobFor(TestRun run, ExecutionOptions options, string workspace)
+    {
+        ArgumentNullException.ThrowIfNull(run);
+        ArgumentNullException.ThrowIfNull(options);
+
+        return new WorkerJob(
+            run.Id,
+            run.ScenarioId,
+            run.TargetOrigin,
+            AllowedOrigins: [],
+            TrustedLocalOrigins: options.TrustedLocalOrigins(),
+            RunBudget.Default,
+            workspace);
     }
 
     /// <summary>Launches the worker, feeds it the job, and waits for its result or a cancellation.</summary>

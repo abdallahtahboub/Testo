@@ -286,6 +286,15 @@ public sealed class ExecutionOptions
     /// </summary>
     public string TargetOrigin { get; set; } = "http://127.0.0.1:5090";
 
+    /// <summary>
+    /// Our own applications on the worker's machine, which a run may reach on loopback. Configuration only:
+    /// a run's stored target is never added (R-11). Empty means the one configured <see cref="TargetOrigin"/>.
+    /// </summary>
+    public List<string> LocalOrigins { get; init; } = [];
+
+    /// <summary>The origins a run may reach on loopback: <see cref="LocalOrigins"/>, or the configured target.</summary>
+    public IReadOnlyList<string> TrustedLocalOrigins() => LocalOrigins.Count > 0 ? [.. LocalOrigins] : [TargetOrigin];
+
     /// <summary>Where the worker executable is, for the dispatcher to launch.</summary>
     public string? WorkerPath { get; set; }
 

@@ -37,13 +37,18 @@ public sealed class TestDatabase : IAsyncDisposable
     /// <summary>Who the test is currently pretending to be.</summary>
     public TestPrincipal Principal { get; } = new();
 
+    /// <summary>
+    /// The server the tests use, without a database: <c>AUTESTIQ_TEST_DB</c>, or a local
+    /// PostgreSQL with the usual development credentials.
+    /// </summary>
+    public static string Server =>
+        Environment.GetEnvironmentVariable("AUTESTIQ_TEST_DB")
+            ?? "Host=localhost;Port=5432;Username=postgres;Password=postgres";
+
     /// <summary>Creates the database and brings it up to the current migration.</summary>
     public static async Task<TestDatabase> CreateAsync()
     {
-        var server = Environment.GetEnvironmentVariable("AUTESTIQ_TEST_DB")
-            ?? "Host=localhost;Port=5432;Username=postgres;Password=postgres";
-
-        var database = new TestDatabase(new NpgsqlConnectionStringBuilder(server) { Database = "postgres" }.ToString());
+        var database = new TestDatabase(new NpgsqlConnectionStringBuilder(Server) { Database = "postgres" }.ToString());
 
         try
         {

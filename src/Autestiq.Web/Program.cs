@@ -104,9 +104,10 @@ builder.Services.AddSingleton<RoutableAssemblies>();
 
 var app = builder.Build();
 
-// Before anything touches the database, so that a server which is not running is answered with
-// a sentence rather than with Entity Framework's connection error.
-await DatabaseStartup.EnsureReachableAsync(app.Services);
+// Before anything touches the database, so that a server which is not running, a database which
+// does not exist or a refused password is answered with a sentence rather than with Entity
+// Framework's connection error. In development the migrations below create a missing database.
+await DatabaseStartup.EnsureReachableAsync(app.Services, allowMissingDatabase: app.Environment.IsDevelopment());
 
 // A deployed application that writes invitation tokens to its log should not start (D-3).
 NotifierStartup.EnsureLinksReachPeople(app.Services, app.Environment.IsDevelopment());

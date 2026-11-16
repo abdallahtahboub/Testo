@@ -113,7 +113,7 @@ public static class Ledger
 
         if (client is { Length: > 0 })
         {
-            matching = matching.Where(invoice => invoice.Client.Contains(client.Trim(), StringComparison.OrdinalIgnoreCase));
+            matching = matching.Where(invoice => invoice.Client.Contains(client.Trim(), Defects.On(Defects.ClientSearchCaseSensitive) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase));
         }
 
         if (sort == "total")

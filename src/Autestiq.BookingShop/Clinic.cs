@@ -76,9 +76,13 @@ public static class Clinic
         var welcome = string.Equals(voucher?.Trim(), Voucher, StringComparison.OrdinalIgnoreCase);
         var ignored = service.Id == "package" && Defects.On(Defects.PackageIgnoresVoucher);
 
-        return welcome && !ignored
-            ? service.Price * (1 - VoucherRate)
+        var price = service.Id == "follow" && Defects.On(Defects.FollowUpPricedAsInitial)
+            ? Services.First(candidate => candidate.Id == "initial").Price
             : service.Price;
+
+        return welcome && !ignored
+            ? price * (1 - VoucherRate)
+            : price;
     }
 
     /// <summary>Records a booking and returns it.</summary>

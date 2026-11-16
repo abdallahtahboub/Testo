@@ -85,6 +85,15 @@ honest answer. Model cost per plan: $0.02 (demo shop) to $0.05 (invoice desk).
 These figures meet the gate's numbers, **but they do not pass it**: the held-out set shaped the fix. The
 gate is decided by a new held-out set, written after this prompt and run against it unchanged.
 
+**The unseen set (written 2026-11-16, after the prompt was frozen), which decides the gate:** twenty
+scenarios in `tools/Autestiq.Benchmark/UnseenScenarios.cs`, six for the demo shop, seven each for the clinic
+and the invoice desk, written without looking at how the planner handles them. Thirteen have a defect: ten
+existing ones in new words, and three no planner has seen, one per application (a basket line that ignores
+its quantity, a follow-up charged at the initial price, a client search that minds capitals). Every
+baseline passes its sound application and fails its broken one (33 of 33 runs), and every exported test
+agrees (ADR-0023). Run once per application with `--unseen` and `--target`, against the prompt of PR #46
+unchanged; nothing in the set changes after that run.
+
 **Validation gate (confirmed by the owner on 2026-11-15):** before the first paid pilot, the planner
 is re-measured on the benchmark, with more scenarios than the current 12, and a published result is
 required that shows at least:

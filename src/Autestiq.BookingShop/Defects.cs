@@ -31,9 +31,16 @@ public static class Defects
     /// <summary>A cancellation is shown as done but is never saved.</summary>
     public const string CancelNotSaved = "cancel-not-saved";
 
+    /// <summary>
+    /// A follow-up is charged at the initial assessment's price. The services and details pages still give
+    /// the right price, so only the booking's own total shows it. Added for the unseen set
+    /// (<c>UnseenScenarios</c>), which no planner had been tuned on.
+    /// </summary>
+    public const string FollowUpPricedAsInitial = "follow-up-priced-as-initial";
+
     /// <summary>Every defect, for the benchmark to iterate.</summary>
     public static IReadOnlyList<string> All { get; } =
-        [DoubleBooking, TimeShifted, CancelWrong, PackageIgnoresVoucher, EmailUnchecked, CancelNotSaved];
+        [DoubleBooking, TimeShifted, CancelWrong, PackageIgnoresVoucher, EmailUnchecked, CancelNotSaved, FollowUpPricedAsInitial];
 
     /// <summary>Whether this defect is switched on.</summary>
     public static bool On(string defect)

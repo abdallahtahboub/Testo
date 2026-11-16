@@ -9,5 +9,5 @@ public static class FluentTheme
     /// The brand color Fluent UI derives its own color ramp from. It must equal the light
     /// value of <c>--color-brand</c> in <c>tokens.css</c>; a test keeps the two in sync.
     /// </summary>
-    public const string BrandColor = "#2E3192";
+    public const string BrandColor = "#162B42";
 }

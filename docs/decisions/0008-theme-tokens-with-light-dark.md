@@ -14,7 +14,8 @@ JavaScript, and the two themes must not drift apart.
   Which one applies follows the CSS `color-scheme`:
   - default: `light dark`, so the browser follows the operating system;
   - `<html data-theme="light|dark">`: the visitor's explicit choice.
-- The choice is stored in the cookie `autestiq.theme`. The **server** reads it and renders
+- The choice is stored in the cookie `autestiq.theme` (named `testo.theme` before the rename to
+  Autestiq, ADR-0025). The **server** reads it and renders
   the attribute, so the first paint is already right. "Same as system" needs no cookie.
 - The theme switch is a plain form (works without JavaScript). `theme.js` only makes it
   instant where JavaScript runs (ADR-0004).

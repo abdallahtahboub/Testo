@@ -1,6 +1,6 @@
 # The Software Testing Journey in Autestiq
 
-> Working product name: **Autestiq** (placeholder, see `CLAUDE.md` → "Product name").
+> Product name: **Autestiq** (see `CLAUDE.md` → "Product name").
 > Status: **Accepted** (Step 0 approved on 2026-11-11).
 
 Autestiq supports the whole testing journey, following the **ISTQB test process** (CTFL v4.0).

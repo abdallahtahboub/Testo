@@ -26,20 +26,20 @@ This session did not run the test suite; the counts below come from grep and the
 
 | Capability | Evidence |
 |---|---|
-| Organizations, memberships, invitations, roles, permission matrix | `src/Testo.Domain/Identity/`, `src/Testo.Application/Identity/`, `tests/Testo.Application.Tests/Identity/PermissionMatrixTests.cs` |
+| Organizations, memberships, invitations, roles, permission matrix | `src/Autestiq.Domain/Identity/`, `src/Autestiq.Application/Identity/`, `tests/Autestiq.Application.Tests/Identity/PermissionMatrixTests.cs` |
 | Tenant isolation at the query layer | `IBelongsToOrganization` on entities; query filter and save guard. Two of three layers are the database's own (ADR-0012) |
 | Sign-in is required on app pages | D-1 fixed in Milestone 3.1 ([`security-register.md`](security-register.md)) |
 | Cross-tenant tenant-id trust, tokens in logs, rate limiting on sign-in | D-2, D-3, D-4 fixed in Milestone 3.1, each with a test that fails without the fix |
-| Append-only audit entries, enforced through EF | `src/Testo.Domain/Audit/AuditEntry.cs`, `TenantGuardInterceptor`. Raw SQL can still rewrite it (R-4) |
-| Test runs: queue, claim with optimistic concurrency, cancel that survives restart | `src/Testo.Application/Execution/RunDispatcher.cs`, `test_runs` table (R-2) |
-| Worker out of process, default-deny egress proxy, judged per resolved address | `src/Testo.Worker/Egress/EgressPolicy.cs`, 45 tests in `tests/Testo.Worker.Tests/Egress` (R-1) |
-| Artifact links: signed, expiring, tenant-filtered | `src/Testo.Application/Execution/ArtifactLinks.cs`, `ExecutionIsolationTests`, `ArtifactAccessTests` (R-3) |
-| Planner boundary: model plans once, closed vocabulary, validator | `src/Testo.Ai/`, `src/Testo.Application/Planning/`, ADR-0019 |
+| Append-only audit entries, enforced through EF | `src/Autestiq.Domain/Audit/AuditEntry.cs`, `TenantGuardInterceptor`. Raw SQL can still rewrite it (R-4) |
+| Test runs: queue, claim with optimistic concurrency, cancel that survives restart | `src/Autestiq.Application/Execution/RunDispatcher.cs`, `test_runs` table (R-2) |
+| Worker out of process, default-deny egress proxy, judged per resolved address | `src/Autestiq.Worker/Egress/EgressPolicy.cs`, 45 tests in `tests/Autestiq.Worker.Tests/Egress` (R-1) |
+| Artifact links: signed, expiring, tenant-filtered | `src/Autestiq.Application/Execution/ArtifactLinks.cs`, `ExecutionIsolationTests`, `ArtifactAccessTests` (R-3) |
+| Planner boundary: model plans once, closed vocabulary, validator | `src/Autestiq.Ai/`, `src/Autestiq.Application/Planning/`, ADR-0019 |
 | Per-run token and money ceilings ending as `BudgetExceeded` | ADR-0019 §6 |
-| Planner cost arithmetic per call | `src/Testo.Ai/AnthropicPlanner.cs:144-148` |
-| Measured planner benchmark with a self-check | `tools/Testo.Benchmark`, CI step "Check the benchmark can catch a planner that only pretends" (`.github/workflows/ci.yml`) |
+| Planner cost arithmetic per call | `src/Autestiq.Ai/AnthropicPlanner.cs:144-148` |
+| Measured planner benchmark with a self-check | `tools/Autestiq.Benchmark`, CI step "Check the benchmark can catch a planner that only pretends" (`.github/workflows/ci.yml`) |
 | CI: build with warnings as errors, all tests against PostgreSQL 16, Playwright browser tests | `.github/workflows/ci.yml` |
-| Public website, 29 routes, EN and DE, labeled placeholders | `src/Testo.Website/`, Milestone 4 in [`roadmap.md`](roadmap.md) |
+| Public website, 29 routes, EN and DE, labeled placeholders | `src/Autestiq.Website/`, Milestone 4 in [`roadmap.md`](roadmap.md) |
 
 Approximate size: about 525 `[Fact]`/`[Theory]` attributes across `tests/` (grep count, not a run).
 
@@ -47,7 +47,7 @@ Approximate size: about 525 `[Fact]`/`[Theory]` attributes across `tests/` (grep
 
 | Capability | What exists | What is missing |
 |---|---|---|
-| Plans and entitlements | `Organization.Plan` is a free string, default `"trial"` (`src/Testo.Domain/Identity/Organization.cs:20`) | No catalog, no versions, no limits. Nothing reads `Plan` except persistence (grep `\.Plan\b`) |
+| Plans and entitlements | `Organization.Plan` is a free string, default `"trial"` (`src/Autestiq.Domain/Identity/Organization.cs:20`) | No catalog, no versions, no limits. Nothing reads `Plan` except persistence (grep `\.Plan\b`) |
 | Concurrency control | `MaxConcurrentRuns = 2` in `ExecutionService.cs:293`, enforced by a per-process `SemaphoreSlim` in `RunDispatcher` | Not per organization. Not across processes. No tenant-level cap |
 | Cost control | Per-run planner budget (ADR-0019 §6); per-call cost computed | No per-organization spend limit (R-10). Prices are hard-coded options (`AnthropicPlanner.cs:34,37`), not a price version. No usage record |
 | Artifact storage | `IArtifactStore` with a local directory (`FileSystemArtifactStore`), one folder per organization and run | Object storage, retention, redaction (R-3). No deletion job exists (grep for purge or retention found nothing) |
@@ -55,7 +55,7 @@ Approximate size: about 525 `[Fact]`/`[Theory]` attributes across `tests/` (grep
 | Rate limiting | `AccountRateLimiting` on sign-in | Forwarded-address handling behind a proxy (R-8). Not on run starts or planner calls |
 | Organization data region | `Organization.DataRegion`, chosen at creation (`Organization.cs:14-17`) | Not enforced in routing or storage. No second region exists |
 | Two-factor | `Organization.RequiresTwoFactor` flag | Authenticator enrollment deferred (roadmap inventory) |
-| Projects | `Project` entity with `KeyPrefix` and `Status` (`src/Testo.Domain/Projects/Project.cs`) | No service, no UI, no project-scoped quota |
+| Projects | `Project` entity with `KeyPrefix` and `Status` (`src/Autestiq.Domain/Projects/Project.cs`) | No service, no UI, no project-scoped quota |
 | Email | Invitation and reset links are written to the log outside development (D-3 fixed by refusing to start that way in production) | Email delivery is deferred. Customers cannot yet be onboarded without an operator |
 
 ### Missing
@@ -75,7 +75,7 @@ Approximate size: about 525 `[Fact]`/`[Theory]` attributes across `tests/` (grep
   §5). Not built. Currently moot because `TargetOrigin` comes from configuration
   (`ExecutionService.cs:231,287`).
 - **Container per run.** Required before any browser runs against a customer target (R-1). Not built.
-- **GitHub and CI integration.** None. No API for CI (`tools/` lists `Testo.Api` as planned only).
+- **GitHub and CI integration.** None. No API for CI (`tools/` lists `Autestiq.Api` as planned only).
 - **Usage and quota dashboard for customers.** None.
 - **Product analytics.** None. Activation, retention and conversion cannot be measured yet.
 - **Autonomous exploration and self-healing.** Not built. The planner exists only as a measured
@@ -156,7 +156,7 @@ impact are judgements, not measurements.
 
 | Directive risk | Severity | Probability (now) | Business impact | Current mitigation | Missing mitigation | Required action | Verification |
 |---|---|---|---|---|---|---|---|
-| 01 AI produces unreliable results | Critical | **Certain**, measured: 7 of 12 false negatives | Trust collapse | Benchmark; closed vocabulary; validator; `Inconclusive` for partial plans | Re-measurement after four fixes; confidence only from data | Re-run benchmark with a model key (developer machine); publish result beside baseline | `tools/Testo.Benchmark` self-check in CI; published rates |
+| 01 AI produces unreliable results | Critical | **Certain**, measured: 7 of 12 false negatives | Trust collapse | Benchmark; closed vocabulary; validator; `Inconclusive` for partial plans | Re-measurement after four fixes; confidence only from data | Re-run benchmark with a model key (developer machine); publish result beside baseline | `tools/Autestiq.Benchmark` self-check in CI; published rates |
 | 02 Tenant leakage | Critical | Low given current scope (demo target only) | Existential | Query filter; save guard; D-1, D-2 fixed; isolation tests against PostgreSQL | No cross-tenant test for worker and artifact paths in a second org beyond the current set; no fuzz | Add second-organization adversarial tests to each new path | `ExecutionIsolationTests`, `ArtifactAccessTests` extended per path |
 | 03 Uncontrolled cost | Critical | High once paid plans exist | Loss per customer | Per-run budget; concurrency of 2 per process | G4 kill switch; G6–G8 ledger, quota, reservation; R-10 | Gaps G4, G6, G7, G8, G14 | Concurrency and quota tests with parallel starts |
 | 04 Unsafe autonomous actions and injection | Critical | Medium once customer targets exist | Customer data, abuse of our address | Default-deny egress; no selectors as code; prompt injection test; worker has no database or credentials | G1 proof of origin; G2 loopback; G3 container per run | Gates in execution-threat-model §5 | Egress tests; container tests; G2 regression test |

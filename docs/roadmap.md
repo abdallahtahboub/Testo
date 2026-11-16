@@ -18,7 +18,7 @@
 ## Milestone 0 — Planning documents *(this step)*
 **Done when:** `docs/testing-journey.md`, `architecture.md`, `sitemap.md`, `design-system.md`, `roadmap.md`, initial ADRs and `CLAUDE.md` are reviewed and approved, and the open questions are answered (name, palette, URL scheme, JS enhancement).
 
-**Status: done (2026-11-11).** All six decisions followed the recommendations: working name "Autestiq", palette A, the small header script, culture-prefixed public URLs, Interactive Server for the app, and the adjusted solution structure.
+**Status: done (2026-11-11).** All six decisions followed the recommendations: working name "Testo" *(historical — the company and product became **Autestiq** on 2026-11-14)*, palette A *(replaced by "Navy & Electric Cyan" in the same rename, ADR-0005)*, the small header script, culture-prefixed public URLs, Interactive Server for the app, and the adjusted solution structure.
 
 ## Milestone 1 — Foundation
 **Scope**
@@ -151,20 +151,10 @@ Changed on 2026-11-13 by ADR-0017, with the owner's approval. The milestones bel
 numbers; only the order changed. New work is inserted as 3.1 to 3.4 rather than renumbering,
 because renumbering is what put the issue tracker a number behind this document.
 
-**Accepted by the owner (2026-11-15):** milestones 3.5 (customer-target safety), 3.6 (usage ledger
-and quotas), 3.7 (plan catalog) and 3.8 (cost and evidence retention) sit between 3.4 and Milestone 4.
-Milestone 4 is already built and awaits review, so it stays where it is in the list above. The pilot
-gate and the billing sandbox (Phase D, Stripe Billing in test mode) are not milestones; they are gates
-that come after 3.8. Scope is in [`commercial-readiness.md`](commercial-readiness.md) §6.
-
-**Order, updated:** 3.1 → 3.2 → 3.3 → 3.4 → 3.5 → 3.6 → 3.7 → 3.8 → 3.9 → 4 → 5 → 6 → 7 → 8.
-
-**Product scope (ADR-0020, accepted 2026-11-15):** the first product is AI-generated E2E UI tests.
-**Milestone 3.9 — validation gate:** re-measure the planner on an expanded benchmark, using a developer
-machine with a model key, and publish the result beside the baseline. The thresholds are proposed in
-ADR-0020 and wait for the owner's confirmation. Milestone 5 is narrowed to projects, environments,
-generated test cases and suites, run history and reports. The other modules wait until after the
-first pilot. The business model is in [`business/BUSINESS_MODEL.md`](business/BUSINESS_MODEL.md).
+**Proposed, not accepted (2026-11-15):** milestones 3.5 (customer-target safety), 3.6 (usage ledger
+and quotas), 3.7 (plan catalog), 3.8 (cost and evidence retention) and a pilot gate, placed before
+Milestone 5. See [`commercial-readiness.md`](commercial-readiness.md) §6. This order does not change
+until the owner accepts it.
 
 **3.1 → 3.2 → 3.3 → 3.4 → 4 → 5 → 6 → 7 → 8**
 

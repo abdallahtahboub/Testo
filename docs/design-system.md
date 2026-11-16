@@ -1,6 +1,6 @@
 # Design System
 
-> Status: **Accepted** (Step 0 approved on 2026-11-11). Palette: **Option A "Indigo & Teal"** (ADR-0005).
+> Status: **Accepted** (Step 0 approved on 2026-11-11). Palette: **"Navy & Electric Cyan"** (ADR-0005, amended for the rename to Autestiq).
 > All contrast ratios below were calculated with the WCAG 2.x relative-luminance formula.
 
 > This document is the **visual** language: color, type, spacing, components.
@@ -20,26 +20,39 @@
 
 ## 2. Color palette
 
-**Chosen: Option A "Indigo & Teal"** (ADR-0005). Options B and C are kept for the record.
+**In use: "Navy & Electric Cyan"** (ADR-0005, amended). The three options the palette was first chosen from are kept for the record, because the reasoning that ruled two of them out still applies to any future accent.
 All three use the same neutrals and semantic colors (§3); only brand and accent differ.
 
-### Option A — "Indigo & Teal" *(chosen)*
-Calm, technical, distinctive. Teal reads as "quality / passing" without being the success green.
+### "Navy & Electric Cyan" *(in use)*
+Deep navy with an electric cyan accent: enterprise engineering, and the cyan reads as
+"quality / passing" without being the success green. Adopted with the rename to Autestiq
+(ADR-0005, amended). The three options the palette was originally chosen from are below, kept
+because the reasoning for ruling two of them out still applies to any future accent.
 
 Tokens are named by their role, not by a shade number, and every color token holds its
 light and its dark value (`light-dark()`, ADR-0008). Components only use these names.
 
 | Token | Light | Dark | Notes |
 |---|---|---|---|
-| `--color-brand` | `#2E3192` | `#8B93FF` | Primary color. Also the link and the focus color |
-| `--color-on-brand` | `#FFFFFF` | `#0E1124` | Text on the brand color: **10.66 : 1** light, **6.86 : 1** dark |
-| `--color-brand-hover` | `#1F2170` | `#A5ABFF` | Hover and pressed state of brand-colored controls |
-| `--color-brand-subtle` | `#E8E9FB` | `#1C1F4A` | Selected rows, the option in effect, subtle highlights |
-| `--color-accent` | `#0F766E` | `#5EEAD4` | Accent text and fills: **5.47 : 1** on white, **12.63 : 1** on the dark background |
-| `--color-on-accent` | `#FFFFFF` | `#0E1124` | Text on the accent color |
-| `--color-accent-decorative` | `#14B8A6` | `#14B8A6` | Illustrations and glows only, never text |
-| `--color-hero-start`, `--color-hero-end` | `#1F2170`, `#2E3192` | same | Hero areas keep their deep indigo in both themes |
-| `--color-on-hero`, `--color-on-hero-muted` | `#FFFFFF`, `#C7CBFF` | same | Text on hero areas |
+| `--color-brand` | `#162B42` | `#55DCE0` | Primary color. Also the link and the focus color |
+| `--color-on-brand` | `#FFFFFF` | `#0B1220` | Text on the brand color: **14.40 : 1** light, **11.32 : 1** dark |
+| `--color-brand-hover` | `#0B1220` | `#8CE8EB` | Hover and pressed state of brand-colored controls |
+| `--color-brand-subtle` | `#E7F0F7` | `#162B42` | Selected rows, the option in effect, subtle highlights |
+| `--color-accent` | `#0A6A70` | `#55DCE0` | Accent text and fills: **6.35 : 1** on white, **11.32 : 1** on the navy |
+| `--color-on-accent` | `#FFFFFF` | `#0B1220` | Text on the accent color |
+| `--color-accent-decorative` | `#55DCE0` | `#55DCE0` | Illustrations and glows only, never text |
+| `--color-hero-start`, `--color-hero-end` | `#0B1220`, `#162B42` | same | Hero areas keep the deep navy in both themes |
+| `--color-on-hero`, `--color-on-hero-muted` | `#FFFFFF`, `#A9DFE4` | same | Text on hero areas |
+
+**The brand color swaps role between the themes.** Navy carries the brand on a light background;
+on a dark background navy *is* the background, so the cyan carries it there.
+
+**The electric cyan `#55DCE0` is 1.65 : 1 on white**, so it can never hold light-theme text — not
+as a link, not as a label, not at any size. The light theme uses the darkened cyan `#0A6A70` for
+anything a person reads, and the electric value stays decorative.
+
+### Option A — "Indigo & Teal" *(the original choice, replaced by the rename)*
+Primary `#2E3192`, accent `#0F766E`. Calm, technical, distinctive.
 
 ### Option B — "Midnight Blue & Amber" *(not chosen)*
 Classic enterprise, warm call-to-action.
@@ -67,13 +80,13 @@ Risk: coral is close to "danger" red in the app.
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `--color-bg` | `#FFFFFF` | `#0E1124` | Page background |
-| `--color-surface` | `#FFFFFF` | `#161A33` | Cards, panels |
-| `--color-surface-subtle` | `#F5F6FA` | `#1B2040` | Alternating sections, app background |
-| `--color-border` | `#D0D4E4` | `#2C3258` | Dividers (decorative, not required to hit 3:1) |
-| `--color-border-strong` | `#7B8199` | `#6B7290` | Input borders: at least **3.2 : 1** on every surface in both themes (1.4.11 non-text contrast) |
-| `--color-text` | `#1A1D2E` | `#EEF0F8` | Body text: **16.68 : 1** on white |
-| `--color-text-muted` | `#5B6178` | `#A3A9BF` | Secondary text: **6.13 : 1** on white, **5.68 : 1** on `#F5F6FA`, **7.99 : 1** on dark |
+| `--color-bg` | `#FFFFFF` | `#0B1220` | Page background |
+| `--color-surface` | `#FFFFFF` | `#11192B` | Cards, panels |
+| `--color-surface-subtle` | `#F4F7FA` | `#162B42` | Alternating sections, app background |
+| `--color-border` | `#D3DCE6` | `#24374F` | Dividers (decorative, not required to hit 3:1) |
+| `--color-border-strong` | `#6E7D8E` | `#7E90A4` | Input borders: at least **3 : 1** on every surface in both themes (1.4.11 non-text contrast) |
+| `--color-text` | `#0B1220` | `#EEF3F8` | Body text: **18.72 : 1** on white |
+| `--color-text-muted` | `#4F5E6E` | `#A7B7C7` | Secondary text: **6.65 : 1** on white, **6.18 : 1** on `#F4F7FA`, **7.02 : 1** on `#162B42` |
 | `--color-success` | `#13753A` | `#4ADE80` | Passed: **5.78 : 1** on white |
 | `--color-warning` | `#AD4407` | `#FBBF24` | Warnings, flaky: **5.82 : 1** on white |
 | `--color-danger` | `#B42318` | `#F87171` | Failed, critical: **6.57 : 1** on white |
@@ -224,7 +237,7 @@ All in `Autestiq.UI.Shared`, prefixed `T` (e.g., `TButton`) so they don't clash 
 Fluent UI Blazor 5 takes its look from CSS variables. The app layout points those
 variables at **our** tokens, so its components follow our brand and both themes without a
 second theme definition. Milestone 1 maps the brand color, font, corner radius and focus
-color (a Fluent button is already exactly our indigo). Milestone 2 completes the mapping
+color (at the time, a Fluent button was already exactly our then-indigo brand). Milestone 2 completes the mapping
 for neutrals, strokes, type ramp and shadows. Fluent UI is loaded on app pages only.
 
 ### Charts

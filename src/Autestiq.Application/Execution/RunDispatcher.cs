@@ -7,6 +7,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Autestiq.Contracts.Execution;
 using Autestiq.Domain.Execution;
+using Autestiq.Application.Usage;
+using Autestiq.Contracts.Usage;
 using Autestiq.Persistence;
 
 namespace Autestiq.Application.Execution;
@@ -29,6 +31,7 @@ namespace Autestiq.Application.Execution;
 public sealed class RunDispatcher(
     IServiceScopeFactory scopes,
     IOptionsMonitor<ExecutionOptions> options,
+    IOptionsMonitor<UsageOptions> usage,
     TimeProvider timeProvider,
     ILogger<RunDispatcher> logger)
     : BackgroundService
@@ -88,39 +91,155 @@ public sealed class RunDispatcher(
     /// </summary>
     private async Task<Guid?> ClaimAsync(CancellationToken cancellationToken)
     {
+        List<(Guid Id, Guid OrganizationId)> candidates;
+
+        await using (var scope = scopes.CreateAsyncScope())
+        {
+            var database = scope.ServiceProvider.GetRequiredService<AutestiqDbContext>();
+
+            // No request, so no organization: the dispatcher works across all of them by necessity and
+            // writes back only to the one on the run it claimed.
+            candidates = (await Claimable(database.TestRuns.IgnoreQueryFilters(), options.CurrentValue)
+                    .Select(run => new { run.Id, run.OrganizationId })
+                    .Take(MaxCandidatesPerClaim)
+                    .ToListAsync(cancellationToken)
+                    .ConfigureAwait(false))
+                .Select(run => (run.Id, run.OrganizationId))
+                .ToList();
+        }
+
+        // The oldest run of each organization in turn: one that is at its limit does not hold up the others.
+        foreach (var candidate in candidates.DistinctBy(run => run.OrganizationId))
+        {
+            if (await TryClaimAsync(candidate.Id, candidate.OrganizationId, cancellationToken).ConfigureAwait(false))
+            {
+                return candidate.Id;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>How many queued runs a claim looks at, oldest first, to find an organization with room.</summary>
+    private const int MaxCandidatesPerClaim = 50;
+
+    /// <summary>
+    /// Claims one run if its organization has room for it, under a lock on the organization's row so that two
+    /// dispatchers cannot both decide there is room (ADR-0027). Room is two things: fewer running runs than the plan
+    /// allows at once, and browser time left this month once what running runs have reserved is counted.
+    /// </summary>
+    private async Task<bool> TryClaimAsync(Guid runId, Guid organizationId, CancellationToken cancellationToken)
+    {
         await using var scope = scopes.CreateAsyncScope();
         var database = scope.ServiceProvider.GetRequiredService<AutestiqDbContext>();
         var writeScope = scope.ServiceProvider.GetRequiredService<TenantWriteScope>();
 
-        // No request, so no organization: the dispatcher works across all of them by necessity and
-        // writes back only to the one on the run it claimed.
-        var run = await Claimable(database.TestRuns.IgnoreQueryFilters(), options.CurrentValue)
-            .FirstOrDefaultAsync(cancellationToken)
+        await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+
+        // One claim at a time for one organization, across every dispatcher: the row lock is held to the commit.
+        // The organization's own row by its id; nothing here reads another tenant's data.
+        await database.Database
+            .ExecuteSqlInterpolatedAsync($"SELECT 1 FROM organizations WHERE id = {organizationId} FOR UPDATE", cancellationToken)
+            .ConfigureAwait(false);
+
+        var run = await database.TestRuns.IgnoreQueryFilters()
+            .FirstOrDefaultAsync(candidate => candidate.Id == runId && candidate.Status == RunStatus.Queued && !candidate.CancellationRequested, cancellationToken)
             .ConfigureAwait(false);
 
         if (run is null)
         {
-            return null;
+            // Taken or cancelled since it was listed.
+            return false;
         }
 
-        run.Status = RunStatus.Running;
-        run.StartedAt = timeProvider.GetUtcNow();
-        run.HeartbeatAt = run.StartedAt;
+        var room = await RoomForAsync(database, organizationId, usage.CurrentValue, timeProvider.GetUtcNow(), cancellationToken).ConfigureAwait(false);
+
+        if (room.UsedUp)
+        {
+            // The hard stop the owner chose (ADR-0027): refused, not left waiting for a month.
+            run.Status = RunStatus.Cancelled;
+            run.FailureReason = "Refused: this organization has used all of its browser minutes for the month.";
+            run.FinishedAt = timeProvider.GetUtcNow();
+        }
+        else if (room.ConcurrentRunsLeft <= 0 || room.SecondsLeft <= 0)
+        {
+            // At its limit for now: it waits for a running run to finish and give back what it holds.
+            return false;
+        }
+        else
+        {
+            run.Status = RunStatus.Running;
+            run.StartedAt = timeProvider.GetUtcNow();
+            run.HeartbeatAt = run.StartedAt;
+
+            // The whole of its time budget, or what is left of the month if that is less: the run is then given no
+            // more time than it holds, so the quota cannot be overshot.
+            run.ReservedSeconds = Math.Min((long)RunBudget.Default.WallClock.TotalSeconds, room.SecondsLeft);
+        }
 
         try
         {
-            using (writeScope.AllowWritingTo(run.OrganizationId))
+            using (writeScope.AllowWritingTo(organizationId))
             {
                 await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
+
+            await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
         }
         catch (DbUpdateConcurrencyException)
         {
             // Another dispatcher took it first. Perfectly normal.
-            return null;
+            return false;
         }
 
-        return run.Id;
+        return run.Status == RunStatus.Running;
+    }
+
+    /// <summary>What an organization has room for now: runs at once, and browser seconds this month.</summary>
+    public readonly record struct Room(int ConcurrentRunsLeft, long SecondsLeft, bool UsedUp);
+
+    /// <summary>
+    /// An organization's room: its plan's limits, less its running runs, its billable seconds this month and the
+    /// seconds its running runs have reserved. Only running runs count, so a run that finished, was cancelled or was
+    /// reaped holds nothing.
+    /// </summary>
+    public static async Task<Room> RoomForAsync(
+        AutestiqDbContext database,
+        Guid organizationId,
+        UsageOptions usageOptions,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(database);
+        ArgumentNullException.ThrowIfNull(usageOptions);
+
+        // The dispatcher has no organization in context; every query below is held to the one it asks about.
+        var plan = await database.Organizations
+            .Where(organization => organization.Id == organizationId)
+            .Select(organization => organization.Plan)
+            .FirstOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        var limit = usageOptions.For(plan);
+        var period = UsageMeter.PeriodOf(now);
+
+        var running = await database.TestRuns.IgnoreQueryFilters()
+            .Where(run => run.OrganizationId == organizationId && run.Status == RunStatus.Running)
+            .Select(run => run.ReservedSeconds)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        var used = await database.UsageEvents.IgnoreQueryFilters()
+            .Where(usage => usage.OrganizationId == organizationId && usage.Period == period && usage.Billable && usage.Category == UsageCategory.BrowserSeconds)
+            .SumAsync(usage => usage.Quantity, cancellationToken)
+            .ConfigureAwait(false);
+
+        var allowance = limit.MonthlyBrowserMinutes * 60;
+
+        return new Room(
+            ConcurrentRunsLeft: limit.ConcurrentRuns - running.Count,
+            SecondsLeft: allowance - used - running.Sum(),
+            UsedUp: used >= allowance);
     }
 
     private async Task ReapAsync(CancellationToken cancellationToken)
@@ -373,7 +492,9 @@ public sealed class RunDispatcher(
                 }
             }
 
-            await IngestAsync(scope.ServiceProvider, run, result, workspace.FullName, stoppingToken)
+            var billable = Usage.UsageMeter.IsBillable(result, stoppedByOperator: stopped == Stop.Paused);
+
+            await IngestAsync(scope.ServiceProvider, run, result, billable, workspace.FullName, stoppingToken)
                 .ConfigureAwait(false);
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
@@ -611,6 +732,11 @@ public sealed class RunDispatcher(
         var target = Origins.Normalize(run.TargetOrigin);
         var ours = trusted.Any(origin => Origins.Normalize(origin) == target);
 
+        // No more time than the run holds against the month's quota (ADR-0027).
+        var budget = run.ReservedSeconds > 0
+            ? RunBudget.Default with { WallClock = TimeSpan.FromSeconds(Math.Min(run.ReservedSeconds, (long)RunBudget.Default.WallClock.TotalSeconds)) }
+            : RunBudget.Default;
+
         return new WorkerJob(
             run.Id,
             run.ScenarioId,
@@ -619,7 +745,7 @@ public sealed class RunDispatcher(
             // A target that is not ours is allowed by name, and every address it resolves to is judged as public.
             AllowedOrigins: ours || target is null ? [] : [target],
             TrustedLocalOrigins: trusted,
-            RunBudget.Default,
+            budget,
             workspace);
     }
 
@@ -860,6 +986,7 @@ public sealed class RunDispatcher(
         IServiceProvider services,
         TestRun run,
         WorkerResult result,
+        bool billable,
         string workspace,
         CancellationToken cancellationToken)
     {
@@ -886,11 +1013,17 @@ public sealed class RunDispatcher(
 
         using (writeScope.AllowWritingTo(run.OrganizationId))
         {
+            long artifactBytes = 0;
+
             foreach (var step in result.Steps)
             {
                 var screenshot = await StoreScreenshotAsync(
                         artifacts, database, run, step, workspace, cancellationToken)
                     .ConfigureAwait(false);
+
+                artifactBytes += database.ChangeTracker.Entries<Artifact>()
+                    .Where(entry => entry.State == EntityState.Added && entry.Entity.Id == screenshot)
+                    .Sum(entry => entry.Entity.SizeBytes);
 
                 database.TestRunSteps.Add(new TestRunStep
                 {
@@ -915,6 +1048,22 @@ public sealed class RunDispatcher(
                 run.Id,
                 $"{run.ScenarioId} #{run.Number}",
                 after: new { Status = run.Status.ToString() });
+
+            // What the run used, in the same save as its result, so neither is ever written without the other. Each
+            // event's key names the run, so a result written back twice records nothing twice.
+            foreach (var usage in Usage.UsageMeter.ForRun(run, result, billable, artifactBytes, timeProvider.GetUtcNow()))
+            {
+                var known = await database.UsageEvents.IgnoreQueryFilters()
+                    .AnyAsync(existing => existing.OrganizationId == usage.OrganizationId && existing.IdempotencyKey == usage.IdempotencyKey, cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (!known)
+                {
+                    database.UsageEvents.Add(usage);
+                }
+            }
+
+            run.ReservedSeconds = 0;
 
             await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }

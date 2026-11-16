@@ -121,7 +121,8 @@ Found by opening it in a browser rather than by a test, and worth remembering:
 
 ## Inventory — what is actually built
 
-> Last verified on 2026-11-14, after Milestone 3.3: `dotnet build` clean, every test green in CI.
+> Last verified on 2026-11-16, after Milestones 3.5 and 3.6: `dotnet build` clean, every test green locally,
+> and 3.5 green in CI.
 > This table is authoritative. Where another document disagrees with it, this one is right.
 
 | Area | State |
@@ -132,9 +133,12 @@ Found by opening it in a browser rather than by a test, and worth remembering:
 | Design system, 35 components | **Real** |
 | Public website | **Real.** 29 routes in English and German, with every placeholder page labeled as one |
 | App area | **One placeholder page** at `/app`, plus the two execution pages. Signing in is required everywhere (D-1 closed in Milestone 3.1) |
-| Test runs: start, stop, rerun, steps, screenshots | **Real** for three scripted scenarios against our own demo target. No customer targets |
+| Test runs: start, stop, rerun, steps, screenshots | **Real** for three scripted scenarios against our own demo target. No customer targets yet: no screen asks for one until Milestone 5 |
+| Customer-site safety (3.5) | **Real.** Proof of site ownership, kill switch, stuck-run reaping, loopback from configuration only, a sealed container per run (ADR-0026). Customer origins are refused outside container mode |
+| Usage and quotas (3.6) | **Real.** Append-only usage ledger, per-organization concurrency and monthly minutes with reservation, rate limits on starts (ADR-0027). Limits from configuration until the plan catalog (3.7); no screen shows usage yet |
+| Exporting tests (ADR-0023) | **Built, not in the product.** Python, verified 107 of 107; reached through the benchmark tool only |
 | AI planning: interface, vocabulary, validator, provider adapter, benchmark | **Built and measured; the planner is not usable.** 5 of 12 plans work on a sound application, 1 of 6 defects genuinely caught, 1 missed. Four faults the measurement exposed are fixed and **not yet re-measured**. Nothing in the product calls a model |
-| Browser execution: worker out of process, egress proxy, signed artifact links | **Real.** Not yet a container per run (R-1) |
+| Browser execution: worker out of process, egress proxy, signed artifact links | **Real.** A sealed container per run in container mode (ADR-0026); process mode for development and tests |
 | The other six feature modules | **Shells.** One class each: an id and a feature flag. No pages, no services |
 | `Autestiq.Capabilities.E2EWeb` | **Empty.** An `_Imports.razor` |
 | `Autestiq.Mocks` | **Shell.** Options and a random source. No services, no seed data |

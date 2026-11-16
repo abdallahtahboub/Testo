@@ -2,22 +2,21 @@
 
 **Autestiq** is an AI-assisted QA platform covering the whole ISTQB testing journey.
 
-**Current state (2026-11-14, after Milestone 4 and the rename).** Identity, organizations,
-memberships, invitations, roles and the audit log are **real**, on PostgreSQL. The design system is
-real. **Test runs are real** for three scripted scenarios against our own demo target:
-`Autestiq.Worker` drives Chromium out of process behind an egress proxy,
-`test_runs`/`test_run_steps`/`artifacts` are persisted inside the tenant boundary, and `/app/runs`
-starts, stops and reruns them. No customer-supplied target. **The AI planner is built and
-measured, and it is not usable yet**: 5 of 12 plans run correctly against a sound application, and
-of six real defects it credibly found one, missed one and said nothing about four
-(`docs/ai-benchmark.md`). Four faults the measurement exposed are fixed and **not yet
-re-measured**. Nothing in the product calls a model, and no claim about AI-found defects is
-supported. **The public website is real**: 29 routes in English and German, every placeholder
-visibly labeled, `sitemap.xml` and `robots.txt` generated from `PublicPages`. Everything else about
-the testing journey — plans, requirements, cases, suites, environments, defects, reporting — **does
-not exist yet, in any form, not even mocked**: six of the seven module projects are shells of one
-class each, and `Autestiq.Mocks` holds options and a random source, no services.
-`docs/roadmap.md` §Inventory is the authoritative list of what is built.
+**Current state (2026-11-16, after Milestones 3.5 and 3.6).** Identity, organizations, memberships,
+invitations, roles and the audit log are **real**, on PostgreSQL. The design system and the public website
+(29 routes, English and German, placeholders labeled) are real. **Test runs are real** against our own target
+applications: the demo shop, a clinic and an invoice desk, each with switchable defects. **Customer-site safety
+is built (3.5)**: proof of site ownership, a kill switch, reaping of stuck runs, and a sealed container per run
+(ADR-0026). Customer origins are refused outside container mode, and no screen asks for one until Milestone 5.
+**Usage and quotas are built (3.6)**: an append-only usage ledger, per-organization concurrency and monthly
+minutes with reservation, and rate limits on starts (ADR-0027). Plan limits come from configuration until the
+plan catalog (3.7). **The AI planner is built and measured, not yet in the product**: on runs recorded before
+the locator work it was correct on 32 of 36 runs of the first twelve scenarios and 50 of 52 of the held-out
+twenty, with no false positives, below the ADR-0020 gate on the first set. Nothing in the product calls a
+model, and no claim about AI-found defects is supported. **Exporting plans as tests** is built for Python and
+verified (ADR-0023), reachable through the benchmark tool only. Everything else about the testing journey —
+plans, requirements, cases, suites, environments, defects, reporting — **does not exist yet**: six of the
+seven module projects are shells. `docs/roadmap.md` §Inventory is the authoritative list of what is built.
 
 Read first: `docs/architecture.md`, `docs/roadmap.md`, `docs/design-system.md`,
 `docs/sitemap.md`, `docs/testing-journey.md`, `docs/decisions/`.

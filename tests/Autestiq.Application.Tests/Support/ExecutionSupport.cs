@@ -63,6 +63,14 @@ internal static class ExecutionSupport
             .SingleAsync(run => run.Id == runId, TestContext.Current.CancellationToken);
     }
 
+    /// <summary>The plans' limits, as configured by default or as a test changes them.</summary>
+    public static IOptionsMonitor<Autestiq.Application.Usage.UsageOptions> Usage(Action<Autestiq.Application.Usage.UsageOptions>? change = null)
+    {
+        var options = new Autestiq.Application.Usage.UsageOptions();
+        change?.Invoke(options);
+        return new FixedOptions<Autestiq.Application.Usage.UsageOptions>(options);
+    }
+
     /// <summary>Polls a run's stored status until it is the one expected or the time is up.</summary>
     public static async Task<RunStatus> StatusOnceItIsAsync(TestDatabase database, Guid runId, RunStatus expected, TimeSpan within)
     {
@@ -85,6 +93,34 @@ internal static class ExecutionSupport
         return status;
     }
 
+    /// <summary>
+    /// A worker that reads its job, waits, and reports a result of its own: a status, the bytes it fetched, and a
+    /// start and finish that many seconds apart. A shell script, so it needs Linux or macOS, as CI and the worker are.
+    /// </summary>
+    public static string ReportingWorker(RunStatus status, long bytesDownloaded, int seconds = 1, int waitSeconds = 1)
+    {
+        var directory = Directory.CreateTempSubdirectory("autestiq-reporting-worker-").FullName;
+        var script = Path.Combine(directory, "worker.sh");
+        var finished = new DateTimeOffset(2026, 11, 16, 12, 0, 0, TimeSpan.Zero).AddSeconds(seconds).ToString("O", System.Globalization.CultureInfo.InvariantCulture);
+
+        File.WriteAllText(script, string.Join('\n',
+        [
+            "#!/bin/sh",
+            "job=$(cat)",
+            """id=$(printf '%s' "$job" | sed -E 's/.*"runId":"([^"]+)".*/\1/')""",
+            $"sleep {waitSeconds}",
+            $$"""printf '{"runId":"%s","status":{{(int)status}},"failureReason":null,"startedAt":"2026-11-16T12:00:00.0000000+00:00","finishedAt":"{{finished}}","steps":[],"bytesDownloaded":{{bytesDownloaded}}}\n' "$id" """,
+            "",
+        ]));
+
+        if (!OperatingSystem.IsWindows())
+        {
+            File.SetUnixFileMode(script, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
+
+        return script;
+    }
+
     /// <summary>An executable that waits a minute and says nothing: a run that stays running until stopped.</summary>
     public static string WaitingWorker()
     {
@@ -102,6 +138,16 @@ internal static class ExecutionSupport
         File.SetUnixFileMode(script, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
         return script;
     }
+}
+
+/// <summary>Options a test fixes for the dispatcher to read.</summary>
+internal sealed class FixedOptions<T>(T value) : IOptionsMonitor<T>
+{
+    public T CurrentValue { get; } = value;
+
+    public T Get(string? name) => CurrentValue;
+
+    public IDisposable? OnChange(Action<T, string?> listener) => null;
 }
 
 /// <summary>Options a test can change while the dispatcher reads them, as a configuration reload would.</summary>

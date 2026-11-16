@@ -16,6 +16,7 @@ internal sealed class OriginProofService(
     AutestiqDbContext database,
     ICurrentUser currentUser,
     IOrganizationContext organizationContext,
+    Microsoft.Extensions.Options.IOptionsMonitor<Usage.UsageOptions> usage,
     TimeProvider timeProvider)
     : IOriginProofService
 {
@@ -36,6 +37,11 @@ internal sealed class OriginProofService(
 
         if (proof is null)
         {
+            if (await ExceededAsync(cancellationToken).ConfigureAwait(false))
+            {
+                return OperationResult.Failure<OriginProofRequest>("Execution_Error_TooManyStarts");
+            }
+
             proof = new OriginProof
             {
                 OrganizationId = organizationContext.RequireOrganizationId(),
@@ -75,6 +81,11 @@ internal sealed class OriginProofService(
             return OperationResult.Success;
         }
 
+        if (await ExceededAsync(cancellationToken).ConfigureAwait(false))
+        {
+            return OperationResult.Failure("Execution_Error_TooManyStarts");
+        }
+
         proof.Status = OriginProofStatus.Checking;
         proof.CheckRequestedAt = timeProvider.GetUtcNow();
         proof.CheckStartedAt = null;
@@ -103,6 +114,14 @@ internal sealed class OriginProofService(
                 proof.ExpiresAt,
                 proof.FailureReason);
     }
+
+    /// <summary>
+    /// Whether the organization has asked for too many proofs or checks in the last minute: each check sends a worker
+    /// to somebody's website, so asking cannot be free (ADR-0027).
+    /// </summary>
+    private Task<bool> ExceededAsync(CancellationToken cancellationToken) =>
+        Usage.StartLimits.ProofRequestsExceededAsync(
+            database, organizationContext.RequireOrganizationId(), usage.CurrentValue, timeProvider.GetUtcNow(), cancellationToken);
 
     /// <summary>Through the tenant filter: the organization's own proof, never another's.</summary>
     private Task<OriginProof?> FindAsync(string normalized, CancellationToken cancellationToken) =>

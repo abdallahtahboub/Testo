@@ -11,7 +11,7 @@ namespace Autestiq.Domain.Audit;
 /// who approved a release and who still had access in March, and the answer has to be better than
 /// a shrug. Kept for two years.
 /// </remarks>
-public sealed class AuditEntry : Entity, IBelongsToOrganization
+public sealed class AuditEntry : Entity, IBelongsToOrganization, IAppendOnly
 {
     /// <inheritdoc />
     public Guid OrganizationId { get; set; }

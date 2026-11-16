@@ -2,6 +2,7 @@ using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Autestiq.Contracts.Identity;
 using Autestiq.Domain.Audit;
+using Autestiq.Domain.Usage;
 using Autestiq.Domain.Common;
 using Autestiq.Domain.Execution;
 using Autestiq.Domain.Identity;
@@ -64,6 +65,9 @@ public class AutestiqDbContext(DbContextOptions<AutestiqDbContext> options, IOrg
 
     /// <summary>Executions of scenarios.</summary>
     public DbSet<TestRun> TestRuns => Set<TestRun>();
+
+    /// <summary>The usage ledger: what each organization used, recorded once, never changed.</summary>
+    public DbSet<UsageEvent> UsageEvents => Set<UsageEvent>();
 
     /// <summary>Organizations' proofs that they control the origins they want tested.</summary>
     public DbSet<OriginProof> OriginProofs => Set<OriginProof>();

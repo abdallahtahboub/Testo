@@ -290,7 +290,12 @@ internet is refused whatever the list says. A customer-supplied loopback address
 stored run. A regression test writes a loopback origin to a run row and expects a refusal.
 Tracked as gap G2 in [`commercial-readiness.md`](commercial-readiness.md).
 
-### R-12 · Concurrency is a per-process limit, not a per-organization one — **High when paid plans exist**
+### R-12 · Concurrency is a per-process limit, not a per-organization one — **Fixed (2026-11-16, Milestone 3.6)**
+
+**Fixed.** The claim counts the organization's running runs under a lock on its row, inside the claim's
+transaction, against its plan's limit (ADR-0027). `MaxConcurrentRuns` remains as a per-process ceiling that
+protects the machine, not the tenants. `TwoDispatchersRacing_NeverRunMoreThanTheOrganizationsLimit` covers it.
+What follows is the finding as it was recorded.
 
 `MaxConcurrentRuns = 2` is enforced by a `SemaphoreSlim` inside each process
 (`RunDispatcher.cs:41`). Two processes allow four runs; one organization can take all of them.

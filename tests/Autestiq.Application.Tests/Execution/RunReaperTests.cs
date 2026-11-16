@@ -90,13 +90,13 @@ public sealed class RunReaperTests : IAsyncLifetime
         // before the worker started was refused as a stale write, and the run ended as an infrastructure error.
         var options = new ChangeableOptions(new ExecutionOptions
         {
-            WorkerPath = PassingWorkerAfter(seconds: 3),
+            WorkerPath = ExecutionSupport.ReportingWorker(RunStatus.Passed, bytesDownloaded: 0, waitSeconds: 3),
             MaxConcurrentRuns = 1,
             HeartbeatInterval = TimeSpan.FromMilliseconds(300),
         });
 
         await using var services = _database.NewServices();
-        var dispatcher = new RunDispatcher(services.GetRequiredService<IServiceScopeFactory>(), options, TimeProvider.System, NullLogger<RunDispatcher>.Instance);
+        var dispatcher = new RunDispatcher(services.GetRequiredService<IServiceScopeFactory>(), options, ExecutionSupport.Usage(), TimeProvider.System, NullLogger<RunDispatcher>.Instance);
         var runId = await ExecutionSupport.RunAsync(_database, _organization, _project);
 
         await dispatcher.StartAsync(TestContext.Current.CancellationToken);
@@ -109,31 +109,6 @@ public sealed class RunReaperTests : IAsyncLifetime
         {
             await dispatcher.StopAsync(CancellationToken.None);
         }
-    }
-
-    /// <summary>A worker that reads its job, waits, and reports that the run passed.</summary>
-    private static string PassingWorkerAfter(int seconds)
-    {
-        var directory = Directory.CreateTempSubdirectory("autestiq-passing-worker-").FullName;
-        var script = Path.Combine(directory, "worker.sh");
-
-        File.WriteAllText(script, string.Join('\n',
-        [
-            "#!/bin/sh",
-            "job=$(cat)",
-            """id=$(printf '%s' "$job" | sed -E 's/.*"runId":"([^"]+)".*/\1/')""",
-            $"sleep {seconds}",
-            """printf '{"runId":"%s","status":3,"failureReason":null,"startedAt":"2026-11-16T12:00:00+00:00","finishedAt":"2026-11-16T12:00:03+00:00","steps":[],"bytesDownloaded":0}\n' "$id" """,
-            "",
-        ]));
-
-        // A shell script, so this one test needs Linux or macOS, as CI is. The worker it stands in for is Linux only.
-        if (!OperatingSystem.IsWindows())
-        {
-            File.SetUnixFileMode(script, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
-        }
-
-        return script;
     }
 
     [Fact]
@@ -151,7 +126,7 @@ public sealed class RunReaperTests : IAsyncLifetime
 
         await using var services = _database.NewServices();
         var scopes = services.GetRequiredService<IServiceScopeFactory>();
-        var first = new RunDispatcher(scopes, Options(), TimeProvider.System, NullLogger<RunDispatcher>.Instance);
+        var first = new RunDispatcher(scopes, Options(), ExecutionSupport.Usage(), TimeProvider.System, NullLogger<RunDispatcher>.Instance);
 
         var runId = await ExecutionSupport.RunAsync(_database, _organization, _project);
         await first.StartAsync(TestContext.Current.CancellationToken);
@@ -166,7 +141,7 @@ public sealed class RunReaperTests : IAsyncLifetime
         await first.StopAsync(CancellationToken.None);
         Assert.Equal(RunStatus.Running, (await ExecutionSupport.StoredAsync(_database, runId)).Status);
 
-        var second = new RunDispatcher(scopes, Options(), TimeProvider.System, NullLogger<RunDispatcher>.Instance);
+        var second = new RunDispatcher(scopes, Options(), ExecutionSupport.Usage(), TimeProvider.System, NullLogger<RunDispatcher>.Instance);
         await second.StartAsync(TestContext.Current.CancellationToken);
 
         try

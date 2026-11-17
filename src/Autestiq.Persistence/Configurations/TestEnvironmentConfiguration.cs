@@ -13,6 +13,7 @@ internal sealed class TestEnvironmentConfiguration : IEntityTypeConfiguration<Te
 
         builder.Property(environment => environment.Name).HasMaxLength(100).IsRequired();
         builder.Property(environment => environment.Origin).HasMaxLength(500).IsRequired();
+        builder.Property(environment => environment.Kind).HasConversion<string>().HasMaxLength(20).IsRequired();
 
         // One project cannot name two environments alike, nor list one site twice.
         builder.HasIndex(environment => new { environment.OrganizationId, environment.ProjectId, environment.Name }).IsUnique();

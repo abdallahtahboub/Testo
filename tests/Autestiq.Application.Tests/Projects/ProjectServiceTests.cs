@@ -169,6 +169,86 @@ public sealed class ProjectServiceTests : IAsyncLifetime
         Assert.Equal(["Environments_Error_NotAllowed"], result.Errors);
     }
 
+    private async Task<(Guid Project, Guid Environment)> ProductionAsync()
+    {
+        await CreateAsync(_northwind, "SHOP");
+        var project = (await AsAsync(_northwind, Role.Owner, projects => projects.FindAsync("SHOP")))!.ProjectId;
+        var environment = (await AsAsync(_northwind, Role.Owner, projects => projects.AddEnvironmentAsync(project, new NewEnvironment("Live", "https://shop.example", EnvironmentKind.Production)))).Value;
+        return (project, environment);
+    }
+
+    [Fact]
+    public async Task AddEnvironment_WithoutSayingWhichKind_IsATestSite()
+    {
+        await CreateAsync(_northwind, "SHOP");
+        var project = (await AsAsync(_northwind, Role.Owner, projects => projects.FindAsync("SHOP")))!.ProjectId;
+
+        await AsAsync(_northwind, Role.Owner, projects => projects.AddEnvironmentAsync(project, new NewEnvironment("Staging", "https://staging.shop.example")));
+
+        var environment = Assert.Single(await AsAsync(_northwind, Role.Viewer, projects => projects.ListEnvironmentsAsync(project)));
+        Assert.Equal(EnvironmentKind.Test, environment.Kind);
+        Assert.True(environment.KindAllowsRuns);
+    }
+
+    [Fact]
+    public async Task AProductionEnvironment_IsNotAuthorizedWhenAdded()
+    {
+        var (project, _) = await ProductionAsync();
+
+        var environment = Assert.Single(await AsAsync(_northwind, Role.Viewer, projects => projects.ListEnvironmentsAsync(project)));
+        Assert.Equal(EnvironmentKind.Production, environment.Kind);
+        Assert.Null(environment.ProductionAuthorizedAt);
+        Assert.False(environment.KindAllowsRuns);
+    }
+
+    [Theory]
+    [InlineData(Role.Admin)]
+    [InlineData(Role.QaLead)]
+    [InlineData(Role.QaEngineer)]
+    public async Task AuthorizeProduction_BySomebodyWhoIsNotAnOwner_IsRefused(Role role)
+    {
+        var (_, environment) = await ProductionAsync();
+
+        Assert.Equal(["Environments_Error_OwnerOnly"], (await AsAsync(_northwind, role, projects => projects.AuthorizeProductionAsync(environment, acknowledged: true))).Errors);
+    }
+
+    [Fact]
+    public async Task AuthorizeProduction_WithoutTheAcknowledgement_IsRefused()
+    {
+        var (_, environment) = await ProductionAsync();
+
+        Assert.Equal(["Environments_Error_AcknowledgementRequired"], (await AsAsync(_northwind, Role.Owner, projects => projects.AuthorizeProductionAsync(environment, acknowledged: false))).Errors);
+    }
+
+    [Fact]
+    public async Task AuthorizeProduction_ByAnOwner_IsRecordedAndAudited_AndCanBeWithdrawn()
+    {
+        var (project, environment) = await ProductionAsync();
+
+        Assert.True((await AsAsync(_northwind, Role.Owner, projects => projects.AuthorizeProductionAsync(environment, acknowledged: true))).Succeeded);
+        Assert.True(Assert.Single(await AsAsync(_northwind, Role.Viewer, projects => projects.ListEnvironmentsAsync(project))).KindAllowsRuns);
+
+        Assert.True((await AsAsync(_northwind, Role.Owner, projects => projects.WithdrawProductionAsync(environment))).Succeeded);
+        Assert.False(Assert.Single(await AsAsync(_northwind, Role.Viewer, projects => projects.ListEnvironmentsAsync(project))).KindAllowsRuns);
+
+        await using var database = _database.NewContext();
+        var actions = await database.AuditEntries.IgnoreQueryFilters()
+            .Where(entry => entry.OrganizationId == _northwind && entry.Action.StartsWith("environment.production"))
+            .Select(entry => entry.Action)
+            .ToListAsync(TestContext.Current.CancellationToken);
+        Assert.Equal(["environment.production_authorized", "environment.production_withdrawn"], actions.Order().ToList());
+    }
+
+    [Fact]
+    public async Task AuthorizeProduction_OfATestSite_IsRefused()
+    {
+        await CreateAsync(_northwind, "SHOP");
+        var project = (await AsAsync(_northwind, Role.Owner, projects => projects.FindAsync("SHOP")))!.ProjectId;
+        var environment = (await AsAsync(_northwind, Role.Owner, projects => projects.AddEnvironmentAsync(project, new NewEnvironment("Staging", "https://staging.shop.example")))).Value;
+
+        Assert.Equal(["Environments_Error_NotProduction"], (await AsAsync(_northwind, Role.Owner, projects => projects.AuthorizeProductionAsync(environment, acknowledged: true))).Errors);
+    }
+
     [Fact]
     public async Task RemoveEnvironment_RemovesIt_ButNotTheOrganizationsProofOfItsSite()
     {

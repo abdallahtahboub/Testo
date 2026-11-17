@@ -322,4 +322,40 @@
   <data name="Proof_Failed" xml:space="preserve">
     <value>Check failed</value>
   </data>
+  <data name="Environments_Production" xml:space="preserve">
+    <value>Production</value>
+  </data>
+  <data name="Environments_IsProduction" xml:space="preserve">
+    <value>This is a production site</value>
+  </data>
+  <data name="Environments_IsProduction_Hint" xml:space="preserve">
+    <value>The live site real customers use. Tests are refused against it until an owner authorizes them.</value>
+  </data>
+  <data name="Environments_Production_Refused" xml:space="preserve">
+    <value>Tests are refused against this production site until an owner authorizes them. Tests can change real data here: orders, bookings, accounts.</value>
+  </data>
+  <data name="Environments_Production_Acknowledge" xml:space="preserve">
+    <value>I understand that tests can create, change or delete real data on this site.</value>
+  </data>
+  <data name="Environments_Production_Authorize" xml:space="preserve">
+    <value>Authorize production testing</value>
+  </data>
+  <data name="Environments_Production_Authorized" xml:space="preserve">
+    <value>An owner authorized tests against this production site on {0}.</value>
+  </data>
+  <data name="Environments_Production_Withdraw" xml:space="preserve">
+    <value>Withdraw the authorization</value>
+  </data>
+  <data name="Environments_Error_InvalidKind" xml:space="preserve">
+    <value>Choose whether this is a test site or a production site.</value>
+  </data>
+  <data name="Environments_Error_OwnerOnly" xml:space="preserve">
+    <value>Only an owner can authorize or withdraw production testing.</value>
+  </data>
+  <data name="Environments_Error_AcknowledgementRequired" xml:space="preserve">
+    <value>Tick the acknowledgement first: tests can change real data on a production site.</value>
+  </data>
+  <data name="Environments_Error_NotProduction" xml:space="preserve">
+    <value>This is a test site; it needs no authorization.</value>
+  </data>
 </root>

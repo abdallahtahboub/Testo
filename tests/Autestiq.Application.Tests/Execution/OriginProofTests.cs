@@ -146,6 +146,64 @@ public sealed class OriginProofTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task MayTarget_AProvedSiteListedAsProduction_IsRefused_UntilAnOwnerAuthorizesIt()
+    {
+        // ADR-0030: production is off by default, whatever the proof says.
+        await ProofAsync(_first, verifiedUntil: Now + TimeSpan.FromDays(10));
+        var environment = await EnvironmentAsync(Domain_Production(authorizedAt: null));
+
+        Assert.False(await MayTargetAsync(Shop, WorkerIsolation.Container));
+
+        await using (var database = _database.NewContext())
+        {
+            var stored = await database.Environments.IgnoreQueryFilters().SingleAsync(candidate => candidate.Id == environment, TestContext.Current.CancellationToken);
+            stored.ProductionAuthorizedAt = Now;
+
+            using (_database.WriteScope.AllowWritingTo(_first))
+            {
+                await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+            }
+        }
+
+        Assert.True(await MayTargetAsync(Shop, WorkerIsolation.Container));
+    }
+
+    [Fact]
+    public async Task MayTarget_AnotherOrganizationsUnauthorizedProductionEntry_DoesNotBlockThisOne()
+    {
+        await ProofAsync(_first, verifiedUntil: Now + TimeSpan.FromDays(10));
+        var secondProject = await ExecutionSupport.ProjectAsync(_database, _second, "LIVE");
+        await EnvironmentAsync(Domain_Production(authorizedAt: null), _second, secondProject);
+
+        Assert.True(await MayTargetAsync(Shop, WorkerIsolation.Container));
+    }
+
+    private static (Contracts.Projects.EnvironmentKind Kind, DateTimeOffset? AuthorizedAt) Domain_Production(DateTimeOffset? authorizedAt) =>
+        (Contracts.Projects.EnvironmentKind.Production, authorizedAt);
+
+    private async Task<Guid> EnvironmentAsync((Contracts.Projects.EnvironmentKind Kind, DateTimeOffset? AuthorizedAt) kind, Guid? organization = null, Guid? project = null)
+    {
+        await using var database = _database.NewContext();
+        var environment = new Domain.Projects.TestEnvironment
+        {
+            OrganizationId = organization ?? _first,
+            ProjectId = project ?? _firstProject,
+            Name = "Live",
+            Origin = "https://shop.example:443",
+            Kind = kind.Kind,
+            ProductionAuthorizedAt = kind.AuthorizedAt,
+        };
+        database.Environments.Add(environment);
+
+        using (_database.WriteScope.AllowWritingTo(environment.OrganizationId))
+        {
+            await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        return environment.Id;
+    }
+
+    [Fact]
     public async Task MayTarget_AVerifiedProof_IsNotEnough_WhenWorkersRunAsProcesses()
     {
         // ADR-0026: a customer's origin is reached only from a sealed container, whatever the proof says.

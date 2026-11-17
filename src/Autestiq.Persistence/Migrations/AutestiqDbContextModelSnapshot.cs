@@ -1472,6 +1472,12 @@ namespace Autestiq.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("kind");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -1487,6 +1493,14 @@ namespace Autestiq.Persistence.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("origin");
+
+                    b.Property<DateTimeOffset?>("ProductionAuthorizedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("production_authorized_at");
+
+                    b.Property<Guid?>("ProductionAuthorizedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("production_authorized_by");
 
                     b.Property<Guid>("ProjectId")
                         .HasColumnType("uuid")

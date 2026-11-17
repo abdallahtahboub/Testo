@@ -28,10 +28,21 @@ inconclusive one → the approved test downloaded.
   Each plan's cost is recorded at the price book's prices (ADR-0029).
 - **The AI's notes** are shown beside the plan as "Noticed while exploring", marked unverified, never as a
   found defect. Only a test's own verdict is a result.
-- **Who approves a plan:** the owner chose "Owner, Admin, QA engineer". The permission table
-  (`docs/identity-and-access.md` §2) already gives "Approve test cases and plans" to **Owner and QA lead**, a
-  role the question did not offer. Whether to keep the table or change it is put back to the owner before
-  part 3, which builds approval; nothing is changed until then.
+- **Who approves a plan:** **Owner and QA lead**, as the permission table already says
+  (`docs/identity-and-access.md` §2, `ApproveTestArtifacts`). The owner first chose "Owner, Admin, QA engineer"
+  from a question that did not offer the QA lead role, and confirmed the table on 2026-11-17 once it was shown.
+
+**Amended on 2026-11-17 by the owner's secure onboarding and privacy requirements**
+(`docs/secure-onboarding-and-privacy.md`, gap analysis in `docs/secure-onboarding-gap-analysis.md`):
+- **Part 1** also gives each environment a **kind**, test or production. **Production is refused** for runs until
+  an Owner authorizes it with an explicit acknowledgement that tests can change real data (G-3).
+- **Part 2** adds, before any planning call: a **per-project AI data-processing permission, off by default**,
+  enforced in the service with a negative test (G-1); a **record of exactly what each planning call sent** (G-2);
+  and the plan's notes **labelled by source**: observed by the crawl, given by the tester, or assumed and needing
+  verification (G-7).
+- **Part 3** flags plans that **may change data** (a form submitted, or a non-GET request seen by the proxy) and
+  requires explicit approval of them (G-4). **No sign-in secrets are stored in part 3**: an encrypted secret
+  store is its own later step, with its own review (G-6).
 
 ## Part 1, built (2026-11-17)
 - **Projects** (`/app/projects`): the organization's projects, and a form to add one within the plan's
@@ -46,6 +57,10 @@ inconclusive one → the approved test downloaded.
 - **The app's navigation**, drawn from what modules register (`NavigationRegistry`, `AppNav`), grouped by
   stage and filtered by feature flag. Until now the registry had no implementation and the menu was a
   placeholder, so the new pages could not be reached.
+- **Production off by default:** an environment is test unless added as production. The dispatcher refuses a
+  run aimed at an origin the organization lists as an unauthorized production environment, whatever its proof
+  says (`RunDispatcher.MayTargetAsync`). Only an Owner can authorize it, only with the acknowledgement ticked,
+  and can withdraw it; both are audited.
 - **Forms stay disabled until the page is interactive:** typing into a prerendered page is lost when the
   circuit replaces it.
 

@@ -50,6 +50,10 @@
 }
 
 .environments__name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
   font-weight: var(--weight-semibold);
 }
 
@@ -99,4 +103,17 @@
   border: 1px solid var(--color-danger);
   border-radius: var(--radius-md);
   color: var(--color-danger);
+}
+
+.environments__production {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+}
+
+.environments__production p {
+  margin: 0;
 }

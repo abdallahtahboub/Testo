@@ -21,4 +21,16 @@ public sealed class TestEnvironment : Entity, IBelongsToOrganization
 
     /// <summary>Its origin, normalized by <c>Origins.Normalize</c>: scheme, host and port.</summary>
     public required string Origin { get; set; }
+
+    /// <summary>Test or production. Production is never the default.</summary>
+    public Contracts.Projects.EnvironmentKind Kind { get; set; } = Contracts.Projects.EnvironmentKind.Test;
+
+    /// <summary>
+    /// When an owner authorized runs against this production environment, or <c>null</c>. Until then the dispatcher
+    /// refuses any run aimed at its origin.
+    /// </summary>
+    public DateTimeOffset? ProductionAuthorizedAt { get; set; }
+
+    /// <summary>The owner who authorized it.</summary>
+    public Guid? ProductionAuthorizedBy { get; set; }
 }

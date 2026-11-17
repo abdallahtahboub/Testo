@@ -56,7 +56,8 @@ moment part 2 calls the planner.
 - Measure it on the benchmark before offering it, because masking can lower accuracy.
 - Keep credentials and evidence out of prompts entirely, as today.
 
-**G-3 · No production flag; production is not off by default (§5).**
+**G-3 · No production flag; production is not off by default (§5).** *Built 2026-11-17, Milestone 5 part 1
+(ADR-0030).*
 Part 1's environments have a name and an address, nothing else.
 *Recommendation:*
 - Each environment has a **kind**, test or production, chosen when it is added.

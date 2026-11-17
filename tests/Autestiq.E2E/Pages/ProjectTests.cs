@@ -61,6 +61,36 @@ public class ProjectTests(AppFixture app) : BrowserTest(app)
     }
 
     [Fact]
+    public async Task Environments_AProductionSite_IsRefusedUntilAnOwnerAcknowledgesAndAuthorizesIt()
+    {
+        var page = await OpenSignedInAsync(Routes.Environments("SHOP"));
+        await Expect(page.Page.GetByTestId("add-environment")).ToBeEnabledAsync();
+
+        var name = $"Live{Guid.CreateVersion7():N}"[..12];
+        await page.Page.GetByTestId("environment-name").FillAsync(name);
+        await page.Page.GetByTestId("environment-origin").FillAsync($"https://{name.ToLowerInvariant()}.northwind.example");
+        await page.Page.GetByTestId("environment-production").GetByRole(Microsoft.Playwright.AriaRole.Checkbox).CheckAsync();
+        await page.Page.GetByTestId("add-environment").ClickAsync();
+
+        var environment = page.Page.GetByTestId($"environment-{name}");
+        await Expect(environment.GetByTestId("production-badge")).ToHaveTextAsync("Production");
+        await Expect(environment.GetByTestId("production-state")).ToContainTextAsync("Tests are refused against this production site");
+
+        // Without the acknowledgement the owner is told why, and nothing is authorized.
+        await environment.GetByTestId($"authorize-{name}").ClickAsync();
+        await Expect(page.Page.GetByRole(Microsoft.Playwright.AriaRole.Alert)).ToContainTextAsync("Tick the acknowledgement first");
+
+        await environment.GetByTestId($"acknowledge-{name}").GetByRole(Microsoft.Playwright.AriaRole.Checkbox).CheckAsync();
+        await environment.GetByTestId($"authorize-{name}").ClickAsync();
+        await Expect(environment.GetByTestId("production-state")).ToContainTextAsync("An owner authorized tests against this production site");
+
+        await environment.GetByTestId($"withdraw-{name}").ClickAsync();
+        await Expect(environment.GetByTestId("production-state")).ToContainTextAsync("Tests are refused against this production site");
+
+        page.AssertNoProblems();
+    }
+
+    [Fact]
     public async Task Environments_OfAProjectThisOrganizationDoesNotHave_SaysNoSuchProject()
     {
         var page = await OpenSignedInAsync(Routes.Environments("NOPE"));

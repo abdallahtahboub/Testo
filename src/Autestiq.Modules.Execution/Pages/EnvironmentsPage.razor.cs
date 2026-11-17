@@ -53,6 +53,14 @@ public sealed partial class EnvironmentsPage : ComponentBase
 
     private string? Origin { get; set; }
 
+    /// <summary>The add form's choice. Off by default: production is never the default.</summary>
+    private bool IsProduction { get; set; }
+
+    /// <summary>The production environments whose acknowledgement an owner has ticked on this page.</summary>
+    private HashSet<Guid> Acknowledged { get; } = [];
+
+    private bool IsOwner => CurrentUser.Role == Role.Owner;
+
     /// <inheritdoc />
     protected override async Task OnParametersSetAsync()
     {
@@ -90,7 +98,8 @@ public sealed partial class EnvironmentsPage : ComponentBase
 
         await DoAsync(async () =>
         {
-            var added = await ProjectService.AddEnvironmentAsync(Project.ProjectId, new NewEnvironment(Name ?? "", Origin ?? ""), CancellationToken.None)
+            var kind = IsProduction ? EnvironmentKind.Production : EnvironmentKind.Test;
+            var added = await ProjectService.AddEnvironmentAsync(Project.ProjectId, new NewEnvironment(Name ?? "", Origin ?? "", kind), CancellationToken.None)
                 .ConfigureAwait(false);
 
             if (added.Succeeded)
@@ -98,6 +107,7 @@ public sealed partial class EnvironmentsPage : ComponentBase
                 // Emptied for the next one; ProjectTests checks the browser shows it empty.
                 Name = "";
                 Origin = "";
+                IsProduction = false;
             }
 
             return added.Errors;
@@ -114,6 +124,28 @@ public sealed partial class EnvironmentsPage : ComponentBase
         }
 
         return request.Errors;
+    });
+
+    private void Acknowledge(Guid environmentId, bool acknowledged)
+    {
+        if (acknowledged)
+        {
+            Acknowledged.Add(environmentId);
+        }
+        else
+        {
+            Acknowledged.Remove(environmentId);
+        }
+    }
+
+    // The service refuses without the acknowledgement; the page passes on exactly what the owner ticked.
+    private Task AuthorizeAsync(Guid environmentId) => DoAsync(async () =>
+        (await ProjectService.AuthorizeProductionAsync(environmentId, Acknowledged.Contains(environmentId), CancellationToken.None).ConfigureAwait(false)).Errors);
+
+    private Task WithdrawAsync(Guid environmentId) => DoAsync(async () =>
+    {
+        Acknowledged.Remove(environmentId);
+        return (await ProjectService.WithdrawProductionAsync(environmentId, CancellationToken.None).ConfigureAwait(false)).Errors;
     });
 
     private Task CheckAsync(string origin) => DoAsync(async () =>

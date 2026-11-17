@@ -11,18 +11,40 @@ namespace Autestiq.Contracts.Projects;
 /// <param name="Environments">How many environments it has.</param>
 public sealed record ProjectSummary(Guid ProjectId, string Name, string Key, string? Description, int Environments);
 
+/// <summary>What kind of site an environment is. Production is refused for runs until an owner authorizes it.</summary>
+public enum EnvironmentKind
+{
+    /// <summary>A test, staging or demo site.</summary>
+    Test = 1,
+
+    /// <summary>The live site real customers use.</summary>
+    Production = 2,
+}
+
 /// <summary>An environment: one address of the application a project tests, with the proof that it may be tested.</summary>
 /// <param name="EnvironmentId">Its id.</param>
 /// <param name="Name">Its name, such as "Staging".</param>
 /// <param name="Origin">Its origin, normalized: <c>https://staging.shop.example:443</c>.</param>
 /// <param name="Proof">Where the organization's proof of control of that origin stands, or <c>null</c> when none was asked for.</param>
-public sealed record EnvironmentSummary(Guid EnvironmentId, string Name, string Origin, OriginProofState? Proof);
+/// <param name="Kind">Test or production.</param>
+/// <param name="ProductionAuthorizedAt">When an owner authorized testing it, for a production environment; <c>null</c> until then.</param>
+public sealed record EnvironmentSummary(
+    Guid EnvironmentId,
+    string Name,
+    string Origin,
+    OriginProofState? Proof,
+    EnvironmentKind Kind = EnvironmentKind.Test,
+    DateTimeOffset? ProductionAuthorizedAt = null)
+{
+    /// <summary>Whether runs may be aimed at it, as far as its kind goes: always for a test site, after authorization for production.</summary>
+    public bool KindAllowsRuns => Kind == EnvironmentKind.Test || ProductionAuthorizedAt is not null;
+}
 
 /// <summary>What is needed to create a project.</summary>
 public sealed record NewProject(string Name, string Key, string? Description);
 
-/// <summary>What is needed to add an environment.</summary>
-public sealed record NewEnvironment(string Name, string Origin);
+/// <summary>What is needed to add an environment. Test unless said otherwise: production is never the default.</summary>
+public sealed record NewEnvironment(string Name, string Origin, EnvironmentKind Kind = EnvironmentKind.Test);
 
 /// <summary>
 /// Projects and their environments (Milestone 5). Everything is scoped to the current organization by the tenant
@@ -45,6 +67,15 @@ public interface IProjectService
 
     /// <summary>Adds an environment to a project. Its origin must be a plain http or https origin.</summary>
     Task<OperationResult<Guid>> AddEnvironmentAsync(Guid projectId, NewEnvironment environment, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Authorizes runs against a production environment. Owners only, and only with the acknowledgement that tests
+    /// can change real data there. Audited.
+    /// </summary>
+    Task<OperationResult> AuthorizeProductionAsync(Guid environmentId, bool acknowledged, CancellationToken cancellationToken = default);
+
+    /// <summary>Withdraws that authorization; runs are refused again. Owners only. Audited.</summary>
+    Task<OperationResult> WithdrawProductionAsync(Guid environmentId, CancellationToken cancellationToken = default);
 
     /// <summary>Removes an environment. Its origin's proof stays, as it belongs to the organization, not the environment.</summary>
     Task<OperationResult> RemoveEnvironmentAsync(Guid environmentId, CancellationToken cancellationToken = default);

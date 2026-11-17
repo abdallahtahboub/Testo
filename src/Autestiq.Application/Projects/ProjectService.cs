@@ -128,7 +128,7 @@ internal sealed class ProjectService(
         foreach (var environment in environments)
         {
             var proof = await proofs.GetAsync(environment.Origin, cancellationToken).ConfigureAwait(false);
-            summaries.Add(new EnvironmentSummary(environment.Id, environment.Name, environment.Origin, proof));
+            summaries.Add(new EnvironmentSummary(environment.Id, environment.Name, environment.Origin, proof, environment.Kind, environment.ProductionAuthorizedAt));
         }
 
         return summaries;
@@ -154,6 +154,11 @@ internal sealed class ProjectService(
         if (Origins.Normalize(environment.Origin) is not { } origin)
         {
             return OperationResult.Failure<Guid>("Environments_Error_InvalidOrigin");
+        }
+
+        if (!Enum.IsDefined(environment.Kind))
+        {
+            return OperationResult.Failure<Guid>("Environments_Error_InvalidKind");
         }
 
         var project = await database.Projects
@@ -187,6 +192,7 @@ internal sealed class ProjectService(
             ProjectId = project.Id,
             Name = name,
             Origin = origin,
+            Kind = environment.Kind,
         };
 
         database.Environments.Add(added);
@@ -202,6 +208,63 @@ internal sealed class ProjectService(
         }
 
         return OperationResult.With(added.Id);
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult> AuthorizeProductionAsync(Guid environmentId, bool acknowledged, CancellationToken cancellationToken = default)
+    {
+        // An owner's decision alone: it lets tests change a live site's real data.
+        if (currentUser.Role != Role.Owner)
+        {
+            return OperationResult.Failure("Environments_Error_OwnerOnly");
+        }
+
+        if (!acknowledged)
+        {
+            return OperationResult.Failure("Environments_Error_AcknowledgementRequired");
+        }
+
+        var environment = await database.Environments.FirstOrDefaultAsync(candidate => candidate.Id == environmentId, cancellationToken).ConfigureAwait(false);
+
+        if (environment is null)
+        {
+            return OperationResult.Failure("Environments_Error_NoSuchEnvironment");
+        }
+
+        if (environment.Kind != EnvironmentKind.Production)
+        {
+            return OperationResult.Failure("Environments_Error_NotProduction");
+        }
+
+        environment.ProductionAuthorizedAt = timeProvider.GetUtcNow();
+        environment.ProductionAuthorizedBy = currentUser.UserId;
+        Record(AuditActions.ProductionAuthorized, nameof(TestEnvironment), environment.Id, $"{environment.Name} ({environment.Origin})");
+        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        return OperationResult.Success;
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult> WithdrawProductionAsync(Guid environmentId, CancellationToken cancellationToken = default)
+    {
+        if (currentUser.Role != Role.Owner)
+        {
+            return OperationResult.Failure("Environments_Error_OwnerOnly");
+        }
+
+        var environment = await database.Environments.FirstOrDefaultAsync(candidate => candidate.Id == environmentId, cancellationToken).ConfigureAwait(false);
+
+        if (environment is null)
+        {
+            return OperationResult.Failure("Environments_Error_NoSuchEnvironment");
+        }
+
+        environment.ProductionAuthorizedAt = null;
+        environment.ProductionAuthorizedBy = null;
+        Record(AuditActions.ProductionWithdrawn, nameof(TestEnvironment), environment.Id, $"{environment.Name} ({environment.Origin})");
+        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        return OperationResult.Success;
     }
 
     /// <inheritdoc />

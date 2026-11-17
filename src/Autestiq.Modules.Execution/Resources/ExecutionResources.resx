@@ -769,4 +769,31 @@
   <data name="Run_Steps_ScreenshotDeleted" xml:space="preserve">
     <value>The screenshot was deleted under the project's evidence policy, or was never kept.</value>
   </data>
+  <data name="Environments_Acting_Off" xml:space="preserve">
+    <value>Exploring this site only follows links: it presses no button and sends no form. That keeps your data unchanged, but tests of anything that happens after a button press are weaker.</value>
+  </data>
+  <data name="Environments_Acting_Acknowledge" xml:space="preserve">
+    <value>I allow exploring this site to press its buttons and send its forms with test values. It can create records, such as test bookings or orders, that I may need to remove. Buttons named for paying, ordering, deleting, cancelling or signing out are never pressed.</value>
+  </data>
+  <data name="Environments_Acting_Allow" xml:space="preserve">
+    <value>Allow exploring to act</value>
+  </data>
+  <data name="Environments_Acting_Allowed" xml:space="preserve">
+    <value>Since {0}, exploring this site may press its buttons and send its forms with test values.</value>
+  </data>
+  <data name="Environments_Acting_Withdraw" xml:space="preserve">
+    <value>Withdraw: follow links only</value>
+  </data>
+  <data name="Environments_Error_ActingAcknowledgementRequired" xml:space="preserve">
+    <value>Tick the acknowledgement first: exploring that acts can create records on your site.</value>
+  </data>
+  <data name="Environments_Error_ActingOnProduction" xml:space="preserve">
+    <value>Exploring never acts on a production site.</value>
+  </data>
+  <data name="Test_Explored" xml:space="preserve">
+    <value>What exploring did</value>
+  </data>
+  <data name="Test_Explored_Intro" xml:space="preserve">
+    <value>Exploring pressed these controls and sent these forms with test values. Anything they created is still on your site.</value>
+  </data>
 </root>

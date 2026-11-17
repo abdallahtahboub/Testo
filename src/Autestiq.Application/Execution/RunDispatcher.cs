@@ -480,7 +480,11 @@ public sealed class RunDispatcher(
                 }
             }
 
-            var job = JobFor(run, options.CurrentValue, workspace.FullName, approved);
+            // An exploration acts on a customer's site only with its owner's permission, read again now (ADR-0032).
+            var customerAllowsActing = run.ScenarioId == Scenarios.Exploration
+                && await ExplorationMayActAsync(database, run, stoppingToken).ConfigureAwait(false);
+
+            var job = JobFor(run, options.CurrentValue, workspace.FullName, approved, customerAllowsActing);
 
             var (result, stopped) = await RunWorkerAsync(job, run.OrganizationId, stoppingToken).ConfigureAwait(false);
 
@@ -793,7 +797,7 @@ public sealed class RunDispatcher(
     /// make the loopback exception a route to whatever listens on the worker's host. A stored target that
     /// configuration does not name is reached, if at all, as any other address is: never on loopback.
     /// </remarks>
-    public static WorkerJob JobFor(TestRun run, ExecutionOptions options, string workspace, ApprovedPlan? approved = null)
+    public static WorkerJob JobFor(TestRun run, ExecutionOptions options, string workspace, ApprovedPlan? approved = null, bool customerAllowsActing = false)
     {
         ArgumentNullException.ThrowIfNull(run);
         ArgumentNullException.ThrowIfNull(options);
@@ -831,7 +835,35 @@ public sealed class RunDispatcher(
             SubmitForms: exploring,
 
             // An approval that does not allow changing data is held in the browser by the worker (ReadOnlyGuard).
-            ReadOnly: plan?.ReadOnly ?? false);
+            ReadOnly: plan?.ReadOnly ?? false,
+            CustomerAllowsActing: exploring && customerAllowsActing);
+    }
+
+    /// <summary>
+    /// Whether an exploration may act on its site: the environment it explores is a test site, not production, and
+    /// its owner's permission stands (ADR-0032). Read across the filter, held to the run's own organization, because the
+    /// dispatcher has none in context.
+    /// </summary>
+    public static async Task<bool> ExplorationMayActAsync(AutestiqDbContext database, TestRun run, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(database);
+        ArgumentNullException.ThrowIfNull(run);
+
+        if (run.TestCaseId is not { } testCaseId)
+        {
+            return false;
+        }
+
+        var environment = await (
+                from testCase in database.TestCases.IgnoreQueryFilters()
+                join candidate in database.Environments.IgnoreQueryFilters() on testCase.EnvironmentId equals candidate.Id
+                where testCase.Id == testCaseId && testCase.OrganizationId == run.OrganizationId && candidate.OrganizationId == run.OrganizationId
+                select candidate)
+            .FirstOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return environment is { ExplorationMayActAt: not null, Kind: Contracts.Projects.EnvironmentKind.Test }
+            && Origins.Normalize(environment.Origin) == Origins.Normalize(run.TargetOrigin);
     }
 
     /// <summary>

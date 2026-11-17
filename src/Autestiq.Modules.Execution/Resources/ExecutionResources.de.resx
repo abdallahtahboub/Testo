@@ -769,4 +769,31 @@
   <data name="Run_Steps_ScreenshotDeleted" xml:space="preserve">
     <value>Der Screenshot wurde nach der Nachweisregel des Projekts gelöscht oder nie aufbewahrt.</value>
   </data>
+  <data name="Environments_Acting_Off" xml:space="preserve">
+    <value>Das Erkunden dieser Seite folgt nur Links: Es drückt keine Schaltfläche und sendet kein Formular. So bleiben Ihre Daten unverändert, aber Tests von allem, was nach einem Klick geschieht, sind schwächer.</value>
+  </data>
+  <data name="Environments_Acting_Acknowledge" xml:space="preserve">
+    <value>Ich erlaube, dass das Erkunden dieser Seite ihre Schaltflächen drückt und ihre Formulare mit Testwerten sendet. Dabei können Datensätze entstehen, etwa Testbuchungen oder Bestellungen, die ich eventuell entfernen muss. Schaltflächen zum Bezahlen, Bestellen, Löschen, Stornieren oder Abmelden werden nie gedrückt.</value>
+  </data>
+  <data name="Environments_Acting_Allow" xml:space="preserve">
+    <value>Erkunden mit Aktionen erlauben</value>
+  </data>
+  <data name="Environments_Acting_Allowed" xml:space="preserve">
+    <value>Seit {0} darf das Erkunden dieser Seite ihre Schaltflächen drücken und ihre Formulare mit Testwerten senden.</value>
+  </data>
+  <data name="Environments_Acting_Withdraw" xml:space="preserve">
+    <value>Zurückziehen: nur Links folgen</value>
+  </data>
+  <data name="Environments_Error_ActingAcknowledgementRequired" xml:space="preserve">
+    <value>Bestätigen Sie zuerst: Erkunden mit Aktionen kann Datensätze auf Ihrer Seite anlegen.</value>
+  </data>
+  <data name="Environments_Error_ActingOnProduction" xml:space="preserve">
+    <value>Auf einer Produktivseite handelt das Erkunden nie.</value>
+  </data>
+  <data name="Test_Explored" xml:space="preserve">
+    <value>Was das Erkunden getan hat</value>
+  </data>
+  <data name="Test_Explored_Intro" xml:space="preserve">
+    <value>Das Erkunden hat diese Steuerelemente gedrückt und diese Formulare mit Testwerten gesendet. Was dabei entstanden ist, ist noch auf Ihrer Seite.</value>
+  </data>
 </root>

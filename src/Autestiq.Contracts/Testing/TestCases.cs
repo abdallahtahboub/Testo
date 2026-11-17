@@ -54,6 +54,10 @@ public sealed record TestCaseSummary(Guid TestCaseId, int Number, string Descrip
 /// <param name="NeedsSecret">Whether the plan types a secret, which no plan may do until a secret store exists.</param>
 /// <param name="Approval">The plan's approval, or <c>null</c> when it has none.</param>
 /// <param name="Runs">The runs of the approved plan, newest first.</param>
+/// <param name="Explored">
+/// What exploring did on the site, when it was allowed to act (ADR-0032): each control pressed and form sent, as the
+/// explorer recorded them, in the order first done. Empty when exploring only followed links.
+/// </param>
 public sealed record TestCaseDetail(
     Guid TestCaseId,
     int Number,
@@ -72,7 +76,8 @@ public sealed record TestCaseDetail(
     IReadOnlyList<int> StepsThatMayChangeData,
     bool NeedsSecret,
     PlanApproval? Approval,
-    IReadOnlyList<TestCaseRun> Runs);
+    IReadOnlyList<TestCaseRun> Runs,
+    IReadOnlyList<string> Explored);
 
 /// <summary>Who approved a plan, when, and whether the approval allows changing data.</summary>
 public sealed record PlanApproval(DateTimeOffset ApprovedAt, string? ApprovedBy, bool ToChangeData);

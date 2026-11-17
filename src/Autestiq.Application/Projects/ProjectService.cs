@@ -179,7 +179,7 @@ internal sealed class ProjectService(
         foreach (var environment in environments)
         {
             var proof = await proofs.GetAsync(environment.Origin, cancellationToken).ConfigureAwait(false);
-            summaries.Add(new EnvironmentSummary(environment.Id, environment.Name, environment.Origin, proof, environment.Kind, environment.ProductionAuthorizedAt));
+            summaries.Add(new EnvironmentSummary(environment.Id, environment.Name, environment.Origin, proof, environment.Kind, environment.ProductionAuthorizedAt, environment.ExplorationMayActAt));
         }
 
         return summaries;
@@ -313,6 +313,64 @@ internal sealed class ProjectService(
         environment.ProductionAuthorizedAt = null;
         environment.ProductionAuthorizedBy = null;
         Record(AuditActions.ProductionWithdrawn, nameof(TestEnvironment), environment.Id, $"{environment.Name} ({environment.Origin})");
+        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        return OperationResult.Success;
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult> AllowExplorationActingAsync(Guid environmentId, bool acknowledged, CancellationToken cancellationToken = default)
+    {
+        // An owner's decision alone, as production is: exploring that acts can create records on the customer's site.
+        if (currentUser.Role != Role.Owner)
+        {
+            return OperationResult.Failure("Environments_Error_OwnerOnly");
+        }
+
+        if (!acknowledged)
+        {
+            return OperationResult.Failure("Environments_Error_ActingAcknowledgementRequired");
+        }
+
+        var environment = await database.Environments.FirstOrDefaultAsync(candidate => candidate.Id == environmentId, cancellationToken).ConfigureAwait(false);
+
+        if (environment is null)
+        {
+            return OperationResult.Failure("Environments_Error_NoSuchEnvironment");
+        }
+
+        // Never production, authorized or not: exploring is broader than running one approved plan.
+        if (environment.Kind == EnvironmentKind.Production)
+        {
+            return OperationResult.Failure("Environments_Error_ActingOnProduction");
+        }
+
+        environment.ExplorationMayActAt = timeProvider.GetUtcNow();
+        environment.ExplorationMayActBy = currentUser.UserId;
+        Record(AuditActions.ExplorationActingAllowed, nameof(TestEnvironment), environment.Id, $"{environment.Name} ({environment.Origin})");
+        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        return OperationResult.Success;
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult> WithdrawExplorationActingAsync(Guid environmentId, CancellationToken cancellationToken = default)
+    {
+        if (currentUser.Role != Role.Owner)
+        {
+            return OperationResult.Failure("Environments_Error_OwnerOnly");
+        }
+
+        var environment = await database.Environments.FirstOrDefaultAsync(candidate => candidate.Id == environmentId, cancellationToken).ConfigureAwait(false);
+
+        if (environment is null)
+        {
+            return OperationResult.Failure("Environments_Error_NoSuchEnvironment");
+        }
+
+        environment.ExplorationMayActAt = null;
+        environment.ExplorationMayActBy = null;
+        Record(AuditActions.ExplorationActingWithdrawn, nameof(TestEnvironment), environment.Id, $"{environment.Name} ({environment.Origin})");
         await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return OperationResult.Success;

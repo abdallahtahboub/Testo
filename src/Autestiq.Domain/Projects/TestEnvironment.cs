@@ -33,4 +33,14 @@ public sealed class TestEnvironment : Entity, IBelongsToOrganization
 
     /// <summary>The owner who authorized it.</summary>
     public Guid? ProductionAuthorizedBy { get; set; }
+
+    /// <summary>
+    /// When an Owner allowed exploring this site to press its buttons and send its forms with test values, or
+    /// <c>null</c>: off by default, and never for a production site (ADR-0032). Without it a customer's site is
+    /// explored read-only.
+    /// </summary>
+    public DateTimeOffset? ExplorationMayActAt { get; set; }
+
+    /// <summary>Who allowed it.</summary>
+    public Guid? ExplorationMayActBy { get; set; }
 }

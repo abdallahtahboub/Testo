@@ -1,6 +1,6 @@
 # 0032 — Exploration that may act on a customer's site, with the customer's permission
 
-- **Status:** Proposed (waiting for the owner's approval)
+- **Status:** Accepted (the owner approved it on 2026-11-17)
 - **Date:** 2026-11-17
 
 ## Context
@@ -15,7 +15,7 @@ The owner's rules allow acting on a customer's site only with explicit approval 
 §5: state-changing steps need explicit approval; production is off by default). Plans already have such an approval
 (ADR-0030, part 3). Exploration has none, so it may not act at all.
 
-## Decision (proposed)
+## Decision
 **A per-environment permission, "exploration may act", off by default.**
 
 1. **Who and how.**

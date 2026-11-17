@@ -47,6 +47,31 @@ public class ExplorationPolicyTests
     }
 
     [Fact]
+    public void ACustomersApplication_WhoseOwnerAllowsActing_MayBePressedAndTypedInto()
+    {
+        // ADR-0032: the dispatcher sets the flag only from the environment's stored permission.
+        var job = Job("https://customer.example", []) with { CustomerAllowsActing = true };
+
+        Assert.True(ExplorationPolicy.MayPressControls(job));
+        Assert.True(ExplorationPolicy.MaySubmitForms(job));
+    }
+
+    [Fact]
+    public void TheOwnersPermission_DoesNotReachAnythingButExploring_NorWhatTheJobDidNotAskFor()
+    {
+        var planned = Job("https://customer.example", [], task: WorkerTask.Planned) with { CustomerAllowsActing = true };
+        Assert.False(ExplorationPolicy.MayPressControls(planned));
+
+        var notAsked = Job("https://customer.example", [], press: false, submit: false) with { CustomerAllowsActing = true };
+        Assert.False(ExplorationPolicy.MayPressControls(notAsked));
+        Assert.False(ExplorationPolicy.MaySubmitForms(notAsked));
+
+        var pressOnly = Job("https://customer.example", [], submit: false) with { CustomerAllowsActing = true };
+        Assert.True(ExplorationPolicy.MayPressControls(pressOnly));
+        Assert.False(ExplorationPolicy.MaySubmitForms(pressOnly));
+    }
+
+    [Fact]
     public void ACustomersApplication_IsRefused_EvenWhenTheCallerNamesItAsTrusted()
     {
         // The case that matters most. The run dispatcher names a run's own target as trusted-local

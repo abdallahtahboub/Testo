@@ -129,7 +129,8 @@ internal sealed class TestCaseService(
             PlanEffects.StepsThatMayChangeData(actions, snapshot),
             PlanEffects.NeedsSecret(actions),
             approval,
-            runs);
+            runs,
+            [.. snapshot?.Pages.SelectMany(page => page.ReachedBy ?? []).Distinct(StringComparer.Ordinal) ?? []]);
     }
 
     /// <inheritdoc />

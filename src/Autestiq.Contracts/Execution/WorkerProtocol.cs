@@ -65,6 +65,11 @@ public enum WorkerTask
 /// the benchmark marks the applications it runs itself. A customer's application never has it
 /// (<c>ExplorationPolicy</c>), whatever the job asks for.
 /// </param>
+/// <param name="CustomerAllowsActing">
+/// For <see cref="WorkerTask.Explore"/> of a customer's site: its owner has allowed exploring to press its controls and
+/// send its forms with test values (ADR-0032). Set only by the dispatcher, from the environment's stored permission
+/// re-read when the run starts, and never for a production site. Without it a customer's site is explored read-only.
+/// </param>
 /// <param name="ReadOnly">
 /// For <see cref="WorkerTask.Planned"/>: the plan was approved as one that does not change data (ADR-0030, part 3), so
 /// the browser sends no request that could: anything but GET, HEAD and OPTIONS is blocked before it leaves the
@@ -88,7 +93,8 @@ public sealed record WorkerJob(
     bool ExploreStates = false,
     bool SubmitForms = false,
     string? OriginProof = null,
-    bool ReadOnly = false);
+    bool ReadOnly = false,
+    bool CustomerAllowsActing = false);
 
 /// <summary>Where an origin's proof file is, and what it is called.</summary>
 public static class OriginProofFile

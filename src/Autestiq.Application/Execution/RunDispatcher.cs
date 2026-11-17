@@ -1109,15 +1109,21 @@ public sealed class RunDispatcher(
         run.FinishedAt = result.FinishedAt;
         run.BytesDownloaded = result.BytesDownloaded;
 
+        // A project that keeps no screenshots never has one stored: the worker's files go with its workspace (G-5).
+        // Across the filter, held to the run's own organization: the dispatcher has none in context.
+        var keepsScreenshots = await database.Projects.IgnoreQueryFilters()
+            .AnyAsync(project => project.OrganizationId == run.OrganizationId && project.Id == run.ProjectId && project.EvidenceRetentionDays > 0, cancellationToken)
+            .ConfigureAwait(false);
+
         using (writeScope.AllowWritingTo(run.OrganizationId))
         {
             long artifactBytes = 0;
 
             foreach (var step in result.Steps)
             {
-                var screenshot = await StoreScreenshotAsync(
-                        artifacts, database, run, step, workspace, cancellationToken)
-                    .ConfigureAwait(false);
+                var screenshot = keepsScreenshots
+                    ? await StoreScreenshotAsync(artifacts, database, run, step, workspace, cancellationToken).ConfigureAwait(false)
+                    : null;
 
                 artifactBytes += database.ChangeTracker.Entries<Artifact>()
                     .Where(entry => entry.State == EntityState.Added && entry.Entity.Id == screenshot)

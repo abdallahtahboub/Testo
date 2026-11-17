@@ -35,6 +35,13 @@ public sealed class Project : Entity, IBelongsToOrganization
 
     /// <summary>Who allowed it.</summary>
     public Guid? AiProcessingAllowedBy { get; set; }
+
+    /// <summary>
+    /// How many days a run's screenshots are kept, one of <c>EvidenceRetention.AllowedDays</c>: 90 by default, and 0 for
+    /// none kept at all. A run's result and steps are kept for good; its screenshots are customer data and go when their
+    /// time is up (gap analysis G-5).
+    /// </summary>
+    public int EvidenceRetentionDays { get; set; } = 90;
 }
 
 /// <summary>Whether a project is still worked on.</summary>

@@ -122,6 +122,33 @@ internal static class ExecutionSupport
     }
 
     /// <summary>
+    /// A worker that passes one step and leaves a screenshot of it in the job's artifact directory, as the real one does.
+    /// </summary>
+    public static string ScreenshotWorker()
+    {
+        var directory = Directory.CreateTempSubdirectory("autestiq-screenshot-worker-").FullName;
+        var script = Path.Combine(directory, "worker.sh");
+
+        File.WriteAllText(script, string.Join('\n',
+        [
+            "#!/bin/sh",
+            "job=$(cat)",
+            """id=$(printf '%s' "$job" | sed -E 's/.*"runId":"([^"]+)".*/\1/')""",
+            """dir=$(printf '%s' "$job" | sed -E 's/.*"artifactDirectory":"([^"]+)".*/\1/')""",
+            """printf 'PNG' > "$dir/step-1.png" """,
+            """printf '{"runId":"%s","status":3,"failureReason":null,"startedAt":"2026-11-16T12:00:00.0000000+00:00","finishedAt":"2026-11-16T12:00:01.0000000+00:00","steps":[{"order":1,"description":"Open the catalogue","status":3,"startedAt":"2026-11-16T12:00:00.0000000+00:00","finishedAt":"2026-11-16T12:00:01.0000000+00:00","message":null,"screenshotFile":"step-1.png"}],"bytesDownloaded":10}\n' "$id" """,
+            "",
+        ]));
+
+        if (!OperatingSystem.IsWindows())
+        {
+            File.SetUnixFileMode(script, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
+
+        return script;
+    }
+
+    /// <summary>
     /// An executable that answers like a worker that explored a site and found what the snapshot says: one passed
     /// step, some bytes from the site, and the snapshot.
     /// </summary>

@@ -348,6 +348,45 @@ internal sealed class ProjectService(
         return OperationResult.Success;
     }
 
+    /// <inheritdoc />
+    public async Task<OperationResult> SetEvidenceRetentionAsync(Guid projectId, int days, CancellationToken cancellationToken = default)
+    {
+        if (!currentUser.Can(Permission.ManageProjects))
+        {
+            return OperationResult.Failure("Projects_Error_NotAllowed");
+        }
+
+        if (!EvidenceRetention.AllowedDays.Contains(days))
+        {
+            return OperationResult.Failure("Projects_Error_InvalidRetention");
+        }
+
+        var project = await database.Projects.FirstOrDefaultAsync(candidate => candidate.Id == projectId, cancellationToken).ConfigureAwait(false);
+
+        if (project is null)
+        {
+            return OperationResult.Failure("Projects_Error_NoSuchProject");
+        }
+
+        var before = project.EvidenceRetentionDays;
+        project.EvidenceRetentionDays = days;
+
+        new AuditWriter(database, timeProvider).Record(
+            organizationContext.RequireOrganizationId(),
+            currentUser.UserId,
+            currentUser.Email,
+            AuditActions.EvidenceRetentionChanged,
+            nameof(Project),
+            project.Id,
+            $"{project.Name} ({project.KeyPrefix})",
+            before: new { Days = before },
+            after: new { Days = days });
+
+        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        return OperationResult.Success;
+    }
+
     private IQueryable<ProjectSummary> Summaries(IQueryable<Project> projects) =>
         projects.Select(project => new ProjectSummary(
             project.Id,
@@ -355,7 +394,8 @@ internal sealed class ProjectService(
             project.KeyPrefix,
             project.Description,
             database.Environments.Count(environment => environment.ProjectId == project.Id),
-            project.AiProcessingAllowedAt));
+            project.AiProcessingAllowedAt,
+            project.EvidenceRetentionDays));
 
     private void Record(string action, string subjectType, Guid subjectId, string subjectName) =>
         new AuditWriter(database, timeProvider).Record(

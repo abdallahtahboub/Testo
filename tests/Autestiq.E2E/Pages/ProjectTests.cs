@@ -91,6 +91,33 @@ public class ProjectTests(AppFixture app) : BrowserTest(app)
     }
 
     [Fact]
+    public async Task Settings_TheScreenshotPolicy_IsNinetyDaysByDefault_AndAShorterOneIsKept()
+    {
+        var page = await OpenSignedInAsync(Routes.ProjectSettings("SHOP"));
+        await Expect(page.Page.GetByTestId("save-evidence")).ToBeEnabledAsync();
+
+        var policy = page.Page.GetByTestId("evidence-policy");
+        await Expect(policy.GetByLabel("90 days")).ToBeCheckedAsync();
+
+        await policy.GetByLabel("30 days").CheckAsync();
+        await page.Page.GetByTestId("save-evidence").ClickAsync();
+        await Expect(page.Page.GetByTestId("evidence-saved")).ToHaveTextAsync("Saved.");
+
+        // Read back from the server, not from the page that set it.
+        var again = await OpenSignedInAsync(Routes.ProjectSettings("SHOP"));
+        await Expect(again.Page.GetByTestId("save-evidence")).ToBeEnabledAsync();
+        await Expect(again.Page.GetByTestId("evidence-policy").GetByLabel("30 days")).ToBeCheckedAsync();
+
+        // Back as it was, for the tests that share this project.
+        await again.Page.GetByTestId("evidence-policy").GetByLabel("90 days").CheckAsync();
+        await again.Page.GetByTestId("save-evidence").ClickAsync();
+        await Expect(again.Page.GetByTestId("evidence-saved")).ToHaveTextAsync("Saved.");
+
+        page.AssertNoProblems();
+        again.AssertNoProblems();
+    }
+
+    [Fact]
     public async Task Environments_OfAProjectThisOrganizationDoesNotHave_SaysNoSuchProject()
     {
         var page = await OpenSignedInAsync(Routes.Environments("NOPE"));

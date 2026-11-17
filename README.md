@@ -27,7 +27,7 @@ This is a young codebase and the list is short on purpose. Nothing below is aspi
 | Test runs, for three scripted scenarios against our own demo shop, with screenshots per step | Downloading a test (part 4) |
 | Projects and environments, with proof of site ownership and production off by default | A deployment of any kind |
 | Describing a test in a sentence and getting the AI's plan for it, only once the project allows AI processing | |
-| Approving a plan (an explicit tick when it may change data) and running it, read-only unless approved otherwise | |
+| Approving a plan (an explicit tick when it may change data), running it read-only unless approved otherwise, and downloading it as a Python test | |
 | The public website: 29 routes in English and German | |
 
 **The AI planner is measured on our own applications.** On 20 scenarios written after its prompt was

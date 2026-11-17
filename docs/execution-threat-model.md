@@ -189,6 +189,11 @@ It is personal data under GDPR, which `identity-and-access.md` §6 already commi
 signed URL issued by the application *after* the same permission check as any other read; no
 bucket is public; retention is 90 days as already decided, shorter for traces.
 
+**Fixed 2026-11-17 (Milestone 5 part 4).** The permission check read the signed-in person from a session that was
+filled only while a page rendered, so the artifact endpoint saw nobody and refused every screenshot, including the
+organization's own. It failed closed: nothing was served to anyone. The session is now read for every request
+(`SessionFromClaims`), and `ArtifactAccessTests` fetches a real screenshot. The test fails without the fix.
+
 ### 4.6 The browser as a way in
 
 Browsers have escapes. Ours runs content chosen by a stranger, which is the exact condition those

@@ -136,6 +136,25 @@ inconclusive one → the approved test downloaded.
 - The rule leans towards "may change data", so most plans that press anything need the tick. That is deliberate.
 - A run's result is shown on the run's own page. Downloading the approved test is part 4.
 
+## Part 4, built (2026-11-17)
+- **Downloading an approved test** (`ITestCaseService.DownloadAsync`, served by the host at
+  `/app/tests/{id}/download`): only a plan that is approved and still has the approved fingerprint. The file comes
+  from the fixed templates of ADR-0023, with a fixed header added: the approval date, the plan's fingerprint, and what
+  the approval allowed. The header holds no name and no text a person or a page wrote, so nothing can break out of
+  a comment. Each download is audited (`test.downloaded`). It needs `Read`, like the preview it matches. Any refusal
+  answers "not found", the same as a test that does not exist.
+- **What the file does not do is said in it and beside the link.** Read-only was held by Autestiq's own browser
+  (part 3). A downloaded file runs wherever the customer runs it, and nothing holds it there. So the header of a
+  read-only approval says: run it only where a test that changes data would be acceptable.
+- **A fault found on the way, fixed:** the signed-in person was read only while a page rendered. An endpoint that is
+  not a page saw nobody, and the tenant filter matched no organization. **Every screenshot link on a run page
+  therefore answered "not found"**, and the download did the same. The session is now read for every request
+  (`SessionFromClaims`), after authentication has checked the cookie. A test stores a real screenshot and fetches
+  it; it fails without the fix.
+
+**This completes the first customer flow**: project, environment, a test in a sentence, the AI's plan, approval, a
+run, and the downloaded test.
+
 ## Later, recorded with this flow
 - **A live view of a run inside the product** (the owner's request of 2026-11-17). The customer watches the
   browser's run in Autestiq step by step, never in a window on their machine. First a picture per step as it

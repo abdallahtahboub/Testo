@@ -102,8 +102,9 @@ public partial class ResourceFileTests
     {
         ["Autestiq.Web"] = ["Autestiq.Application", "Autestiq.Persistence"],
 
-        // The execution use cases answer with keys that belong to the module that shows them.
-        ["Autestiq.Modules.Execution"] = ["Autestiq.Application"],
+        // The execution use cases answer with keys that belong to the module that shows them, and a failed plan
+        // carries the planner's own keys (PlanningErrors), which the test page shows.
+        ["Autestiq.Modules.Execution"] = ["Autestiq.Application", Path.Combine("Autestiq.Contracts", "Planning")],
     };
 
     /// <summary>The Razor and C# files that may use the keys of a resource file.</summary>

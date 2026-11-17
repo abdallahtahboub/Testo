@@ -27,6 +27,10 @@ internal static class AuditActions
     public const string ProjectCreated = "project.created";
     public const string EnvironmentAdded = "environment.added";
     public const string EnvironmentRemoved = "environment.removed";
+    public const string TestDescribed = "test.described";
+    public const string TestPlanned = "test.planned";
+    public const string AiProcessingAllowed = "project.ai_processing_allowed";
+    public const string AiProcessingWithdrawn = "project.ai_processing_withdrawn";
     public const string ProductionAuthorized = "environment.production_authorized";
     public const string ProductionWithdrawn = "environment.production_withdrawn";
 

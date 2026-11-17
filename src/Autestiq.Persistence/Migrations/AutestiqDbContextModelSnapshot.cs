@@ -694,6 +694,10 @@ namespace Autestiq.Persistence.Migrations
                         .HasColumnType("character varying(500)")
                         .HasColumnName("target_origin");
 
+                    b.Property<Guid?>("TestCaseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("test_case_id");
+
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -713,6 +717,9 @@ namespace Autestiq.Persistence.Migrations
 
                     b.HasAlternateKey("OrganizationId", "Id")
                         .HasName("ak_test_runs_organization_id_id");
+
+                    b.HasIndex("TestCaseId")
+                        .HasDatabaseName("ix_test_runs_test_case_id");
 
                     b.HasIndex("OrganizationId", "Status")
                         .HasDatabaseName("ix_test_runs_organization_id_status");
@@ -1392,6 +1399,14 @@ namespace Autestiq.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<DateTimeOffset?>("AiProcessingAllowedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ai_processing_allowed_at");
+
+                    b.Property<Guid?>("AiProcessingAllowedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ai_processing_allowed_by");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -1526,6 +1541,129 @@ namespace Autestiq.Persistence.Migrations
                         .HasDatabaseName("ix_environments_organization_id_project_id_origin");
 
                     b.ToTable("environments", (string)null);
+                });
+
+            modelBuilder.Entity("Autestiq.Domain.Testing.TestCase", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("description");
+
+                    b.Property<Guid>("EnvironmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("environment_id");
+
+                    b.Property<string>("FailureReason")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("failure_reason");
+
+                    b.Property<string>("Model")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("model");
+
+                    b.Property<decimal?>("ModelCost")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("model_cost");
+
+                    b.Property<int?>("ModelTokens")
+                        .HasColumnType("integer")
+                        .HasColumnName("model_tokens");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text")
+                        .HasColumnName("notes");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("integer")
+                        .HasColumnName("number");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<string>("Plan")
+                        .HasColumnType("text")
+                        .HasColumnName("plan");
+
+                    b.Property<DateTimeOffset?>("PlannedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("planned_at");
+
+                    b.Property<DateTimeOffset?>("PlanningStartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("planning_started_at");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<Guid?>("RequestedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("requested_by");
+
+                    b.Property<string>("SentToModel")
+                        .HasColumnType("text")
+                        .HasColumnName("sent_to_model");
+
+                    b.Property<string>("Snapshot")
+                        .HasColumnType("text")
+                        .HasColumnName("snapshot");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id")
+                        .HasName("pk_test_cases");
+
+                    b.HasIndex("EnvironmentId")
+                        .HasDatabaseName("ix_test_cases_environment_id");
+
+                    b.HasIndex("OrganizationId", "PlannedAt")
+                        .HasDatabaseName("ix_test_cases_organization_id_planned_at");
+
+                    b.HasIndex("Status", "PlanningStartedAt")
+                        .HasDatabaseName("ix_test_cases_status_planning_started_at");
+
+                    b.HasIndex("OrganizationId", "ProjectId", "Number")
+                        .IsUnique()
+                        .HasDatabaseName("ix_test_cases_organization_id_project_id_number");
+
+                    b.ToTable("test_cases");
                 });
 
             modelBuilder.Entity("Autestiq.Domain.Usage.UsageEvent", b =>
@@ -1749,6 +1887,24 @@ namespace Autestiq.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_environments_projects_organization_id_project_id");
+                });
+
+            modelBuilder.Entity("Autestiq.Domain.Testing.TestCase", b =>
+                {
+                    b.HasOne("Autestiq.Domain.Projects.TestEnvironment", null)
+                        .WithMany()
+                        .HasForeignKey("EnvironmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_test_cases_environments_environment_id");
+
+                    b.HasOne("Autestiq.Domain.Projects.Project", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId", "ProjectId")
+                        .HasPrincipalKey("OrganizationId", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_test_cases_projects_organization_id_project_id");
                 });
 
             modelBuilder.Entity("Autestiq.Domain.Costs.PriceVersion", b =>

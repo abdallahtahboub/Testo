@@ -1,0 +1,122 @@
+@page "/app/p/{ProjectKey}/tests"
+@inject IStringLocalizer<ExecutionResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    A project's described tests, the permission AI planning needs, and the form that describes a new
+    test (Milestone 5, part 2; ADR-0030). The permission is off by default and says plainly what is
+    sent and what never is (docs/secure-onboarding-and-privacy.md §4).
+*@
+<PageTitle>@L["Tests_PageTitle", Project?.Name ?? ProjectKey, Brand.Value.ProductName]</PageTitle>
+
+@if (Loading)
+{
+    <TSkeleton Shape="SkeletonShape.Text" Lines="3" />
+}
+else if (Project is null)
+{
+    <h1>@L["Environments_NoSuchProject"]</h1>
+    <p class="t-muted">@L["Environments_NoSuchProject_Text"]</p>
+    <p><a href="@Routes.Projects">@L["Environments_BackToProjects"]</a></p>
+}
+else
+{
+    <div class="tests">
+        <header class="tests__header">
+            <ProjectNav ProjectKey="@Project.Key" ProjectName="@Project.Name" Current="tests" />
+            <h1>@L["Tests_Title"]</h1>
+            <p class="t-muted">@L["Tests_Intro"]</p>
+        </header>
+
+        @if (Problem is not null)
+        {
+            <p class="tests__problem" role="alert">@Problem</p>
+        }
+
+        <section class="tests__ai" aria-labelledby="tests-ai" data-testid="ai-permission">
+            <h2 id="tests-ai" class="t-h4">@L["Tests_Ai_Title"]</h2>
+            @if (Project.AiProcessingAllowedAt is { } allowedAt)
+            {
+                <p>@L["Tests_Ai_Allowed", allowedAt.ToLocalTime().ToString("d")]</p>
+                <AiDataNotice />
+                @if (CanManageProjects)
+                {
+                    <div>
+                        <TButton Variant="ButtonVariant.Ghost" Disabled="Busy || !Ready" OnClick="WithdrawAsync" data-testid="withdraw-ai">@L["Tests_Ai_Withdraw"]</TButton>
+                    </div>
+                }
+            }
+            else
+            {
+                <p>@L["Tests_Ai_Off"]</p>
+                <AiDataNotice />
+                @if (CanManageProjects)
+                {
+                    <TCheckbox Label="@L["Tests_Ai_Acknowledge"]" @bind-Checked="Acknowledged" Disabled="!Ready" data-testid="acknowledge-ai" />
+                    <div>
+                        <TButton Disabled="Busy || !Ready" OnClick="AllowAsync" data-testid="allow-ai">@L["Tests_Ai_Allow"]</TButton>
+                    </div>
+                }
+                else
+                {
+                    <p class="t-muted">@L["Tests_Ai_AskAnAdmin"]</p>
+                }
+            }
+        </section>
+
+        @if (Project.AiProcessingAllowedAt is not null && CanDescribe)
+        {
+            <section class="tests__new" aria-labelledby="tests-new">
+                <h2 id="tests-new" class="t-h4">@L["Tests_New"]</h2>
+
+                @if (Environments.Count == 0)
+                {
+                    <p>@L["Tests_New_NoEnvironment"] <a href="@Routes.Environments(Project.Key)">@L["Environments_Title"]</a></p>
+                }
+                else
+                {
+                    <div class="tests__form">
+                        <TField Label="@L["Tests_New_Environment"]" Required>
+                            <TSelect Context="context" @bind-Value="EnvironmentId" Required Disabled="!Ready" data-testid="test-environment">
+                                @foreach (var environment in Environments)
+                                {
+                                    <option value="@environment.EnvironmentId">@environment.Name (@Origins.Display(environment.Origin))</option>
+                                }
+                            </TSelect>
+                        </TField>
+                        <TField Label="@L["Tests_New_Description"]" Hint="@L["Tests_New_Description_Hint"]" Required>
+                            <TTextArea Context="context" @bind-Value="Description" Rows="3" Required Disabled="!Ready" data-testid="test-description" />
+                        </TField>
+                        <p class="t-muted">@L["Tests_New_ReadOnlyNote"]</p>
+                        <div>
+                            <TButton Variant="ButtonVariant.Primary" Loading="Busy" Disabled="!Ready" OnClick="DescribeAsync" data-testid="describe-test">@L["Tests_New_Submit"]</TButton>
+                        </div>
+                    </div>
+                }
+            </section>
+        }
+
+        <section aria-labelledby="tests-list">
+            <h2 id="tests-list" class="t-h4">@L["Tests_List"]</h2>
+            <TAsyncView Loading="false" Error="@LoadError" OnRetry="LoadAsync" IsEmpty="Tests.Count == 0">
+                <EmptyContent>
+                    <TEmptyState Title="@L["Tests_Empty_Title"]">@L["Tests_Empty_Text"]</TEmptyState>
+                </EmptyContent>
+                <ChildContent>
+                    <ul class="tests__list" data-testid="tests">
+                        @foreach (var test in Tests)
+                        {
+                            <li class="tests__item">
+                                <div class="tests__text">
+                                    <p class="tests__name"><a href="@Routes.Test(Project.Key, test.TestCaseId)" data-testid="@($"test-{test.Number}")">#@test.Number @test.Description</a></p>
+                                    <p class="t-muted">@test.EnvironmentName</p>
+                                </div>
+                                <TestStatusText Status="test.Status" />
+                            </li>
+                        }
+                    </ul>
+                </ChildContent>
+            </TAsyncView>
+        </section>
+    </div>
+}

@@ -9,7 +9,8 @@ namespace Autestiq.Contracts.Projects;
 /// <param name="Key">Its short key, upper case, as it appears in addresses: <c>/app/p/SHOP/…</c>.</param>
 /// <param name="Description">What it is for, if anyone said.</param>
 /// <param name="Environments">How many environments it has.</param>
-public sealed record ProjectSummary(Guid ProjectId, string Name, string Key, string? Description, int Environments);
+/// <param name="AiProcessingAllowedAt">When AI planning was allowed to process its page content, or <c>null</c>: off by default.</param>
+public sealed record ProjectSummary(Guid ProjectId, string Name, string Key, string? Description, int Environments, DateTimeOffset? AiProcessingAllowedAt = null);
 
 /// <summary>What kind of site an environment is. Production is refused for runs until an owner authorizes it.</summary>
 public enum EnvironmentKind
@@ -61,6 +62,15 @@ public interface IProjectService
 
     /// <summary>Creates a project, within the number the organization's plan allows. Returns its key.</summary>
     Task<OperationResult<string>> CreateAsync(NewProject project, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Allows AI planning to process the project's discovered page content: titles, labels and visible text, sent to
+    /// the configured model provider. Never credentials, screenshots or traces. Requires ManageProjects; audited.
+    /// </summary>
+    Task<OperationResult> AllowAiProcessingAsync(Guid projectId, bool acknowledged, CancellationToken cancellationToken = default);
+
+    /// <summary>Withdraws that permission: no more planning for the project until it is allowed again. Audited.</summary>
+    Task<OperationResult> WithdrawAiProcessingAsync(Guid projectId, CancellationToken cancellationToken = default);
 
     /// <summary>A project's environments, by name, each with the state of its origin's proof.</summary>
     Task<IReadOnlyList<EnvironmentSummary>> ListEnvironmentsAsync(Guid projectId, CancellationToken cancellationToken = default);

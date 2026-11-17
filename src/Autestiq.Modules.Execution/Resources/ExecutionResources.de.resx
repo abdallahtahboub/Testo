@@ -358,4 +358,277 @@
   <data name="Environments_Error_NotProduction" xml:space="preserve">
     <value>Dies ist eine Testseite; sie braucht keine Freigabe.</value>
   </data>
+  <data name="Tests_PageTitle" xml:space="preserve">
+    <value>Tests von {0} – {1}</value>
+  </data>
+  <data name="Tests_Title" xml:space="preserve">
+    <value>Tests</value>
+  </data>
+  <data name="Tests_Intro" xml:space="preserve">
+    <value>Beschreiben Sie einen Test in einem Satz. Autestiq erkundet die Seite und die KI schreibt einen Plan, den Sie prüfen, bevor etwas läuft.</value>
+  </data>
+  <data name="Tests_Ai_Title" xml:space="preserve">
+    <value>KI-Planung</value>
+  </data>
+  <data name="Tests_Ai_Off" xml:space="preserve">
+    <value>Die KI-Planung ist für dieses Projekt aus. Nichts daraus wird an einen KI-Anbieter gesendet, bis jemand, der Projekte verwaltet, es erlaubt.</value>
+  </data>
+  <data name="Tests_Ai_Allowed" xml:space="preserve">
+    <value>Die KI-Planung wurde für dieses Projekt am {0} erlaubt.</value>
+  </data>
+  <data name="Tests_Ai_Acknowledge" xml:space="preserve">
+    <value>Ich erlaube, dass die erkundeten Seiteninhalte dieses Projekts wie oben beschrieben zur Planung an den KI-Anbieter gesendet werden.</value>
+  </data>
+  <data name="Tests_Ai_Allow" xml:space="preserve">
+    <value>KI-Planung erlauben</value>
+  </data>
+  <data name="Tests_Ai_Withdraw" xml:space="preserve">
+    <value>Erlaubnis zurückziehen</value>
+  </data>
+  <data name="Tests_Ai_AskAnAdmin" xml:space="preserve">
+    <value>Bitten Sie einen Inhaber oder Administrator, sie zu erlauben.</value>
+  </data>
+  <data name="Tests_New" xml:space="preserve">
+    <value>Test beschreiben</value>
+  </data>
+  <data name="Tests_New_NoEnvironment" xml:space="preserve">
+    <value>Legen Sie zuerst eine Umgebung an:</value>
+  </data>
+  <data name="Tests_New_Environment" xml:space="preserve">
+    <value>Umgebung</value>
+  </data>
+  <data name="Tests_New_Description" xml:space="preserve">
+    <value>Was soll getestet werden?</value>
+  </data>
+  <data name="Tests_New_Description_Hint" xml:space="preserve">
+    <value>Ein oder zwei Sätze, wie eine Testerin es sagen würde. Zum Beispiel: Zwei Tassen in den Warenkorb legen und prüfen, dass er 22,50 £ anzeigt.</value>
+  </data>
+  <data name="Tests_New_ReadOnlyNote" xml:space="preserve">
+    <value>Auf Ihrer eigenen Seite folgt das Erkunden nur Links: Es drückt keine Schaltflächen und sendet keine Formulare.</value>
+  </data>
+  <data name="Tests_New_Submit" xml:space="preserve">
+    <value>Erkunden und planen</value>
+  </data>
+  <data name="Tests_List" xml:space="preserve">
+    <value>Beschriebene Tests</value>
+  </data>
+  <data name="Tests_Empty_Title" xml:space="preserve">
+    <value>Noch keine Tests</value>
+  </data>
+  <data name="Tests_Empty_Text" xml:space="preserve">
+    <value>Beschreiben Sie oben einen, und sein Plan erscheint hier.</value>
+  </data>
+  <data name="Tests_LoadFailed" xml:space="preserve">
+    <value>Die Tests konnten nicht geladen werden.</value>
+  </data>
+  <data name="Tests_Error_NotAllowed" xml:space="preserve">
+    <value>Nur Inhaber, QA-Leitung und QA-Engineers können Tests beschreiben.</value>
+  </data>
+  <data name="Tests_Error_DescriptionRequired" xml:space="preserve">
+    <value>Beschreiben Sie den Test mit bis zu 1.000 Zeichen.</value>
+  </data>
+  <data name="Tests_Error_NoSuchProject" xml:space="preserve">
+    <value>Dieses Projekt gibt es nicht.</value>
+  </data>
+  <data name="Tests_Error_AiNotAllowed" xml:space="preserve">
+    <value>Die KI-Planung ist für dieses Projekt nicht erlaubt.</value>
+  </data>
+  <data name="Tests_Error_NoSuchEnvironment" xml:space="preserve">
+    <value>Wählen Sie eine der Umgebungen dieses Projekts.</value>
+  </data>
+  <data name="Tests_Error_ProductionNotAuthorized" xml:space="preserve">
+    <value>Das ist eine Produktivseite, die ein Inhaber nicht für Tests freigegeben hat.</value>
+  </data>
+  <data name="Tests_Error_Paused" xml:space="preserve">
+    <value>Das Testen ist derzeit pausiert. Bitte versuchen Sie es später erneut.</value>
+  </data>
+  <data name="Tests_Error_SiteNotAllowed" xml:space="preserve">
+    <value>Diese Seite kann noch nicht erkundet werden: Weisen Sie zuerst auf der Seite Umgebungen nach, dass sie Ihnen gehört.</value>
+  </data>
+  <data name="Tests_Error_MinutesUsedUp" xml:space="preserve">
+    <value>Die Browserminuten dieses Monats sind aufgebraucht.</value>
+  </data>
+  <data name="Tests_Error_AiBudgetSpent" xml:space="preserve">
+    <value>Das KI-Planungsbudget dieses Monats ist aufgebraucht.</value>
+  </data>
+  <data name="Tests_Error_TooManyStarts" xml:space="preserve">
+    <value>Zu viele Anfragen in der letzten Minute. Bitte warten Sie einen Moment und versuchen Sie es erneut.</value>
+  </data>
+  <data name="Tests_Error_ExplorationFailed" xml:space="preserve">
+    <value>Das Erkunden der Seite ist nicht gelungen, daher gab es nichts zu planen.</value>
+  </data>
+  <data name="Tests_Error_NoPlanner" xml:space="preserve">
+    <value>Die KI-Planung ist auf diesem Server nicht eingerichtet.</value>
+  </data>
+  <data name="Tests_Error_NoPlan" xml:space="preserve">
+    <value>Es konnte kein Plan geschrieben werden.</value>
+  </data>
+  <data name="Projects_Error_AiAcknowledgementRequired" xml:space="preserve">
+    <value>Bestätigen Sie zuerst die Erlaubnis: Sie sendet Seiteninhalte an den KI-Anbieter.</value>
+  </data>
+  <data name="Projects_Error_NoSuchProject" xml:space="preserve">
+    <value>Dieses Projekt gibt es nicht.</value>
+  </data>
+  <data name="Environments_Error_InUse" xml:space="preserve">
+    <value>Gegen diese Umgebung wurden Tests erkundet, daher bleibt sie bestehen.</value>
+  </data>
+  <data name="AiNotice_Sent_Title" xml:space="preserve">
+    <value>An den KI-Anbieter gesendet:</value>
+  </data>
+  <data name="AiNotice_Sent" xml:space="preserve">
+    <value>Ihre Testbeschreibung und was das Erkunden auf der Seite gefunden hat: Seitenadressen, Titel, Überschriften sowie Namen und sichtbarer Text von Schaltflächen, Links, Feldern und anderen Elementen. Auf einer echten Seite können das Namen, E-Mail-Adressen oder Bestellungen sein, die dort angezeigt werden.</value>
+  </data>
+  <data name="AiNotice_Never_Title" xml:space="preserve">
+    <value>Nie gesendet:</value>
+  </data>
+  <data name="AiNotice_Never" xml:space="preserve">
+    <value>Passwörter und andere Geheimnisse, Screenshots, Aufzeichnungen oder Netzwerk-Traces.</value>
+  </data>
+  <data name="TestStatus_Exploring" xml:space="preserve">
+    <value>Wird erkundet</value>
+  </data>
+  <data name="TestStatus_Planning" xml:space="preserve">
+    <value>Wird geplant</value>
+  </data>
+  <data name="TestStatus_Planned" xml:space="preserve">
+    <value>Geplant</value>
+  </data>
+  <data name="TestStatus_Failed" xml:space="preserve">
+    <value>Kein Plan</value>
+  </data>
+  <data name="Test_PageTitle" xml:space="preserve">
+    <value>Test Nr. {0} – {1}</value>
+  </data>
+  <data name="Test_NoSuchTest" xml:space="preserve">
+    <value>Test nicht gefunden</value>
+  </data>
+  <data name="Test_NoSuchTest_Text" xml:space="preserve">
+    <value>In diesem Projekt gibt es keinen Test mit dieser Nummer.</value>
+  </data>
+  <data name="Test_Title" xml:space="preserve">
+    <value>Test Nr. {0}</value>
+  </data>
+  <data name="Test_Against" xml:space="preserve">
+    <value>Gegen {0}, {1}</value>
+  </data>
+  <data name="Test_Asked" xml:space="preserve">
+    <value>Was Sie verlangt haben</value>
+  </data>
+  <data name="Test_Exploring" xml:space="preserve">
+    <value>Die Seite wird erkundet. Das kann einige Minuten dauern; die Seite aktualisiert sich selbst.</value>
+  </data>
+  <data name="Test_Planning" xml:space="preserve">
+    <value>Die KI schreibt den Plan. Die Seite aktualisiert sich selbst.</value>
+  </data>
+  <data name="Test_Plan" xml:space="preserve">
+    <value>Der Plan</value>
+  </data>
+  <data name="Test_Plan_NotApproved" xml:space="preserve">
+    <value>Von der KI geschrieben und vom Validator von Autestiq geprüft. Er ist nicht gelaufen und läuft erst, wenn ihn jemand freigibt.</value>
+  </data>
+  <data name="Test_Plan_Partial" xml:space="preserve">
+    <value>Dieser Plan deckt nur einen Teil dessen ab, was Sie verlangt haben. Die Notizen der KI sagen, welcher Teil fehlt.</value>
+  </data>
+  <data name="Test_Checks" xml:space="preserve">
+    <value>Von Autestiq geprüft</value>
+  </data>
+  <data name="Test_Checks_Intro" xml:space="preserve">
+    <value>Was die Software von Autestiq selbst gefunden hat, als sie den Plan mit der erkundeten Seite abglich.</value>
+  </data>
+  <data name="Test_AiNotes" xml:space="preserve">
+    <value>Notizen der KI: ungeprüft</value>
+  </data>
+  <data name="Test_AiNotes_Intro" xml:space="preserve">
+    <value>Die Überlegungen und Annahmen der KI und was ihr beim Erkunden aufgefallen ist. Behandeln Sie sie als zu prüfende Punkte, nicht als Tatsachen oder Anforderungen.</value>
+  </data>
+  <data name="Test_Python" xml:space="preserve">
+    <value>Als Python-Test</value>
+  </data>
+  <data name="Test_Python_Intro" xml:space="preserve">
+    <value>Der Plan, geschrieben von festen Vorlagen, nie von der KI. Den Download gibt es mit der Freigabe.</value>
+  </data>
+  <data name="Test_Sent" xml:space="preserve">
+    <value>Was an die KI gesendet wurde</value>
+  </data>
+  <data name="Test_Sent_Intro" xml:space="preserve">
+    <value>Genau der Text über Ihre Anwendung, der an {0} gesendet wurde, mit einem festen Anweisungstext daneben. Die Planung kostete {1} $.</value>
+  </data>
+  <data name="Test_Sent_Attempt" xml:space="preserve">
+    <value>Versuch {0}</value>
+  </data>
+  <data name="Action_Goto" xml:space="preserve">
+    <value>Öffnen</value>
+  </data>
+  <data name="Action_Click" xml:space="preserve">
+    <value>Klicken</value>
+  </data>
+  <data name="Action_Type" xml:space="preserve">
+    <value>Eingeben</value>
+  </data>
+  <data name="Action_Press" xml:space="preserve">
+    <value>Taste drücken</value>
+  </data>
+  <data name="Action_WaitFor" xml:space="preserve">
+    <value>Warten auf</value>
+  </data>
+  <data name="Action_Select" xml:space="preserve">
+    <value>Auswählen</value>
+  </data>
+  <data name="Action_AssertText" xml:space="preserve">
+    <value>Text prüfen</value>
+  </data>
+  <data name="Action_AssertVisible" xml:space="preserve">
+    <value>Prüfen, dass es angezeigt wird</value>
+  </data>
+  <data name="Action_AssertNotVisible" xml:space="preserve">
+    <value>Prüfen, dass es nicht angezeigt wird</value>
+  </data>
+  <data name="Action_AssertUrl" xml:space="preserve">
+    <value>Adresse prüfen</value>
+  </data>
+  <data name="ProjectNav_Label" xml:space="preserve">
+    <value>Projekt</value>
+  </data>
+  <data name="ProjectNav_Tests" xml:space="preserve">
+    <value>Tests</value>
+  </data>
+  <data name="Planning_Error_Unreadable" xml:space="preserve">
+    <value>Die Antwort der KI war kein Plan.</value>
+  </data>
+  <data name="Planning_Error_UnknownAction" xml:space="preserve">
+    <value>Der Plan der KI verwendete einen Schritt, den es nicht gibt.</value>
+  </data>
+  <data name="Planning_Error_UnknownTarget" xml:space="preserve">
+    <value>Der Plan der KI nannte etwas, das beim Erkunden nie zu sehen war.</value>
+  </data>
+  <data name="Planning_Error_ForeignOrigin" xml:space="preserve">
+    <value>Der Plan der KI führte auf eine andere Seite.</value>
+  </data>
+  <data name="Planning_Error_TooManyActions" xml:space="preserve">
+    <value>Der Plan der KI war länger als erlaubt.</value>
+  </data>
+  <data name="Planning_Error_NoAssertions" xml:space="preserve">
+    <value>Der Plan der KI prüfte nichts.</value>
+  </data>
+  <data name="Planning_Error_Incomplete" xml:space="preserve">
+    <value>Einem Schritt im Plan der KI fehlte etwas, das er braucht.</value>
+  </data>
+  <data name="Planning_Error_BudgetSpent" xml:space="preserve">
+    <value>Die Planung hat ihr Ausgabenlimit erreicht.</value>
+  </data>
+  <data name="Planning_Error_ProviderUnavailable" xml:space="preserve">
+    <value>Der KI-Anbieter war nicht erreichbar.</value>
+  </data>
+  <data name="Planning_Error_ProviderRefusedTheKey" xml:space="preserve">
+    <value>Der KI-Anbieter hat den Schlüssel dieses Servers abgelehnt.</value>
+  </data>
+  <data name="Planning_Error_ProviderOutOfCredit" xml:space="preserve">
+    <value>Das Konto beim KI-Anbieter hat kein Guthaben mehr.</value>
+  </data>
+  <data name="Planning_Error_ProviderRateLimited" xml:space="preserve">
+    <value>Der KI-Anbieter hat um weniger Anfragen gebeten. Bitte versuchen Sie es gleich erneut.</value>
+  </data>
+  <data name="Planning_Error_NoPlanner" xml:space="preserve">
+    <value>Die KI-Planung ist auf diesem Server nicht eingerichtet.</value>
+  </data>
 </root>

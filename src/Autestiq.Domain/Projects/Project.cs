@@ -26,6 +26,15 @@ public sealed class Project : Entity, IBelongsToOrganization
 
     /// <summary>Whether it is still worked on.</summary>
     public ProjectStatus Status { get; set; } = ProjectStatus.Active;
+
+    /// <summary>
+    /// When someone allowed AI planning to process this project's discovered page content, or <c>null</c>: off by
+    /// default. Without it no page content of this project is sent to a model (ADR-0030, gap analysis G-1).
+    /// </summary>
+    public DateTimeOffset? AiProcessingAllowedAt { get; set; }
+
+    /// <summary>Who allowed it.</summary>
+    public Guid? AiProcessingAllowedBy { get; set; }
 }
 
 /// <summary>Whether a project is still worked on.</summary>

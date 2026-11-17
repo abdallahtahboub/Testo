@@ -19,6 +19,9 @@ public static class Scenarios
     /// <summary>A page trying to read cloud metadata, which must not reach it.</summary>
     public const string DemoShopEgressProbe = "demo-shop.egress-probe";
 
+    /// <summary>The scenario id of a run that explores a site for a described test (Milestone 5, part 2).</summary>
+    public const string Exploration = "explore";
+
     /// <summary>Everything a person may start.</summary>
     public static IReadOnlyList<ScenarioSummary> All { get; } =
     [
@@ -43,5 +46,5 @@ public static class Scenarios
     /// <summary>The name of a scenario, or the id itself when it is not one we know.</summary>
     public static string NameOf(string scenarioId) =>
         All.FirstOrDefault(scenario => string.Equals(scenario.ScenarioId, scenarioId, StringComparison.Ordinal))
-            ?.Name ?? scenarioId;
+            ?.Name ?? (scenarioId == Exploration ? "Site exploration" : scenarioId);
 }

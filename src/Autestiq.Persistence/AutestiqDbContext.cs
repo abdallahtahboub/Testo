@@ -66,6 +66,9 @@ public class AutestiqDbContext(DbContextOptions<AutestiqDbContext> options, IOrg
     /// <summary>The addresses each project tests.</summary>
     public DbSet<Domain.Projects.TestEnvironment> Environments => Set<Domain.Projects.TestEnvironment>();
 
+    /// <summary>Tests described in a sentence, with the plans the AI wrote for them.</summary>
+    public DbSet<Domain.Testing.TestCase> TestCases => Set<Domain.Testing.TestCase>();
+
     /// <summary>Executions of scenarios.</summary>
     public DbSet<TestRun> TestRuns => Set<TestRun>();
 

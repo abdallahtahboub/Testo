@@ -121,6 +121,33 @@ internal static class ExecutionSupport
         return script;
     }
 
+    /// <summary>
+    /// An executable that answers like a worker that explored a site and found what the snapshot says: one passed
+    /// step, some bytes from the site, and the snapshot.
+    /// </summary>
+    public static string ExploringWorker(string snapshotJson)
+    {
+        var directory = Directory.CreateTempSubdirectory("autestiq-exploring-worker-").FullName;
+        var script = Path.Combine(directory, "worker.sh");
+        File.WriteAllText(Path.Combine(directory, "snapshot.json"), snapshotJson);
+
+        File.WriteAllText(script, string.Join('\n',
+        [
+            "#!/bin/sh",
+            "job=$(cat)",
+            """id=$(printf '%s' "$job" | sed -E 's/.*"runId":"([^"]+)".*/\1/')""",
+            $$"""printf '{"runId":"%s","status":{{(int)RunStatus.Passed}},"failureReason":null,"startedAt":"2026-11-16T12:00:00.0000000+00:00","finishedAt":"2026-11-16T12:00:05.0000000+00:00","steps":[],"bytesDownloaded":2048,"snapshot":%s}\n' "$id" "$(cat {{Path.Combine(directory, "snapshot.json")}})" """,
+            "",
+        ]));
+
+        if (!OperatingSystem.IsWindows())
+        {
+            File.SetUnixFileMode(script, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
+
+        return script;
+    }
+
     /// <summary>An executable that waits a minute and says nothing: a run that stays running until stopped.</summary>
     public static string WaitingWorker()
     {

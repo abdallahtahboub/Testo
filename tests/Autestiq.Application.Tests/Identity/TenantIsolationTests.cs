@@ -34,7 +34,7 @@ public sealed class TenantIsolationTests : IAsyncLifetime
     /// at a real project and a step at a real run: the composite foreign keys are part of what is
     /// being tested, and they refuse anything else.
     /// </summary>
-    private readonly record struct SeedContext(Guid OrganizationId, Guid UserId, Guid ProjectId, Guid RunId);
+    private readonly record struct SeedContext(Guid OrganizationId, Guid UserId, Guid ProjectId, Guid RunId, Guid EnvironmentId);
 
     private static readonly Dictionary<Type, Func<SeedContext, object>> Seeds = new()
     {
@@ -122,10 +122,19 @@ public sealed class TenantIsolationTests : IAsyncLifetime
         },
         [typeof(Domain.Projects.TestEnvironment)] = seed => new Domain.Projects.TestEnvironment
         {
+            Id = seed.EnvironmentId,
             OrganizationId = seed.OrganizationId,
             ProjectId = seed.ProjectId,
             Name = $"Staging {Guid.CreateVersion7():N}",
             Origin = $"https://{Guid.CreateVersion7():N}.example:443",
+        },
+        [typeof(Domain.Testing.TestCase)] = seed => new Domain.Testing.TestCase
+        {
+            OrganizationId = seed.OrganizationId,
+            ProjectId = seed.ProjectId,
+            EnvironmentId = seed.EnvironmentId,
+            Number = 1,
+            Description = "Check the basket adds up",
         },
         [typeof(OriginProof)] = seed => new OriginProof
         {
@@ -367,7 +376,7 @@ public sealed class TenantIsolationTests : IAsyncLifetime
         database.Users.Add(user);
         await database.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var seedContext = new SeedContext(organization.Id, user.Id, Guid.CreateVersion7(), Guid.CreateVersion7());
+        var seedContext = new SeedContext(organization.Id, user.Id, Guid.CreateVersion7(), Guid.CreateVersion7(), Guid.CreateVersion7());
 
         foreach (var seed in Seeds.Values)
         {

@@ -358,4 +358,277 @@
   <data name="Environments_Error_NotProduction" xml:space="preserve">
     <value>This is a test site; it needs no authorization.</value>
   </data>
+  <data name="Tests_PageTitle" xml:space="preserve">
+    <value>Tests of {0} – {1}</value>
+  </data>
+  <data name="Tests_Title" xml:space="preserve">
+    <value>Tests</value>
+  </data>
+  <data name="Tests_Intro" xml:space="preserve">
+    <value>Describe a test in a sentence. Autestiq explores the site and the AI writes a plan, which you review before anything runs.</value>
+  </data>
+  <data name="Tests_Ai_Title" xml:space="preserve">
+    <value>AI planning</value>
+  </data>
+  <data name="Tests_Ai_Off" xml:space="preserve">
+    <value>AI planning is off for this project. Nothing from it is sent to an AI provider until someone who manages projects allows it.</value>
+  </data>
+  <data name="Tests_Ai_Allowed" xml:space="preserve">
+    <value>AI planning was allowed for this project on {0}.</value>
+  </data>
+  <data name="Tests_Ai_Acknowledge" xml:space="preserve">
+    <value>I allow this project's discovered page content to be sent to the AI provider for planning, as described above.</value>
+  </data>
+  <data name="Tests_Ai_Allow" xml:space="preserve">
+    <value>Allow AI planning</value>
+  </data>
+  <data name="Tests_Ai_Withdraw" xml:space="preserve">
+    <value>Withdraw the permission</value>
+  </data>
+  <data name="Tests_Ai_AskAnAdmin" xml:space="preserve">
+    <value>Ask an owner or an admin to allow it.</value>
+  </data>
+  <data name="Tests_New" xml:space="preserve">
+    <value>Describe a test</value>
+  </data>
+  <data name="Tests_New_NoEnvironment" xml:space="preserve">
+    <value>Add an environment first:</value>
+  </data>
+  <data name="Tests_New_Environment" xml:space="preserve">
+    <value>Environment</value>
+  </data>
+  <data name="Tests_New_Description" xml:space="preserve">
+    <value>What should be tested?</value>
+  </data>
+  <data name="Tests_New_Description_Hint" xml:space="preserve">
+    <value>One or two sentences, as a tester would say it. For example: Add two cups to the basket and check it says £22.50.</value>
+  </data>
+  <data name="Tests_New_ReadOnlyNote" xml:space="preserve">
+    <value>On your own site, exploring only follows links: it does not press buttons or submit forms.</value>
+  </data>
+  <data name="Tests_New_Submit" xml:space="preserve">
+    <value>Explore and plan</value>
+  </data>
+  <data name="Tests_List" xml:space="preserve">
+    <value>Described tests</value>
+  </data>
+  <data name="Tests_Empty_Title" xml:space="preserve">
+    <value>No tests yet</value>
+  </data>
+  <data name="Tests_Empty_Text" xml:space="preserve">
+    <value>Describe one above and its plan will appear here.</value>
+  </data>
+  <data name="Tests_LoadFailed" xml:space="preserve">
+    <value>The tests could not be loaded.</value>
+  </data>
+  <data name="Tests_Error_NotAllowed" xml:space="preserve">
+    <value>Only an owner, a QA lead or a QA engineer can describe tests.</value>
+  </data>
+  <data name="Tests_Error_DescriptionRequired" xml:space="preserve">
+    <value>Describe the test in up to 1,000 characters.</value>
+  </data>
+  <data name="Tests_Error_NoSuchProject" xml:space="preserve">
+    <value>There is no such project.</value>
+  </data>
+  <data name="Tests_Error_AiNotAllowed" xml:space="preserve">
+    <value>AI planning is not allowed for this project.</value>
+  </data>
+  <data name="Tests_Error_NoSuchEnvironment" xml:space="preserve">
+    <value>Choose one of this project's environments.</value>
+  </data>
+  <data name="Tests_Error_ProductionNotAuthorized" xml:space="preserve">
+    <value>That is a production site that an owner has not authorized for testing.</value>
+  </data>
+  <data name="Tests_Error_Paused" xml:space="preserve">
+    <value>Testing is paused for now. Please try again later.</value>
+  </data>
+  <data name="Tests_Error_SiteNotAllowed" xml:space="preserve">
+    <value>That site cannot be explored yet: prove it is yours on the Environments page first.</value>
+  </data>
+  <data name="Tests_Error_MinutesUsedUp" xml:space="preserve">
+    <value>This month's browser minutes are used up.</value>
+  </data>
+  <data name="Tests_Error_AiBudgetSpent" xml:space="preserve">
+    <value>This month's AI planning budget is spent.</value>
+  </data>
+  <data name="Tests_Error_TooManyStarts" xml:space="preserve">
+    <value>Too many requests in the last minute. Please wait a moment and try again.</value>
+  </data>
+  <data name="Tests_Error_ExplorationFailed" xml:space="preserve">
+    <value>Exploring the site did not succeed, so there was nothing to plan from.</value>
+  </data>
+  <data name="Tests_Error_NoPlanner" xml:space="preserve">
+    <value>AI planning is not set up on this server.</value>
+  </data>
+  <data name="Tests_Error_NoPlan" xml:space="preserve">
+    <value>No plan could be written.</value>
+  </data>
+  <data name="Projects_Error_AiAcknowledgementRequired" xml:space="preserve">
+    <value>Tick the permission first: it sends page content to the AI provider.</value>
+  </data>
+  <data name="Projects_Error_NoSuchProject" xml:space="preserve">
+    <value>There is no such project.</value>
+  </data>
+  <data name="Environments_Error_InUse" xml:space="preserve">
+    <value>Tests were explored against this environment, so it stays.</value>
+  </data>
+  <data name="AiNotice_Sent_Title" xml:space="preserve">
+    <value>Sent to the AI provider:</value>
+  </data>
+  <data name="AiNotice_Sent" xml:space="preserve">
+    <value>your test description, and what exploring found on the site: page addresses, titles, headings, and the names and visible text of buttons, links, fields and other elements. On a real site that can include names, emails or orders shown on its pages.</value>
+  </data>
+  <data name="AiNotice_Never_Title" xml:space="preserve">
+    <value>Never sent:</value>
+  </data>
+  <data name="AiNotice_Never" xml:space="preserve">
+    <value>passwords and other secrets, screenshots, recordings or network traces.</value>
+  </data>
+  <data name="TestStatus_Exploring" xml:space="preserve">
+    <value>Exploring</value>
+  </data>
+  <data name="TestStatus_Planning" xml:space="preserve">
+    <value>Planning</value>
+  </data>
+  <data name="TestStatus_Planned" xml:space="preserve">
+    <value>Planned</value>
+  </data>
+  <data name="TestStatus_Failed" xml:space="preserve">
+    <value>No plan</value>
+  </data>
+  <data name="Test_PageTitle" xml:space="preserve">
+    <value>Test #{0} – {1}</value>
+  </data>
+  <data name="Test_NoSuchTest" xml:space="preserve">
+    <value>No such test</value>
+  </data>
+  <data name="Test_NoSuchTest_Text" xml:space="preserve">
+    <value>There is no test with that number in this project.</value>
+  </data>
+  <data name="Test_Title" xml:space="preserve">
+    <value>Test #{0}</value>
+  </data>
+  <data name="Test_Against" xml:space="preserve">
+    <value>Against {0}, {1}</value>
+  </data>
+  <data name="Test_Asked" xml:space="preserve">
+    <value>What you asked for</value>
+  </data>
+  <data name="Test_Exploring" xml:space="preserve">
+    <value>Exploring the site. This can take a few minutes; the page updates by itself.</value>
+  </data>
+  <data name="Test_Planning" xml:space="preserve">
+    <value>The AI is writing the plan. The page updates by itself.</value>
+  </data>
+  <data name="Test_Plan" xml:space="preserve">
+    <value>The plan</value>
+  </data>
+  <data name="Test_Plan_NotApproved" xml:space="preserve">
+    <value>Written by the AI and checked by Autestiq's validator. It has not run, and it runs only once someone approves it.</value>
+  </data>
+  <data name="Test_Plan_Partial" xml:space="preserve">
+    <value>This plan covers only part of what you asked for. The AI's notes say which part is missing.</value>
+  </data>
+  <data name="Test_Checks" xml:space="preserve">
+    <value>Checked by Autestiq</value>
+  </data>
+  <data name="Test_Checks_Intro" xml:space="preserve">
+    <value>What Autestiq's own software found when it checked the plan against the explored site.</value>
+  </data>
+  <data name="Test_AiNotes" xml:space="preserve">
+    <value>The AI's notes: unverified</value>
+  </data>
+  <data name="Test_AiNotes_Intro" xml:space="preserve">
+    <value>The AI's reasoning, assumptions and what it noticed while exploring. Treat them as things to check, not as facts or requirements.</value>
+  </data>
+  <data name="Test_Python" xml:space="preserve">
+    <value>As a Python test</value>
+  </data>
+  <data name="Test_Python_Intro" xml:space="preserve">
+    <value>The plan written out by fixed templates, never by the AI. Download comes with approval.</value>
+  </data>
+  <data name="Test_Sent" xml:space="preserve">
+    <value>What was sent to the AI</value>
+  </data>
+  <data name="Test_Sent_Intro" xml:space="preserve">
+    <value>Exactly the text about your application that was sent to {0}, with a fixed instruction text beside it. Planning cost ${1}.</value>
+  </data>
+  <data name="Test_Sent_Attempt" xml:space="preserve">
+    <value>Attempt {0}</value>
+  </data>
+  <data name="Action_Goto" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="Action_Click" xml:space="preserve">
+    <value>Click</value>
+  </data>
+  <data name="Action_Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Action_Press" xml:space="preserve">
+    <value>Press</value>
+  </data>
+  <data name="Action_WaitFor" xml:space="preserve">
+    <value>Wait for</value>
+  </data>
+  <data name="Action_Select" xml:space="preserve">
+    <value>Choose</value>
+  </data>
+  <data name="Action_AssertText" xml:space="preserve">
+    <value>Check the text</value>
+  </data>
+  <data name="Action_AssertVisible" xml:space="preserve">
+    <value>Check it is shown</value>
+  </data>
+  <data name="Action_AssertNotVisible" xml:space="preserve">
+    <value>Check it is not shown</value>
+  </data>
+  <data name="Action_AssertUrl" xml:space="preserve">
+    <value>Check the address</value>
+  </data>
+  <data name="ProjectNav_Label" xml:space="preserve">
+    <value>Project</value>
+  </data>
+  <data name="ProjectNav_Tests" xml:space="preserve">
+    <value>Tests</value>
+  </data>
+  <data name="Planning_Error_Unreadable" xml:space="preserve">
+    <value>The AI's answer was not a plan.</value>
+  </data>
+  <data name="Planning_Error_UnknownAction" xml:space="preserve">
+    <value>The AI's plan used a step that does not exist.</value>
+  </data>
+  <data name="Planning_Error_UnknownTarget" xml:space="preserve">
+    <value>The AI's plan named something exploring never saw.</value>
+  </data>
+  <data name="Planning_Error_ForeignOrigin" xml:space="preserve">
+    <value>The AI's plan went to another site.</value>
+  </data>
+  <data name="Planning_Error_TooManyActions" xml:space="preserve">
+    <value>The AI's plan was longer than allowed.</value>
+  </data>
+  <data name="Planning_Error_NoAssertions" xml:space="preserve">
+    <value>The AI's plan checked nothing.</value>
+  </data>
+  <data name="Planning_Error_Incomplete" xml:space="preserve">
+    <value>A step of the AI's plan was missing something it needs.</value>
+  </data>
+  <data name="Planning_Error_BudgetSpent" xml:space="preserve">
+    <value>Planning reached its spending limit.</value>
+  </data>
+  <data name="Planning_Error_ProviderUnavailable" xml:space="preserve">
+    <value>The AI provider could not be reached.</value>
+  </data>
+  <data name="Planning_Error_ProviderRefusedTheKey" xml:space="preserve">
+    <value>The AI provider refused this server's key.</value>
+  </data>
+  <data name="Planning_Error_ProviderOutOfCredit" xml:space="preserve">
+    <value>The AI provider's account has run out of credit.</value>
+  </data>
+  <data name="Planning_Error_ProviderRateLimited" xml:space="preserve">
+    <value>The AI provider asked us to slow down. Please try again in a moment.</value>
+  </data>
+  <data name="Planning_Error_NoPlanner" xml:space="preserve">
+    <value>AI planning is not set up on this server.</value>
+  </data>
 </root>

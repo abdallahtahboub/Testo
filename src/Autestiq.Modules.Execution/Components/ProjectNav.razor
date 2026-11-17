@@ -1,0 +1,27 @@
+@inject IStringLocalizer<ExecutionResources> L
+
+@*
+    Where a project's pages are: its environments and its tests, with the one shown marked as
+    current, in words as well as in style.
+*@
+<nav class="project-nav" aria-label="@L["ProjectNav_Label"]">
+    <p class="t-muted project-nav__trail"><a href="@Routes.Projects">@L["Projects_Title"]</a> / @ProjectName</p>
+    <ul class="project-nav__tabs">
+        <li><a href="@Routes.Tests(ProjectKey)" aria-current="@(Current == "tests" ? "page" : null)" data-testid="project-nav-tests">@L["ProjectNav_Tests"]</a></li>
+        <li><a href="@Routes.Environments(ProjectKey)" aria-current="@(Current == "environments" ? "page" : null)" data-testid="project-nav-environments">@L["Environments_Title"]</a></li>
+    </ul>
+</nav>
+
+@code {
+    /// <summary>The project's key.</summary>
+    [Parameter, EditorRequired]
+    public string ProjectKey { get; set; } = "";
+
+    /// <summary>The project's name.</summary>
+    [Parameter, EditorRequired]
+    public string ProjectName { get; set; } = "";
+
+    /// <summary>Which page is shown: <c>tests</c> or <c>environments</c>.</summary>
+    [Parameter, EditorRequired]
+    public string Current { get; set; } = "";
+}

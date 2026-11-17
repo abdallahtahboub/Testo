@@ -33,7 +33,10 @@
                                 <p class="t-muted">@project.Description</p>
                             }
                         </div>
-                        <p class="t-muted projects__count">@L["Projects_EnvironmentCount", project.Environments]</p>
+                        <p class="t-muted projects__count">
+                            <a href="@Routes.Tests(project.Key)" data-testid="@($"project-tests-{project.Key}")">@L["ProjectNav_Tests"]</a>
+                            · @L["Projects_EnvironmentCount", project.Environments]
+                        </p>
                     </li>
                 }
             </ul>

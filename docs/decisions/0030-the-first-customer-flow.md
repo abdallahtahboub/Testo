@@ -64,6 +64,48 @@ inconclusive one → the approved test downloaded.
 - **Forms stay disabled until the page is interactive:** typing into a prerendered page is lost when the
   circuit replaces it.
 
+## Part 2, built (2026-11-17)
+- **The AI permission, per project, off by default (G-1).** Someone with `ManageProjects` allows it on the tests
+  page (`/app/p/{key}/tests`) by ticking an acknowledgement under a notice that says what is sent (the
+  description; page addresses, titles, headings, and the names and visible texts of elements, which on a real
+  site can include personal data) and what never is (secrets, screenshots, recordings, traces). Allowing and
+  withdrawing are audited. **`TestCaseService.DescribeAsync` refuses without it, and `PlanningDispatcher` checks it
+  again just before the call**, so a permission withdrawn while a site is being explored stops the call. Both
+  have negative tests.
+- **Describing a test** (`ManageTestCases`: Owner, QA lead, QA engineer) creates a test case and an exploration
+  run, after the same gates a run has, in this order: permission to describe, a description of 1 to 1,000
+  characters, the project, the AI permission, the environment, production authorization, the kill switch, the
+  dispatcher's own `MayTargetAsync` (proof, container mode), browser minutes, the AI budgets, and the start rate
+  limit. The exploration is an ordinary run (`Scenarios.Exploration`) with its own budget, 10 minutes and 24
+  pages, so the quotas, cost rows and reaping of 3.5 to 3.8 apply to it unchanged.
+- **Planning** (`PlanningDispatcher`, a background service) takes a test whose exploration finished, hands its
+  snapshot to `PlanningService` (the measured planner and validator of ADR-0019/0020), and stores the plan, its
+  notes, its cost and what was sent. A call's cost limit is the smaller of $0.25 and what is left of the month's
+  budgets. Token prices come from the price book (ADR-0029); without them, or without a key
+  (`Planner__ApiKey`, server configuration only), the test fails with "AI planning is not set up on this server"
+  and nothing is called.
+- **What was sent is recorded (G-2):** the exact text about the application sent on each attempt
+  (`PlanPrompt.User`), shown on the test's page under the model's name and the cost. The system prompt beside it
+  is fixed text with nothing of the customer's. **The minimized mode G-2 recommends is not built**: masking values
+  can lower accuracy and must be measured first.
+- **Notes kept apart by source (G-7):** "Checked by Autestiq" for what the validator found, and "The AI's notes:
+  unverified" for everything the model wrote, in a separate dashed box that says to treat them as things to
+  check. What the tester asked for is shown on its own. The AI's notes are **not** split further into "observed"
+  and "assumed", because that split would rest on the model labelling itself; all of them are unverified.
+- **The plan's Python export** is previewed, from the fixed templates (ADR-0023). Downloading waits for approval
+  (parts 3 and 4).
+- **An environment a test was explored against cannot be removed**, so a test never loses where it was planned.
+
+**Limits and gaps, stated:**
+- **A customer's site is explored read-only.** The worker's exploration policy presses buttons and submits forms
+  only on our own loopback applications; on a customer's site it follows links. This was kept deliberately,
+  because a submitted form can change data before anyone has approved anything (G-4). **Read-only exploration
+  has not been measured on the benchmark**, so plans from it may be weaker than ADR-0020's figures, which come
+  from full exploration of our applications.
+- Customer sites still run only in container mode with a verified proof (ADR-0026). Only our own applications
+  can be explored on a developer machine.
+- Nothing runs a plan yet. Approval, the "may change data" flag and running come in part 3.
+
 ## Later, recorded with this flow
 - **A live view of a run inside the product** (the owner's request of 2026-11-17). The customer watches the
   browser's run in Autestiq step by step, never in a window on their machine. First a picture per step as it
@@ -72,8 +114,8 @@ inconclusive one → the approved test downloaded.
 
 ## Consequences
 - **Easier:** a customer can set up what a run needs, and the shell finally shows where things are.
-- **Harder:** the product will call a model with our key from part 2 on, so the budget checks must hold
-  before any call, and are tested.
+- **Harder:** the product calls a model with our key from part 2 on, so the budget checks hold before any call
+  and are tested, for the organization and for the product.
 - **Must remember:** customer origins are still refused outside container mode (ADR-0026); an environment
   can be added and proved in any mode, but run against only from a sealed container.
 

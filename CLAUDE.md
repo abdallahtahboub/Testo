@@ -18,7 +18,7 @@ prompt was frozen, 2026-11-17) it was 95% correct on sound applications, caught 
 verdict was reached, and never passed a broken application, so **the ADR-0020 gate's figures are met on our
 three applications**. Applications without test ids and applications we did not build are not yet measured,
 and no claim reaches beyond our applications until they are. Nothing in the product calls a
-model, and no claim about AI-found defects is supported. **Exporting plans as tests** is built for Python and
+model yet. **Exporting plans as tests** is built for Python and
 verified (ADR-0023), reachable through the benchmark tool only. Everything else about the testing journey —
 plans, requirements, cases, suites, environments, defects, reporting — **does not exist yet**: six of the
 seven module projects are shells. `docs/roadmap.md` §Inventory is the authoritative list of what is built.

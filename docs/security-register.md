@@ -302,6 +302,20 @@ What follows is the finding as it was recorded.
 Nothing in the database counts an organization's active runs. **Fix:** a count under a row lock in
 the claim transaction (gap G7 in [`commercial-readiness.md`](commercial-readiness.md)).
 
+### R-13 · Customer page content reaching an AI provider — **High, from Milestone 5 part 2**
+The crawl's snapshot holds page titles, element names and visible text, which on a customer's staging site can be
+names, emails and orders. Planning sends it to the model provider. **Mitigation, required before part 2 ships:**
+a per-project AI data-processing permission, off by default and enforced in the service; a record of what each
+call sent; later a measured minimized mode (gap analysis G-1, G-2).
+
+### R-14 · An approved plan changing or destroying customer data — **High, from Milestone 5 part 3**
+A plan may place an order, book a slot or cancel something. **Mitigation:** production refused until an owner
+authorizes it (built, G-3); plans that may change data flagged and explicitly approved (G-4); ownership proofs.
+
+### R-15 · Misrepresenting where processing happens — **Medium, permanent**
+Our sealed container runs on our infrastructure; it is not private execution, and private execution is not
+private AI processing. **Mitigation:** wording reviewed against `docs/secure-onboarding-and-privacy.md` §3–4.
+
 ### R-7 · One database for every tenant — **Accepted, documented**
 
 ADR-0012 chose a shared database with filtered access and listed the consequences, including the

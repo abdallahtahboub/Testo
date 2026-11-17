@@ -27,6 +27,15 @@ public sealed class ExecutionModule : IFeatureModule
         ArgumentNullException.ThrowIfNull(navigation);
 
         navigation.Add(new NavItem(
+            "projects",
+            LocalizedText.From<ExecutionResources>("Nav_Projects"),
+            Routes.Projects,
+            "Folder",
+            NavGroup.Overview,
+            Order: 10,
+            FeatureFlag: FeatureFlag));
+
+        navigation.Add(new NavItem(
             Id,
             LocalizedText.From<ExecutionResources>("Nav_Runs"),
             Routes.Runs,

@@ -533,6 +533,24 @@ public sealed class RunDispatcher(
             return true;
         }
 
+        // Production is off by default (ADR-0030): an origin the organization lists as a production environment is
+        // refused until an owner has authorized it, whatever the proof says. Across the filter, held to the run's
+        // organization, as the proof below.
+        var unauthorizedProduction = await database.Environments
+            .IgnoreQueryFilters()
+            .AnyAsync(
+                environment => environment.OrganizationId == run.OrganizationId
+                    && environment.Origin == target
+                    && environment.Kind == Contracts.Projects.EnvironmentKind.Production
+                    && environment.ProductionAuthorizedAt == null,
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        if (unauthorizedProduction)
+        {
+            return false;
+        }
+
         // An origin that is not ours is reached only from a sealed container (ADR-0026). A proof is not enough on
         // its own: in process mode a browser exploit could reach whatever this machine can.
         if (options.Isolation != WorkerIsolation.Container)

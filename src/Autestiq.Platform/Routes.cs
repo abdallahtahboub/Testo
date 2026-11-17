@@ -38,6 +38,12 @@ public static class Routes
     public const string AcceptInvitation = Account + "/accept";
 
     /// <summary>Test runs: the list, and one run with its steps and evidence.</summary>
+    /// <summary>The organization's projects (Milestone 5).</summary>
+    public const string Projects = App + "/projects";
+
+    /// <summary>A project's environments, by the project's key.</summary>
+    public static string Environments(string projectKey) => $"{App}/p/{projectKey}/execution/environments";
+
     public const string Runs = App + "/runs";
 
     /// <summary>One run.</summary>

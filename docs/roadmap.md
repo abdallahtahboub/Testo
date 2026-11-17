@@ -132,7 +132,7 @@ Found by opening it in a browser rather than by a test, and worth remembering:
 | Sign in, sign out, password reset, one-time code, accept invitation | **Real** |
 | Design system, 35 components | **Real** |
 | Public website | **Real.** 29 routes in English and German, with every placeholder page labeled as one |
-| App area | **One placeholder page** at `/app`, plus the two execution pages. Signing in is required everywhere (D-1 closed in Milestone 3.1) |
+| App area | **Navigation drawn from the module registry** (Milestone 5). Real pages: projects, environments with ownership proofs (Milestone 5 part 1, ADR-0030), and the two run pages; `/app` is still a placeholder. Signing in is required everywhere (D-1 closed in Milestone 3.1) |
 | Test runs: start, stop, rerun, steps, screenshots | **Real** for three scripted scenarios against our own demo target. No customer targets yet: no screen asks for one until Milestone 5 |
 | Customer-site safety (3.5) | **Real.** Proof of site ownership, kill switch, stuck-run reaping, loopback from configuration only, a sealed container per run (ADR-0026). Customer origins are refused outside container mode |
 | Usage and quotas (3.6) | **Real.** Append-only usage ledger, per-organization concurrency and monthly minutes with reservation, rate limits on starts (ADR-0027). No screen shows usage yet |

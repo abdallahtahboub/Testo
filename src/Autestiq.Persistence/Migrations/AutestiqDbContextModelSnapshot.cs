@@ -1457,6 +1457,77 @@ namespace Autestiq.Persistence.Migrations
                     b.ToTable("projects");
                 });
 
+            modelBuilder.Entity("Autestiq.Domain.Projects.TestEnvironment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("kind");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<string>("Origin")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("origin");
+
+                    b.Property<DateTimeOffset?>("ProductionAuthorizedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("production_authorized_at");
+
+                    b.Property<Guid?>("ProductionAuthorizedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("production_authorized_by");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_environments");
+
+                    b.HasIndex("OrganizationId", "ProjectId", "Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_environments_organization_id_project_id_name");
+
+                    b.HasIndex("OrganizationId", "ProjectId", "Origin")
+                        .IsUnique()
+                        .HasDatabaseName("ix_environments_organization_id_project_id_origin");
+
+                    b.ToTable("environments", (string)null);
+                });
+
             modelBuilder.Entity("Autestiq.Domain.Usage.UsageEvent", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1667,6 +1738,17 @@ namespace Autestiq.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_projects_organizations_organization_id");
+                });
+
+            modelBuilder.Entity("Autestiq.Domain.Projects.TestEnvironment", b =>
+                {
+                    b.HasOne("Autestiq.Domain.Projects.Project", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId", "ProjectId")
+                        .HasPrincipalKey("OrganizationId", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_environments_projects_organization_id_project_id");
                 });
 
             modelBuilder.Entity("Autestiq.Domain.Costs.PriceVersion", b =>

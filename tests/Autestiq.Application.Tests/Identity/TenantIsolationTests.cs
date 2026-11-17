@@ -120,6 +120,13 @@ public sealed class TenantIsolationTests : IAsyncLifetime
             Period = "2026-11",
             IdempotencyKey = $"seed-{Guid.CreateVersion7():N}",
         },
+        [typeof(Domain.Projects.TestEnvironment)] = seed => new Domain.Projects.TestEnvironment
+        {
+            OrganizationId = seed.OrganizationId,
+            ProjectId = seed.ProjectId,
+            Name = $"Staging {Guid.CreateVersion7():N}",
+            Origin = $"https://{Guid.CreateVersion7():N}.example:443",
+        },
         [typeof(OriginProof)] = seed => new OriginProof
         {
             OrganizationId = seed.OrganizationId,

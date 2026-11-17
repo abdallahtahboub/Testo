@@ -73,4 +73,18 @@ public static class Origins
             System.Globalization.CultureInfo.InvariantCulture,
             $"{uri.Scheme}://{uri.IdnHost.ToLowerInvariant()}:{uri.Port}");
     }
+
+    /// <summary>
+    /// An origin or an address on it as a person writes it: the scheme's own port left out, so
+    /// <c>https://shop.example:443/x</c> reads <c>https://shop.example/x</c>. For showing only; what is stored and
+    /// compared is always the normalized form.
+    /// </summary>
+    public static string Display(string address)
+    {
+        ArgumentNullException.ThrowIfNull(address);
+
+        return Uri.TryCreate(address, UriKind.Absolute, out var uri) && uri.IsDefaultPort && address.Contains($":{uri.Port}", StringComparison.Ordinal)
+            ? address.Replace($"{uri.Host}:{uri.Port}", uri.Host, StringComparison.OrdinalIgnoreCase)
+            : address;
+    }
 }

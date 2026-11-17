@@ -5,8 +5,8 @@
 @inject SignedInUser Session
 
 @*
-    Layout of the product app: top bar, navigation and main region. The navigation is filled
-    from the module registry in Milestone 5; until then it shows its empty state.
+    Layout of the product app: top bar, navigation and main region. The navigation is drawn from
+    what the modules registered (AppNav), and shows its empty state when no module is switched on.
 
     The top bar carries a sign-out link rather than the user menu of Milestone 5, because the app
     now requires a session (D-1) and a product somebody cannot leave is not finished.
@@ -32,7 +32,7 @@
     </header>
 
     <nav class="app-nav" aria-label="@L["App_Nav_Label"]">
-        <p class="app-nav__empty">@L["App_Nav_Empty"]</p>
+        <AppNav />
     </nav>
 
     <main id="main-content" class="app-main" tabindex="-1">

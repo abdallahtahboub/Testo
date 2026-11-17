@@ -35,6 +35,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<IAuditLog, AuditLog>();
         services.AddScoped<IExecutionService, ExecutionService>();
         services.AddScoped<IOriginProofService, OriginProofService>();
+        services.AddScoped<Contracts.Projects.IProjectService, Projects.ProjectService>();
         services.AddScoped<Contracts.Usage.IUsageService, Usage.UsageService>();
 
         // Artifacts: a directory today, object storage when there is more than one machine

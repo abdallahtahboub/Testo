@@ -1,0 +1,154 @@
+@page "/app/p/{ProjectKey}/execution/environments"
+@inject IStringLocalizer<ExecutionResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    A project's environments, each with the proof that its site may be tested (Milestone 5).
+    Nothing is run against an environment whose site has not been proven: the dispatcher refuses
+    it whatever this page says (ADR-0026), so this page explains rather than guards.
+*@
+<PageTitle>@L["Environments_PageTitle", Project?.Name ?? ProjectKey, Brand.Value.ProductName]</PageTitle>
+
+@if (Loading)
+{
+    <TSkeleton Shape="SkeletonShape.Text" Lines="3" />
+}
+else if (Project is null)
+{
+    <h1>@L["Environments_NoSuchProject"]</h1>
+    <p class="t-muted">@L["Environments_NoSuchProject_Text"]</p>
+    <p><a href="@Routes.Projects">@L["Environments_BackToProjects"]</a></p>
+}
+else
+{
+    <div class="environments">
+        <header class="environments__header">
+            <p class="t-muted"><a href="@Routes.Projects">@L["Projects_Title"]</a> / @Project.Name</p>
+            <h1>@L["Environments_Title"]</h1>
+            <p class="t-muted">@L["Environments_Intro"]</p>
+        </header>
+
+        @if (Problem is not null)
+        {
+            <p class="environments__problem" role="alert">@Problem</p>
+        }
+
+        <TAsyncView Loading="false" Error="@LoadError" OnRetry="LoadAsync" IsEmpty="Environments.Count == 0">
+            <EmptyContent>
+                <TEmptyState Title="@L["Environments_Empty_Title"]">@L["Environments_Empty_Text"]</TEmptyState>
+            </EmptyContent>
+            <ChildContent>
+                <ul class="environments__list" data-testid="environments">
+                    @foreach (var environment in Environments)
+                    {
+                        <li class="environments__item" data-testid="@($"environment-{environment.Name}")">
+                            <div class="environments__row">
+                                <div class="environments__text">
+                                    <p class="environments__name">
+                                        @environment.Name
+                                        @if (environment.Kind == EnvironmentKind.Production)
+                                        {
+                                            <TBadge Tone="Tone.Danger" data-testid="production-badge">@L["Environments_Production"]</TBadge>
+                                        }
+                                    </p>
+                                    <p class="t-muted environments__origin">@Origins.Display(environment.Origin)</p>
+                                </div>
+                                <ProofBadge Proof="environment.Proof" />
+                            </div>
+
+                            @if (environment.Kind == EnvironmentKind.Production)
+                            {
+                                <div class="environments__production" data-testid="production-state">
+                                    @if (environment.ProductionAuthorizedAt is { } authorizedAt)
+                                    {
+                                        <p>@L["Environments_Production_Authorized", authorizedAt.ToLocalTime().ToString("d")]</p>
+                                        @if (IsOwner)
+                                        {
+                                            <TButton Variant="ButtonVariant.Ghost" Disabled="Busy || !Ready" OnClick="() => WithdrawAsync(environment.EnvironmentId)" data-testid="@($"withdraw-{environment.Name}")">
+                                                @L["Environments_Production_Withdraw"]
+                                            </TButton>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <p>@L["Environments_Production_Refused"]</p>
+                                        @if (IsOwner)
+                                        {
+                                            <TCheckbox Label="@L["Environments_Production_Acknowledge"]"
+                                                       Checked="Acknowledged.Contains(environment.EnvironmentId)"
+                                                       CheckedChanged="checkedNow => Acknowledge(environment.EnvironmentId, checkedNow)"
+                                                       Disabled="!Ready"
+                                                       data-testid="@($"acknowledge-{environment.Name}")" />
+                                            <div>
+                                                <TButton Disabled="Busy || !Ready" OnClick="() => AuthorizeAsync(environment.EnvironmentId)" data-testid="@($"authorize-{environment.Name}")">
+                                                    @L["Environments_Production_Authorize"]
+                                                </TButton>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            }
+
+                            @if (Requests.TryGetValue(environment.Origin, out var request))
+                            {
+                                <div class="environments__proof" data-testid="proof-instructions">
+                                    <p>@L["Environments_Proof_Instructions"]</p>
+                                    <dl>
+                                        <dt>@L["Environments_Proof_File"]</dt>
+                                        <dd><code data-testid="proof-file">@Origins.Display(request.FileUrl)</code></dd>
+                                        <dt>@L["Environments_Proof_Token"]</dt>
+                                        <dd><code data-testid="proof-token">@request.Token</code></dd>
+                                    </dl>
+                                </div>
+                            }
+
+                            @if (CanManage)
+                            {
+                                <div class="environments__actions">
+                                    @if (environment.Proof?.Status is not OriginProofStatus.Verified)
+                                    {
+                                        <TButton Disabled="Busy || !Ready" OnClick="() => ProveAsync(environment.Origin)" data-testid="@($"prove-{environment.Name}")">
+                                            @L["Environments_Prove"]
+                                        </TButton>
+                                        <TButton Disabled="Busy || !Ready || environment.Proof is null" OnClick="() => CheckAsync(environment.Origin)" data-testid="@($"check-{environment.Name}")">
+                                            @L["Environments_Check"]
+                                        </TButton>
+                                    }
+                                    <TButton Variant="ButtonVariant.Ghost" Disabled="Busy || !Ready" OnClick="() => RemoveAsync(environment.EnvironmentId)" data-testid="@($"remove-{environment.Name}")">
+                                        @L["Environments_Remove"]
+                                    </TButton>
+                                </div>
+                            }
+                        </li>
+                    }
+                </ul>
+            </ChildContent>
+        </TAsyncView>
+
+        @if (CanManage)
+        {
+            <section class="environments__new" aria-labelledby="environments-new">
+                <h2 id="environments-new" class="t-h4">@L["Environments_New"]</h2>
+
+                <div class="environments__form">
+                    <TField Label="@L["Environments_Name"]" Hint="@L["Environments_Name_Hint"]" Required>
+                        <TInput Context="context" Disabled="!Ready" @bind-Value="Name" Required data-testid="environment-name" />
+                    </TField>
+                    <TField Label="@L["Environments_Origin"]" Hint="@L["Environments_Origin_Hint"]" Required>
+                        <TInput Context="context" Disabled="!Ready" Type="url" @bind-Value="Origin" Required data-testid="environment-origin" />
+                    </TField>
+                    <TCheckbox Label="@L["Environments_IsProduction"]"
+                               Hint="@L["Environments_IsProduction_Hint"]"
+                               @bind-Checked="IsProduction"
+                               Disabled="!Ready"
+                               data-testid="environment-production" />
+                    <div>
+                        <TButton Variant="ButtonVariant.Primary" Loading="Busy" Disabled="!Ready" OnClick="AddAsync" data-testid="add-environment">
+                            @L["Environments_Add"]
+                        </TButton>
+                    </div>
+                </div>
+            </section>
+        }
+    </div>
+}

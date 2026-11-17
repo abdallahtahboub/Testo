@@ -24,6 +24,10 @@ internal static class AuditActions
     public const string RunCancelled = "run.cancelled";
     public const string RunFinished = "run.finished";
 
+    public const string ProjectCreated = "project.created";
+    public const string EnvironmentAdded = "environment.added";
+    public const string EnvironmentRemoved = "environment.removed";
+
     /// <summary>An operator moved the organization to another plan version (ADR-0028).</summary>
     public const string PlanChanged = "organization.plan_changed";
 }

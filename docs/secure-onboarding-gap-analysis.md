@@ -84,7 +84,9 @@ approver that a plan changes data.
 - Show it on the approval screen in words, and require an explicit tick for such plans.
 - The proxy already sees every request, so the evidence exists.
 
-**G-5 · Evidence retention and deletion are not built (§5, gap G12).**
+**G-5 · Evidence retention and deletion are not built (§5, gap G12).** *Retention built 2026-11-17 (ADR-0031): a
+per-project policy, an hourly deletion job, none stored when a project keeps none. Deletion with a project or an
+organization waits for those deletions to exist.*
 Screenshots are kept on our servers' disk indefinitely.
 *Recommendation:*
 - Retention by policy (90 days decided), deletion when a project or organization is deleted.

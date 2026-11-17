@@ -204,6 +204,11 @@ Tested in `ExecutionIsolationTests` and `ArtifactAccessTests`. **Not yet built:*
 (the store is a local directory behind `IArtifactStore`), retention and redaction. No traces are
 captured yet, which is the one part of the decision that needs nothing further to hold.
 
+**Retention built (2026-11-17, [ADR-0031](decisions/0031-evidence-retention.md)).** A policy per project (90, 30 or
+7 days, or none kept), an hourly job that deletes expired screenshots, files first and then rows, audited per
+project. A project that keeps none has no screenshot stored. **Still open:** object storage, which is a hosting
+decision, and redaction.
+
 ### R-4 · The audit log is append-only only through Entity Framework — **Medium**
 
 `TenantGuardInterceptor` refuses to update or delete an `AuditEntry`, and that is tested. Raw SQL,

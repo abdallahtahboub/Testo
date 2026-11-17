@@ -24,7 +24,9 @@ describing a test in a sentence: the site is explored (read-only on a customer's
 and the AI's notes labelled unverified. Part 3 built approving and running a plan: steps that may change data are
 decided by software, approval (Owner, QA lead) needs an explicit tick for them and is checked again by the dispatcher,
 and a plan approved without it runs read-only, held in the browser by the worker. No sign-in secrets are stored.
-Part 4 built downloading an approved test, which completes the first customer flow. **Exporting plans as tests** is built for Python and
+Part 4 built downloading an approved test, which completes the first customer flow. **Evidence retention is built
+(3.8 part 2, ADR-0031)**: a screenshot policy per project, an hourly job that deletes expired screenshots, none stored
+when a project keeps none; object storage waits for hosting. **Exporting plans as tests** is built for Python and
 verified (ADR-0023), previewed on a test's page and downloaded once approved. Everything else about the testing journey —
 plans, requirements, a case library, suites, defects, reporting — **does not exist yet**: six of the
 seven module projects are shells. `docs/roadmap.md` §Inventory is the authoritative list of what is built.

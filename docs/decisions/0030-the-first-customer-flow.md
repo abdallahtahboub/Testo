@@ -106,6 +106,36 @@ inconclusive one → the approved test downloaded.
   can be explored on a developer machine.
 - Nothing runs a plan yet. Approval, the "may change data" flag and running come in part 3.
 
+## Part 3, built (2026-11-17)
+- **What may change data is decided by software (G-4)** (`PlanEffects`, in `Contracts` so the approval and the
+  screen agree). Going to an address, waiting, checking and typing read. Clicking something exploring saw only as a
+  link reads. Every other action may change data: clicking a button or anything not seen as a link, pressing a key,
+  choosing an option, and clicking a target exploring never saw. The model is never asked. The test page marks each
+  such step "May change data" and names the steps above the approval.
+- **Approval** (`ApproveTestArtifacts`: Owner and QA lead) records who, when, and the SHA-256 of the exact stored
+  plan. Refused for a partial plan, for a plan that types a secret, and for a plan with any step that may change data
+  unless the approver ticks "I approve this plan to change data on …". Approving and withdrawing are audited.
+- **Running** (`RunTests`: Owner, QA lead, QA engineer) is refused unless the plan is approved and still has the
+  approved fingerprint. It then passes the same gates as any run: production authorization, the kill switch, the
+  dispatcher's `MayTargetAsync`, minutes, and the start rate limit. **The dispatcher checks the approval again**
+  (`RunDispatcher.ApprovedPlanAsync`) before any worker starts, so a withdrawn approval or a changed plan stops a
+  queued run. The run carries out the plan through the worker's existing planned-run path, as a sealed container on
+  a customer's site.
+- **A read-only approval holds in the browser** (`ReadOnlyGuard` in the worker). The egress proxy sees only an
+  encrypted tunnel for an HTTPS site, so the guard sits in the browser context: every request other than GET, HEAD
+  and OPTIONS is aborted before it leaves, WebSockets are closed before they connect, and service workers are
+  blocked. A read-only run that fails after something was blocked ends **inconclusive**, with what was blocked,
+  because the block may be the cause.
+- **No sign-in secrets are stored (G-6).** A plan that types one cannot be approved; a secret store is its own step.
+
+**Limits, stated:**
+- A link that changes data when followed is counted as reading, and the guard lets a GET through. HTTP says such
+  links should not exist; some sites have them anyway. The approval text says so.
+- A site that reads through POST requests (some GraphQL sites) gets inconclusive read-only runs. Approving such a
+  plan to change data is the way through, and the approver is told what that allows.
+- The rule leans towards "may change data", so most plans that press anything need the tick. That is deliberate.
+- A run's result is shown on the run's own page. Downloading the approved test is part 4.
+
 ## Later, recorded with this flow
 - **A live view of a run inside the product** (the owner's request of 2026-11-17). The customer watches the
   browser's run in Autestiq step by step, never in a window on their machine. First a picture per step as it

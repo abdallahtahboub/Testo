@@ -23,10 +23,11 @@ This is a young codebase and the list is short on purpose. Nothing below is aspi
 | Built and working | Not built |
 |---|---|
 | Accounts, organizations, memberships, roles, invitations, audit log — on PostgreSQL, inside a tenant boundary | Test plans, requirements, a test case library, suites, defects, reporting |
-| The design system: tokens, components, light and dark themes, WCAG 2.2 AA | Approving and running an AI-written plan (Milestone 5 part 3) |
+| The design system: tokens, components, light and dark themes, WCAG 2.2 AA | A store for sign-in secrets |
 | Test runs, for three scripted scenarios against our own demo shop, with screenshots per step | Downloading a test (part 4) |
 | Projects and environments, with proof of site ownership and production off by default | A deployment of any kind |
 | Describing a test in a sentence and getting the AI's plan for it, only once the project allows AI processing | |
+| Approving a plan (an explicit tick when it may change data) and running it, read-only unless approved otherwise | |
 | The public website: 29 routes in English and German | |
 
 **The AI planner is measured on our own applications.** On 20 scenarios written after its prompt was

@@ -71,7 +71,11 @@ Part 1's environments have a name and an address, nothing else.
 
 ### P1 — needed before running AI-written plans against customers (Milestone 5 part 3)
 
-**G-4 · State-changing steps are not identified or approved separately (§5).**
+**G-4 · State-changing steps are not identified or approved separately (§5).** *Built 2026-11-17, Milestone 5
+part 3 (ADR-0030): decided by `PlanEffects` from the plan and the explored site, marked on each step, approved only
+with an explicit tick, and held at run time by a read-only guard in the browser for plans approved without it. The
+proxy-based detection of non-GET requests recommended below was not used: the proxy cannot see methods inside an
+HTTPS tunnel.*
 A plan may place an order, book a slot or cancel something. Plan approval is decided, but nothing tells the
 approver that a plan changes data.
 *Recommendation:*
@@ -87,7 +91,8 @@ Screenshots are kept on our servers' disk indefinitely.
 - A per-project evidence policy: keep screenshots or not.
 - Before the first pilot at the latest. It is part 2 of Milestone 3.8, already planned.
 
-**G-6 · Secrets for sign-in scenarios have no encrypted store in the product (§5).**
+**G-6 · Secrets for sign-in scenarios have no encrypted store in the product (§5).** *Deferred, as the owner chose
+on 2026-11-17: a plan that types a secret cannot be approved until a store exists.*
 The benchmark passes them in; the product has nowhere to keep them.
 *Recommendation:*
 - Encrypted at rest (ASP.NET Core Data Protection with a key held outside the database, or a cloud key

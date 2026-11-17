@@ -310,9 +310,12 @@ call sent; later a measured minimized mode (gap analysis G-1, G-2). **Built 2026
 record (ADR-0030 part 2). The permission is checked when a test is described and again just before each call.
 **Open:** the minimized mode; until it exists, a project that allows AI planning sends visible page text as found.
 
-### R-14 · An approved plan changing or destroying customer data — **High, from Milestone 5 part 3**
+### R-14 · An approved plan changing or destroying customer data — **High; mitigated in Milestone 5 part 3**
 A plan may place an order, book a slot or cancel something. **Mitigation:** production refused until an owner
 authorizes it (built, G-3); plans that may change data flagged and explicitly approved (G-4); ownership proofs.
+**Built 2026-11-17:** `PlanEffects`, approval with a plan fingerprint checked again by the dispatcher, and a
+read-only guard in the browser for plans approved without the acknowledgement (ADR-0030 part 3). **Open:** a link
+that changes data when followed is neither flagged nor blocked.
 
 ### R-15 · Misrepresenting where processing happens — **Medium, permanent**
 Our sealed container runs on our infrastructure; it is not private execution, and private execution is not

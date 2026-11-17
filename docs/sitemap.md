@@ -90,7 +90,7 @@ Routes are scoped by project: `/app/p/{projectKey}/...` (e.g., `/app/p/orion/def
 | `/app/p/{p}/execution/suites` | Execution | Test suites | Suite builder |
 | `/app/p/{p}/execution/environments` | Execution | Environments | Environment registry, each with its site's ownership proof *(built, Milestone 5 part 1)* |
 | `/app/p/{p}/tests` | Execution | Tests | The project's AI permission, describing a test in a sentence, and the described tests *(built, Milestone 5 part 2)* |
-| `/app/p/{p}/tests/{testId}` | Execution | Test | Progress while exploring and planning, then the plan, Autestiq's checks, the AI's unverified notes, the Python preview, and what was sent to the AI *(built, Milestone 5 part 2)* |
+| `/app/p/{p}/tests/{testId}` | Execution | Test | Progress while exploring and planning, then the plan with the steps that may change data marked, its approval and runs, Autestiq's checks, the AI's unverified notes, the Python preview, and what was sent to the AI *(built, Milestone 5 parts 2 and 3)* |
 | `/app/p/{p}/execution/runs/{runId}` | Execution | Run detail | Results per test; delegates to the capability's results UI |
 | `/app/p/{p}/execution/runs/{runId}/live` | Capability E2EWeb | **Live E2E test run** | Step timeline, current step, status per step, screenshot panel, log console, elapsed time, stop/rerun |
 | `/app/p/{p}/execution/manual/{runId}` | Execution | Manual test runner | Step-by-step execution with evidence |

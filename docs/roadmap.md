@@ -121,8 +121,8 @@ Found by opening it in a browser rather than by a test, and worth remembering:
 
 ## Inventory — what is actually built
 
-> Last verified on 2026-11-17, after Milestone 5 part 2 (describing a test and its plan): `dotnet build` clean, every test green
-> locally and in CI.
+> Last verified on 2026-11-17, after Milestone 5 part 3 (approving and running a plan): `dotnet build` clean, every test green
+> locally.
 > This table is authoritative. Where another document disagrees with it, this one is right.
 
 | Area | State |
@@ -132,14 +132,15 @@ Found by opening it in a browser rather than by a test, and worth remembering:
 | Sign in, sign out, password reset, one-time code, accept invitation | **Real** |
 | Design system, 35 components | **Real** |
 | Public website | **Real.** 29 routes in English and German, with every placeholder page labeled as one |
-| App area | **Navigation drawn from the module registry** (Milestone 5). Real pages: projects, environments with ownership proofs (Milestone 5 part 1, ADR-0030), tests and their plans (part 2), and the two run pages; `/app` is still a placeholder. Signing in is required everywhere (D-1 closed in Milestone 3.1) |
+| App area | **Navigation drawn from the module registry** (Milestone 5). Real pages: projects, environments with ownership proofs (Milestone 5 part 1, ADR-0030), tests, their plans, approval and runs (parts 2 and 3), and the two run pages; `/app` is still a placeholder. Signing in is required everywhere (D-1 closed in Milestone 3.1) |
 | Test runs: start, stop, rerun, steps, screenshots | **Real** for three scripted scenarios against our own demo target. No customer targets yet: no screen asks for one until Milestone 5 |
 | Customer-site safety (3.5) | **Real.** Proof of site ownership, kill switch, stuck-run reaping, loopback from configuration only, a sealed container per run (ADR-0026). Customer origins are refused outside container mode |
 | Usage and quotas (3.6) | **Real.** Append-only usage ledger, per-organization concurrency and monthly minutes with reservation, rate limits on starts (ADR-0027). No screen shows usage yet |
 | Plan catalog (3.7) | **Real.** Versioned plans in the database, organizations on a version they keep until an operator moves them, limits read from that version (ADR-0028). No prices; an operator command changes plans; no screen |
 | Cost per run (3.8, part 1) | **Real.** A price book of versions that never change, cost rows per run at the price in force when it finished, a run's total, an operator cost report (ADR-0029). Machine and storage prices are **estimates** until hosting is chosen. Evidence retention (G12) is not built |
 | Exporting tests (ADR-0023) | **Built; previewed in the product.** Python, verified 107 of 107. A plan's Python is shown on its test page; downloading waits for approval (Milestone 5 parts 3 and 4) |
-| Described tests and their plans (Milestone 5 part 2) | **Real.** A per-project AI permission, off by default, enforced in the service and checked again before each call; a test described in a sentence; the site explored as a run (read-only on a customer's site); the plan written by the measured planner and validator, with its cost at the price book's prices, within $10 a month for the product and $2 per organization; what was sent recorded and shown; the AI's notes labelled unverified (ADR-0030). Needs `Planner__ApiKey` on the server. **No plan runs yet**, and read-only exploration is not yet measured |
+| Described tests and their plans (Milestone 5 part 2) | **Real.** A per-project AI permission, off by default, enforced in the service and checked again before each call; a test described in a sentence; the site explored as a run (read-only on a customer's site); the plan written by the measured planner and validator, with its cost at the price book's prices, within $10 a month for the product and $2 per organization; what was sent recorded and shown; the AI's notes labelled unverified (ADR-0030). Needs `Planner__ApiKey` on the server. Read-only exploration is not yet measured |
+| Approving and running a plan (Milestone 5 part 3) | **Real.** Steps that may change data decided by software and marked; approval by Owner or QA lead with the plan's fingerprint, an explicit tick for a plan that may change data, refused for partial plans and plans that type a secret; runs refused unless approved, checked again by the dispatcher; read-only runs held by a guard in the browser (ADR-0030). No secret store; no download yet |
 | AI planning: interface, vocabulary, validator, provider adapter, benchmark | **Built; the ADR-0020 gate's figures are met on our applications, with and without test ids.** On the unseen set (20 scenarios written after the prompt was frozen, 2026-11-17): 95% correct on sound applications, every defect caught where a verdict was reached, no false positive, including three defects no planner had seen; the same with every test id removed. Not yet measured on an application we did not build. Remaining misses are inconclusive: values generated at run time and states the crawl never saw. The product calls it from Milestone 5 part 2, only with the project's permission |
 | Browser execution: worker out of process, egress proxy, signed artifact links | **Real.** A sealed container per run in container mode (ADR-0026); process mode for development and tests |
 | The other six feature modules | **Shells.** One class each: an id and a feature flag. No pages, no services |

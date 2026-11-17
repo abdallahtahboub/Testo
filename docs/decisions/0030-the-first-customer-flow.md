@@ -106,8 +106,12 @@ inconclusive one → the approved test downloaded.
     pages the unseen scenarios' baseline plans need, read-only exploration shows 85% on the demo shop (full: 100%),
     90% on the booking site (full: 98%) and 94% on the invoice desk (unchanged). What it misses appears only after a
     button is pressed: basket lines after "Add", a booking's total after booking. Six of the twenty scenarios lose
-    something. The planner's accuracy on read-only exploration still needs a paid run
-    (`--unseen --read-only --max-total-usd 5`), with the owner's yes.
+    something.
+  - *Measured with the planner (2026-11-17, the owner's run):* **36 of 66 runs correct read-only, against 62 of 66
+    with full exploration, and no false positive in either.** The demo shop fell to 4 of 20 and the clinic to 8 of
+    22; the invoice desk kept 24 of 24. What is lost is every flow whose result appears only after an action. See
+    ADR-0020, "The unseen set explored read-only". **The product's planning is therefore weak on a customer's site
+    today, though never falsely reassuring**, until exploration there may act, with the customer's permission.
 - Customer sites still run only in container mode with a verified proof (ADR-0026). Only our own applications
   can be explored on a developer machine.
 - Nothing runs a plan yet. Approval, the "may change data" flag and running come in part 3.

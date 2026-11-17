@@ -64,6 +64,12 @@ inconclusive one → the approved test downloaded.
 - **Forms stay disabled until the page is interactive:** typing into a prerendered page is lost when the
   circuit replaces it.
 
+## Later, recorded with this flow
+- **A live view of a run inside the product** (the owner's request of 2026-11-17). The customer watches the
+  browser's run in Autestiq step by step, never in a window on their machine. First a picture per step as it
+  ends, later a continuous stream. Bound by the evidence rules of the secure onboarding requirements. Planned
+  with Milestone 7 (`docs/roadmap.md`).
+
 ## Consequences
 - **Easier:** a customer can set up what a run needs, and the shell finally shows where things are.
 - **Harder:** the product will call a model with our key from part 2 on, so the budget checks must hold

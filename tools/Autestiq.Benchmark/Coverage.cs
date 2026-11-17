@@ -26,7 +26,8 @@ internal static class Coverage
     /// <summary>Explores the target once, the way a planner's exploration does, and says what that took.</summary>
     /// <param name="origin">Where the target is.</param>
     /// <param name="startAfresh">Puts the target back to its starting state, when it keeps any on its server.</param>
-    public static async Task<(SiteSnapshot Snapshot, string Said)> ExploreAsync(string origin, Func<Task>? startAfresh)
+    /// <param name="readOnly">Follow links only, as a customer's site is explored: press nothing, send no form.</param>
+    public static async Task<(SiteSnapshot Snapshot, string Said)> ExploreAsync(string origin, Func<Task>? startAfresh, bool readOnly = false)
     {
         var job = new WorkerJob(
             RunId: Guid.CreateVersion7(),
@@ -37,8 +38,8 @@ internal static class Coverage
             Budget: Harness.ExplorationBudget,
             ArtifactDirectory: Directory.CreateTempSubdirectory("autestiq-coverage-").FullName,
             Task: WorkerTask.Explore,
-            ExploreStates: true,
-            SubmitForms: true);
+            ExploreStates: !readOnly,
+            SubmitForms: !readOnly);
 
         var result = await new ScenarioRunner(TimeProvider.System) { StartAfresh = startAfresh }
             .RunAsync(job, CancellationToken.None);

@@ -117,6 +117,24 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
     /// </summary>
     public Func<Task>? ResetTarget { get; init; }
 
+    /// <summary>
+    /// Explore by following links only, never pressing a control or submitting a form: how a customer's site is
+    /// explored (ADR-0030, part 2). Off by default, which is how the published figures were measured.
+    /// </summary>
+    public bool ReadOnlyExploration { get; init; }
+
+    /// <summary>
+    /// What the whole run may spend on planning, in US dollars. Once spent, no further plan is asked for, the run
+    /// ends, and <see cref="StoppedAtSpendingCap"/> says so. Unset, there is no cap beyond each plan's own budget.
+    /// </summary>
+    public decimal? MaxTotalUsd { get; init; }
+
+    /// <summary>What planning has cost so far in this run.</summary>
+    public decimal Spent { get; private set; }
+
+    /// <summary>Whether the run ended early because <see cref="MaxTotalUsd"/> was reached; its figures are partial.</summary>
+    public bool StoppedAtSpendingCap { get; private set; }
+
     private readonly PlanningService? _planning =
         planner is null ? null : new PlanningService(planner, NullLogger<PlanningService>.Instance);
 
@@ -152,10 +170,20 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
                 // _planning is not null, so neither is the planner it was built from.
                 var model = planner!.Model;
 
+                // Checked before each request, so the cap is overshot by at most one plan's own budget.
+                if (MaxTotalUsd is { } cap && Spent >= cap)
+                {
+                    StoppedAtSpendingCap = true;
+                    Say?.Invoke($"  Stopping: planning has cost ${Spent:0.0000}, which reaches the cap of ${cap:0.00}.");
+                    SetDefects([]);
+                    return measurements;
+                }
+
                 Say?.Invoke($"  {scenario.Id,-34} defect={(defectOn ? "on " : "off")} "
                     + $"{model,-18} looking at the application, then planning…");
 
                 var planned = await PlanAsync(scenario, cancellationToken).ConfigureAwait(false);
+                Spent += planned.Cost.Cost;
 
                 var measured = planned.Plan is { } plan
                     ? await MeasureAsync(
@@ -341,6 +369,8 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
         // Every target this tool measures is one it started itself, so it asks for the controls to be
         // pressed and the forms to be filled. Whether that is allowed is not decided here: the worker's
         // own policy decides, from the address (Autestiq.Worker.ExplorationPolicy).
-        ExploreStates: task == WorkerTask.Explore,
-        SubmitForms: task == WorkerTask.Explore);
+        //
+        // Read-only exploration asks for neither, as the product does for a customer's site.
+        ExploreStates: task == WorkerTask.Explore && !ReadOnlyExploration,
+        SubmitForms: task == WorkerTask.Explore && !ReadOnlyExploration);
 }

@@ -108,12 +108,27 @@ was inconclusive with the defect off and on: it checks a booked slot, a state th
 set was run twice by accident and gave the same verdict on every run both times. Model cost for the set:
 about $1.50. Flake rate and cost per run are in `docs/ai-benchmark-unseen-*.md`, beside the baseline.
 
+**The unseen set without test ids (2026-11-17):** the same twenty scenarios, the applications served with every
+test id removed (`--without-test-ids`), so a plan could name elements only by role, accessible name or text.
+
+| | Demo shop | Clinic | Invoice desk | Together |
+|---|---|---|---|---|
+| Correct on the sound application | 6/6 | 6/7 | 7/7 | **19/20 (95%)** |
+| Defects caught where a verdict was reached | 4/4 | 4/4 | 5/5 | **13/13 (100%)** |
+| False positives | 0 | 0 | 0 | **0** |
+| False negatives | 0 | 0 | 0 | 0 |
+
+The same as with test ids, and one defect run that was inconclusive with them was caught without them. The
+miss is the same booked-slot scenario with the defect off. The hand-written baselines fail without test ids
+by design, which shows the ids were gone. Model cost: about $1.20. Reports: `docs/ai-benchmark-unseen-*-no-ids.md`.
+
 **What this supports, and what it does not.** It supports this statement: *on our three benchmark
 applications, on scenarios written after the planner was frozen, the planner's tests gave the right verdict
 on 95% of sound-application runs, caught every seeded defect where a verdict was reached, and never passed
-a broken application.* It does not support a claim about applications without test ids, applications we did
-not build, or customers' applications: those are measured next (`--without-test-ids`, eShopOnWeb), and sales
-material says nothing broader until they are.
+a broken application.* With the run without test ids, the same holds when the
+applications carry no test ids. It does not support a claim about applications we did not build, or
+customers' applications: those are measured next (eShopOnWeb, then a real site with its owner's permission),
+and sales material says nothing broader until they are.
 
 **Validation gate (confirmed by the owner on 2026-11-15):** before the first paid pilot, the planner
 is re-measured on the benchmark, with more scenarios than the current 12, and a published result is

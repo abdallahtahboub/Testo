@@ -28,6 +28,7 @@ internal sealed class TestCaseService(
     IOptionsMonitor<ExecutionOptions> execution,
     IOptionsMonitor<PlanningOptions> planning,
     IOptionsMonitor<Usage.UsageOptions> usage,
+    IEnumerable<Contracts.Export.ITestExporter> exporters,
     TimeProvider timeProvider)
     : ITestCaseService
 {
@@ -435,6 +436,41 @@ internal sealed class TestCaseService(
         return OperationResult.With(run.Id);
     }
 
+    /// <inheritdoc />
+    public async Task<OperationResult<Contracts.Export.ExportedTest>> DownloadAsync(Guid testCaseId, CancellationToken cancellationToken = default)
+    {
+        if (!currentUser.Can(Permission.Read))
+        {
+            return OperationResult.Failure<Contracts.Export.ExportedTest>("Tests_Error_NoSuchTest");
+        }
+
+        var testCase = await database.TestCases.FirstOrDefaultAsync(candidate => candidate.Id == testCaseId, cancellationToken).ConfigureAwait(false);
+
+        if (testCase is null)
+        {
+            return OperationResult.Failure<Contracts.Export.ExportedTest>("Tests_Error_NoSuchTest");
+        }
+
+        // Only an approved plan leaves Autestiq, and only the plan that was approved.
+        if (!IsApproved(testCase) || testCase.Plan is not { } stored || JsonSerializer.Deserialize<StoredPlan>(stored, Json) is not { } plan)
+        {
+            return OperationResult.Failure<Contracts.Export.ExportedTest>("Tests_Error_NotApproved");
+        }
+
+        // The project's language is a setting once there is more than one; Python is the one that is built (ADR-0023).
+        if (exporters.FirstOrDefault(candidate => candidate.Language == Contracts.Export.ExportLanguage.Python) is not { } exporter)
+        {
+            return OperationResult.Failure<Contracts.Export.ExportedTest>("Tests_Error_NoExporter");
+        }
+
+        var exported = exporter.Export(new TestPlan(testCase.Description, plan.Actions, [], plan.Coverage));
+
+        Record(testCase, AuditActions.TestDownloaded, new { Plan = testCase.ApprovedPlanHash, exported.FileName });
+        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        return OperationResult.With(exported with { Code = ApprovedTestHeader.For(testCase) + exported.Code });
+    }
+
     /// <summary>Whether a test's plan is approved, and is still the plan that was approved.</summary>
     internal static bool IsApproved(TestCase testCase) =>
         testCase.ApprovedAt is not null
@@ -451,6 +487,29 @@ internal sealed class TestCaseService(
             testCase.Id,
             $"test #{testCase.Number}",
             after: after);
+}
+
+/// <summary>
+/// The fixed lines a downloaded test begins with: what was approved, and what the file does not do. Fixed text, a date
+/// and a fingerprint only, never a name or anything a person or a page wrote, so nothing can break out of a comment
+/// (ADR-0023).
+/// </summary>
+internal static class ApprovedTestHeader
+{
+    private const string ChangesData = "# The approval allows this test to change data on the site it runs against.\n";
+
+    private const string ReadOnly =
+        "# The approval was for a test that does not change data. Autestiq held that in its own browser;\n"
+        + "# this file does not. Run it only where a test that changes data would be acceptable.\n";
+
+    public static string For(TestCase testCase)
+    {
+        var approvedOn = testCase.ApprovedAt?.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) ?? "";
+
+        return $"# Approved in Autestiq on {approvedOn}. Plan fingerprint (SHA-256): {testCase.ApprovedPlanHash}.\n"
+            + (testCase.ApprovedToChangeData ? ChangesData : ReadOnly)
+            + "\n";
+    }
 }
 
 /// <summary>The fingerprint of a stored plan: its SHA-256, in lower-case hex.</summary>

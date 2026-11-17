@@ -158,12 +158,16 @@ app.UseAccountRateLimiting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Who is signed in, for every request: endpoints that are not pages need it as much as pages do.
+app.UseSessionFromClaims();
 app.UseImmutableFontCaching();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapPreferenceEndpoints();
 app.MapArtifactEndpoints();
+app.MapTestDownloadEndpoints();
 
 // sitemap.xml and robots.txt, generated from the page catalogue so they cannot go stale.
 app.MapSiteMap();

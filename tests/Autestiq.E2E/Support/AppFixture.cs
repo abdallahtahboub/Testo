@@ -52,6 +52,10 @@ public sealed class AppFixture : IAsyncLifetime
     public string ConnectionString =>
         _database?.ConnectionString ?? throw new InvalidOperationException("The database has not been created.");
 
+    /// <summary>The running application's services, for a test that must put something in place the screens cannot.</summary>
+    public IServiceProvider Services =>
+        _application?.Services ?? throw new InvalidOperationException("The application has not been started.");
+
     /// <summary>The people the seeded organization has, for tests that sign in.</summary>
     public static string OwnerEmail => "mara@northwind.example";
 

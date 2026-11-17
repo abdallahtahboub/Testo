@@ -110,4 +110,11 @@ public interface ITestCaseService
     /// rate checks any run has. The dispatcher checks the approval again before a browser starts.
     /// </summary>
     Task<OperationResult<Guid>> RunAsync(Guid testCaseId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// The approved plan as a test file to download (Milestone 5, part 4), written by the fixed templates of
+    /// <see cref="Export.ITestExporter"/> with a fixed header saying what was approved. Needs
+    /// <see cref="Identity.Permission.Read"/> and a plan that is approved and still the plan that was approved. Audited.
+    /// </summary>
+    Task<OperationResult<Export.ExportedTest>> DownloadAsync(Guid testCaseId, CancellationToken cancellationToken = default);
 }

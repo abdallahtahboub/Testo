@@ -7,6 +7,9 @@ public abstract class HttpTest(AppFixture app) : IDisposable
 {
     private readonly HttpClient _client = app.CreateHttpClient();
 
+    /// <summary>The running application.</summary>
+    protected AppFixture App { get; } = app;
+
     /// <summary>The token that ends a request when the test run is cancelled.</summary>
     protected static CancellationToken Cancellation => TestContext.Current.CancellationToken;
 

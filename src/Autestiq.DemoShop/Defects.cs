@@ -37,12 +37,19 @@ public static class Defects
     /// <summary>Removing a line removes the first one instead of the one asked for.</summary>
     public const string RemoveWrongItem = "remove-wrong-item";
 
+    /// <summary>
+    /// A basket line shows the price of one item as its total, however many there are. The basket's own
+    /// total is still right, so only a check of the line catches it. Added for the unseen set
+    /// (<c>UnseenScenarios</c>), which no planner had been tuned on.
+    /// </summary>
+    public const string LineTotalIgnoresQuantity = "line-total-ignores-quantity";
+
     /// <summary>An empty basket can still be ordered, for nothing.</summary>
     public const string EmptyOrderAllowed = "empty-order-allowed";
 
     /// <summary>Every defect, for the benchmark to iterate.</summary>
     public static IReadOnlyList<string> All { get; } =
-        [CheckoutTotal, QuantityIgnored, DiscountTwice, SignInAnyPassword, RemoveWrongItem, EmptyOrderAllowed];
+        [CheckoutTotal, QuantityIgnored, DiscountTwice, SignInAnyPassword, RemoveWrongItem, EmptyOrderAllowed, LineTotalIgnoresQuantity];
 
     /// <summary>Whether this defect is switched on.</summary>
     public static bool On(string defect)

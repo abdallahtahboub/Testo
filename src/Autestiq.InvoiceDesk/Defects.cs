@@ -31,9 +31,15 @@ public static class Defects
     /// <summary>A client's email address is not checked.</summary>
     public const string ClientEmailUnchecked = "client-email-unchecked";
 
+    /// <summary>
+    /// Searching by client matches only the exact capitals, so "harbour" finds nothing of Harbour Coffee's.
+    /// Added for the unseen set (<c>UnseenScenarios</c>), which no planner had been tuned on.
+    /// </summary>
+    public const string ClientSearchCaseSensitive = "client-search-case-sensitive";
+
     /// <summary>Every defect, for the benchmark to iterate.</summary>
     public static IReadOnlyList<string> All { get; } =
-        [VatRoundedDown, FilterIgnored, PageSkipsOne, PaidMarksAnother, OutstandingIncludesPaid, ClientEmailUnchecked];
+        [VatRoundedDown, FilterIgnored, PageSkipsOne, PaidMarksAnother, OutstandingIncludesPaid, ClientEmailUnchecked, ClientSearchCaseSensitive];
 
     /// <summary>Whether this defect is switched on.</summary>
     public static bool On(string defect)

@@ -85,6 +85,36 @@ honest answer. Model cost per plan: $0.02 (demo shop) to $0.05 (invoice desk).
 These figures meet the gate's numbers, **but they do not pass it**: the held-out set shaped the fix. The
 gate is decided by a new held-out set, written after this prompt and run against it unchanged.
 
+**The unseen set (written 2026-11-16, after the prompt was frozen), which decides the gate:** twenty
+scenarios in `tools/Autestiq.Benchmark/UnseenScenarios.cs`, six for the demo shop, seven each for the clinic
+and the invoice desk, written without looking at how the planner handles them. Thirteen have a defect: ten
+existing ones in new words, and three no planner has seen, one per application (a basket line that ignores
+its quantity, a follow-up charged at the initial price, a client search that minds capitals). Every
+baseline passes its sound application and fails its broken one (33 of 33 runs), and every exported test
+agrees (ADR-0023). Run once per application with `--unseen` and `--target`, against the prompt of PR #46
+unchanged; nothing in the set changes after that run.
+
+**Result of the unseen set (2026-11-17), run by the owner with Claude Sonnet 5.5: the gate's figures are met.**
+
+| | Demo shop | Clinic | Invoice desk | Together |
+|---|---|---|---|---|
+| Correct on the sound application | 6/6 | 6/7 | 7/7 | **19/20 (95%)** |
+| Defects caught where a verdict was reached | 4/4 | 3/3 | 5/5 | **12/12 (100%)** |
+| False positives | 0 | 0 | 0 | **0** |
+| False negatives | 0 | 0 | 0 | 0 |
+
+The three defects no planner had seen were all caught. The one miss, `a-taken-hour-is-not-offered-again`,
+was inconclusive with the defect off and on: it checks a booked slot, a state the crawl never saw. The clinic
+set was run twice by accident and gave the same verdict on every run both times. Model cost for the set:
+about $1.50. Flake rate and cost per run are in `docs/ai-benchmark-unseen-*.md`, beside the baseline.
+
+**What this supports, and what it does not.** It supports this statement: *on our three benchmark
+applications, on scenarios written after the planner was frozen, the planner's tests gave the right verdict
+on 95% of sound-application runs, caught every seeded defect where a verdict was reached, and never passed
+a broken application.* It does not support a claim about applications without test ids, applications we did
+not build, or customers' applications: those are measured next (`--without-test-ids`, eShopOnWeb), and sales
+material says nothing broader until they are.
+
 **Validation gate (confirmed by the owner on 2026-11-15):** before the first paid pilot, the planner
 is re-measured on the benchmark, with more scenarios than the current 12, and a published result is
 required that shows at least:

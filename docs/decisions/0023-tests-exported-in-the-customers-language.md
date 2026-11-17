@@ -71,7 +71,8 @@ names elements the same way the plan does.
 - **Verified as §4 requires** (`--export-check python --python <interpreter with pytest-playwright>`): every
   baseline of every set exported, run by pytest against the application with each defect off and on.
   **107 of 107 runs gave the plan's verdict**: demo shop 18 of 18, held-out set 26 of 26, clinic 26 of 26,
-  invoice desk 26 of 26, eShopOnWeb 11 of 11. Every defect a plan catches, its exported test catches, and no
+  invoice desk 26 of 26, eShopOnWeb 11 of 11. The unseen set added on 2026-11-16 (`--unseen`): 33 of 33,
+  demo shop 10, clinic 11, invoice desk 12, so 140 of 140 in all. Every defect a plan catches, its exported test catches, and no
   exported test fails an application the plan passes. Measured with Playwright for Python 1.65.2, pytest
   8.4.2 and pytest-playwright 0.7.1, in a virtual environment outside the repository; nothing in the product
   depends on Python.

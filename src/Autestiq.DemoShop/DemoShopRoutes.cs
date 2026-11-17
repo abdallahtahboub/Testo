@@ -94,7 +94,7 @@ public static class DemoShopRoutes
             <li data-testid="line-{line.Product.Id}">
               <span>{line.Product.Name}</span>
               <span data-testid="quantity-{line.Product.Id}">{line.Quantity}</span>
-              <span data-testid="line-total-{line.Product.Id}">{Shop.Money(line.Total)}</span>
+              <span data-testid="line-total-{line.Product.Id}">{Shop.Money(Defects.On(Defects.LineTotalIgnoresQuantity) ? line.Product.Price : line.Total)}</span>
               <form method="post" action="/basket/remove">
                 <input type="hidden" name="id" value="{line.Product.Id}" />
                 <button type="submit" data-testid="remove-{line.Product.Id}">Remove</button>

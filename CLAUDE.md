@@ -13,11 +13,12 @@ minutes with reservation, and rate limits on starts (ADR-0027). **The plan catal
 plans in the database, each organization on a version it keeps until an operator moves it (ADR-0028). **Cost per run
 is built (3.8, part 1)**: a price book of versions that never change, cost rows per run at the price in force when it
 finished, and an operator cost report (ADR-0029); machine and storage prices are estimates until hosting is chosen.
-**The AI planner is built and measured, not yet in the product**: after the prompt fix of 2026-11-16,
-the four benchmark sets (96 runs) give 92% correct on sound applications, 100% of defects caught where a
-verdict was reached, and no false positive. The held-out set shaped that fix, so **the ADR-0020 gate is not
-yet passed**: a new held-out set decides. Nothing in the product calls a
-model, and no claim about AI-found defects is supported. **Exporting plans as tests** is built for Python and
+**The AI planner is built and measured, not yet in the product**: on the unseen set (20 scenarios written after the
+prompt was frozen, 2026-11-17) it was 95% correct on sound applications, caught every seeded defect where a
+verdict was reached, and never passed a broken application, so **the ADR-0020 gate's figures are met on our
+three applications**. Applications without test ids and applications we did not build are not yet measured,
+and no claim reaches beyond our applications until they are. Nothing in the product calls a
+model yet. **Exporting plans as tests** is built for Python and
 verified (ADR-0023), reachable through the benchmark tool only. Everything else about the testing journey —
 plans, requirements, cases, suites, environments, defects, reporting — **does not exist yet**: six of the
 seven module projects are shells. `docs/roadmap.md` §Inventory is the authoritative list of what is built.

@@ -15,6 +15,8 @@ using Autestiq.DemoShop;
 //
 //   dotnet run --project tools/Autestiq.Benchmark                      the baseline only
 //   PLANNER__APIKEY=sk-... dotnet run --project tools/Autestiq.Benchmark    baseline and planner
+//   dotnet run --project tools/Autestiq.Benchmark -- --unseen          the set that decides the gate;
+//                                                                   add --target booking or invoices
 //   dotnet run --project tools/Autestiq.Benchmark -- --recorded        replays saved answers, free
 //   dotnet run --project tools/Autestiq.Benchmark -- --smoke           one scenario, for CI
 //   dotnet run --project tools/Autestiq.Benchmark -- --self-check      proves the harness catches a
@@ -87,7 +89,10 @@ Func<IReadOnlyList<string>, bool> setDefects = options.Target switch
     _ => names => Autestiq.DemoShop.Defects.Set(names),
 };
 
-IReadOnlyList<BenchmarkScenario> targetScenarios = options.Target switch
+// --unseen picks the set that decides the ADR-0020 gate, for whichever target is named (UnseenScenarios).
+var unseen = args.Contains("--unseen", StringComparer.Ordinal);
+
+IReadOnlyList<BenchmarkScenario> targetScenarios = unseen && options.Target != "eshop" ? UnseenScenarios.For(options.Target) : options.Target switch
 {
     "booking" => BookingScenarios.All,
     "invoices" => InvoiceScenarios.All,
@@ -363,7 +368,8 @@ internal sealed record BenchmarkOptions(
 
     /// <summary>Each target and each set has its own report, so no run can overwrite another's.</summary>
     private static string ReportFileName(string[] args) =>
-        Value(args, "--target") == "booking" ? "ai-benchmark-booking.md"
+        args.Contains("--unseen", StringComparer.Ordinal) ? $"ai-benchmark-unseen-{Value(args, "--target") ?? "demo"}.md"
+        : Value(args, "--target") == "booking" ? "ai-benchmark-booking.md"
         : Value(args, "--target") == "invoices" ? "ai-benchmark-invoices.md"
         : Value(args, "--target") == "eshop" ? "ai-benchmark-eshop.md"
         : args.Contains("--held-out", StringComparer.Ordinal) ? "ai-benchmark-held-out.md"

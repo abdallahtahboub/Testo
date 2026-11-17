@@ -105,7 +105,7 @@ else
             <section class="test__block" aria-labelledby="test-python">
                 <h2 id="test-python" class="t-h4">@L["Test_Python"]</h2>
                 <p class="t-muted">@L["Test_Python_Intro"]</p>
-                <pre class="test__code" data-testid="test-python"><code>@Python</code></pre>
+                <pre class="test__code" data-testid="test-python" role="region" tabindex="0" aria-labelledby="test-python"><code>@Python</code></pre>
             </section>
         }
 
@@ -118,7 +118,7 @@ else
                 {
                     <details class="test__sent" data-testid="test-sent">
                         <summary>@L["Test_Sent_Attempt", attempt + 1]</summary>
-                        <pre class="test__code"><code>@Detail.SentToModel[attempt]</code></pre>
+                        <pre class="test__code" role="region" tabindex="0" aria-label="@L["Test_Sent_Attempt", attempt + 1]"><code>@Detail.SentToModel[attempt]</code></pre>
                     </details>
                 }
             </section>

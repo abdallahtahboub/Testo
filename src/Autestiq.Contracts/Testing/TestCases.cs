@@ -50,6 +50,10 @@ public sealed record TestCaseSummary(Guid TestCaseId, int Number, string Descrip
 /// <param name="Cost">What planning cost, in US dollars, at the price book's prices.</param>
 /// <param name="SentToModel">Exactly the text about the application that was sent to the model, for each attempt.</param>
 /// <param name="ExplorationRunId">The run that explored the site.</param>
+/// <param name="StepsThatMayChangeData">The 1-based numbers of the plan's steps that may change data (<see cref="PlanEffects"/>).</param>
+/// <param name="NeedsSecret">Whether the plan types a secret, which no plan may do until a secret store exists.</param>
+/// <param name="Approval">The plan's approval, or <c>null</c> when it has none.</param>
+/// <param name="Runs">The runs of the approved plan, newest first.</param>
 public sealed record TestCaseDetail(
     Guid TestCaseId,
     int Number,
@@ -64,7 +68,17 @@ public sealed record TestCaseDetail(
     string? Model,
     decimal? Cost,
     IReadOnlyList<string> SentToModel,
-    Guid? ExplorationRunId);
+    Guid? ExplorationRunId,
+    IReadOnlyList<int> StepsThatMayChangeData,
+    bool NeedsSecret,
+    PlanApproval? Approval,
+    IReadOnlyList<TestCaseRun> Runs);
+
+/// <summary>Who approved a plan, when, and whether the approval allows changing data.</summary>
+public sealed record PlanApproval(DateTimeOffset ApprovedAt, string? ApprovedBy, bool ToChangeData);
+
+/// <summary>One run of an approved plan.</summary>
+public sealed record TestCaseRun(Guid RunId, int Number, Execution.RunStatus Status, DateTimeOffset QueuedAt, DateTimeOffset? FinishedAt);
 
 /// <summary>
 /// Describing a test and getting the AI's plan for it (Milestone 5, part 2). Describing needs
@@ -81,4 +95,19 @@ public interface ITestCaseService
 
     /// <summary>Describes a test: queues an exploration of the environment, after which the AI plans it.</summary>
     Task<OperationResult<Guid>> DescribeAsync(Guid projectId, Guid environmentId, string description, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Approves the test's plan to run (Milestone 5, part 3). Needs <see cref="Identity.Permission.ApproveTestArtifacts"/>
+    /// (Owner, QA lead). Refused for a plan that is partial or types a secret, and for a plan that may change data unless
+    /// <paramref name="allowChangingData"/> says the approver accepts that.
+    /// </summary>
+    Task<OperationResult> ApproveAsync(Guid testCaseId, bool allowChangingData, CancellationToken cancellationToken = default);
+
+    /// <summary>Withdraws a plan's approval, so it runs no more until approved again.</summary>
+    Task<OperationResult> WithdrawApprovalAsync(Guid testCaseId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Queues a run of the approved plan. Needs <see cref="Identity.Permission.RunTests"/> and the same site, quota and
+    /// rate checks any run has. The dispatcher checks the approval again before a browser starts.
+    /// </summary>
+    Task<OperationResult<Guid>> RunAsync(Guid testCaseId, CancellationToken cancellationToken = default);
 }

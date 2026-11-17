@@ -16,6 +16,7 @@ internal sealed class TestCaseConfiguration : IEntityTypeConfiguration<TestCase>
         builder.Property(testCase => testCase.FailureReason).HasMaxLength(200);
         builder.Property(testCase => testCase.Model).HasMaxLength(100);
         builder.Property(testCase => testCase.ModelCost).HasPrecision(18, 6);
+        builder.Property(testCase => testCase.ApprovedPlanHash).HasMaxLength(64).IsFixedLength();
 
         builder.HasIndex(testCase => new { testCase.OrganizationId, testCase.ProjectId, testCase.Number }).IsUnique();
 

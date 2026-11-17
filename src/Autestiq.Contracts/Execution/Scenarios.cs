@@ -22,6 +22,9 @@ public static class Scenarios
     /// <summary>The scenario id of a run that explores a site for a described test (Milestone 5, part 2).</summary>
     public const string Exploration = "explore";
 
+    /// <summary>The scenario id of a run that carries out a test's approved plan (Milestone 5, part 3).</summary>
+    public const string ApprovedPlan = "approved-plan";
+
     /// <summary>Everything a person may start.</summary>
     public static IReadOnlyList<ScenarioSummary> All { get; } =
     [
@@ -46,5 +49,10 @@ public static class Scenarios
     /// <summary>The name of a scenario, or the id itself when it is not one we know.</summary>
     public static string NameOf(string scenarioId) =>
         All.FirstOrDefault(scenario => string.Equals(scenario.ScenarioId, scenarioId, StringComparison.Ordinal))
-            ?.Name ?? (scenarioId == Exploration ? "Site exploration" : scenarioId);
+            ?.Name ?? scenarioId switch
+            {
+                Exploration => "Site exploration",
+                ApprovedPlan => "Approved test",
+                _ => scenarioId,
+            };
 }

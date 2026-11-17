@@ -51,10 +51,18 @@
   background: var(--color-surface);
 }
 
+/* A list item keeps its number, which the approval refers to; its parts stack inside it. */
 .test__steps li {
+  margin-block-end: var(--space-2);
+}
+
+.test__step {
   display: flex;
   flex-direction: column;
-  margin-block-end: var(--space-2);
+}
+
+.test__badge {
+  margin-inline-start: var(--space-2);
 }
 
 .test__step-detail {

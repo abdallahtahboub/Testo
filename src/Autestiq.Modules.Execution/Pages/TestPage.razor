@@ -61,15 +61,29 @@ else
                     <p class="test__partial" data-testid="test-partial">@L["Test_Plan_Partial"]</p>
                 }
                 <ol class="test__steps" data-testid="test-steps">
-                    @foreach (var step in Detail.Steps)
+                    @for (var index = 0; index < Detail.Steps.Count; index++)
                     {
-                        <li>
-                            <span>@step.Description</span>
-                            <span class="t-muted test__step-detail">@L[ActionKey(step.Kind)]@TargetText(step)</span>
+                        var step = Detail.Steps[index];
+                        <li data-testid="@($"step-{index + 1}")">
+                            <div class="test__step">
+                                <span>
+                                    @step.Description
+                                    @if (Detail.StepsThatMayChangeData.Contains(index + 1))
+                                    {
+                                        <span class="test__badge"><TBadge Tone="Tone.Warning" data-testid="may-change-data">@L["Step_MayChangeData"]</TBadge></span>
+                                    }
+                                </span>
+                                <span class="t-muted test__step-detail">@L[ActionKey(step.Kind)]@TargetText(step)</span>
+                            </div>
                         </li>
                     }
                 </ol>
             </section>
+
+            @if (Detail.Status == TestCaseStatus.Planned)
+            {
+                <PlanApprovalPanel Detail="Detail" Changed="ReloadAsync" />
+            }
         }
 
         @if (Checks.Count > 0)

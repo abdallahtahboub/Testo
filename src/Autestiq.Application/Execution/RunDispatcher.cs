@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Autestiq.Contracts.Execution;
+using Autestiq.Contracts.Planning;
 using Autestiq.Domain.Execution;
 using Autestiq.Application.Usage;
 using Autestiq.Contracts.Usage;
@@ -463,7 +464,23 @@ public sealed class RunDispatcher(
                 return;
             }
 
-            var job = JobFor(run, options.CurrentValue, workspace.FullName);
+            // A test's plan runs only as approved, and only the plan that was approved (ADR-0030, part 3). Checked here,
+            // where the worker is started, whatever was checked when the run was asked for.
+            ApprovedPlan? approved = null;
+
+            if (run.ScenarioId == Scenarios.ApprovedPlan)
+            {
+                approved = await ApprovedPlanAsync(database, run, stoppingToken).ConfigureAwait(false);
+
+                if (approved is null)
+                {
+                    await RefuseAsync(scope.ServiceProvider, run, stoppingToken,
+                        "Refused: this test's plan is not approved, or is not the plan that was approved.").ConfigureAwait(false);
+                    return;
+                }
+            }
+
+            var job = JobFor(run, options.CurrentValue, workspace.FullName, approved);
 
             var (result, stopped) = await RunWorkerAsync(job, run.OrganizationId, stoppingToken).ConfigureAwait(false);
 
@@ -567,13 +584,56 @@ public sealed class RunDispatcher(
         return proof is not null && proof.CountsAt(now);
     }
 
-    private async Task RefuseAsync(IServiceProvider services, TestRun run, CancellationToken cancellationToken)
+    /// <summary>A test's approved plan, as a run carries it out.</summary>
+    /// <param name="Actions">The plan's steps.</param>
+    /// <param name="ReadOnly">Whether the approval leaves data unchanged, which the worker then holds in the browser.</param>
+    public sealed record ApprovedPlan(IReadOnlyList<PlannedAction> Actions, bool ReadOnly);
+
+    /// <summary>
+    /// The plan a run of a test may carry out, or <c>null</c> when it may carry out none: the test has no approval, its
+    /// plan is not the one approved, it is partial, it types a secret, or it may change data and the approval does not
+    /// allow it. Every condition is checked again here, because what was true when the run was asked for may not be now.
+    /// </summary>
+    public static async Task<ApprovedPlan?> ApprovedPlanAsync(AutestiqDbContext database, TestRun run, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(database);
+        ArgumentNullException.ThrowIfNull(run);
+
+        if (run.TestCaseId is not { } testCaseId)
+        {
+            return null;
+        }
+
+        // Across the filter, because the dispatcher has no organization of its own; held to the run's.
+        var testCase = await database.TestCases.IgnoreQueryFilters()
+            .FirstOrDefaultAsync(candidate => candidate.Id == testCaseId && candidate.OrganizationId == run.OrganizationId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (testCase is not { Plan: { } stored } || !Testing.TestCaseService.IsApproved(testCase)
+            || JsonSerializer.Deserialize<Testing.StoredPlan>(stored, Testing.TestCaseService.Json) is not { } plan)
+        {
+            return null;
+        }
+
+        var snapshot = testCase.Snapshot is null ? null : JsonSerializer.Deserialize<SiteSnapshot>(testCase.Snapshot, Testing.TestCaseService.Json);
+
+        if (plan.Coverage != PlanCoverage.Full
+            || PlanEffects.NeedsSecret(plan.Actions)
+            || (!testCase.ApprovedToChangeData && PlanEffects.StepsThatMayChangeData(plan.Actions, snapshot).Count > 0))
+        {
+            return null;
+        }
+
+        return new ApprovedPlan(plan.Actions, ReadOnly: !testCase.ApprovedToChangeData);
+    }
+
+    private async Task RefuseAsync(IServiceProvider services, TestRun run, CancellationToken cancellationToken, string? reason = null)
     {
         var database = services.GetRequiredService<AutestiqDbContext>();
         var writeScope = services.GetRequiredService<TenantWriteScope>();
 
         run.Status = RunStatus.Cancelled;
-        run.FailureReason = $"Refused: this organization has not proved that it controls {run.TargetOrigin}, or its proof has expired.";
+        run.FailureReason = reason ?? $"Refused: this organization has not proved that it controls {run.TargetOrigin}, or its proof has expired.";
         run.FinishedAt = timeProvider.GetUtcNow();
 
         using (writeScope.AllowWritingTo(run.OrganizationId))
@@ -733,7 +793,7 @@ public sealed class RunDispatcher(
     /// make the loopback exception a route to whatever listens on the worker's host. A stored target that
     /// configuration does not name is reached, if at all, as any other address is: never on loopback.
     /// </remarks>
-    public static WorkerJob JobFor(TestRun run, ExecutionOptions options, string workspace)
+    public static WorkerJob JobFor(TestRun run, ExecutionOptions options, string workspace, ApprovedPlan? approved = null)
     {
         ArgumentNullException.ThrowIfNull(run);
         ArgumentNullException.ThrowIfNull(options);
@@ -748,7 +808,8 @@ public sealed class RunDispatcher(
             ? full with { WallClock = TimeSpan.FromSeconds(Math.Min(run.ReservedSeconds, (long)full.WallClock.TotalSeconds)) }
             : full;
 
-        var exploring = run.TestCaseId is not null;
+        var exploring = run.ScenarioId == Scenarios.Exploration && run.TestCaseId is not null;
+        var plan = run.ScenarioId == Scenarios.ApprovedPlan ? approved : null;
 
         return new WorkerJob(
             run.Id,
@@ -764,9 +825,13 @@ public sealed class RunDispatcher(
             // An exploration asks to press controls and fill forms; the worker's own policy allows it only on an
             // application we run ourselves (ExplorationPolicy). On a customer's site it reads, and nothing more,
             // until approval of state-changing discovery exists (ADR-0030, gap analysis G-4).
-            Task: exploring ? WorkerTask.Explore : WorkerTask.Scripted,
+            Task: exploring ? WorkerTask.Explore : plan is not null ? WorkerTask.Planned : WorkerTask.Scripted,
+            Plan: plan?.Actions,
             ExploreStates: exploring,
-            SubmitForms: exploring);
+            SubmitForms: exploring,
+
+            // An approval that does not allow changing data is held in the browser by the worker (ReadOnlyGuard).
+            ReadOnly: plan?.ReadOnly ?? false);
     }
 
     /// <summary>
@@ -777,7 +842,7 @@ public sealed class RunDispatcher(
     {
         ArgumentNullException.ThrowIfNull(run);
 
-        return run.TestCaseId is null
+        return run.ScenarioId != Scenarios.Exploration
             ? RunBudget.Default
             : RunBudget.Default with { WallClock = TimeSpan.FromMinutes(10), MaxPagesCrawled = 24 };
     }
@@ -1103,7 +1168,7 @@ public sealed class RunDispatcher(
             run.ReservedSeconds = 0;
 
             // An exploration hands what it found to its test, for the planning step (Testing.PlanningDispatcher).
-            if (run.TestCaseId is { } testCaseId && result.Snapshot is { } snapshot)
+            if (run.ScenarioId == Scenarios.Exploration && run.TestCaseId is { } testCaseId && result.Snapshot is { } snapshot)
             {
                 // Across the filter, held to the run's own organization: the dispatcher has none in context.
                 var testCase = await database.TestCases.IgnoreQueryFilters()

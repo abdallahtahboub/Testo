@@ -48,6 +48,45 @@ public class DescribedTestTests(AppFixture app) : BrowserTest(app)
         await page.AssertAccessibleAsync();
     }
 
+    [Fact]
+    public async Task Test_APlanThatMayChangeData_IsApprovedOnlyWithTheTick_AndARunOfAnUnprovedSiteIsRefused()
+    {
+        // Its second step clicks "add-cup", which nothing showed to be a link: it may change data.
+        var number = await PlannedTestAsync(App);
+        var list = await OpenSignedInAsync(Routes.Tests("SHOP"));
+        var address = await list.Page.GetByTestId($"test-{number}").GetAttributeAsync("href");
+        list.AssertNoProblems();
+
+        var page = await OpenSignedInAsync(address ?? throw new InvalidOperationException("The test is not linked from the list."));
+        await Expect(page.Page.GetByTestId("approve-plan")).ToBeEnabledAsync();
+
+        await Expect(page.Page.GetByTestId("step-2").GetByTestId("may-change-data")).ToHaveTextAsync("May change data");
+        await Expect(page.Page.GetByTestId("step-1").GetByTestId("may-change-data")).ToHaveCountAsync(0);
+        await Expect(page.Page.GetByTestId("approval-changes")).ToContainTextAsync("Step 2 may change data");
+        await Expect(page.Page.GetByTestId("runs-empty")).ToBeVisibleAsync();
+
+        // Without the tick, nothing is approved.
+        await page.Page.GetByTestId("approve-plan").ClickAsync();
+        await Expect(page.Page.GetByTestId("approval").GetByRole(AriaRole.Alert)).ToContainTextAsync("This plan may change data");
+        await Expect(page.Page.GetByTestId("run-test")).ToHaveCountAsync(0);
+
+        await page.Page.GetByTestId("allow-change").GetByRole(AriaRole.Checkbox).CheckAsync();
+        await page.Page.GetByTestId("approve-plan").ClickAsync();
+        await Expect(page.Page.GetByTestId("approval-state")).ToContainTextAsync("Approved by Mara Lindqvist");
+        await Expect(page.Page.GetByTestId("approval-state")).ToContainTextAsync("This approval allows the plan to change data.");
+
+        // Approved, but the site is neither one of ours here nor proved: the service refuses the run.
+        await page.Page.GetByTestId("run-test").ClickAsync();
+        await Expect(page.Page.GetByTestId("approval").GetByRole(AriaRole.Alert)).ToContainTextAsync("prove it is yours");
+        await Expect(page.Page.GetByTestId("runs-empty")).ToBeVisibleAsync();
+
+        await page.Page.GetByTestId("withdraw-approval").ClickAsync();
+        await Expect(page.Page.GetByTestId("approval-state")).ToContainTextAsync("Nothing runs until an owner or a QA lead approves this plan.");
+
+        page.AssertNoProblems();
+        await page.AssertAccessibleAsync();
+    }
+
     /// <summary>
     /// A planned test, written straight into the database: planning needs a model, and the browser tests never call one.
     /// </summary>
@@ -86,7 +125,7 @@ public class DescribedTestTests(AppFixture app) : BrowserTest(app)
         await using var insert = new NpgsqlCommand(
             """
             INSERT INTO environments (id, organization_id, project_id, name, origin, kind, created_at, updated_at)
-            VALUES (@environment, @organization, @project, @environmentName, 'http://127.0.0.1:5090', 'Test', now(), now());
+            VALUES (@environment, @organization, @project, @environmentName, @origin, 'Test', now(), now());
             INSERT INTO test_cases (id, organization_id, project_id, environment_id, number, description, status, plan, notes,
                 sent_to_model, model, model_cost, planned_at, created_at, updated_at)
             VALUES (@testCase, @organization, @project, @environment, @number, 'Add a cup and check the total', 'Planned', @plan, @notes,
@@ -95,6 +134,9 @@ public class DescribedTestTests(AppFixture app) : BrowserTest(app)
             connection);
         insert.Parameters.AddWithValue("environment", environment);
         insert.Parameters.AddWithValue("environmentName", $"Shop{number}");
+
+        // An environment's address is unique in its project, and every test here adds one.
+        insert.Parameters.AddWithValue("origin", $"http://127.0.0.1:{10_000 + number % 50_000}");
         insert.Parameters.AddWithValue("organization", organization);
         insert.Parameters.AddWithValue("project", project);
         insert.Parameters.AddWithValue("testCase", testCase);

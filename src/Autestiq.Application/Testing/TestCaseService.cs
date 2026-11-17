@@ -78,13 +78,37 @@ internal sealed class TestCaseService(
         var testCase = found.TestCase;
 
         var exploration = await database.TestRuns
-            .Where(run => run.TestCaseId == testCase.Id)
+            .Where(run => run.TestCaseId == testCase.Id && run.ScenarioId == Scenarios.Exploration)
             .OrderByDescending(run => run.QueuedAt)
             .Select(run => (Guid?)run.Id)
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
 
         var plan = testCase.Plan is null ? null : JsonSerializer.Deserialize<StoredPlan>(testCase.Plan, Json);
+        var snapshot = testCase.Snapshot is null ? null : JsonSerializer.Deserialize<SiteSnapshot>(testCase.Snapshot, Json);
+        var actions = plan?.Actions ?? [];
+
+        PlanApproval? approval = null;
+
+        if (testCase.ApprovedAt is { } approvedAt)
+        {
+            // A person's name, from the shared users table: a user is not inside the tenant boundary.
+            var approver = await database.Users.IgnoreQueryFilters()
+                .Where(user => user.Id == testCase.ApprovedBy)
+                .Select(user => user.DisplayName)
+                .FirstOrDefaultAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            approval = new PlanApproval(approvedAt, approver, testCase.ApprovedToChangeData);
+        }
+
+        var runs = await database.TestRuns
+            .Where(run => run.TestCaseId == testCase.Id && run.ScenarioId == Scenarios.ApprovedPlan)
+            .OrderByDescending(run => run.QueuedAt)
+            .Take(20)
+            .Select(run => new TestCaseRun(run.Id, run.Number, run.Status, run.QueuedAt, run.FinishedAt))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
 
         return new TestCaseDetail(
             testCase.Id,
@@ -100,7 +124,11 @@ internal sealed class TestCaseService(
             testCase.Model,
             testCase.ModelCost,
             testCase.SentToModel is null ? [] : JsonSerializer.Deserialize<List<string>>(testCase.SentToModel, Json) ?? [],
-            exploration);
+            exploration,
+            PlanEffects.StepsThatMayChangeData(actions, snapshot),
+            PlanEffects.NeedsSecret(actions),
+            approval,
+            runs);
     }
 
     /// <inheritdoc />
@@ -231,6 +259,205 @@ internal sealed class TestCaseService(
 
         return OperationResult.With(testCase.Id);
     }
+
+    /// <inheritdoc />
+    public async Task<OperationResult> ApproveAsync(Guid testCaseId, bool allowChangingData, CancellationToken cancellationToken = default)
+    {
+        if (!currentUser.Can(Permission.ApproveTestArtifacts))
+        {
+            return OperationResult.Failure("Tests_Error_NotApprover");
+        }
+
+        var testCase = await database.TestCases.FirstOrDefaultAsync(candidate => candidate.Id == testCaseId, cancellationToken).ConfigureAwait(false);
+
+        if (testCase is null)
+        {
+            return OperationResult.Failure("Tests_Error_NoSuchTest");
+        }
+
+        if (testCase.Status != TestCaseStatus.Planned || testCase.Plan is null
+            || JsonSerializer.Deserialize<StoredPlan>(testCase.Plan, Json) is not { } plan)
+        {
+            return OperationResult.Failure("Tests_Error_NotPlanned");
+        }
+
+        // A plan that tests part of what was asked would pass for the whole of it.
+        if (plan.Coverage != PlanCoverage.Full)
+        {
+            return OperationResult.Failure("Tests_Error_PartialPlan");
+        }
+
+        // G-6: there is nowhere to keep a sign-in secret yet, so no plan that types one is approved.
+        if (PlanEffects.NeedsSecret(plan.Actions))
+        {
+            return OperationResult.Failure("Tests_Error_NeedsSecret");
+        }
+
+        var snapshot = testCase.Snapshot is null ? null : JsonSerializer.Deserialize<SiteSnapshot>(testCase.Snapshot, Json);
+
+        // G-4: a plan that may change data is approved only by someone who says, in so many words, that it may.
+        if (PlanEffects.StepsThatMayChangeData(plan.Actions, snapshot).Count > 0 && !allowChangingData)
+        {
+            return OperationResult.Failure("Tests_Error_ChangeAcknowledgementRequired");
+        }
+
+        testCase.ApprovedAt = timeProvider.GetUtcNow();
+        testCase.ApprovedBy = currentUser.UserId;
+        testCase.ApprovedPlanHash = PlanFingerprint.Of(testCase.Plan);
+        testCase.ApprovedToChangeData = allowChangingData;
+
+        Record(testCase, AuditActions.TestApproved, new { ToChangeData = allowChangingData, Plan = testCase.ApprovedPlanHash });
+        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        return OperationResult.Success;
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult> WithdrawApprovalAsync(Guid testCaseId, CancellationToken cancellationToken = default)
+    {
+        if (!currentUser.Can(Permission.ApproveTestArtifacts))
+        {
+            return OperationResult.Failure("Tests_Error_NotApprover");
+        }
+
+        var testCase = await database.TestCases.FirstOrDefaultAsync(candidate => candidate.Id == testCaseId, cancellationToken).ConfigureAwait(false);
+
+        if (testCase is null)
+        {
+            return OperationResult.Failure("Tests_Error_NoSuchTest");
+        }
+
+        testCase.ApprovedAt = null;
+        testCase.ApprovedBy = null;
+        testCase.ApprovedPlanHash = null;
+        testCase.ApprovedToChangeData = false;
+
+        Record(testCase, AuditActions.TestApprovalWithdrawn, after: null);
+        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        return OperationResult.Success;
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult<Guid>> RunAsync(Guid testCaseId, CancellationToken cancellationToken = default)
+    {
+        if (!currentUser.Can(Permission.RunTests))
+        {
+            return OperationResult.Failure<Guid>("Tests_Error_CannotRun");
+        }
+
+        var testCase = await database.TestCases.FirstOrDefaultAsync(candidate => candidate.Id == testCaseId, cancellationToken).ConfigureAwait(false);
+
+        if (testCase is null)
+        {
+            return OperationResult.Failure<Guid>("Tests_Error_NoSuchTest");
+        }
+
+        if (!IsApproved(testCase))
+        {
+            return OperationResult.Failure<Guid>("Tests_Error_NotApproved");
+        }
+
+        var environment = await database.Environments
+            .FirstOrDefaultAsync(candidate => candidate.Id == testCase.EnvironmentId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (environment is null)
+        {
+            return OperationResult.Failure<Guid>("Tests_Error_NoSuchEnvironment");
+        }
+
+        if (environment.Kind == EnvironmentKind.Production && environment.ProductionAuthorizedAt is null)
+        {
+            return OperationResult.Failure<Guid>("Tests_Error_ProductionNotAuthorized");
+        }
+
+        var now = timeProvider.GetUtcNow();
+        var options = execution.CurrentValue;
+
+        if (options.IsPaused(testCase.OrganizationId))
+        {
+            return OperationResult.Failure<Guid>("Tests_Error_Paused");
+        }
+
+        var probe = new TestRun { OrganizationId = testCase.OrganizationId, ScenarioId = Scenarios.ApprovedPlan, TargetOrigin = environment.Origin };
+
+        if (!await RunDispatcher.MayTargetAsync(database, probe, options, now, cancellationToken).ConfigureAwait(false))
+        {
+            return OperationResult.Failure<Guid>("Tests_Error_SiteNotAllowed");
+        }
+
+        if ((await RunDispatcher.RoomForAsync(database, testCase.OrganizationId, now, cancellationToken).ConfigureAwait(false)).UsedUp)
+        {
+            return OperationResult.Failure<Guid>("Tests_Error_MinutesUsedUp");
+        }
+
+        var organizationId = organizationContext.RequireOrganizationId();
+
+        await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+        await Usage.StartLimits.LockAsync(database, organizationId, cancellationToken).ConfigureAwait(false);
+
+        if (await Usage.StartLimits.RunStartsExceededAsync(database, organizationId, currentUser.UserId, usage.CurrentValue, now, cancellationToken).ConfigureAwait(false))
+        {
+            return OperationResult.Failure<Guid>("Tests_Error_TooManyStarts");
+        }
+
+        var runNumber = (await database.TestRuns.Where(run => run.ProjectId == testCase.ProjectId)
+            .MaxAsync(run => (int?)run.Number, cancellationToken).ConfigureAwait(false) ?? 0) + 1;
+
+        var run = new TestRun
+        {
+            OrganizationId = organizationId,
+            ProjectId = testCase.ProjectId,
+            Number = runNumber,
+            ScenarioId = Scenarios.ApprovedPlan,
+            TargetOrigin = environment.Origin,
+            Status = RunStatus.Queued,
+            QueuedAt = now,
+            RequestedBy = currentUser.UserId,
+            TestCaseId = testCase.Id,
+        };
+
+        database.TestRuns.Add(run);
+
+        new AuditWriter(database, timeProvider).Record(
+            organizationId,
+            currentUser.UserId,
+            currentUser.Email,
+            AuditActions.RunStarted,
+            nameof(TestRun),
+            run.Id,
+            $"test #{testCase.Number}, run #{run.Number}");
+
+        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+
+        return OperationResult.With(run.Id);
+    }
+
+    /// <summary>Whether a test's plan is approved, and is still the plan that was approved.</summary>
+    internal static bool IsApproved(TestCase testCase) =>
+        testCase.ApprovedAt is not null
+        && testCase.Plan is not null
+        && testCase.ApprovedPlanHash == PlanFingerprint.Of(testCase.Plan);
+
+    private void Record(TestCase testCase, string action, object? after) =>
+        new AuditWriter(database, timeProvider).Record(
+            testCase.OrganizationId,
+            currentUser.UserId,
+            currentUser.Email,
+            action,
+            nameof(TestCase),
+            testCase.Id,
+            $"test #{testCase.Number}",
+            after: after);
+}
+
+/// <summary>The fingerprint of a stored plan: its SHA-256, in lower-case hex.</summary>
+internal static class PlanFingerprint
+{
+    public static string Of(string plan) =>
+        Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(plan)));
 }
 
 /// <summary>A plan as it is stored with its test.</summary>

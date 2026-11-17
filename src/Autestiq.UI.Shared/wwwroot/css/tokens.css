@@ -137,6 +137,7 @@
   --shadow-2: 0 4px 12px light-dark(rgb(16 20 50 / 0.08), transparent);
   --shadow-3: 0 12px 32px light-dark(rgb(16 20 50 / 0.12), rgb(0 0 0 / 0.4));
 
+  --border-width-strong: 2px;
   --focus-ring-width: 2px;
   --focus-ring-offset: 2px;
   /* The ring that marks the step a run is on, or the row a person is reading. */

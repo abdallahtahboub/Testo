@@ -90,6 +90,19 @@ public sealed class DescribedTestTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task RemoveEnvironment_ThatATestWasExploredAgainst_IsRefused_AndTheEnvironmentStays()
+    {
+        var (project, environment) = await ProjectAsync(_northwind, aiAllowed: true);
+        Assert.True((await DescribeAsync(_northwind, project, environment)).Succeeded);
+
+        var removed = await AsAsync(_northwind, Role.Owner, provider => provider.GetRequiredService<IProjectService>().RemoveEnvironmentAsync(environment));
+
+        Assert.Equal(["Environments_Error_InUse"], removed.Errors);
+        await using var database = _database.NewContext();
+        Assert.True(await database.Environments.IgnoreQueryFilters().AnyAsync(candidate => candidate.Id == environment, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task Describe_WithoutTheProjectsAiPermission_IsRefused_AndQueuesNothing()
     {
         var (project, environment) = await ProjectAsync(_northwind, aiAllowed: false);

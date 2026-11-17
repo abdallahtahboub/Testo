@@ -44,6 +44,12 @@ public static class Routes
     /// <summary>A project's environments, by the project's key.</summary>
     public static string Environments(string projectKey) => $"{App}/p/{projectKey}/execution/environments";
 
+    /// <summary>A project's described tests.</summary>
+    public static string Tests(string projectKey) => $"{App}/p/{projectKey}/tests";
+
+    /// <summary>One described test and its plan.</summary>
+    public static string Test(string projectKey, Guid testCaseId) => $"{App}/p/{projectKey}/tests/{testCaseId}";
+
     public const string Runs = App + "/runs";
 
     /// <summary>One run.</summary>

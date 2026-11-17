@@ -335,6 +335,12 @@ internal sealed class ProjectService(
             return OperationResult.Failure("Environments_Error_NoSuchEnvironment");
         }
 
+        // Tests keep the environment they were explored against: one that has any is not removed from under them.
+        if (await database.TestCases.AnyAsync(testCase => testCase.EnvironmentId == environmentId, cancellationToken).ConfigureAwait(false))
+        {
+            return OperationResult.Failure("Environments_Error_InUse");
+        }
+
         database.Environments.Remove(environment);
         Record(AuditActions.EnvironmentRemoved, nameof(TestEnvironment), environment.Id, $"{environment.Name} ({environment.Origin})");
         await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

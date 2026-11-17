@@ -1,0 +1,10 @@
+@inject IStringLocalizer<ExecutionResources> L
+
+@*
+    What AI planning sends to the model provider and what it never sends, in plain words, wherever the
+    permission is given or shown (docs/secure-onboarding-and-privacy.md §4).
+*@
+<div class="ai-notice" data-testid="ai-data-notice">
+    <p><strong>@L["AiNotice_Sent_Title"]</strong> @L["AiNotice_Sent"]</p>
+    <p><strong>@L["AiNotice_Never_Title"]</strong> @L["AiNotice_Never"]</p>
+</div>

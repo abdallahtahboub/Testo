@@ -1,0 +1,127 @@
+@page "/app/p/{ProjectKey}/tests/{TestCaseId:guid}"
+@implements IDisposable
+@inject IStringLocalizer<ExecutionResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    One described test and the AI's plan for it (Milestone 5, part 2; ADR-0030). It keeps apart what
+    the person asked for, what Autestiq's own checks found, and what the AI wrote, which is unverified
+    until someone checks it (docs/secure-onboarding-and-privacy.md §6). It also shows exactly what was
+    sent to the model. Nothing here runs the plan: approval comes in part 3.
+*@
+<PageTitle>@L["Test_PageTitle", Detail?.Number.ToString(System.Globalization.CultureInfo.CurrentCulture) ?? "…", Brand.Value.ProductName]</PageTitle>
+
+@if (Loading)
+{
+    <TSkeleton Shape="SkeletonShape.Text" Lines="4" />
+}
+else if (Detail is null || Project is null)
+{
+    <h1>@L["Test_NoSuchTest"]</h1>
+    <p class="t-muted">@L["Test_NoSuchTest_Text"]</p>
+    <p><a href="@Routes.Projects">@L["Environments_BackToProjects"]</a></p>
+}
+else
+{
+    <div class="test">
+        <header class="test__header">
+            <ProjectNav ProjectKey="@Project.Key" ProjectName="@Project.Name" Current="tests" />
+            <div class="test__title">
+                <h1>@L["Test_Title", Detail.Number]</h1>
+                <TestStatusText Status="Detail.Status" />
+            </div>
+            <p class="t-muted">@L["Test_Against", Detail.EnvironmentName, Origins.Display(Detail.Origin)]</p>
+        </header>
+
+        <section class="test__block" aria-labelledby="test-asked">
+            <h2 id="test-asked" class="t-h4">@L["Test_Asked"]</h2>
+            <p class="test__asked" data-testid="test-asked">@Detail.Description</p>
+        </section>
+
+        @switch (Detail.Status)
+        {
+            case TestCaseStatus.Exploring:
+                <p role="status" data-testid="test-progress">@L["Test_Exploring"]</p>
+                break;
+            case TestCaseStatus.Planning:
+                <p role="status" data-testid="test-progress">@L["Test_Planning"]</p>
+                break;
+            case TestCaseStatus.Failed:
+                <p class="test__problem" role="alert" data-testid="test-failure">@L[Detail.FailureReason ?? "Tests_Error_NoPlan"]</p>
+                break;
+        }
+
+        @if (Detail.Steps.Count > 0)
+        {
+            <section class="test__block" aria-labelledby="test-plan">
+                <h2 id="test-plan" class="t-h4">@L["Test_Plan"]</h2>
+                <p class="t-muted">@L["Test_Plan_NotApproved"]</p>
+                @if (Detail.Coverage == PlanCoverage.Partial)
+                {
+                    <p class="test__partial" data-testid="test-partial">@L["Test_Plan_Partial"]</p>
+                }
+                <ol class="test__steps" data-testid="test-steps">
+                    @foreach (var step in Detail.Steps)
+                    {
+                        <li>
+                            <span>@step.Description</span>
+                            <span class="t-muted test__step-detail">@L[ActionKey(step.Kind)]@TargetText(step)</span>
+                        </li>
+                    }
+                </ol>
+            </section>
+        }
+
+        @if (Checks.Count > 0)
+        {
+            <section class="test__block" aria-labelledby="test-checks">
+                <h2 id="test-checks" class="t-h4">@L["Test_Checks"]</h2>
+                <p class="t-muted">@L["Test_Checks_Intro"]</p>
+                <ul data-testid="test-checks">
+                    @foreach (var note in Checks)
+                    {
+                        <li>@note.Text</li>
+                    }
+                </ul>
+            </section>
+        }
+
+        @if (AiNotes.Count > 0)
+        {
+            <section class="test__block test__block--unverified" aria-labelledby="test-ai-notes">
+                <h2 id="test-ai-notes" class="t-h4">@L["Test_AiNotes"]</h2>
+                <p class="t-muted">@L["Test_AiNotes_Intro"]</p>
+                <ul data-testid="test-ai-notes">
+                    @foreach (var note in AiNotes)
+                    {
+                        <li>@note.Text</li>
+                    }
+                </ul>
+            </section>
+        }
+
+        @if (Python is not null)
+        {
+            <section class="test__block" aria-labelledby="test-python">
+                <h2 id="test-python" class="t-h4">@L["Test_Python"]</h2>
+                <p class="t-muted">@L["Test_Python_Intro"]</p>
+                <pre class="test__code" data-testid="test-python"><code>@Python</code></pre>
+            </section>
+        }
+
+        @if (Detail.SentToModel.Count > 0)
+        {
+            <section class="test__block" aria-labelledby="test-sent">
+                <h2 id="test-sent" class="t-h4">@L["Test_Sent"]</h2>
+                <p class="t-muted">@L["Test_Sent_Intro", Detail.Model ?? "", Detail.Cost?.ToString("0.0000", System.Globalization.CultureInfo.InvariantCulture) ?? "0"]</p>
+                @for (var attempt = 0; attempt < Detail.SentToModel.Count; attempt++)
+                {
+                    <details class="test__sent" data-testid="test-sent">
+                        <summary>@L["Test_Sent_Attempt", attempt + 1]</summary>
+                        <pre class="test__code"><code>@Detail.SentToModel[attempt]</code></pre>
+                    </details>
+                }
+            </section>
+        }
+    </div>
+}

@@ -23,7 +23,7 @@ else
 {
     <div class="environments">
         <header class="environments__header">
-            <p class="t-muted"><a href="@Routes.Projects">@L["Projects_Title"]</a> / @Project.Name</p>
+            <ProjectNav ProjectKey="@Project.Key" ProjectName="@Project.Name" Current="environments" />
             <h1>@L["Environments_Title"]</h1>
             <p class="t-muted">@L["Environments_Intro"]</p>
         </header>

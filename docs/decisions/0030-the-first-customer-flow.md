@@ -106,6 +106,12 @@ inconclusive one → the approved test downloaded.
   can be explored on a developer machine.
 - Nothing runs a plan yet. Approval, the "may change data" flag and running come in part 3.
 
+## Later, recorded with this flow
+- **A live view of a run inside the product** (the owner's request of 2026-11-17). The customer watches the
+  browser's run in Autestiq step by step, never in a window on their machine. First a picture per step as it
+  ends, later a continuous stream. Bound by the evidence rules of the secure onboarding requirements. Planned
+  with Milestone 7 (`docs/roadmap.md`).
+
 ## Consequences
 - **Easier:** a customer can set up what a run needs, and the shell finally shows where things are.
 - **Harder:** the product calls a model with our key from part 2 on, so the budget checks hold before any call

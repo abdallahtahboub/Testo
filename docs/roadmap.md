@@ -427,6 +427,23 @@ Delivered **one stage at a time**, each as its own reviewable sub-milestone:
 ## Milestone 7 — Live E2E Test Run view (showpiece)
 **Scope:** `Autestiq.Capabilities.E2EWeb` implementing `ITestCapability` (settings, run setup, live view, results); `MockTestRunLiveFeed` with scripted scenarios (passing run, failure at step 7, self-healed locator); live view with step timeline, highlighted current step, per-step status, screenshot panel (mock screenshots as generated SVGs of a fake web shop), log console with level filters and auto-scroll lock, elapsed time, stop / rerun; polite screen-reader announcements; reconnect/gap handling via `Sequence`.
 
+**The real live view (the owner's request of 2026-11-17).** Beyond the scripted feed: a customer watches their
+own run inside Autestiq, step by step, while it happens. The browser always runs on our side, in its sealed
+container (or, later, in the customer's private agent), and never opens a window on the customer's machine.
+Two stages:
+1. **Step by step.** The worker already screenshots each step. It sends each step's result and picture as soon as
+   the step ends, and the run page updates over the circuit the app already holds. Near-live, a picture per step.
+2. **A continuous picture.** The browser streams its screen while it runs (Playwright's screencast, a few frames
+   a second): smoother, with more bandwidth and storage to plan for.
+
+What streams is customer evidence (`docs/secure-onboarding-and-privacy.md` §4–5):
+- it is masked like screenshots, with password fields hidden;
+- it is shown only to members who may read runs;
+- it is kept no longer than the retention policy allows, and follows the project's evidence policy;
+- from a private agent it streams only if the customer's data-sharing policy allows, and otherwise only step
+  results come through;
+- the viewer is read-only: nobody can click through it into the customer's site.
+
 **Done when:** adding the capability required only the new project + one registration line (verified in the PR diff); reducer and component tests run with a fake `TimeProvider` (no real waiting); E2E watches a mock run to completion and asserts the final status; stop and rerun work; reduced-motion mode verified.
 
 ## Milestone 8 — Polish

@@ -404,7 +404,7 @@
     <value>Ein oder zwei Sätze, wie eine Testerin es sagen würde. Zum Beispiel: Zwei Tassen in den Warenkorb legen und prüfen, dass er 22,50 £ anzeigt.</value>
   </data>
   <data name="Tests_New_ReadOnlyNote" xml:space="preserve">
-    <value>Auf Ihrer eigenen Seite folgt das Erkunden nur Links: Es drückt keine Schaltflächen und sendet keine Formulare.</value>
+    <value>Auf Ihrer eigenen Seite folgt das Erkunden nur Links, es sei denn, ein Inhaber hat auf der Seite Umgebungen Aktionen erlaubt.</value>
   </data>
   <data name="Tests_New_Submit" xml:space="preserve">
     <value>Erkunden und planen</value>

@@ -97,8 +97,9 @@ inconclusive one → the approved test downloaded.
 - **An environment a test was explored against cannot be removed**, so a test never loses where it was planned.
 
 **Limits and gaps, stated:**
-- **A customer's site is explored read-only.** The worker's exploration policy presses buttons and submits forms
-  only on our own loopback applications; on a customer's site it follows links. This was kept deliberately,
+- **A customer's site is explored read-only** unless its owner allows exploring to act (ADR-0032, built on
+  2026-11-17). Without that permission, the worker's exploration policy presses buttons and submits forms only on
+  our own loopback applications; on a customer's site it follows links. This was kept deliberately,
   because a submitted form can change data before anyone has approved anything (G-4). **Read-only exploration
   has not been measured on the benchmark**, so plans from it may be weaker than ADR-0020's figures, which come
   from full exploration of our applications.

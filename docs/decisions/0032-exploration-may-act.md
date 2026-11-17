@@ -50,6 +50,26 @@ The owner's rules allow acting on a customer's site only with explicit approval 
      owner's yes and the price stated first.
    - Until that run reproduces the full-exploration figures, the product makes no accuracy claim for customer sites.
 
+## Built (2026-11-17)
+- `TestEnvironment.ExplorationMayActAt`/`By`; `IProjectService.AllowExplorationActingAsync` and
+  `WithdrawExplorationActingAsync`, which are Owner only, need the acknowledgement, refuse production and are
+  audited. The Environments page shows the choice on every test environment, with the acknowledgement in words.
+- `RunDispatcher.ExplorationMayActAsync` reads the permission when the exploration starts. It requires a test
+  environment whose origin is the run's, and the permission still given. `JobFor` passes it as
+  `WorkerJob.CustomerAllowsActing`, on an exploration only.
+- `ExplorationPolicy.MayPressControls` acts on a customer's origin only with that flag. The never-pressed names,
+  the test values and the budgets are unchanged.
+- The test page lists "What exploring did", from the snapshot's `ReachedBy`.
+- Tests:
+  - the service: Owner only, the acknowledgement, production refused even when authorized, another organization's
+    environment, the audit;
+  - the dispatcher: only while the permission stands, never on a run that isn't an exploration, never on another
+    origin;
+  - the worker policy: the flag allows acting, but not on a planned run and not beyond what the job asked;
+  - a browser flow on the Environments page.
+- **Not yet measured.** The benchmark's acting exploration is the full exploration already measured (62 of 66), so
+  that figure is what this permission makes possible. A measurement on a site we did not build is still to come.
+
 ## Consequences
 - **Easier:** planning on a customer's staging site can see what its actions lead to, as on our own applications,
   where it measured 62 of 66.

@@ -404,7 +404,7 @@
     <value>One or two sentences, as a tester would say it. For example: Add two cups to the basket and check it says £22.50.</value>
   </data>
   <data name="Tests_New_ReadOnlyNote" xml:space="preserve">
-    <value>On your own site, exploring only follows links: it does not press buttons or submit forms.</value>
+    <value>On your own site, exploring only follows links unless an owner allowed it to act on the Environments page.</value>
   </data>
   <data name="Tests_New_Submit" xml:space="preserve">
     <value>Explore and plan</value>

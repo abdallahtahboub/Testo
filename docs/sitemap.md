@@ -88,7 +88,7 @@ Routes are scoped by project: `/app/p/{projectKey}/...` (e.g., `/app/p/orion/def
 | `/app/p/{p}/execution` | Execution | Test runs | Run history list with status, capability, duration, filters |
 | `/app/p/{p}/execution/new` | Execution | Start a run | Choose suite, environment, capability (renders capability's setup UI) |
 | `/app/p/{p}/execution/suites` | Execution | Test suites | Suite builder |
-| `/app/p/{p}/execution/environments` | Execution | Environments | Environment registry |
+| `/app/p/{p}/execution/environments` | Execution | Environments | Environment registry, each with its site's ownership proof *(built, Milestone 5 part 1)* |
 | `/app/p/{p}/execution/runs/{runId}` | Execution | Run detail | Results per test; delegates to the capability's results UI |
 | `/app/p/{p}/execution/runs/{runId}/live` | Capability E2EWeb | **Live E2E test run** | Step timeline, current step, status per step, screenshot panel, log console, elapsed time, stop/rerun |
 | `/app/p/{p}/execution/manual/{runId}` | Execution | Manual test runner | Step-by-step execution with evidence |
@@ -99,6 +99,7 @@ Routes are scoped by project: `/app/p/{projectKey}/...` (e.g., `/app/p/orion/def
 | `/app/p/{p}/reporting/releases/{relId}` | Reporting | Release readiness | Exit criteria, readiness score, go/no-go sign-off |
 | `/app/p/{p}/reporting/releases/{relId}/summary` | Reporting | Test summary report | Printable summary, AI draft (P) |
 | `/app/p/{p}/reporting/releases/{relId}/closure` | Reporting | Test completion | Closure checklist, lessons learned, archive |
+| `/app/projects` | Execution | Projects | The organization's projects, and adding one within the plan's limit *(built, Milestone 5 part 1; the project picker at `/app` comes later)* |
 | `/app/settings` | Settings | Settings overview | Entry to settings areas |
 | `/app/settings/integrations` | Settings | Integrations (P) | Git, Azure DevOps, Jira connection cards (UI only) |
 | `/app/settings/team` | Settings | Team members | Members, roles, invite (UI only) |

@@ -1420,6 +1420,10 @@ namespace Autestiq.Persistence.Migrations
                         .HasColumnType("character varying(2000)")
                         .HasColumnName("description");
 
+                    b.Property<int>("EvidenceRetentionDays")
+                        .HasColumnType("integer")
+                        .HasColumnName("evidence_retention_days");
+
                     b.Property<string>("KeyPrefix")
                         .IsRequired()
                         .HasMaxLength(10)

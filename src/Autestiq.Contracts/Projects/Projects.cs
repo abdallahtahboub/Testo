@@ -10,7 +10,17 @@ namespace Autestiq.Contracts.Projects;
 /// <param name="Description">What it is for, if anyone said.</param>
 /// <param name="Environments">How many environments it has.</param>
 /// <param name="AiProcessingAllowedAt">When AI planning was allowed to process its page content, or <c>null</c>: off by default.</param>
-public sealed record ProjectSummary(Guid ProjectId, string Name, string Key, string? Description, int Environments, DateTimeOffset? AiProcessingAllowedAt = null);
+public sealed record ProjectSummary(Guid ProjectId, string Name, string Key, string? Description, int Environments, DateTimeOffset? AiProcessingAllowedAt = null, int EvidenceRetentionDays = EvidenceRetention.DefaultDays);
+
+/// <summary>How long a project keeps its runs' screenshots (gap analysis G-5).</summary>
+public static class EvidenceRetention
+{
+    /// <summary>What a project keeps unless someone chooses less: 90 days (<c>docs/domain-model.md</c> §7).</summary>
+    public const int DefaultDays = 90;
+
+    /// <summary>The choices, longest first; 0 keeps no screenshot at all. Nothing is kept longer than 90 days.</summary>
+    public static IReadOnlyList<int> AllowedDays { get; } = [90, 30, 7, 0];
+}
 
 /// <summary>What kind of site an environment is. Production is refused for runs until an owner authorizes it.</summary>
 public enum EnvironmentKind
@@ -71,6 +81,12 @@ public interface IProjectService
 
     /// <summary>Withdraws that permission: no more planning for the project until it is allowed again. Audited.</summary>
     Task<OperationResult> WithdrawAiProcessingAsync(Guid projectId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sets how many days the project's screenshots are kept, one of <see cref="EvidenceRetention.AllowedDays"/>. Needs
+    /// <see cref="Identity.Permission.ManageProjects"/>; audited. A shorter time applies to screenshots already kept.
+    /// </summary>
+    Task<OperationResult> SetEvidenceRetentionAsync(Guid projectId, int days, CancellationToken cancellationToken = default);
 
     /// <summary>A project's environments, by name, each with the state of its origin's proof.</summary>
     Task<IReadOnlyList<EnvironmentSummary>> ListEnvironmentsAsync(Guid projectId, CancellationToken cancellationToken = default);

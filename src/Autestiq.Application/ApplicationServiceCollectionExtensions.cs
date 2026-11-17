@@ -45,6 +45,7 @@ public static class ApplicationServiceCollectionExtensions
 
         // AI planning (Milestone 5, part 2): its budgets, and no planner unless the host provides one with a key.
         services.AddOptions<Testing.PlanningOptions>();
+        services.AddOptions<EvidenceRetentionOptions>();
         services.TryAddSingleton<Testing.IPlannerFactory, Testing.NoPlannerFactory>();
         services.AddScoped<Contracts.Testing.ITestCaseService, Testing.TestCaseService>();
 
@@ -67,6 +68,9 @@ public static class ApplicationServiceCollectionExtensions
 
         // The planning step that follows an exploration (Milestone 5, part 2).
         services.AddHostedService<Testing.PlanningDispatcher>();
+
+        // Deleting screenshots whose project's policy has run out (gap analysis G-5).
+        services.AddHostedService<EvidenceRetentionService>();
         return services;
     }
 }

@@ -1,0 +1,27 @@
+/* A project's settings, one section each. */
+
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.settings h1 {
+  margin-block: var(--space-4) 0;
+}
+
+.settings__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-inline-size: 48rem;
+}
+
+.settings__section h2,
+.settings__section p {
+  margin: 0;
+}
+
+.settings__problem {
+  color: var(--color-danger);
+}

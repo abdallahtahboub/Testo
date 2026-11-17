@@ -101,6 +101,7 @@ Routes are scoped by project: `/app/p/{projectKey}/...` (e.g., `/app/p/orion/def
 | `/app/p/{p}/reporting/releases/{relId}` | Reporting | Release readiness | Exit criteria, readiness score, go/no-go sign-off |
 | `/app/p/{p}/reporting/releases/{relId}/summary` | Reporting | Test summary report | Printable summary, AI draft (P) |
 | `/app/p/{p}/reporting/releases/{relId}/closure` | Reporting | Test completion | Closure checklist, lessons learned, archive |
+| `/app/p/{p}/settings` | Execution | Project settings | How long the project's screenshots are kept: 90, 30 or 7 days, or none *(built, ADR-0031)* |
 | `/app/projects` | Execution | Projects | The organization's projects, and adding one within the plan's limit *(built, Milestone 5 part 1; the project picker at `/app` comes later)* |
 | `/app/settings` | Settings | Settings overview | Entry to settings areas |
 | `/app/settings/integrations` | Settings | Integrations (P) | Git, Azure DevOps, Jira connection cards (UI only) |

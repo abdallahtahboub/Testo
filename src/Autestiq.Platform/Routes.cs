@@ -47,6 +47,9 @@ public static class Routes
     /// <summary>A project's described tests.</summary>
     public static string Tests(string projectKey) => $"{App}/p/{projectKey}/tests";
 
+    /// <summary>A project's settings, such as how long it keeps evidence.</summary>
+    public static string ProjectSettings(string projectKey) => $"{App}/p/{projectKey}/settings";
+
     /// <summary>One described test and its plan.</summary>
     public static string Test(string projectKey, Guid testCaseId) => $"{App}/p/{projectKey}/tests/{testCaseId}";
 

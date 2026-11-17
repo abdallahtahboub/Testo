@@ -27,6 +27,9 @@ public class PageSmokeTests(AppFixture app) : BrowserTest(app)
                 // PublicSiteSmokeTests. What is left here is the product behind the sign-in.
                 pages.Add("/app", "en", "App preview – Autestiq", "App shell preview", scheme);
                 pages.Add(Routes.Runs, "en", "Test runs – Autestiq", "Test runs", scheme);
+                pages.Add(Routes.Projects, "en", "Projects – Autestiq", "Projects", scheme);
+                pages.Add(Routes.Environments("SHOP"), "en", "Environments of Northwind Shop – Autestiq", "Environments", scheme);
+                pages.Add(Routes.Environments("NOPE"), "en", "Environments of NOPE – Autestiq", "No such project", scheme);
 
                 // A run that is not this organization's. The page still has a title and one
                 // heading, because "no such run" is a page like any other.

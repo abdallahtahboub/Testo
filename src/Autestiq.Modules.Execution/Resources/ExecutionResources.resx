@@ -163,4 +163,163 @@
   <data name="Run_Steps_Took" xml:space="preserve">
     <value>{0} s</value>
   </data>
+  <data name="Nav_Projects" xml:space="preserve">
+    <value>Projects</value>
+  </data>
+  <data name="Projects_PageTitle" xml:space="preserve">
+    <value>Projects – {0}</value>
+  </data>
+  <data name="Projects_Title" xml:space="preserve">
+    <value>Projects</value>
+  </data>
+  <data name="Projects_Intro" xml:space="preserve">
+    <value>A project is one application you test. Its environments, tests and runs belong to it.</value>
+  </data>
+  <data name="Projects_Empty_Title" xml:space="preserve">
+    <value>No projects yet</value>
+  </data>
+  <data name="Projects_Empty_Text" xml:space="preserve">
+    <value>Add one below to start testing an application.</value>
+  </data>
+  <data name="Projects_EnvironmentCount" xml:space="preserve">
+    <value>Environments: {0}</value>
+  </data>
+  <data name="Projects_New" xml:space="preserve">
+    <value>Add a project</value>
+  </data>
+  <data name="Projects_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Projects_Key" xml:space="preserve">
+    <value>Key</value>
+  </data>
+  <data name="Projects_Key_Hint" xml:space="preserve">
+    <value>2 to 10 letters and digits, starting with a letter, such as SHOP. It appears in addresses and cannot be changed.</value>
+  </data>
+  <data name="Projects_Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Projects_Create" xml:space="preserve">
+    <value>Add the project</value>
+  </data>
+  <data name="Projects_LoadFailed" xml:space="preserve">
+    <value>The projects could not be loaded.</value>
+  </data>
+  <data name="Projects_Error_NotAllowed" xml:space="preserve">
+    <value>Only an owner or an admin can add projects.</value>
+  </data>
+  <data name="Projects_Error_NameRequired" xml:space="preserve">
+    <value>Give the project a name of up to 200 characters.</value>
+  </data>
+  <data name="Projects_Error_InvalidKey" xml:space="preserve">
+    <value>The key must be 2 to 10 letters and digits, starting with a letter.</value>
+  </data>
+  <data name="Projects_Error_KeyTaken" xml:space="preserve">
+    <value>Another project already uses that key.</value>
+  </data>
+  <data name="Projects_Error_PlanLimit" xml:space="preserve">
+    <value>Your plan does not allow another project.</value>
+  </data>
+  <data name="Environments_PageTitle" xml:space="preserve">
+    <value>Environments of {0} – {1}</value>
+  </data>
+  <data name="Environments_Title" xml:space="preserve">
+    <value>Environments</value>
+  </data>
+  <data name="Environments_Intro" xml:space="preserve">
+    <value>An environment is one address of the application, such as its staging site. Tests run against an environment only once you have proved the site is yours.</value>
+  </data>
+  <data name="Environments_NoSuchProject" xml:space="preserve">
+    <value>No such project</value>
+  </data>
+  <data name="Environments_NoSuchProject_Text" xml:space="preserve">
+    <value>There is no project with that key in this organization.</value>
+  </data>
+  <data name="Environments_BackToProjects" xml:space="preserve">
+    <value>Back to the projects</value>
+  </data>
+  <data name="Environments_Empty_Title" xml:space="preserve">
+    <value>No environments yet</value>
+  </data>
+  <data name="Environments_Empty_Text" xml:space="preserve">
+    <value>Add the address of the site you want to test.</value>
+  </data>
+  <data name="Environments_Proof_Instructions" xml:space="preserve">
+    <value>To prove the site is yours, publish a file at this address holding exactly this text, then choose Check now.</value>
+  </data>
+  <data name="Environments_Proof_File" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="Environments_Proof_Token" xml:space="preserve">
+    <value>Text</value>
+  </data>
+  <data name="Environments_Prove" xml:space="preserve">
+    <value>Prove ownership</value>
+  </data>
+  <data name="Environments_Check" xml:space="preserve">
+    <value>Check now</value>
+  </data>
+  <data name="Environments_Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Environments_New" xml:space="preserve">
+    <value>Add an environment</value>
+  </data>
+  <data name="Environments_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Environments_Name_Hint" xml:space="preserve">
+    <value>Such as Staging or Production.</value>
+  </data>
+  <data name="Environments_Origin" xml:space="preserve">
+    <value>Address</value>
+  </data>
+  <data name="Environments_Origin_Hint" xml:space="preserve">
+    <value>The site's address, such as https://staging.example.com, with nothing after it.</value>
+  </data>
+  <data name="Environments_Add" xml:space="preserve">
+    <value>Add the environment</value>
+  </data>
+  <data name="Environments_LoadFailed" xml:space="preserve">
+    <value>The environments could not be loaded.</value>
+  </data>
+  <data name="Environments_Error_NotAllowed" xml:space="preserve">
+    <value>Only an owner or an admin can change environments.</value>
+  </data>
+  <data name="Environments_Error_NameRequired" xml:space="preserve">
+    <value>Give the environment a name of up to 100 characters.</value>
+  </data>
+  <data name="Environments_Error_InvalidOrigin" xml:space="preserve">
+    <value>That is not a website address this can test: use https://, a host and nothing after it.</value>
+  </data>
+  <data name="Environments_Error_NoSuchProject" xml:space="preserve">
+    <value>There is no such project.</value>
+  </data>
+  <data name="Environments_Error_NameTaken" xml:space="preserve">
+    <value>This project already has an environment with that name.</value>
+  </data>
+  <data name="Environments_Error_OriginTaken" xml:space="preserve">
+    <value>This project already has an environment at that address.</value>
+  </data>
+  <data name="Environments_Error_NoSuchEnvironment" xml:space="preserve">
+    <value>There is no such environment.</value>
+  </data>
+  <data name="Proof_None" xml:space="preserve">
+    <value>Not proved</value>
+  </data>
+  <data name="Proof_Issued" xml:space="preserve">
+    <value>Waiting for the file</value>
+  </data>
+  <data name="Proof_Checking" xml:space="preserve">
+    <value>Checking</value>
+  </data>
+  <data name="Proof_Verified" xml:space="preserve">
+    <value>Proved</value>
+  </data>
+  <data name="Proof_VerifiedUntil" xml:space="preserve">
+    <value>Proved until {0}</value>
+  </data>
+  <data name="Proof_Failed" xml:space="preserve">
+    <value>Check failed</value>
+  </data>
 </root>

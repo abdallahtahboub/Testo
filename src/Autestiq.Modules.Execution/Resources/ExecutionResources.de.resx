@@ -163,4 +163,163 @@
   <data name="Run_Steps_Took" xml:space="preserve">
     <value>{0} s</value>
   </data>
+  <data name="Nav_Projects" xml:space="preserve">
+    <value>Projekte</value>
+  </data>
+  <data name="Projects_PageTitle" xml:space="preserve">
+    <value>Projekte – {0}</value>
+  </data>
+  <data name="Projects_Title" xml:space="preserve">
+    <value>Projekte</value>
+  </data>
+  <data name="Projects_Intro" xml:space="preserve">
+    <value>Ein Projekt ist eine Anwendung, die Sie testen. Seine Umgebungen, Tests und Läufe gehören zu ihm.</value>
+  </data>
+  <data name="Projects_Empty_Title" xml:space="preserve">
+    <value>Noch keine Projekte</value>
+  </data>
+  <data name="Projects_Empty_Text" xml:space="preserve">
+    <value>Legen Sie unten eines an, um eine Anwendung zu testen.</value>
+  </data>
+  <data name="Projects_EnvironmentCount" xml:space="preserve">
+    <value>Umgebungen: {0}</value>
+  </data>
+  <data name="Projects_New" xml:space="preserve">
+    <value>Projekt anlegen</value>
+  </data>
+  <data name="Projects_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Projects_Key" xml:space="preserve">
+    <value>Kürzel</value>
+  </data>
+  <data name="Projects_Key_Hint" xml:space="preserve">
+    <value>2 bis 10 Buchstaben und Ziffern, beginnend mit einem Buchstaben, etwa SHOP. Es erscheint in Adressen und lässt sich nicht ändern.</value>
+  </data>
+  <data name="Projects_Description" xml:space="preserve">
+    <value>Beschreibung</value>
+  </data>
+  <data name="Projects_Create" xml:space="preserve">
+    <value>Projekt anlegen</value>
+  </data>
+  <data name="Projects_LoadFailed" xml:space="preserve">
+    <value>Die Projekte konnten nicht geladen werden.</value>
+  </data>
+  <data name="Projects_Error_NotAllowed" xml:space="preserve">
+    <value>Nur Inhaber und Administratoren können Projekte anlegen.</value>
+  </data>
+  <data name="Projects_Error_NameRequired" xml:space="preserve">
+    <value>Geben Sie dem Projekt einen Namen mit bis zu 200 Zeichen.</value>
+  </data>
+  <data name="Projects_Error_InvalidKey" xml:space="preserve">
+    <value>Das Kürzel muss aus 2 bis 10 Buchstaben und Ziffern bestehen und mit einem Buchstaben beginnen.</value>
+  </data>
+  <data name="Projects_Error_KeyTaken" xml:space="preserve">
+    <value>Ein anderes Projekt verwendet dieses Kürzel bereits.</value>
+  </data>
+  <data name="Projects_Error_PlanLimit" xml:space="preserve">
+    <value>Ihr Tarif erlaubt kein weiteres Projekt.</value>
+  </data>
+  <data name="Environments_PageTitle" xml:space="preserve">
+    <value>Umgebungen von {0} – {1}</value>
+  </data>
+  <data name="Environments_Title" xml:space="preserve">
+    <value>Umgebungen</value>
+  </data>
+  <data name="Environments_Intro" xml:space="preserve">
+    <value>Eine Umgebung ist eine Adresse der Anwendung, etwa ihre Staging-Seite. Tests laufen gegen eine Umgebung erst, wenn Sie nachgewiesen haben, dass die Seite Ihnen gehört.</value>
+  </data>
+  <data name="Environments_NoSuchProject" xml:space="preserve">
+    <value>Projekt nicht gefunden</value>
+  </data>
+  <data name="Environments_NoSuchProject_Text" xml:space="preserve">
+    <value>In dieser Organisation gibt es kein Projekt mit diesem Kürzel.</value>
+  </data>
+  <data name="Environments_BackToProjects" xml:space="preserve">
+    <value>Zurück zu den Projekten</value>
+  </data>
+  <data name="Environments_Empty_Title" xml:space="preserve">
+    <value>Noch keine Umgebungen</value>
+  </data>
+  <data name="Environments_Empty_Text" xml:space="preserve">
+    <value>Fügen Sie die Adresse der Seite hinzu, die Sie testen möchten.</value>
+  </data>
+  <data name="Environments_Proof_Instructions" xml:space="preserve">
+    <value>Um nachzuweisen, dass die Seite Ihnen gehört, veröffentlichen Sie unter dieser Adresse eine Datei mit genau diesem Text und wählen Sie dann Jetzt prüfen.</value>
+  </data>
+  <data name="Environments_Proof_File" xml:space="preserve">
+    <value>Datei</value>
+  </data>
+  <data name="Environments_Proof_Token" xml:space="preserve">
+    <value>Text</value>
+  </data>
+  <data name="Environments_Prove" xml:space="preserve">
+    <value>Inhaberschaft nachweisen</value>
+  </data>
+  <data name="Environments_Check" xml:space="preserve">
+    <value>Jetzt prüfen</value>
+  </data>
+  <data name="Environments_Remove" xml:space="preserve">
+    <value>Entfernen</value>
+  </data>
+  <data name="Environments_New" xml:space="preserve">
+    <value>Umgebung hinzufügen</value>
+  </data>
+  <data name="Environments_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Environments_Name_Hint" xml:space="preserve">
+    <value>Etwa Staging oder Produktion.</value>
+  </data>
+  <data name="Environments_Origin" xml:space="preserve">
+    <value>Adresse</value>
+  </data>
+  <data name="Environments_Origin_Hint" xml:space="preserve">
+    <value>Die Adresse der Seite, etwa https://staging.example.com, ohne etwas dahinter.</value>
+  </data>
+  <data name="Environments_Add" xml:space="preserve">
+    <value>Umgebung hinzufügen</value>
+  </data>
+  <data name="Environments_LoadFailed" xml:space="preserve">
+    <value>Die Umgebungen konnten nicht geladen werden.</value>
+  </data>
+  <data name="Environments_Error_NotAllowed" xml:space="preserve">
+    <value>Nur Inhaber und Administratoren können Umgebungen ändern.</value>
+  </data>
+  <data name="Environments_Error_NameRequired" xml:space="preserve">
+    <value>Geben Sie der Umgebung einen Namen mit bis zu 100 Zeichen.</value>
+  </data>
+  <data name="Environments_Error_InvalidOrigin" xml:space="preserve">
+    <value>Das ist keine Website-Adresse, die getestet werden kann: Verwenden Sie https://, einen Host und nichts dahinter.</value>
+  </data>
+  <data name="Environments_Error_NoSuchProject" xml:space="preserve">
+    <value>Dieses Projekt gibt es nicht.</value>
+  </data>
+  <data name="Environments_Error_NameTaken" xml:space="preserve">
+    <value>Dieses Projekt hat bereits eine Umgebung mit diesem Namen.</value>
+  </data>
+  <data name="Environments_Error_OriginTaken" xml:space="preserve">
+    <value>Dieses Projekt hat bereits eine Umgebung unter dieser Adresse.</value>
+  </data>
+  <data name="Environments_Error_NoSuchEnvironment" xml:space="preserve">
+    <value>Diese Umgebung gibt es nicht.</value>
+  </data>
+  <data name="Proof_None" xml:space="preserve">
+    <value>Nicht nachgewiesen</value>
+  </data>
+  <data name="Proof_Issued" xml:space="preserve">
+    <value>Wartet auf die Datei</value>
+  </data>
+  <data name="Proof_Checking" xml:space="preserve">
+    <value>Wird geprüft</value>
+  </data>
+  <data name="Proof_Verified" xml:space="preserve">
+    <value>Nachgewiesen</value>
+  </data>
+  <data name="Proof_VerifiedUntil" xml:space="preserve">
+    <value>Nachgewiesen bis {0}</value>
+  </data>
+  <data name="Proof_Failed" xml:space="preserve">
+    <value>Prüfung fehlgeschlagen</value>
+  </data>
 </root>

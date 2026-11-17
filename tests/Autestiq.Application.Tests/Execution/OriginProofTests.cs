@@ -50,6 +50,17 @@ public sealed class OriginProofTests : IAsyncLifetime
         Assert.Equal(expected, Origins.Normalize(origin));
     }
 
+    [Theory]
+    [InlineData("https://shop.example:443", "https://shop.example")]
+    [InlineData("https://shop.example:443/.well-known/autestiq-verification.txt", "https://shop.example/.well-known/autestiq-verification.txt")]
+    [InlineData("http://shop.example:80", "http://shop.example")]
+    [InlineData("http://shop.example:8080", "http://shop.example:8080")]
+    [InlineData("https://shop.example:8443/x", "https://shop.example:8443/x")]
+    public void Display_LeavesOutOnlyTheSchemesOwnPort(string address, string expected)
+    {
+        Assert.Equal(expected, Origins.Display(address));
+    }
+
     [Fact]
     public async Task Request_IssuesAnUnguessableToken_AndTheSameOneWhenAskedAgain()
     {

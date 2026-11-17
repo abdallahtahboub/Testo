@@ -16,8 +16,10 @@ finished, and an operator cost report (ADR-0029); machine and storage prices are
 **The AI planner is built and measured, not yet in the product**: on the unseen set (20 scenarios written after the
 prompt was frozen, 2026-11-17) it was 95% correct on sound applications, caught every seeded defect where a
 verdict was reached, and never passed a broken application, so **the ADR-0020 gate's figures are met on our
-three applications**, and the same holds with every test id removed. Applications we did not build are not
-yet measured, and no claim reaches beyond our applications until they are. **Milestone 5, the first customer flow, is under way (ADR-0030)**: part 1 built projects, environments with
+three applications**, and the same holds with every test id removed. **Explored read-only, as a customer's site
+is, it drops to 36 of 66 runs correct (full: 62 of 66), still with no false positive**: read-only exploration
+never sees what an action leads to (ADR-0020). Applications we did not build are not yet measured, and no claim
+reaches beyond our applications until they are. **Milestone 5, the first customer flow, is under way (ADR-0030)**: part 1 built projects, environments with
 ownership proofs, production off by default, and the app's navigation drawn from the module registry. Part 2 built
 describing a test in a sentence: the site is explored (read-only on a customer's site) and the planner writes a plan,
 **only if the project's AI permission, off by default, is given**, within the AI budgets, with what was sent recorded

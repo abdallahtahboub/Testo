@@ -122,6 +122,32 @@ The same as with test ids, and one defect run that was inconclusive with them wa
 miss is the same booked-slot scenario with the defect off. The hand-written baselines fail without test ids
 by design, which shows the ids were gone. Model cost: about $1.20. Reports: `docs/ai-benchmark-unseen-*-no-ids.md`.
 
+**The unseen set explored read-only (2026-11-17):** the same twenty scenarios, with the exploration the product
+uses on a customer's site: links followed, no control pressed, no form sent (`--read-only`). The plans still run
+in full; only what the planner was shown changes.
+
+| | Demo shop | Clinic | Invoice desk | Together |
+|---|---|---|---|---|
+| Correct on the sound application | 2/6 | 3/7 | 7/7 | **12/20 (60%)** |
+| Defects caught where a verdict was reached | 0/4 | 1/1 | 5/5 | **6/10** |
+| Defects with no verdict (partial plans) | 0 | 3 | 0 | 3 |
+| False positives | 0 | 0 | 0 | **0** |
+| False negatives | 4 | 0 | 0 | 4 |
+
+All runs together: 36 of 66 correct read-only, against 62 of 66 with full exploration. **Safety held: no false
+positive anywhere.** Usefulness did not. The cause is the same in every lost scenario: read-only exploration never
+sees what an action leads to. On the demo shop the planner did not know that "Add to basket" opens the basket, so
+its plans failed on a sound shop ("failed both"). On the clinic it saw no page after "Confirm booking" and, rather
+than guess, marked its plans partial, so they ended without a verdict. The invoice desk, whose scenarios read,
+filter and follow links, kept 24 of 24: it is the control, and it shows that the loss comes from results only an
+action reveals, not from read-only exploration as such. Model cost: about $2.10. Reports:
+`docs/ai-benchmark-unseen-*-read-only.md`.
+
+**So the gate's figures are met for full exploration of our applications, not for read-only exploration of
+them.** A customer's site is explored read-only today (ADR-0030), so no claim of the gate's figures reaches a
+customer's site until exploration there can see what actions do, with the customer's explicit permission, and is
+measured again.
+
 **What this supports, and what it does not.** It supports this statement: *on our three benchmark
 applications, on scenarios written after the planner was frozen, the planner's tests gave the right verdict
 on 95% of sound-application runs, caught every seeded defect where a verdict was reached, and never passed

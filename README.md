@@ -177,6 +177,18 @@ worker, which is treated as already compromised (ADR-0018, ADR-0019 §4). A full
 makes one model call per scenario and costs cents, not dollars; the per-run token and money budgets
 stop it going further than that.
 
+Two options for measuring how a customer's site would fare:
+
+- `--read-only` explores as the product explores a customer's site: links followed, no control pressed,
+  no form sent. Its report gets a `-read-only` name of its own. With `--coverage` it costs nothing and says
+  how much of what each scenario needs the exploration shows.
+- `--max-total-usd 5` stops a run once planning has cost that much in all; a report cut short says its
+  figures are partial.
+
+```bash
+dotnet run --project tools/Autestiq.Benchmark -- --coverage --unseen --target booking --read-only
+```
+
 ### Tests
 
 ```bash

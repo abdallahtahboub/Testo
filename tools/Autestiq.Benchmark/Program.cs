@@ -35,6 +35,17 @@ var options = BenchmarkOptions.From(args);
 // application that has none, as most do.
 var withoutTestIds = args.Contains("--without-test-ids", StringComparer.Ordinal);
 
+// Explore as a customer's site is explored: links followed, no control pressed, no form sent (ADR-0030, part 2).
+var readOnly = args.Contains("--read-only", StringComparer.Ordinal);
+
+// A spending cap that cannot be read is not silently no cap.
+if (BenchmarkOptions.Value(args, "--max-total-usd") is { } capText
+    && !(decimal.TryParse(capText, System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture, out var capValue) && capValue > 0))
+{
+    Console.WriteLine($"--max-total-usd needs a positive amount in US dollars, such as 5 or 2.50; '{capText}' is not one.");
+    return 2;
+}
+
 Action<WebApplication> map = options.Target switch
 {
     "booking" => app => Autestiq.BookingShop.BookingShopRoutes.Map(app),
@@ -103,7 +114,7 @@ IReadOnlyList<BenchmarkScenario> targetScenarios = unseen && options.Target != "
 // How much of what the baseline plans need the exploration shows: no key, nothing spent.
 if (args.Contains("--coverage", StringComparer.Ordinal))
 {
-    var (snapshot, said) = await Coverage.ExploreAsync(origin, startAfresh);
+    var (snapshot, said) = await Coverage.ExploreAsync(origin, startAfresh, readOnly);
     Console.WriteLine(said);
 
     if (withoutTestIds)
@@ -112,7 +123,7 @@ if (args.Contains("--coverage", StringComparer.Ordinal))
         // says what each test id is: its role, its name, its text. The question is whether the copy without
         // them still shows that element.
         using var reference = InProcessHost.Start(map, withoutTestIds: false);
-        var (withIds, _) = await Coverage.ExploreAsync(reference.Origin, startAfresh);
+        var (withIds, _) = await Coverage.ExploreAsync(reference.Origin, startAfresh, readOnly);
         Coverage.PrintWithoutTestIds(targetScenarios, snapshot, withIds, Console.Out);
     }
     else
@@ -146,7 +157,7 @@ if (BenchmarkOptions.Value(args, "--export-check") is { } language)
 // the crawl against an application without a key.
 if (args.Contains("--explore", StringComparer.Ordinal))
 {
-    var (snapshot, said) = await Coverage.ExploreAsync(origin, startAfresh);
+    var (snapshot, said) = await Coverage.ExploreAsync(origin, startAfresh, readOnly);
     Console.WriteLine(said);
 
     foreach (var page in snapshot.Pages)
@@ -206,6 +217,8 @@ var clock = System.Diagnostics.Stopwatch.StartNew();
 
 var harness = new Harness(origin, planner, options.Repetitions, options.RecordingDirectory)
 {
+    ReadOnlyExploration = options.ReadOnly,
+    MaxTotalUsd = options.MaxTotalUsd,
     Say = Console.WriteLine,
     SetDefects = setDefects,
     ResetTarget = startAfresh,
@@ -245,7 +258,18 @@ var report = Report.Write(
     measurements,
     options.Repetitions,
     DateTimeOffset.UtcNow,
-    external is null ? "an application of our own" : "eShopOnWeb, Microsoft's sample shop, which nobody here wrote");
+    (external is null ? "an application of our own" : "eShopOnWeb, Microsoft's sample shop, which nobody here wrote")
+        + (options.ReadOnly ? ", explored read-only (links followed, no control pressed, no form sent), as a customer's site is" : ""));
+
+Console.WriteLine($"Planning cost ${harness.Spent:0.0000} in all.");
+
+if (harness.StoppedAtSpendingCap)
+{
+    // Partial figures are not published as if they were whole ones.
+    report = $"> **Stopped early: planning reached the spending cap of ${options.MaxTotalUsd:0.00}.** "
+        + "The figures below cover only the scenarios measured before it, and are not comparable with a full run.\n\n" + report;
+    Console.WriteLine("Stopped early at the spending cap; the report says its figures are partial.");
+}
 
 if (options.Smoke)
 {
@@ -334,7 +358,9 @@ internal sealed record BenchmarkOptions(
     string? RecordingDirectory,
     bool FailOnFalsePositive,
     bool HeldOut,
-    string Target)
+    string Target,
+    bool ReadOnly = false,
+    decimal? MaxTotalUsd = null)
 {
     /// <summary>Reads the arguments. Plain switches; this is a tool, not a product.</summary>
     public static BenchmarkOptions From(string[] args)
@@ -363,12 +389,18 @@ internal sealed record BenchmarkOptions(
             Value(args, "--recordings") ?? Path.Combine(root, "tools", "Autestiq.Benchmark", "recordings"),
             args.Contains("--fail-on-false-positive", StringComparer.Ordinal),
             args.Contains("--held-out", StringComparer.Ordinal),
-            Value(args, "--target") ?? "demo");
+            Value(args, "--target") ?? "demo",
+            args.Contains("--read-only", StringComparer.Ordinal),
+            Value(args, "--max-total-usd") is { } cap && decimal.TryParse(cap, System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture, out var usd) && usd > 0
+                ? usd
+                : null);
     }
 
     /// <summary>Each target and each set has its own report, so no run can overwrite another's.</summary>
     private static string ReportFileName(string[] args) =>
-        args.Contains("--unseen", StringComparer.Ordinal) ? $"ai-benchmark-unseen-{Value(args, "--target") ?? "demo"}.md"
+        args.Contains("--read-only", StringComparer.Ordinal)
+            ? ReportFileName([.. args.Where(arg => arg != "--read-only")]).Replace(".md", "-read-only.md", StringComparison.Ordinal)
+        : args.Contains("--unseen", StringComparer.Ordinal) ? $"ai-benchmark-unseen-{Value(args, "--target") ?? "demo"}.md"
         : Value(args, "--target") == "booking" ? "ai-benchmark-booking.md"
         : Value(args, "--target") == "invoices" ? "ai-benchmark-invoices.md"
         : Value(args, "--target") == "eshop" ? "ai-benchmark-eshop.md"

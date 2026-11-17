@@ -102,6 +102,12 @@ inconclusive one → the approved test downloaded.
   because a submitted form can change data before anyone has approved anything (G-4). **Read-only exploration
   has not been measured on the benchmark**, so plans from it may be weaker than ADR-0020's figures, which come
   from full exploration of our applications.
+  - *What it shows, measured without a model (2026-11-17, `--coverage --unseen --read-only`):* of the elements and
+    pages the unseen scenarios' baseline plans need, read-only exploration shows 85% on the demo shop (full: 100%),
+    90% on the booking site (full: 98%) and 94% on the invoice desk (unchanged). What it misses appears only after a
+    button is pressed: basket lines after "Add", a booking's total after booking. Six of the twenty scenarios lose
+    something. The planner's accuracy on read-only exploration still needs a paid run
+    (`--unseen --read-only --max-total-usd 5`), with the owner's yes.
 - Customer sites still run only in container mode with a verified proof (ADR-0026). Only our own applications
   can be explored on a developer machine.
 - Nothing runs a plan yet. Approval, the "may change data" flag and running come in part 3.

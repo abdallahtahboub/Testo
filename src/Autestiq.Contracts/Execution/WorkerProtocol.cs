@@ -65,6 +65,11 @@ public enum WorkerTask
 /// the benchmark marks the applications it runs itself. A customer's application never has it
 /// (<c>ExplorationPolicy</c>), whatever the job asks for.
 /// </param>
+/// <param name="ReadOnly">
+/// For <see cref="WorkerTask.Planned"/>: the plan was approved as one that does not change data (ADR-0030, part 3), so
+/// the browser sends no request that could: anything but GET, HEAD and OPTIONS is blocked before it leaves the
+/// browser, as are WebSockets and service workers. The approval is the application's; this is where it is held.
+/// </param>
 /// <param name="OriginProof">
 /// For <see cref="WorkerTask.VerifyOrigin"/>: the token the origin's proof file must hold. Not a secret: it is
 /// published on the customer's own site, and it proves nothing to anybody but the organization it was issued to.
@@ -82,7 +87,8 @@ public sealed record WorkerJob(
     IReadOnlyDictionary<string, string>? Secrets = null,
     bool ExploreStates = false,
     bool SubmitForms = false,
-    string? OriginProof = null);
+    string? OriginProof = null,
+    bool ReadOnly = false);
 
 /// <summary>Where an origin's proof file is, and what it is called.</summary>
 public static class OriginProofFile

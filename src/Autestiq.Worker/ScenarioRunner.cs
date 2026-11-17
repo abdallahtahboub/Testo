@@ -147,14 +147,26 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
             Args = ["--no-sandbox", "--disable-dev-shm-usage"],
         }).ConfigureAwait(false);
 
+        var readOnly = ReadOnlyGuard.Applies(job);
+
         await using var context = await browser.NewContextAsync(new BrowserNewContextOptions
         {
             BaseURL = job.TargetOrigin,
             AcceptDownloads = false,
             IgnoreHTTPSErrors = false,
+
+            // A service worker's own requests are not seen by the routes below, so a read-only run has none.
+            ServiceWorkers = readOnly ? ServiceWorkerPolicy.Block : ServiceWorkerPolicy.Allow,
         }).ConfigureAwait(false);
 
         context.SetDefaultTimeout(15_000);
+
+        var guard = new ReadOnlyGuard();
+
+        if (readOnly)
+        {
+            await guard.FitAsync(context).ConfigureAwait(false);
+        }
 
         var page = await context.NewPageAsync().ConfigureAwait(false);
         var deadline = startedAt.Add(job.Budget.WallClock);
@@ -197,6 +209,13 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
                 var reason = ending == RunStatus.Failed
                     ? steps[index].Message
                     : Reason(ending, refusals);
+
+                // A read-only run that failed after a request was blocked may have failed because it was blocked: that
+                // says nothing about the application, so it is no verdict.
+                if (ending == RunStatus.Failed && guard.Blocked.Count > 0)
+                {
+                    return Finish(job, RunStatus.Inconclusive, startedAt, steps, proxy, guard.Explain(reason));
+                }
 
                 return Finish(job, ending, startedAt, steps, proxy, reason);
             }

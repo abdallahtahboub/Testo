@@ -60,4 +60,22 @@ public sealed class TestCase : Entity, IBelongsToOrganization
 
     /// <summary>Who described it.</summary>
     public Guid? RequestedBy { get; set; }
+
+    /// <summary>When an Owner or QA lead approved the plan to run (ADR-0030, part 3); null until then, or once withdrawn.</summary>
+    public DateTimeOffset? ApprovedAt { get; set; }
+
+    /// <summary>Who approved it.</summary>
+    public Guid? ApprovedBy { get; set; }
+
+    /// <summary>
+    /// The SHA-256 of the plan that was approved, in hex. A run carries out only a plan with this fingerprint, so an
+    /// approval is of one plan and never of whatever the test holds later.
+    /// </summary>
+    public string? ApprovedPlanHash { get; set; }
+
+    /// <summary>
+    /// Whether the approval allows changing data: given only with an explicit acknowledgement, and required for a plan
+    /// that may change data. Without it a run is read-only, held in the browser by the worker.
+    /// </summary>
+    public bool ApprovedToChangeData { get; set; }
 }

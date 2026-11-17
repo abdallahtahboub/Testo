@@ -38,6 +38,10 @@ internal static class Jobs
         RunBudget? budget = null) =>
         RunAsync(Job(origin, "planned", WorkerTask.Planned, budget) with { Plan = plan, Secrets = secrets }, out _);
 
+    /// <summary>Carries out a plan that was approved as one that does not change data.</summary>
+    public static Task<WorkerResult> ReadOnlyAsync(string origin, IReadOnlyList<PlannedAction> plan) =>
+        RunAsync(Job(origin, "planned", WorkerTask.Planned, null) with { Plan = plan, ReadOnly = true }, out _);
+
     /// <summary>Carries out a plan, and says where its evidence went.</summary>
     public static Task<WorkerResult> PlannedAsync(
         string origin,

@@ -37,6 +37,39 @@ public class PlannedRunTests(DemoShopFixture shop)
     }
 
     [Fact]
+    public async Task AReadOnlyRun_ThatPressesAButtonWhichPostsAForm_SendsNothing_AndHasNoVerdict()
+    {
+        // "Add the teapot" posts a form. Approved as read-only, the post never leaves the browser, so the basket stays
+        // empty, and the failure that follows is said to be ours, not the application's.
+        PlannedAction[] plan =
+        [
+            new(ActionKind.Goto, "Open the catalogue", Path: "/"),
+            new(ActionKind.Click, "Add the teapot", ActionTarget.ByTestId("add-pot")),
+            new(ActionKind.AssertVisible, "The teapot is in the basket", ActionTarget.ByTestId("line-pot")),
+        ];
+
+        var result = await Jobs.ReadOnlyAsync(shop.Origin, plan);
+
+        Assert.Equal(RunStatus.Inconclusive, result.Status);
+        Assert.Contains("POST /basket/add", result.FailureReason!, StringComparison.Ordinal);
+        Assert.Contains("was blocked", result.FailureReason!, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task AReadOnlyRun_ThatOnlyReads_PassesAsAnyRunWould()
+    {
+        PlannedAction[] plan =
+        [
+            new(ActionKind.Goto, "Open the catalogue", Path: "/"),
+            new(ActionKind.AssertText, "The catalogue is the catalogue", ActionTarget.ByRole("heading", "Catalogue"), Text: "Catalogue"),
+        ];
+
+        var result = await Jobs.ReadOnlyAsync(shop.Origin, plan);
+
+        Assert.Equal(RunStatus.Passed, result.Status);
+    }
+
+    [Fact]
     public async Task APlanWhoseAssertionIsWrongAboutTheApplication_Fails_AndNamesTheStep()
     {
         // The known defect, found by a plan instead of by a scripted scenario: the basket says

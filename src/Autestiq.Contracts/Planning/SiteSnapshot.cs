@@ -79,6 +79,14 @@ public sealed record SiteSnapshot(string Origin, IReadOnlyList<PageSnapshot> Pag
         return Pages.Any(page => page.Elements.Any(element => Matches(element, target)));
     }
 
+    /// <summary>Every element the crawl saw that this target could mean, on any page.</summary>
+    public IReadOnlyList<SnapshotElement> ElementsFor(ActionTarget target)
+    {
+        ArgumentNullException.ThrowIfNull(target);
+
+        return [.. Pages.SelectMany(page => page.Elements).Where(element => Matches(element, target))];
+    }
+
     /// <summary>Whether the crawl saw this path.</summary>
     public bool HasPath(string path) =>
         Pages.Any(page => string.Equals(page.Path, path, StringComparison.OrdinalIgnoreCase));

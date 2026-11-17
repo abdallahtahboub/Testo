@@ -49,17 +49,23 @@ public sealed class PlanningService(IScenarioPlanner planner, ILogger<PlanningSe
         var spent = PlanningCost.None;
         IReadOnlyList<string> errors = [PlanningErrors.NoPlanner];
         IReadOnlyList<string> notes = [];
+        var sent = new List<string>();
 
         for (var attempt = 1; attempt <= MaxAttempts; attempt++)
         {
             var answer = await planner.PlanAsync(request, cancellationToken).ConfigureAwait(false);
             spent += answer.Cost;
 
+            if (answer.Sent is { } text)
+            {
+                sent.Add(text);
+            }
+
             if (!answer.Succeeded)
             {
                 // The provider itself, not the plan: nothing to re-ask about, so stop.
                 PlanningLog.ProviderRefused(logger, planner.Model, string.Join(", ", answer.Errors));
-                return new PlannedResult(null, answer.Errors, [], spent, planner.Model);
+                return new PlannedResult(null, answer.Errors, [], spent, planner.Model, sent);
             }
 
             var review = PlanValidator.Review(answer.Plan, site, budget.MaxSteps);
@@ -72,11 +78,11 @@ public sealed class PlanningService(IScenarioPlanner planner, ILogger<PlanningSe
 
                 if (Overspent(spent, budget) is { } overspent)
                 {
-                    return new PlannedResult(null, [overspent], notes, spent, planner.Model);
+                    return new PlannedResult(null, [overspent], notes, spent, planner.Model, sent, review.Notes);
                 }
 
                 PlanningLog.Planned(logger, planner.Model, answer.Plan.Actions.Count, attempt, spent.TotalTokens);
-                return new PlannedResult(answer.Plan, [], notes, spent, planner.Model);
+                return new PlannedResult(answer.Plan, [], notes, spent, planner.Model, sent, review.Notes);
             }
 
             errors = review.Errors;
@@ -84,7 +90,7 @@ public sealed class PlanningService(IScenarioPlanner planner, ILogger<PlanningSe
 
             if (Overspent(spent, budget) is { } spentUp)
             {
-                return new PlannedResult(null, [spentUp], review.Notes, spent, planner.Model);
+                return new PlannedResult(null, [spentUp], review.Notes, spent, planner.Model, sent, review.Notes);
             }
 
             request = request.Retry(errors);
@@ -92,7 +98,7 @@ public sealed class PlanningService(IScenarioPlanner planner, ILogger<PlanningSe
 
         // Twice wrong. The run ends saying planning failed; it does not improvise, and it does not
         // run the valid prefix of an invalid plan (ADR-0019 §3).
-        return new PlannedResult(null, errors, notes, spent, planner.Model);
+        return new PlannedResult(null, errors, notes, spent, planner.Model, sent);
     }
 
     /// <summary>
@@ -111,12 +117,16 @@ public sealed class PlanningService(IScenarioPlanner planner, ILogger<PlanningSe
 /// <param name="Notes">What a person should know about the plan that is about to run.</param>
 /// <param name="Cost">Tokens, money and time, across every attempt.</param>
 /// <param name="Model">Which model answered.</param>
+/// <param name="Sent">Exactly what was sent to the model about the application, one entry per attempt.</param>
+/// <param name="CheckNotes">The validator's notes alone: what Autestiq's own software found, not the model.</param>
 public sealed record PlannedResult(
     TestPlan? Plan,
     IReadOnlyList<string> Errors,
     IReadOnlyList<string> Notes,
     PlanningCost Cost,
-    string Model)
+    string Model,
+    IReadOnlyList<string>? Sent = null,
+    IReadOnlyList<string>? CheckNotes = null)
 {
     /// <summary>Whether there is a plan that may run.</summary>
     public bool Succeeded => Plan is not null;

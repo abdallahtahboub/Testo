@@ -85,9 +85,13 @@ public sealed class AnthropicPlanner(HttpClient client, PlannerOptions options, 
 
         var started = timeProvider.GetTimestamp();
 
+        // Exactly what goes to the provider about the application, kept so that a customer can see it (ADR-0030, G-2).
+        // The system prompt beside it is fixed text and holds nothing of theirs.
+        var sent = PlanPrompt.User(request);
+
         try
         {
-            using var message = Request(request);
+            using var message = Request(request, sent);
             using var response = await client.SendAsync(message, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
@@ -111,7 +115,7 @@ public sealed class AnthropicPlanner(HttpClient client, PlannerOptions options, 
                     _ => PlanningErrors.ProviderUnavailable,
                 };
 
-                return PlanResult.Failed([error], Spent(0, 0, started), Model);
+                return PlanResult.Failed([error], Spent(0, 0, started), Model) with { Sent = sent };
             }
 
             var answer = await response.Content.ReadFromJsonAsync<Answer>(Wire, cancellationToken).ConfigureAwait(false);
@@ -122,19 +126,19 @@ public sealed class AnthropicPlanner(HttpClient client, PlannerOptions options, 
 
             var text = string.Concat(answer?.Content?.Where(block => block.Type == "text").Select(block => block.Text) ?? []);
 
-            return PlanJson.Read(text) is { } plan
+            return (PlanJson.Read(text) is { } plan
                 ? PlanResult.From(plan, cost, Model)
-                : PlanResult.Failed([PlanningErrors.Unreadable], cost, Model);
+                : PlanResult.Failed([PlanningErrors.Unreadable], cost, Model)) with { Sent = sent };
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException && !cancellationToken.IsCancellationRequested)
         {
             // Unreachable, or too slow. Not a fault in the plan, and not something a second
             // attempt would tell us anything new about.
-            return PlanResult.Failed([PlanningErrors.ProviderUnavailable], Spent(0, 0, started), Model);
+            return PlanResult.Failed([PlanningErrors.ProviderUnavailable], Spent(0, 0, started), Model) with { Sent = sent };
         }
     }
 
-    private HttpRequestMessage Request(PlanRequest request)
+    private HttpRequestMessage Request(PlanRequest request, string sent)
     {
         var message = new HttpRequestMessage(HttpMethod.Post, options.Endpoint)
         {
@@ -143,7 +147,7 @@ public sealed class AnthropicPlanner(HttpClient client, PlannerOptions options, 
                     options.Model,
                     Math.Max(1_024, request.MaxTokens / 4),
                     PlanPrompt.System,
-                    [new Turn("user", PlanPrompt.User(request))]),
+                    [new Turn("user", sent)]),
                 options: Wire),
         };
 

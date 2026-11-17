@@ -10,7 +10,9 @@
 
   <!-- The host is the composition root: it is the only project that references everything. -->
   <ItemGroup>
+    <ProjectReference Include="..\Autestiq.Ai\Autestiq.Ai.csproj" />
     <ProjectReference Include="..\Autestiq.Application\Autestiq.Application.csproj" />
+    <ProjectReference Include="..\Autestiq.Export\Autestiq.Export.csproj" />
     <ProjectReference Include="..\Autestiq.Contracts\Autestiq.Contracts.csproj" />
     <ProjectReference Include="..\Autestiq.Domain\Autestiq.Domain.csproj" />
     <ProjectReference Include="..\Autestiq.Platform\Autestiq.Platform.csproj" />

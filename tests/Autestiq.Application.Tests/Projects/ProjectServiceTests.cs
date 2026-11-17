@@ -250,6 +250,42 @@ public sealed class ProjectServiceTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task AiProcessing_IsOffForANewProject()
+    {
+        await CreateAsync(_northwind, "SHOP");
+
+        Assert.Null((await AsAsync(_northwind, Role.Viewer, projects => projects.FindAsync("SHOP")))!.AiProcessingAllowedAt);
+    }
+
+    [Fact]
+    public async Task AllowAiProcessing_NeedsTheAcknowledgement_AndSomebodyWhoManagesProjects_AndIsAuditedBothWays()
+    {
+        await CreateAsync(_northwind, "SHOP");
+        var project = (await AsAsync(_northwind, Role.Owner, projects => projects.FindAsync("SHOP")))!.ProjectId;
+
+        Assert.Equal(["Projects_Error_AiAcknowledgementRequired"], (await AsAsync(_northwind, Role.Owner, projects => projects.AllowAiProcessingAsync(project, acknowledged: false))).Errors);
+        Assert.Equal(["Projects_Error_NotAllowed"], (await AsAsync(_northwind, Role.QaEngineer, projects => projects.AllowAiProcessingAsync(project, acknowledged: true))).Errors);
+
+        Assert.True((await AsAsync(_northwind, Role.Admin, projects => projects.AllowAiProcessingAsync(project, acknowledged: true))).Succeeded);
+        Assert.NotNull((await AsAsync(_northwind, Role.Viewer, projects => projects.FindAsync("SHOP")))!.AiProcessingAllowedAt);
+
+        Assert.True((await AsAsync(_northwind, Role.Owner, projects => projects.WithdrawAiProcessingAsync(project))).Succeeded);
+        Assert.Null((await AsAsync(_northwind, Role.Viewer, projects => projects.FindAsync("SHOP")))!.AiProcessingAllowedAt);
+
+        await using var database = _database.NewContext();
+        Assert.Equal(2, await database.AuditEntries.IgnoreQueryFilters().CountAsync(entry => entry.OrganizationId == _northwind && entry.Action.StartsWith("project.ai_processing"), TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task AllowAiProcessing_ForAnotherOrganizationsProject_FindsNoSuchProject()
+    {
+        await CreateAsync(_northwind, "SHOP");
+        var project = (await AsAsync(_northwind, Role.Owner, projects => projects.FindAsync("SHOP")))!.ProjectId;
+
+        Assert.Equal(["Projects_Error_NoSuchProject"], (await AsAsync(_contoso, Role.Owner, projects => projects.AllowAiProcessingAsync(project, acknowledged: true))).Errors);
+    }
+
+    [Fact]
     public async Task RemoveEnvironment_RemovesIt_ButNotTheOrganizationsProofOfItsSite()
     {
         await CreateAsync(_northwind, "SHOP");

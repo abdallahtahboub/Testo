@@ -174,7 +174,7 @@ public sealed class RunDispatcher(
 
             // The whole of its time budget, or what is left of the month if that is less: the run is then given no
             // more time than it holds, so the quota cannot be overshot.
-            run.ReservedSeconds = Math.Min((long)RunBudget.Default.WallClock.TotalSeconds, room.SecondsLeft);
+            run.ReservedSeconds = Math.Min((long)BudgetFor(run).WallClock.TotalSeconds, room.SecondsLeft);
         }
 
         try
@@ -743,9 +743,12 @@ public sealed class RunDispatcher(
         var ours = trusted.Any(origin => Origins.Normalize(origin) == target);
 
         // No more time than the run holds against the month's quota (ADR-0027).
+        var full = BudgetFor(run);
         var budget = run.ReservedSeconds > 0
-            ? RunBudget.Default with { WallClock = TimeSpan.FromSeconds(Math.Min(run.ReservedSeconds, (long)RunBudget.Default.WallClock.TotalSeconds)) }
-            : RunBudget.Default;
+            ? full with { WallClock = TimeSpan.FromSeconds(Math.Min(run.ReservedSeconds, (long)full.WallClock.TotalSeconds)) }
+            : full;
+
+        var exploring = run.TestCaseId is not null;
 
         return new WorkerJob(
             run.Id,
@@ -756,7 +759,27 @@ public sealed class RunDispatcher(
             AllowedOrigins: ours || target is null ? [] : [target],
             TrustedLocalOrigins: trusted,
             budget,
-            workspace);
+            workspace,
+
+            // An exploration asks to press controls and fill forms; the worker's own policy allows it only on an
+            // application we run ourselves (ExplorationPolicy). On a customer's site it reads, and nothing more,
+            // until approval of state-changing discovery exists (ADR-0030, gap analysis G-4).
+            Task: exploring ? WorkerTask.Explore : WorkerTask.Scripted,
+            ExploreStates: exploring,
+            SubmitForms: exploring);
+    }
+
+    /// <summary>
+    /// The budget a run gets: an exploration walks up to two dozen pages and is given ten minutes for it, as the
+    /// benchmark measured; a scripted run gets the default.
+    /// </summary>
+    public static RunBudget BudgetFor(TestRun run)
+    {
+        ArgumentNullException.ThrowIfNull(run);
+
+        return run.TestCaseId is null
+            ? RunBudget.Default
+            : RunBudget.Default with { WallClock = TimeSpan.FromMinutes(10), MaxPagesCrawled = 24 };
     }
 
     /// <summary>Launches the worker, feeds it the job, and waits for its result or a cancellation.</summary>
@@ -1078,6 +1101,20 @@ public sealed class RunDispatcher(
             await RecordCostAsync(database, run, used, result.FinishedAt, cancellationToken).ConfigureAwait(false);
 
             run.ReservedSeconds = 0;
+
+            // An exploration hands what it found to its test, for the planning step (Testing.PlanningDispatcher).
+            if (run.TestCaseId is { } testCaseId && result.Snapshot is { } snapshot)
+            {
+                // Across the filter, held to the run's own organization: the dispatcher has none in context.
+                var testCase = await database.TestCases.IgnoreQueryFilters()
+                    .FirstOrDefaultAsync(candidate => candidate.Id == testCaseId && candidate.OrganizationId == run.OrganizationId, cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (testCase is not null)
+                {
+                    testCase.Snapshot = JsonSerializer.Serialize(snapshot, Testing.TestCaseService.Json);
+                }
+            }
 
             await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }

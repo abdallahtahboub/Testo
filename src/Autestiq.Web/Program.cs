@@ -87,10 +87,20 @@ var connectionString = builder.Configuration.GetConnectionString("Autestiq")
 builder.Services.AddAutestiqApplication(connectionString);
 builder.Services.Configure<ExecutionOptions>(builder.Configuration.GetSection(ExecutionOptions.SectionName));
 builder.Services.Configure<Autestiq.Application.Usage.UsageOptions>(builder.Configuration.GetSection(Autestiq.Application.Usage.UsageOptions.SectionName));
+builder.Services.Configure<Autestiq.Application.Testing.PlanningOptions>(builder.Configuration.GetSection(Autestiq.Application.Testing.PlanningOptions.Section));
 builder.Services.Configure<ArtifactStoreOptions>(builder.Configuration.GetSection(ArtifactStoreOptions.SectionName));
 
 // Runs are carried out by a worker process, outside this one (ADR-0018).
 builder.Services.AddAutestiqRunDispatcher();
+
+// The product's AI planner (ADR-0030): the key from server configuration only, prices from the price book. Without a
+// key there is no planner, and planning says so rather than calling anything.
+builder.Services.AddHttpClient(nameof(Autestiq.Web.Planning.AnthropicPlannerFactory));
+builder.Services.Configure<Autestiq.Web.Planning.PlannerKeyOptions>(builder.Configuration.GetSection(Autestiq.Web.Planning.PlannerKeyOptions.Section));
+builder.Services.AddSingleton<Autestiq.Application.Testing.IPlannerFactory, Autestiq.Web.Planning.AnthropicPlannerFactory>();
+
+// Plans written out as tests by fixed templates, never by a model (ADR-0023).
+builder.Services.AddSingleton<Autestiq.Contracts.Export.ITestExporter, Autestiq.Export.PythonExporter>();
 
 // Feature modules: one line each. A module brings its own pages, services, navigation and widgets.
 builder.Services.AddAutestiqModule<PlanningModule>();

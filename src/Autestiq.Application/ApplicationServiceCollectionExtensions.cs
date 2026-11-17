@@ -43,6 +43,11 @@ public static class ApplicationServiceCollectionExtensions
         services.AddSingleton<IArtifactStore, FileSystemArtifactStore>();
         services.AddSingleton<ArtifactLinks>();
 
+        // AI planning (Milestone 5, part 2): its budgets, and no planner unless the host provides one with a key.
+        services.AddOptions<Testing.PlanningOptions>();
+        services.TryAddSingleton<Testing.IPlannerFactory, Testing.NoPlannerFactory>();
+        services.AddScoped<Contracts.Testing.ITestCaseService, Testing.TestCaseService>();
+
         // Replaced by a real sender when one is chosen; until then the link goes to the log.
         services.TryAddScoped<IInvitationNotifier, LoggingInvitationNotifier>();
 
@@ -59,6 +64,9 @@ public static class ApplicationServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(services);
 
         services.AddHostedService<RunDispatcher>();
+
+        // The planning step that follows an exploration (Milestone 5, part 2).
+        services.AddHostedService<Testing.PlanningDispatcher>();
         return services;
     }
 }

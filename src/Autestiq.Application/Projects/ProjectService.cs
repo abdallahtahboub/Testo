@@ -110,6 +110,57 @@ internal sealed class ProjectService(
     }
 
     /// <inheritdoc />
+    public async Task<OperationResult> AllowAiProcessingAsync(Guid projectId, bool acknowledged, CancellationToken cancellationToken = default)
+    {
+        if (!currentUser.Can(Permission.ManageProjects))
+        {
+            return OperationResult.Failure("Projects_Error_NotAllowed");
+        }
+
+        if (!acknowledged)
+        {
+            return OperationResult.Failure("Projects_Error_AiAcknowledgementRequired");
+        }
+
+        var project = await database.Projects.FirstOrDefaultAsync(candidate => candidate.Id == projectId, cancellationToken).ConfigureAwait(false);
+
+        if (project is null)
+        {
+            return OperationResult.Failure("Projects_Error_NoSuchProject");
+        }
+
+        project.AiProcessingAllowedAt = timeProvider.GetUtcNow();
+        project.AiProcessingAllowedBy = currentUser.UserId;
+        Record(AuditActions.AiProcessingAllowed, nameof(Project), project.Id, $"{project.Name} ({project.KeyPrefix})");
+        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        return OperationResult.Success;
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult> WithdrawAiProcessingAsync(Guid projectId, CancellationToken cancellationToken = default)
+    {
+        if (!currentUser.Can(Permission.ManageProjects))
+        {
+            return OperationResult.Failure("Projects_Error_NotAllowed");
+        }
+
+        var project = await database.Projects.FirstOrDefaultAsync(candidate => candidate.Id == projectId, cancellationToken).ConfigureAwait(false);
+
+        if (project is null)
+        {
+            return OperationResult.Failure("Projects_Error_NoSuchProject");
+        }
+
+        project.AiProcessingAllowedAt = null;
+        project.AiProcessingAllowedBy = null;
+        Record(AuditActions.AiProcessingWithdrawn, nameof(Project), project.Id, $"{project.Name} ({project.KeyPrefix})");
+        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        return OperationResult.Success;
+    }
+
+    /// <inheritdoc />
     public async Task<IReadOnlyList<EnvironmentSummary>> ListEnvironmentsAsync(Guid projectId, CancellationToken cancellationToken = default)
     {
         if (!currentUser.Can(Permission.Read))
@@ -297,7 +348,8 @@ internal sealed class ProjectService(
             project.Name,
             project.KeyPrefix,
             project.Description,
-            database.Environments.Count(environment => environment.ProjectId == project.Id)));
+            database.Environments.Count(environment => environment.ProjectId == project.Id),
+            project.AiProcessingAllowedAt));
 
     private void Record(string action, string subjectType, Guid subjectId, string subjectName) =>
         new AuditWriter(database, timeProvider).Record(

@@ -87,7 +87,8 @@ public sealed record PlanResult(
     TestPlan? Plan,
     IReadOnlyList<string> Errors,
     PlanningCost Cost,
-    string Model)
+    string Model,
+    string? Sent = null)
 {
     /// <summary>Whether there is a plan.</summary>
     public bool Succeeded => Plan is not null;

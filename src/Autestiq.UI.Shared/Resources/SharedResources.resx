@@ -171,4 +171,22 @@
   <data name="Cookie_More" xml:space="preserve">
     <value>Read the privacy notice</value>
   </data>
+  <data name="App_Nav_Group_Overview" xml:space="preserve">
+    <value>Overview</value>
+  </data>
+  <data name="App_Nav_Group_Plan" xml:space="preserve">
+    <value>Plan</value>
+  </data>
+  <data name="App_Nav_Group_Build" xml:space="preserve">
+    <value>Build</value>
+  </data>
+  <data name="App_Nav_Group_Run" xml:space="preserve">
+    <value>Run</value>
+  </data>
+  <data name="App_Nav_Group_Report" xml:space="preserve">
+    <value>Report</value>
+  </data>
+  <data name="App_Nav_Group_Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
 </root>

@@ -50,12 +50,6 @@
   background-color: var(--color-surface);
 }
 
-.app-nav__empty {
-  color: var(--color-text-muted);
-  font-size: var(--text-body-sm);
-  line-height: var(--leading-body-sm);
-}
-
 .app-main {
   grid-area: main;
   min-width: 0;

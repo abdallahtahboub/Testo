@@ -1,4 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Autestiq.Platform.Navigation;
 
 namespace Autestiq.Platform.Modules;
 
@@ -30,6 +32,9 @@ public static class ModuleServiceCollectionExtensions
 
         services.AddSingleton<IFeatureModule>(module);
         module.RegisterServices(services);
+
+        // Every module's navigation, collected once from all of them; the shell filters it by feature flag.
+        services.TryAddSingleton<INavigationRegistry>(provider => NavigationRegistry.From(provider.GetServices<IFeatureModule>()));
         return services;
     }
 }

@@ -31,6 +31,10 @@ public abstract class DesignSystemTestContext : BunitContext
         // test against an invented two-item menu would not notice the real one breaking.
         Services.AddSingleton<ISiteMenu, SiteMenuCatalogue>();
 
+        // No module registered and every flag on, unless a test says otherwise: the shell's navigation is then empty.
+        Services.AddSingleton<Autestiq.Platform.Navigation.INavigationRegistry>(new Autestiq.Platform.Navigation.NavigationRegistry());
+        Services.AddSingleton<Autestiq.Platform.Features.IFeatureFlags>(new SwitchedFlags());
+
         // Fluent UI components call into JavaScript when they render; the tests do not care.
         JSInterop.Mode = JSRuntimeMode.Loose;
     }

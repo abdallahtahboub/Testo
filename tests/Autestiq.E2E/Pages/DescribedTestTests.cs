@@ -75,6 +75,15 @@ public class DescribedTestTests(AppFixture app) : BrowserTest(app)
         await Expect(page.Page.GetByTestId("approval-state")).ToContainTextAsync("Approved by Mara Lindqvist");
         await Expect(page.Page.GetByTestId("approval-state")).ToContainTextAsync("This approval allows the plan to change data.");
 
+        // Approved, it can be downloaded: the fixed header first, then the test the templates wrote.
+        var download = await page.Page.RunAndWaitForDownloadAsync(() => page.Page.GetByTestId("download-test").ClickAsync());
+        var file = await download.PathAsync();
+        var code = await File.ReadAllTextAsync(file, TestContext.Current.CancellationToken);
+        Assert.StartsWith("# Approved in Autestiq on ", code, StringComparison.Ordinal);
+        Assert.Contains("The approval allows this test to change data", code, StringComparison.Ordinal);
+        Assert.Contains("def test_", code, StringComparison.Ordinal);
+        Assert.EndsWith(".py", download.SuggestedFilename, StringComparison.Ordinal);
+
         // Approved, but the site is neither one of ours here nor proved: the service refuses the run.
         await page.Page.GetByTestId("run-test").ClickAsync();
         await Expect(page.Page.GetByTestId("approval").GetByRole(AriaRole.Alert)).ToContainTextAsync("prove it is yours");

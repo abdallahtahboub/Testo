@@ -124,6 +124,4 @@ public class PreferenceEndpointTests(AppFixture app) : HttpTest(app)
         Assert.Empty(Header(response, "Set-Cookie"));
         Assert.Contains("<h1", html, StringComparison.Ordinal);
     }
-
-    private AppFixture App { get; } = app;
 }

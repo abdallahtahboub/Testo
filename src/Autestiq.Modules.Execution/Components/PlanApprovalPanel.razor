@@ -29,6 +29,12 @@
                 <TButton Variant="ButtonVariant.Ghost" Disabled="Busy || !Ready" OnClick="WithdrawAsync" data-testid="withdraw-approval">@L["Approval_Withdraw"]</TButton>
             }
         </div>
+        @* A plain link the host serves as a file (TestDownloadEndpoints); "download" keeps the router from taking it. *@
+        <p><a href="@Routes.TestDownload(Detail.TestCaseId)" download data-testid="download-test">@L["Approval_Download"]</a></p>
+        @if (!approval.ToChangeData)
+        {
+            <p class="t-muted">@L["Approval_Download_ReadOnly"]</p>
+        }
     }
     else if (Detail.Coverage == PlanCoverage.Partial)
     {

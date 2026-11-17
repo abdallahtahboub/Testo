@@ -545,7 +545,7 @@
     <value>Als Python-Test</value>
   </data>
   <data name="Test_Python_Intro" xml:space="preserve">
-    <value>Der Plan, geschrieben von festen Vorlagen, nie von der KI. Den Download gibt es mit der Freigabe.</value>
+    <value>Der Plan, geschrieben von festen Vorlagen, nie von der KI. Er kann heruntergeladen werden, sobald der Plan freigegeben ist.</value>
   </data>
   <data name="Test_Sent" xml:space="preserve">
     <value>Was an die KI gesendet wurde</value>
@@ -711,5 +711,14 @@
   </data>
   <data name="Approval_Changes_One" xml:space="preserve">
     <value>Schritt {0} kann Daten auf der Seite ändern: Er drückt eine Schaltfläche oder Taste, wählt eine Option oder wirkt auf etwas, das beim Erkunden nicht als Link zu sehen war. Das entscheidet die Software von Autestiq anhand des Plans, nicht die KI.</value>
+  </data>
+  <data name="Approval_Download" xml:space="preserve">
+    <value>Python-Test herunterladen</value>
+  </data>
+  <data name="Approval_Download_ReadOnly" xml:space="preserve">
+    <value>Autestiq führt diesen Test in seinem eigenen Browser nur lesend aus. Die heruntergeladene Datei kann das nicht: Führen Sie sie nur dort aus, wo ein Test, der Daten ändert, vertretbar wäre. Das steht auch in ihren ersten Zeilen.</value>
+  </data>
+  <data name="Tests_Error_NoExporter" xml:space="preserve">
+    <value>Das Herunterladen von Tests ist auf diesem Server nicht eingerichtet.</value>
   </data>
 </root>

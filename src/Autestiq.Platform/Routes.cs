@@ -50,6 +50,9 @@ public static class Routes
     /// <summary>One described test and its plan.</summary>
     public static string Test(string projectKey, Guid testCaseId) => $"{App}/p/{projectKey}/tests/{testCaseId}";
 
+    /// <summary>Where an approved test is downloaded from (Milestone 5, part 4). Served by the host, not a page.</summary>
+    public static string TestDownload(Guid testCaseId) => $"/app/tests/{testCaseId}/download";
+
     public const string Runs = App + "/runs";
 
     /// <summary>One run.</summary>

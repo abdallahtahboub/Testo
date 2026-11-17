@@ -67,9 +67,15 @@ public sealed class ApprovedPlanTests : IAsyncLifetime
 
     public async ValueTask DisposeAsync() => await _database.DisposeAsync();
 
-    private async Task<T> AsAsync<T>(Guid organization, Role role, Func<ITestCaseService, Task<T>> act)
+    private async Task<T> AsAsync<T>(Guid organization, Role role, Func<ITestCaseService, Task<T>> act, bool withExporter = true)
     {
-        await using var services = _database.NewServices();
+        await using var services = _database.NewServices(collection =>
+        {
+            if (withExporter)
+            {
+                collection.AddSingleton<Contracts.Export.ITestExporter, FakeExporter>();
+            }
+        });
         _database.Principal.Become(organization, Guid.CreateVersion7(), role);
 
         using var scope = services.CreateScope();
@@ -372,6 +378,80 @@ public sealed class ApprovedPlanTests : IAsyncLifetime
 
         Assert.Equal(RunStatus.Cancelled, run.Status);
         Assert.Contains("not approved", run.FailureReason, StringComparison.Ordinal);
+    }
+
+    // --- Downloading ---
+
+    [Fact]
+    public async Task Download_AnApprovedReadOnlyPlan_StartsWithWhatWasApproved_AndSaysTheFileDoesNotHoldIt_AndIsAudited()
+    {
+        var testCase = await PlannedAsync(Reads);
+        await AsAsync(_northwind, Role.Owner, tests => tests.ApproveAsync(testCase, false));
+
+        var downloaded = await AsAsync(_northwind, Role.Viewer, tests => tests.DownloadAsync(testCase));
+
+        Assert.True(downloaded.Succeeded, string.Join(", ", downloaded.Errors));
+        var code = downloaded.Value!.Code;
+        var stored = await StoredAsync(testCase);
+        Assert.StartsWith($"# Approved in Autestiq on {stored.ApprovedAt:yyyy-MM-dd}. Plan fingerprint (SHA-256): {stored.ApprovedPlanHash}.", code, StringComparison.Ordinal);
+        Assert.Contains("this file does not", code, StringComparison.Ordinal);
+        Assert.EndsWith(FakeExporter.Body, code, StringComparison.Ordinal);
+
+        await using var database = _database.NewContext();
+        Assert.True(await database.AuditEntries.IgnoreQueryFilters().AnyAsync(entry => entry.Action == "test.downloaded" && entry.SubjectId == testCase, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task Download_APlanApprovedToChangeData_SaysSo()
+    {
+        var testCase = await PlannedAsync(Changes);
+        await AsAsync(_northwind, Role.Owner, tests => tests.ApproveAsync(testCase, true));
+
+        var downloaded = await AsAsync(_northwind, Role.Owner, tests => tests.DownloadAsync(testCase));
+
+        Assert.Contains("The approval allows this test to change data", downloaded.Value!.Code, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Download_OfAPlanThatIsNotApproved_OrNoLongerTheApprovedOne_OrAnotherOrganizations_IsRefused()
+    {
+        var testCase = await PlannedAsync(Reads);
+
+        Assert.Equal(["Tests_Error_NotApproved"], (await AsAsync(_northwind, Role.Owner, tests => tests.DownloadAsync(testCase))).Errors);
+
+        await AsAsync(_northwind, Role.Owner, tests => tests.ApproveAsync(testCase, false));
+        Assert.Equal(["Tests_Error_NoSuchTest"], (await AsAsync(_contoso, Role.Owner, tests => tests.DownloadAsync(testCase))).Errors);
+
+        await using (var database = _database.NewContext())
+        {
+            var stored = await database.TestCases.IgnoreQueryFilters().SingleAsync(candidate => candidate.Id == testCase, TestContext.Current.CancellationToken);
+            stored.Plan = JsonSerializer.Serialize(new { Actions = Changes, Coverage = PlanCoverage.Full }, Web);
+
+            using (_database.WriteScope.AllowWritingTo(_northwind))
+            {
+                await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+            }
+        }
+
+        Assert.Equal(["Tests_Error_NotApproved"], (await AsAsync(_northwind, Role.Owner, tests => tests.DownloadAsync(testCase))).Errors);
+    }
+
+    [Fact]
+    public async Task Download_WithNoExporterOnTheServer_SaysSo()
+    {
+        var testCase = await PlannedAsync(Reads);
+        await AsAsync(_northwind, Role.Owner, tests => tests.ApproveAsync(testCase, false));
+
+        Assert.Equal(["Tests_Error_NoExporter"], (await AsAsync(_northwind, Role.Owner, tests => tests.DownloadAsync(testCase), withExporter: false)).Errors);
+    }
+
+    private sealed class FakeExporter : Contracts.Export.ITestExporter
+    {
+        public const string Body = "def test_it():\n    pass\n";
+
+        public Contracts.Export.ExportLanguage Language => Contracts.Export.ExportLanguage.Python;
+
+        public Contracts.Export.ExportedTest Export(TestPlan plan) => new("test_it.py", Body, []);
     }
 
     // --- Which steps may change data ---

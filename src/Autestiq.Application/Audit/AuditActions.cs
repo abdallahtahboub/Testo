@@ -31,6 +31,7 @@ internal static class AuditActions
     public const string TestPlanned = "test.planned";
     public const string TestApproved = "test.approved";
     public const string TestApprovalWithdrawn = "test.approval_withdrawn";
+    public const string TestDownloaded = "test.downloaded";
     public const string AiProcessingAllowed = "project.ai_processing_allowed";
     public const string AiProcessingWithdrawn = "project.ai_processing_withdrawn";
     public const string ProductionAuthorized = "environment.production_authorized";

@@ -545,7 +545,7 @@
     <value>As a Python test</value>
   </data>
   <data name="Test_Python_Intro" xml:space="preserve">
-    <value>The plan written out by fixed templates, never by the AI. Download comes with approval.</value>
+    <value>The plan written out by fixed templates, never by the AI. It can be downloaded once the plan is approved.</value>
   </data>
   <data name="Test_Sent" xml:space="preserve">
     <value>What was sent to the AI</value>
@@ -711,5 +711,14 @@
   </data>
   <data name="Approval_Changes_One" xml:space="preserve">
     <value>Step {0} may change data on the site: it presses a button, presses a key or chooses an option, or acts on something exploring did not see as a link. Autestiq's software decides this from the plan, not the AI.</value>
+  </data>
+  <data name="Approval_Download" xml:space="preserve">
+    <value>Download the Python test</value>
+  </data>
+  <data name="Approval_Download_ReadOnly" xml:space="preserve">
+    <value>Autestiq runs this test read-only in its own browser. The downloaded file cannot do that: run it only where a test that changes data would be acceptable. Its first lines say so too.</value>
+  </data>
+  <data name="Tests_Error_NoExporter" xml:space="preserve">
+    <value>Downloading tests is not set up on this server.</value>
   </data>
 </root>

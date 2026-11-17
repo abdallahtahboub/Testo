@@ -36,6 +36,41 @@ Read first: `docs/architecture.md`, `docs/roadmap.md`, `docs/design-system.md`,
 - Commit after each meaningful step; small commits with clear messages (imperative mood, e.g. `Add TKpiTile component with delta indicator`).
 - Before saying a milestone is done: `dotnet build` (zero warnings) and `dotnet test` (incl. Playwright) must pass. Report failures honestly.
 
+## Security, privacy and onboarding (binding, owner's requirements of 2026-11-17)
+
+The full text is [`docs/secure-onboarding-and-privacy.md`](docs/secure-onboarding-and-privacy.md); its gap analysis
+against the current system is [`docs/secure-onboarding-gap-analysis.md`](docs/secure-onboarding-gap-analysis.md).
+These rules hold for every change. They are long-term requirements, **not** an instruction to build everything
+now or to rewrite the roadmap; working features are preserved.
+
+- **Customer trust comes before speed, feature count and AI autonomy.** Never silently weaken a security
+  requirement to go faster. If a request conflicts with these rules, say so and propose a safer alternative.
+- **No source code is required.** Source access stays optional, explicitly authorized and least-privilege. The
+  product must be useful from a staging URL alone; specifications, requirements, a private agent and repositories
+  only add to it, alone or combined.
+- **Control plane and execution plane are separate.** Execution must be able to move to customer-controlled
+  infrastructure (a private agent: outbound-authenticated, local secrets, local evidence by default, sends only
+  what the customer's policy allows, revocable and audited). A tunnel to our cloud browser is **not** private
+  execution, and private execution is **not** private AI processing: never claim either.
+- **AI processing needs explicit permission and minimal data.** Never send confidential customer information to an
+  external AI provider automatically. Never assume staging data is harmless. Treat as distinct: approved
+  metadata; confidential application information; credentials (never to a model); personal or regulated data;
+  execution evidence (screenshots, DOM, traces, logs, API responses).
+- **Security is enforced by deterministic software, not by prompts.** Prompts are advisory (ADR-0019 §5).
+  Allowlists, proofs, validators, proxies, quotas and permissions are what hold.
+- **Production is off by default.** Testing a production environment needs the customer's explicit authorization
+  and configuration. **State-changing or destructive test steps need explicit approval.**
+- **Observed, documented and assumed are never mixed.** The AI keeps observed behaviour, documented expectations and
+  its own assumptions apart; an inferred rule is never shown as a verified requirement, and every generated test
+  traces to its evidence with its uncertainty stated.
+- **Evidence is customer data:** retained and deleted by policy, stored and transmitted as configured.
+- **Before any change touching application access, AI processing, testing, infrastructure or customer data:**
+  examine the existing design; name the trust boundaries and risks; check it against these rules; take the
+  simplest design that keeps the future open; write acceptance criteria **with negative and security tests**;
+  test it; record the decision and its trade-offs (ADR); state what is deferred or temporarily limited.
+- **No major architecture change or new infrastructure dependency without explaining why, and the owner's
+  approval.**
+
 ## Product name
 
 **Autestiq** is the company and the product. The brand is written **AUTESTIQ** in logo and wordmark

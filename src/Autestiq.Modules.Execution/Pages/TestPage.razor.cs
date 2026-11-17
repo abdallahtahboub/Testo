@@ -74,6 +74,14 @@ public sealed partial class TestPage : ComponentBase
         }
     }
 
+    private async Task ReloadAsync()
+    {
+        await LoadAsync().ConfigureAwait(false);
+
+        // Back on the renderer's dispatcher: the await above may have finished on another thread.
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+
     private async Task LoadAsync()
     {
         var detail = await TestCases.GetAsync(TestCaseId, CancellationToken.None).ConfigureAwait(false);

@@ -1,0 +1,90 @@
+@inject IStringLocalizer<ExecutionResources> L
+
+@*
+    A plan's approval and its runs (Milestone 5, part 3; ADR-0030). Which steps may change data is decided by software
+    (PlanEffects), and a plan with any such step is approved only with an explicit tick. Without it, a run is read-only,
+    held in the browser by the worker. Nothing here is a control the service does not check again.
+*@
+<section class="approval" aria-labelledby="approval-title" data-testid="approval">
+    <h2 id="approval-title" class="t-h4">@L["Approval_Title"]</h2>
+
+    @if (Problem is not null)
+    {
+        <p class="approval__problem" role="alert">@Problem</p>
+    }
+
+    @if (Detail.Approval is { } approval)
+    {
+        <p data-testid="approval-state">
+            @L["Approval_Approved", approval.ApprovedBy ?? "", approval.ApprovedAt.ToLocalTime().ToString("d")]
+            @(approval.ToChangeData ? L["Approval_Approved_ChangesData"] : L["Approval_Approved_ReadOnly"])
+        </p>
+        <div class="approval__actions">
+            @if (CanRun)
+            {
+                <TButton Variant="ButtonVariant.Primary" Loading="Busy" Disabled="!Ready" OnClick="RunAsync" data-testid="run-test">@L["Approval_Run"]</TButton>
+            }
+            @if (CanApprove)
+            {
+                <TButton Variant="ButtonVariant.Ghost" Disabled="Busy || !Ready" OnClick="WithdrawAsync" data-testid="withdraw-approval">@L["Approval_Withdraw"]</TButton>
+            }
+        </div>
+    }
+    else if (Detail.Coverage == PlanCoverage.Partial)
+    {
+        <p data-testid="approval-state">@L["Approval_Partial"]</p>
+    }
+    else if (Detail.NeedsSecret)
+    {
+        <p data-testid="approval-state">@L["Approval_NeedsSecret"]</p>
+    }
+    else
+    {
+        <p data-testid="approval-state">@L["Approval_NotApproved"]</p>
+
+        @if (Detail.StepsThatMayChangeData.Count > 0)
+        {
+            <p class="approval__changes" data-testid="approval-changes">@(Detail.StepsThatMayChangeData.Count == 1
+                ? L["Approval_Changes_One", Detail.StepsThatMayChangeData[0]]
+                : L["Approval_Changes", string.Join(", ", Detail.StepsThatMayChangeData)])</p>
+        }
+        else
+        {
+            <p data-testid="approval-changes">@L["Approval_ReadsOnly"]</p>
+        }
+
+        @if (CanApprove)
+        {
+            @if (Detail.StepsThatMayChangeData.Count > 0)
+            {
+                <TCheckbox Label="@L["Approval_AllowChange", Origins.Display(Detail.Origin)]" @bind-Checked="AllowChange" Disabled="!Ready" data-testid="allow-change" />
+            }
+            <div class="approval__actions">
+                <TButton Variant="ButtonVariant.Primary" Loading="Busy" Disabled="!Ready" OnClick="ApproveAsync" data-testid="approve-plan">@L["Approval_Approve"]</TButton>
+            </div>
+        }
+        else
+        {
+            <p class="t-muted">@L["Approval_AskAnApprover"]</p>
+        }
+    }
+
+    <h3 class="t-h4">@L["Approval_Runs"]</h3>
+    @if (Detail.Runs.Count == 0)
+    {
+        <p class="t-muted" data-testid="runs-empty">@L["Approval_Runs_Empty"]</p>
+    }
+    else
+    {
+        <ul class="approval__runs" data-testid="test-runs">
+            @foreach (var run in Detail.Runs)
+            {
+                <li>
+                    <a href="@Routes.Run(run.RunId)" data-testid="@($"test-run-{run.Number}")">@L["Approval_Run_Item", run.Number]</a>
+                    <RunStatusBadge Status="run.Status" />
+                    <span class="t-muted">@run.QueuedAt.ToLocalTime().ToString("g")</span>
+                </li>
+            }
+        </ul>
+    }
+</section>

@@ -443,7 +443,7 @@
     <value>Das Testen ist derzeit pausiert. Bitte versuchen Sie es später erneut.</value>
   </data>
   <data name="Tests_Error_SiteNotAllowed" xml:space="preserve">
-    <value>Diese Seite kann noch nicht erkundet werden: Weisen Sie zuerst auf der Seite Umgebungen nach, dass sie Ihnen gehört.</value>
+    <value>Diese Seite kann noch nicht getestet werden: Weisen Sie zuerst auf der Seite Umgebungen nach, dass sie Ihnen gehört.</value>
   </data>
   <data name="Tests_Error_MinutesUsedUp" xml:space="preserve">
     <value>Die Browserminuten dieses Monats sind aufgebraucht.</value>
@@ -524,7 +524,7 @@
     <value>Der Plan</value>
   </data>
   <data name="Test_Plan_NotApproved" xml:space="preserve">
-    <value>Von der KI geschrieben und vom Validator von Autestiq geprüft. Er ist nicht gelaufen und läuft erst, wenn ihn jemand freigibt.</value>
+    <value>Von der KI geschrieben und vom Validator von Autestiq geprüft. Er läuft erst, wenn ein Inhaber oder die QA-Leitung ihn unten freigibt.</value>
   </data>
   <data name="Test_Plan_Partial" xml:space="preserve">
     <value>Dieser Plan deckt nur einen Teil dessen ab, was Sie verlangt haben. Die Notizen der KI sagen, welcher Teil fehlt.</value>
@@ -630,5 +630,86 @@
   </data>
   <data name="Planning_Error_NoPlanner" xml:space="preserve">
     <value>Die KI-Planung ist auf diesem Server nicht eingerichtet.</value>
+  </data>
+  <data name="Approval_Title" xml:space="preserve">
+    <value>Freigabe</value>
+  </data>
+  <data name="Approval_NotApproved" xml:space="preserve">
+    <value>Nichts läuft, bis ein Inhaber oder die QA-Leitung diesen Plan freigibt.</value>
+  </data>
+  <data name="Approval_Changes" xml:space="preserve">
+    <value>Die Schritte {0} können Daten auf der Seite ändern: Sie drücken eine Schaltfläche oder Taste, wählen eine Option oder wirken auf etwas, das beim Erkunden nicht als Link zu sehen war. Das entscheidet die Software von Autestiq anhand des Plans, nicht die KI.</value>
+  </data>
+  <data name="Approval_ReadsOnly" xml:space="preserve">
+    <value>Kein Schritt dieses Plans sollte Daten ändern, daher läuft er nur lesend: Der Browser blockiert jede Anfrage, die Daten ändern könnte. Ein Link, der beim Aufrufen Daten ändert, würde nicht erkannt.</value>
+  </data>
+  <data name="Approval_AllowChange" xml:space="preserve">
+    <value>Ich gebe frei, dass dieser Plan Daten auf {0} ändert, zum Beispiel indem er Formulare sendet oder Bestellungen aufgibt.</value>
+  </data>
+  <data name="Approval_Approve" xml:space="preserve">
+    <value>Plan freigeben</value>
+  </data>
+  <data name="Approval_Approved" xml:space="preserve">
+    <value>Freigegeben von {0} am {1}.</value>
+  </data>
+  <data name="Approval_Approved_ChangesData" xml:space="preserve">
+    <value>Diese Freigabe erlaubt dem Plan, Daten zu ändern.</value>
+  </data>
+  <data name="Approval_Approved_ReadOnly" xml:space="preserve">
+    <value>Seine Läufe sind nur lesend.</value>
+  </data>
+  <data name="Approval_Withdraw" xml:space="preserve">
+    <value>Freigabe zurückziehen</value>
+  </data>
+  <data name="Approval_Partial" xml:space="preserve">
+    <value>Ein Plan, der nur einen Teil des Verlangten abdeckt, kann nicht freigegeben werden. Beschreiben Sie den fehlenden Teil als eigenen Test.</value>
+  </data>
+  <data name="Approval_NeedsSecret" xml:space="preserve">
+    <value>Dieser Plan meldet sich mit einem Geheimnis an, und Autestiq kann noch keine Geheimnisse speichern, daher kann er nicht freigegeben werden.</value>
+  </data>
+  <data name="Approval_AskAnApprover" xml:space="preserve">
+    <value>Bitten Sie einen Inhaber oder die QA-Leitung um die Freigabe.</value>
+  </data>
+  <data name="Approval_Run" xml:space="preserve">
+    <value>Test ausführen</value>
+  </data>
+  <data name="Approval_Runs" xml:space="preserve">
+    <value>Läufe</value>
+  </data>
+  <data name="Approval_Runs_Empty" xml:space="preserve">
+    <value>Er ist noch nicht gelaufen.</value>
+  </data>
+  <data name="Approval_Run_Item" xml:space="preserve">
+    <value>Lauf Nr. {0}</value>
+  </data>
+  <data name="Step_MayChangeData" xml:space="preserve">
+    <value>Kann Daten ändern</value>
+  </data>
+  <data name="Tests_Error_NotApprover" xml:space="preserve">
+    <value>Nur Inhaber und QA-Leitung können einen Plan freigeben.</value>
+  </data>
+  <data name="Tests_Error_NoSuchTest" xml:space="preserve">
+    <value>Diesen Test gibt es nicht.</value>
+  </data>
+  <data name="Tests_Error_NotPlanned" xml:space="preserve">
+    <value>Dieser Test hat keinen Plan zum Freigeben.</value>
+  </data>
+  <data name="Tests_Error_PartialPlan" xml:space="preserve">
+    <value>Ein Plan, der nur einen Teil des Tests abdeckt, kann nicht freigegeben werden.</value>
+  </data>
+  <data name="Tests_Error_NeedsSecret" xml:space="preserve">
+    <value>Ein Plan, der ein Geheimnis eingibt, kann noch nicht freigegeben werden.</value>
+  </data>
+  <data name="Tests_Error_ChangeAcknowledgementRequired" xml:space="preserve">
+    <value>Dieser Plan kann Daten ändern: Bestätigen Sie mit dem Häkchen, dass Sie das freigeben.</value>
+  </data>
+  <data name="Tests_Error_CannotRun" xml:space="preserve">
+    <value>Nur Inhaber, QA-Leitung und QA-Engineers können Tests ausführen.</value>
+  </data>
+  <data name="Tests_Error_NotApproved" xml:space="preserve">
+    <value>Dieser Plan ist nicht freigegeben oder nicht der Plan, der freigegeben wurde.</value>
+  </data>
+  <data name="Approval_Changes_One" xml:space="preserve">
+    <value>Schritt {0} kann Daten auf der Seite ändern: Er drückt eine Schaltfläche oder Taste, wählt eine Option oder wirkt auf etwas, das beim Erkunden nicht als Link zu sehen war. Das entscheidet die Software von Autestiq anhand des Plans, nicht die KI.</value>
   </data>
 </root>

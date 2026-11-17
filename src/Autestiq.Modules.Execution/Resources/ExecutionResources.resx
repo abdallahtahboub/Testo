@@ -443,7 +443,7 @@
     <value>Testing is paused for now. Please try again later.</value>
   </data>
   <data name="Tests_Error_SiteNotAllowed" xml:space="preserve">
-    <value>That site cannot be explored yet: prove it is yours on the Environments page first.</value>
+    <value>That site cannot be tested yet: prove it is yours on the Environments page first.</value>
   </data>
   <data name="Tests_Error_MinutesUsedUp" xml:space="preserve">
     <value>This month's browser minutes are used up.</value>
@@ -524,7 +524,7 @@
     <value>The plan</value>
   </data>
   <data name="Test_Plan_NotApproved" xml:space="preserve">
-    <value>Written by the AI and checked by Autestiq's validator. It has not run, and it runs only once someone approves it.</value>
+    <value>Written by the AI and checked by Autestiq's validator. It runs only once an owner or a QA lead approves it, below.</value>
   </data>
   <data name="Test_Plan_Partial" xml:space="preserve">
     <value>This plan covers only part of what you asked for. The AI's notes say which part is missing.</value>
@@ -630,5 +630,86 @@
   </data>
   <data name="Planning_Error_NoPlanner" xml:space="preserve">
     <value>AI planning is not set up on this server.</value>
+  </data>
+  <data name="Approval_Title" xml:space="preserve">
+    <value>Approval</value>
+  </data>
+  <data name="Approval_NotApproved" xml:space="preserve">
+    <value>Nothing runs until an owner or a QA lead approves this plan.</value>
+  </data>
+  <data name="Approval_Changes" xml:space="preserve">
+    <value>Steps {0} may change data on the site: they press a button, press a key or choose an option, or act on something exploring did not see as a link. Autestiq's software decides this from the plan, not the AI.</value>
+  </data>
+  <data name="Approval_ReadsOnly" xml:space="preserve">
+    <value>No step of this plan should change data, so it runs read-only: the browser blocks every request that could change data. A link that changes data when it is followed would not be caught.</value>
+  </data>
+  <data name="Approval_AllowChange" xml:space="preserve">
+    <value>I approve this plan to change data on {0}, for example by submitting forms or placing orders.</value>
+  </data>
+  <data name="Approval_Approve" xml:space="preserve">
+    <value>Approve the plan</value>
+  </data>
+  <data name="Approval_Approved" xml:space="preserve">
+    <value>Approved by {0} on {1}.</value>
+  </data>
+  <data name="Approval_Approved_ChangesData" xml:space="preserve">
+    <value>This approval allows the plan to change data.</value>
+  </data>
+  <data name="Approval_Approved_ReadOnly" xml:space="preserve">
+    <value>Its runs are read-only.</value>
+  </data>
+  <data name="Approval_Withdraw" xml:space="preserve">
+    <value>Withdraw the approval</value>
+  </data>
+  <data name="Approval_Partial" xml:space="preserve">
+    <value>A plan that covers only part of what you asked for cannot be approved. Describe the missing part as a test of its own.</value>
+  </data>
+  <data name="Approval_NeedsSecret" xml:space="preserve">
+    <value>This plan signs in with a secret, and Autestiq cannot store secrets yet, so it cannot be approved.</value>
+  </data>
+  <data name="Approval_AskAnApprover" xml:space="preserve">
+    <value>Ask an owner or a QA lead to approve it.</value>
+  </data>
+  <data name="Approval_Run" xml:space="preserve">
+    <value>Run the test</value>
+  </data>
+  <data name="Approval_Runs" xml:space="preserve">
+    <value>Runs</value>
+  </data>
+  <data name="Approval_Runs_Empty" xml:space="preserve">
+    <value>It has not run yet.</value>
+  </data>
+  <data name="Approval_Run_Item" xml:space="preserve">
+    <value>Run #{0}</value>
+  </data>
+  <data name="Step_MayChangeData" xml:space="preserve">
+    <value>May change data</value>
+  </data>
+  <data name="Tests_Error_NotApprover" xml:space="preserve">
+    <value>Only an owner or a QA lead can approve a plan.</value>
+  </data>
+  <data name="Tests_Error_NoSuchTest" xml:space="preserve">
+    <value>There is no such test.</value>
+  </data>
+  <data name="Tests_Error_NotPlanned" xml:space="preserve">
+    <value>This test has no plan to approve.</value>
+  </data>
+  <data name="Tests_Error_PartialPlan" xml:space="preserve">
+    <value>A plan that covers only part of the test cannot be approved.</value>
+  </data>
+  <data name="Tests_Error_NeedsSecret" xml:space="preserve">
+    <value>A plan that types a secret cannot be approved yet.</value>
+  </data>
+  <data name="Tests_Error_ChangeAcknowledgementRequired" xml:space="preserve">
+    <value>This plan may change data: tick the box to say you approve that.</value>
+  </data>
+  <data name="Tests_Error_CannotRun" xml:space="preserve">
+    <value>Only an owner, a QA lead or a QA engineer can run tests.</value>
+  </data>
+  <data name="Tests_Error_NotApproved" xml:space="preserve">
+    <value>This plan is not approved, or is not the plan that was approved.</value>
+  </data>
+  <data name="Approval_Changes_One" xml:space="preserve">
+    <value>Step {0} may change data on the site: it presses a button, presses a key or chooses an option, or acts on something exploring did not see as a link. Autestiq's software decides this from the plan, not the AI.</value>
   </data>
 </root>

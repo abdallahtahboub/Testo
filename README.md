@@ -161,11 +161,16 @@ stop it going further than that.
 ### Tests
 
 ```bash
-dotnet test
+dotnet test --max-parallel-test-modules 1
 ```
 
 This runs everything: unit, component, architecture and browser tests. The browser tests
 start the application themselves, so nothing needs to be running first.
+
+The flag runs one test project at a time (tests inside a project still run in parallel), as CI
+does. Without it, the sealed-run tests create Docker networks while the browser tests run;
+Chromium takes each new network interface for a change of network and fails the page's
+requests with `ERR_NETWORK_CHANGED`, so browser tests fail at random.
 
 The data tests and the browser tests need **PostgreSQL**, because two of the three layers of
 tenant isolation are the database's own and an in-memory provider would pass tests that

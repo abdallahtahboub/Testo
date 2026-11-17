@@ -22,20 +22,19 @@ This is a young codebase and the list is short on purpose. Nothing below is aspi
 
 | Built and working | Not built |
 |---|---|
-| Accounts, organizations, memberships, roles, invitations, audit log — on PostgreSQL, inside a tenant boundary | Test plans, requirements, test cases, suites, environments, defects, reporting |
-| The design system: tokens, components, light and dark themes, WCAG 2.2 AA | Any customer-supplied test target |
-| Test runs, for three scripted scenarios against our own demo shop, with screenshots per step | Anything in the product that calls a model |
-| The public website: 29 routes in English and German | A deployment of any kind |
+| Accounts, organizations, memberships, roles, invitations, audit log — on PostgreSQL, inside a tenant boundary | Test plans, requirements, a test case library, suites, defects, reporting |
+| The design system: tokens, components, light and dark themes, WCAG 2.2 AA | Approving and running an AI-written plan (Milestone 5 part 3) |
+| Test runs, for three scripted scenarios against our own demo shop, with screenshots per step | Downloading a test (part 4) |
+| Projects and environments, with proof of site ownership and production off by default | A deployment of any kind |
+| Describing a test in a sentence and getting the AI's plan for it, only once the project allows AI processing | |
+| The public website: 29 routes in English and German | |
 
-**The AI planner exists, is measured, and is not usable yet.** The interface, the closed action
-vocabulary, the validator, the provider adapter and the benchmark are built (ADR-0019). Measured
-against twelve controlled scenarios, it writes a plan that runs correctly 5 times out of 12 against
-a sound application, and of six real defects it credibly found one, missed one, and said nothing
-about four. The hand-written baseline scores 36 of 36 on the same scenarios.
-[`docs/ai-benchmark.md`](docs/ai-benchmark.md) has the numbers.
-
-**So no claim about AI-found defects is supported by anything yet, and the product makes none.**
-The tagline is the company's, not a description of what the software does today.
+**The AI planner is measured on our own applications.** On 20 scenarios written after its prompt was
+frozen, it was correct 95% of the time on sound applications, caught every seeded defect where it
+reached a verdict, and never passed a broken application; the same held with every test id removed
+(ADR-0020, [`docs/ai-benchmark.md`](docs/ai-benchmark.md)). **Applications we did not build are not
+measured yet**, and neither is the read-only exploration used on a customer's site, so no claim reaches
+beyond our applications. The tagline is the company's, not a description of what the software does today.
 
 [`docs/roadmap.md`](docs/roadmap.md) §Inventory is the authoritative list of what is built, and
 [`docs/security-register.md`](docs/security-register.md) is the honest list of what is not yet safe.
@@ -141,6 +140,20 @@ basket and forgets the rest, and the step that fails keeps the screenshot that s
 The worker drives Chromium through an egress proxy of its own that refuses every address but the
 target. It needs the same browser the tests use, so install that first (below), or point
 `AUTESTIQ_BROWSER_PATH` at a Chromium you already have.
+
+### Describing a test
+
+The tests page of a project (`/app/p/SHOP/tests`) asks for the project's permission to send what
+exploring finds to the AI provider, and only then offers to describe a test. Planning needs a model
+key in the server's configuration, never in a file in the repository:
+
+```bash
+export Planner__ApiKey="..."
+```
+
+Without one, a described test is explored and then says that AI planning is not set up, and nothing is
+sent. The budgets are in `appsettings.json` under `Planning`: $10 a month for the whole product and
+$2 per organization. Each plan's cost is counted at the price book's prices (ADR-0029).
 
 ### The AI benchmark
 

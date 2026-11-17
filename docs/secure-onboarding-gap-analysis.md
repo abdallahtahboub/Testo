@@ -38,7 +38,9 @@ gaps are production targeting, state-changing steps, and evidence retention.
 
 ### P0 — needed before the product calls a model for a customer (before Milestone 5 part 2 ships)
 
-**G-1 · No permission decides whether page content may go to an AI provider (§4).**
+**G-1 · No permission decides whether page content may go to an AI provider (§4).** *Built 2026-11-17, Milestone 5
+part 2 (ADR-0030): off by default, set with an acknowledgement, audited, refused in `TestCaseService` and checked
+again in `PlanningDispatcher` before each call, with negative tests.*
 The crawl's snapshot holds page titles, headings, element names and visible texts. On a real staging site, those
 can be customer names, emails, orders and prices. Today nothing would stop that from being sent to Anthropic the
 moment part 2 calls the planner.
@@ -48,7 +50,8 @@ moment part 2 calls the planner.
 - No planning call is made without it, enforced in the service, not the screen, with a negative test.
 - The policy screen says plainly what is sent and what never is (credentials, screenshots, traces).
 
-**G-2 · No minimization of what is sent (§4).**
+**G-2 · No minimization of what is sent (§4).** *Recording built 2026-11-17, Milestone 5 part 2: each planning
+attempt's text is stored and shown on the test's page. The minimized mode is not built and not measured.*
 *Recommendation:*
 - Record exactly what each planning call sent, per run, so a customer can see it.
 - Design, measure and then offer a **minimized mode** that masks values in visible text (emails, numbers, names)
@@ -91,7 +94,9 @@ The benchmark passes them in; the product has nowhere to keep them.
   service), never logged, never returned to a screen.
 - Or defer scenarios that need sign-in until it exists. **Needs approval:** which.
 
-**G-7 · Observed, documented and assumed are not yet shown apart (§6).**
+**G-7 · Observed, documented and assumed are not yet shown apart (§6).** *Built 2026-11-17, Milestone 5 part 2:
+"Checked by Autestiq" apart from "The AI's notes: unverified", and the tester's request on its own. The AI's notes
+are not split by the model's own labels, because that would trust the model to label itself.*
 The planner's notes mix them in prose.
 *Recommendation:*
 - In part 2's plan view, label each note as observed by the crawl, given by the tester, or assumed, with

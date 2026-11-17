@@ -302,11 +302,13 @@ What follows is the finding as it was recorded.
 Nothing in the database counts an organization's active runs. **Fix:** a count under a row lock in
 the claim transaction (gap G7 in [`commercial-readiness.md`](commercial-readiness.md)).
 
-### R-13 · Customer page content reaching an AI provider — **High, from Milestone 5 part 2**
+### R-13 · Customer page content reaching an AI provider — **High; mitigated in Milestone 5 part 2, minimized mode open**
 The crawl's snapshot holds page titles, element names and visible text, which on a customer's staging site can be
 names, emails and orders. Planning sends it to the model provider. **Mitigation, required before part 2 ships:**
 a per-project AI data-processing permission, off by default and enforced in the service; a record of what each
-call sent; later a measured minimized mode (gap analysis G-1, G-2).
+call sent; later a measured minimized mode (gap analysis G-1, G-2). **Built 2026-11-17:** the permission and the
+record (ADR-0030 part 2). The permission is checked when a test is described and again just before each call.
+**Open:** the minimized mode; until it exists, a project that allows AI planning sends visible page text as found.
 
 ### R-14 · An approved plan changing or destroying customer data — **High, from Milestone 5 part 3**
 A plan may place an order, book a slot or cancel something. **Mitigation:** production refused until an owner

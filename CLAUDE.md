@@ -17,11 +17,13 @@ finished, and an operator cost report (ADR-0029); machine and storage prices are
 prompt was frozen, 2026-11-17) it was 95% correct on sound applications, caught every seeded defect where a
 verdict was reached, and never passed a broken application, so **the ADR-0020 gate's figures are met on our
 three applications**, and the same holds with every test id removed. Applications we did not build are not
-yet measured, and no claim reaches beyond our applications until they are. Nothing in the product calls a
-model yet. **Milestone 5, the first customer flow, is under way (ADR-0030)**: part 1 built projects, environments
-with ownership proofs, and the app's navigation drawn from the module registry. **Exporting plans as tests** is built for Python and
-verified (ADR-0023), reachable through the benchmark tool only. Everything else about the testing journey —
-plans, requirements, cases, suites, environments, defects, reporting — **does not exist yet**: six of the
+yet measured, and no claim reaches beyond our applications until they are. **Milestone 5, the first customer flow, is under way (ADR-0030)**: part 1 built projects, environments with
+ownership proofs, production off by default, and the app's navigation drawn from the module registry. Part 2 built
+describing a test in a sentence: the site is explored (read-only on a customer's site) and the planner writes a plan,
+**only if the project's AI permission, off by default, is given**, within the AI budgets, with what was sent recorded
+and the AI's notes labelled unverified. No plan runs yet; approval and running are part 3. **Exporting plans as tests** is built for Python and
+verified (ADR-0023), previewed on a test's page; downloading waits for approval. Everything else about the testing journey —
+plans, requirements, a case library, suites, defects, reporting — **does not exist yet**: six of the
 seven module projects are shells. `docs/roadmap.md` §Inventory is the authoritative list of what is built.
 
 Read first: `docs/architecture.md`, `docs/roadmap.md`, `docs/design-system.md`,

@@ -39,67 +39,67 @@ question and it is not answered here.
 | Runs | 22 | 22 |
 | **False positives** (passed a broken shop) | 0 | 0 |
 | False negatives (failed a sound shop) | 0 | 2 |
-| Correct verdicts | 22 | 14 |
+| Correct verdicts | 22 | 18 |
 | Failed the broken shop *and* the sound one | 0 | 0 |
-| Never reached a verdict | 0 | 6 |
-| …of those, passed only the part they planned | 0 | 6 |
+| Never reached a verdict | 0 | 2 |
+| …of those, passed only the part they planned | 0 | 2 |
 | Scenarios that flaked | 0 | 0 |
 | Could not be planned | 0 | 0 |
-| Median execution | 0.7 s | 0.8 s |
-| Tokens per planned run | — | 9255 |
-| Cost per planned run | — | $0.0252 |
+| Median execution | 0.7 s | 1.0 s |
+| Tokens per planned run | — | 14526 |
+| Cost per planned run | — | $0.0360 |
 
 ## Every scenario
 
 | Scenario | Defect | Source | Verdict | Status | Flaked | Execution | Tokens | Cost |
 |---|---|---|---|---|---|---|---|---|
-| second-page-holds-the-last-two | off | baseline | correct | Passed | no | 1.1 s | — | — |
-| second-page-holds-the-last-two | off | claude-sonnet-5-5 | correct | Passed | no | 0.7 s | 9258 | $0.0251 |
+| second-page-holds-the-last-two | off | baseline | correct | Passed | no | 1.0 s | — | — |
+| second-page-holds-the-last-two | off | claude-sonnet-5-5 | correct | Passed | no | 0.8 s | 14534 | $0.0359 |
 | catalogue-shows-a-price | off | baseline | correct | Passed | no | 0.6 s | — | — |
-| catalogue-shows-a-price | off | claude-sonnet-5-5 | correct | Passed | no | 0.6 s | 9102 | $0.0237 |
+| catalogue-shows-a-price | off | claude-sonnet-5-5 | correct | Passed | no | 0.7 s | 14332 | $0.0341 |
 | adding-a-product-opens-the-basket | off | baseline | correct | Passed | no | 0.8 s | — | — |
-| adding-a-product-opens-the-basket | off | claude-sonnet-5-5 | inconclusive | Inconclusive | no | 2.9 s | 9492 | $0.0275 |
+| adding-a-product-opens-the-basket | off | claude-sonnet-5-5 | correct | Passed | no | 0.9 s | 14415 | $0.0348 |
 | two-products-are-both-in-the-basket | off | baseline | correct | Passed | no | 1.1 s | — | — |
-| two-products-are-both-in-the-basket | off | claude-sonnet-5-5 | inconclusive | Inconclusive | no | 1.0 s | 9864 | $0.0311 |
+| two-products-are-both-in-the-basket | off | claude-sonnet-5-5 | correct | Passed | no | 1.6 s | 14962 | $0.0402 |
 | an-empty-basket-says-so | off | baseline | correct | Passed | no | 0.5 s | — | — |
-| an-empty-basket-says-so | off | claude-sonnet-5-5 | correct | Passed | no | 2.6 s | 8697 | $0.0197 |
-| checkout-asks-to-sign-in | off | baseline | correct | Passed | no | 0.7 s | — | — |
-| checkout-asks-to-sign-in | off | claude-sonnet-5-5 | correct | Passed | no | 0.8 s | 8997 | $0.0226 |
-| wrong-password-is-refused | off | baseline | correct | Passed | no | 0.5 s | — | — |
-| wrong-password-is-refused | off | claude-sonnet-5-5 | correct | Passed | no | 0.6 s | 8928 | $0.0219 |
+| an-empty-basket-says-so | off | claude-sonnet-5-5 | correct | Passed | no | 3.0 s | 14080 | $0.0316 |
+| checkout-asks-to-sign-in | off | baseline | correct | Passed | no | 0.8 s | — | — |
+| checkout-asks-to-sign-in | off | claude-sonnet-5-5 | correct | Passed | no | 1.0 s | 14513 | $0.0358 |
+| wrong-password-is-refused | off | baseline | correct | Passed | no | 0.6 s | — | — |
+| wrong-password-is-refused | off | claude-sonnet-5-5 | correct | Passed | no | 0.7 s | 14244 | $0.0332 |
 | signing-in-shows-who-is-signed-in | off | baseline | correct | Passed | no | 0.7 s | — | — |
-| signing-in-shows-who-is-signed-in | off | claude-sonnet-5-5 | correct | Passed | no | 0.8 s | 9315 | $0.0258 |
-| an-order-can-be-placed | off | baseline | correct | Passed | no | 1.2 s | — | — |
-| an-order-can-be-placed | off | claude-sonnet-5-5 | inconclusive | Inconclusive | no | 3.6 s | 9894 | $0.0314 |
+| signing-in-shows-who-is-signed-in | off | claude-sonnet-5-5 | correct | Passed | no | 0.8 s | 14640 | $0.0372 |
+| an-order-can-be-placed | off | baseline | correct | Passed | no | 1.3 s | — | — |
+| an-order-can-be-placed | off | claude-sonnet-5-5 | inconclusive | Inconclusive | no | 1.2 s | 15146 | $0.0420 |
 | order-history-needs-sign-in | off | baseline | correct | Passed | no | 0.4 s | — | — |
-| order-history-needs-sign-in | off | claude-sonnet-5-5 | false negative | Failed | no | 17.4 s | 9264 | $0.0254 |
-| forgotten-password-is-confirmed | off | baseline | correct | Passed | no | 0.5 s | — | — |
-| forgotten-password-is-confirmed | off | claude-sonnet-5-5 | correct | Passed | no | 0.5 s | 8998 | $0.0227 |
+| order-history-needs-sign-in | off | claude-sonnet-5-5 | false negative | Failed | no | 17.4 s | 14684 | $0.0377 |
+| forgotten-password-is-confirmed | off | baseline | correct | Passed | no | 0.6 s | — | — |
+| forgotten-password-is-confirmed | off | claude-sonnet-5-5 | correct | Passed | no | 0.6 s | 14239 | $0.0332 |
 
 ## What the planner and the validator had to say
 
-- **second-page-holds-the-last-two**: The crawl shows the second page (Page 2 - 2) at /?pageId=1, so the plan opens it directly instead of clicking Next. The Next links appear twice on the page and are not reliably distinguishable.
-- **second-page-holds-the-last-two**: The first page lists 'Prism White T-Shirt' (with a hyphen), while the second page lists 'Prism White TShirt' (no hyphen). The plan uses the second-page spelling, as the description does.
-- **catalogue-shows-a-price**: The crawl found that the text "19.50" is unique on the catalogue page, so it is named without a "within". The check therefore confirms that 19.50 is shown and that the product is listed, but it does not tie the price to that product's row by locator. No other product on page 1 has this price, so the check is still meaningful.
-- **adding-a-product-opens-the-basket**: The crawled basket page with an item in it does not show the product name or any other element that identifies the line, so the plan cannot check that the item is the Roslyn Red Sheet. It checks only that the basket is not empty, that the checkout and update controls are offered, and that the basket count link reads 1.
-- **adding-a-product-opens-the-basket**: The 'one item' check relies on the basket count link named '1' in the page header, which is how the crawl saw the count shown after this same add.
-- **adding-a-product-opens-the-basket**: The plan does not assert the URL after the click. The description did not ask for it, and the crawl only saw the basket at /Basket after this route.
-- **two-products-are-both-in-the-basket**: The 'basket holds both' check is not made. The crawl's description of the basket page lists no product names or line items, so nothing there names the two lines reliably. Asserting text such as 'Roslyn Red Sheet' on /Basket would be a guess, and a wrong guess would fail a working application.
-- **two-products-are-both-in-the-basket**: The count check relies on the header basket link, which the crawl showed as '1' after one item was added. The plan asserts it reads '2' after the second add. That follows from the observed pattern but was not itself observed.
-- **two-products-are-both-in-the-basket**: Adding the second item should land on /Basket, as the first add did in the crawl, so the plan asserts the header link there without checking the URL.
-- **two-products-are-both-in-the-basket**: The step “The header basket count shows two items” acts on link “2”, which was not on any page the crawl saw. That is normal for something that appears only once the test has acted, and a mistake otherwise.
-- **an-empty-basket-says-so**: The basket is opened by going directly to /Basket from a fresh visit, with nothing added. The crawl shows the empty basket page at /Basket with the heading 'Basket is empty.'
-- **checkout-asks-to-sign-in**: The description says only that the user is asked to log in. The plan checks that the Login page's 'Log in' heading is visible after clicking Checkout, and does not assert a URL because the redirect path was never observed.
-- **checkout-asks-to-sign-in**: The crawl showed the basket link in the header as '1' after adding the item, which is consistent with the item being in the basket. The plan relies on the Checkout link on the basket page.
-- **wrong-password-is-refused**: The wrong password 'not-the-password' is deliberately incorrect, so it is typed as text rather than as a secret.
-- **wrong-password-is-refused**: The refusal is checked by the 'Invalid login attempt.' message, which the crawl saw after a failed login with test values, and by the login form still being shown (the 'Log in' heading).
-- **signing-in-shows-who-is-signed-in**: No crawled page shows the signed-in state, so the exact wording of the signed-in indicator is an assumption. I assume the page shows the account's email address, demouser@microsoft.com, as visible text after login.
-- **signing-in-shows-who-is-signed-in**: The login page lists demouser@microsoft.com as a demo credential. The assertion runs after the login redirect, so it should not match that text, but check this if the assertion passes suspiciously.
-- **an-order-can-be-placed**: Partial: the plan stops after login. No page shown to me describes the checkout/payment page or the order confirmation page, so I have no reliable names for the pay button or for the thank-you message. Guessing them could fail a working shop.
-- **an-order-can-be-placed**: Missing checks: paying for the order, and that the shop thanks you for it. A person should add them once those pages have been crawled. A pass from this plan is therefore inconclusive.
-- **an-order-can-be-placed**: Assumption: clicking [ Checkout ] while logged out sends the user to the login page, as the description says ('log in when asked'). If it doesn't, the waitFor on the Log in heading will fail.
-- **an-order-can-be-placed**: The only checks are that the basket offers Checkout after adding the sheet, and that no 'Invalid login attempt.' error appears after logging in.
-- **order-history-needs-sign-in**: No page in the crawl links to the order history, because the crawl was not logged in. The path /Order/MyOrders is my assumption, taken from the usual eShopOnWeb layout. If the application uses a different path, change the goto step.
-- **order-history-needs-sign-in**: I did not assert the exact URL after the redirect. The login URL probably carries a returnUrl parameter, and I have not seen its wording. Instead I check that the login page's 'Log in' heading and button are visible, and both appear on the crawled login page.
-- **forgotten-password-is-confirmed**: The confirmation is checked through the heading 'Forgot password confirmation' and the text 'Please check your email to reset your password.', both seen on the ForgotPasswordConfirmation page in the crawl.
-- **forgotten-password-is-confirmed**: The path of the confirmation page is not asserted, since the description did not ask for it.
+- **second-page-holds-the-last-two**: The second page is opened directly at /?pageId=1, the address the crawl found for 'Page 2 - 2'. The Next link appears twice on the page with the same name and container, so it may not identify a single element.
+- **second-page-holds-the-last-two**: The crawl also found /?pageId=2, which is empty ('THERE ARE NO RESULTS THAT MATCH YOUR SEARCH'). That is the third page, so it is not used here.
+- **catalogue-shows-a-price**: The crawl named the 19.50 price element by text alone, without a 'within', because 19.50 appears only once on the first catalogue page. The check therefore confirms that 19.50 is shown and that the product is listed. It does not tie the price to that product's own row. The basket page the crawl reached by adding this product does show $ 19.50 for it, which is consistent.
+- **catalogue-shows-a-price**: The catalogue shows prices without a currency symbol, so the check is for '19.50' exactly.
+- **adding-a-product-opens-the-basket**: The 'one item' check uses the basket counter link in the page header, which reads "1" on the crawled basket page after adding the Roslyn Red Sheet.
+- **adding-a-product-opens-the-basket**: The crawl shows that clicking the add button leads to /Basket, so the plan checks the URL as /Basket.
+- **two-products-are-both-in-the-basket**: Went back to the catalogue with the 'eShop On Web' link, the route the crawl took. The basket's '[ Continue Shopping ]' link would also work.
+- **two-products-are-both-in-the-basket**: The item count is checked through the basket link in the header, named '2' in the crawl's pages for a basket with two items.
+- **two-products-are-both-in-the-basket**: The Blue Sweatshirt was not added to the basket in the crawl, but its add button on the catalogue page is named the same way as the others.
+- **an-empty-basket-says-so**: The empty-basket message is taken from the crawled /Basket page, which shows the heading 'Basket is empty.' when nothing has been added.
+- **an-empty-basket-says-so**: The plan also asserts that the basket's Checkout link is not visible, as the empty basket page does not offer it. This follows from the crawled pages.
+- **checkout-asks-to-sign-in**: I did not assert the URL after clicking Checkout, because no page shown to me gives the redirect path (it is probably under /Identity/Account/Login with a returnUrl, but that is a guess). The check is that the login page's 'Log in' heading, Email field and Password field are visible.
+- **checkout-asks-to-sign-in**: The plan never signs in, so the checkout is attempted as an anonymous visitor.
+- **wrong-password-is-refused**: The wrong password 'not-the-password' is typed as plain text because it is deliberately incorrect, not a real credential.
+- **wrong-password-is-refused**: The refusal is checked by the 'Invalid login attempt.' message, which the crawl saw after a failed login, and by confirming the Log in heading is still shown. I did not assert a URL after the attempt because the crawl did not show one for this case.
+- **signing-in-shows-who-is-signed-in**: The crawl never saw a logged-in page, so how the page shows the signed-in user is an assumption. I assumed the page shows the user's email address, demouser@microsoft.com, as visible text. If the application shows a name or some other wording instead, this check will fail even though the login worked.
+- **signing-in-shows-who-is-signed-in**: The login page also lists demouser@microsoft.com in its demo-credentials note. The assertion only runs after the login submit, so it should be checking the signed-in page, not that note. If the login fails and the page stays on the login form, the note could make the assertion pass wrongly.
+- **an-order-can-be-placed**: Missing part: paying and checking that the shop thanks you for the order. The crawl never reached the checkout, payment or order-confirmation pages, so nothing there can be named reliably and I did not guess at buttons or thank-you wording.
+- **an-order-can-be-placed**: This plan stops after the login attempt. Its checks are that the Roslyn Red Sheet is in the basket and that no 'Invalid login attempt.' message appears after logging in. Because it is partial, a pass is reported as inconclusive, not as a pass.
+- **an-order-can-be-placed**: Assumption: clicking Checkout while logged out sends the user to the login page. The description implies this ('log in ... when asked'), but the crawl did not show it. The waitFor on the 'Log in' heading will fail if that is not what happens.
+- **an-order-can-be-placed**: The email is typed as plain text because it is not a secret. The password is typed via the stored secret 'password'.
+- **order-history-needs-sign-in**: No page in the crawl shows the order history, and the logged-out navigation has no link to it. The path /Order/MyOrders is an assumption based on the standard eShopOnWeb layout, so please confirm it.
+- **order-history-needs-sign-in**: I did not assert the exact URL after the redirect, because the crawl never saw it. Instead the plan checks that the login page's 'Log in' heading, the Email and Password fields and the 'Log in' button are shown, which the crawl did see on /Identity/Account/Login.
+- **forgotten-password-is-confirmed**: The confirmation is checked by the heading and the message text the crawl saw on /Identity/Account/ForgotPasswordConfirmation after submitting a valid email.
+- **forgotten-password-is-confirmed**: The plan does not assert the confirmation page URL; the heading and message already show the request was confirmed.

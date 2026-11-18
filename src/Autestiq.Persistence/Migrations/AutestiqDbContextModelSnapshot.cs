@@ -1392,6 +1392,66 @@ namespace Autestiq.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Autestiq.Domain.Projects.EnvironmentSecret", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Ciphertext")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("ciphertext");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("EnvironmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("environment_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<Guid?>("SetBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("set_by");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_environment_secrets");
+
+                    b.HasIndex("EnvironmentId")
+                        .HasDatabaseName("ix_environment_secrets_environment_id");
+
+                    b.HasIndex("OrganizationId", "EnvironmentId", "Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_environment_secrets_organization_id_environment_id_name");
+
+                    b.ToTable("environment_secrets");
+                });
+
             modelBuilder.Entity("Autestiq.Domain.Projects.Project", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1896,6 +1956,16 @@ namespace Autestiq.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_plan_versions_plans_plan_id");
+                });
+
+            modelBuilder.Entity("Autestiq.Domain.Projects.EnvironmentSecret", b =>
+                {
+                    b.HasOne("Autestiq.Domain.Projects.TestEnvironment", null)
+                        .WithMany()
+                        .HasForeignKey("EnvironmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_environment_secrets_environments_environment_id");
                 });
 
             modelBuilder.Entity("Autestiq.Domain.Projects.Project", b =>

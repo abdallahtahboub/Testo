@@ -36,6 +36,8 @@ internal static class AuditActions
     public const string EvidenceExpired = "evidence.expired";
     public const string ExplorationActingAllowed = "environment.exploration_acting_allowed";
     public const string ExplorationActingWithdrawn = "environment.exploration_acting_withdrawn";
+    public const string SecretSet = "environment.secret_set";
+    public const string SecretDeleted = "environment.secret_deleted";
     public const string AiProcessingAllowed = "project.ai_processing_allowed";
     public const string AiProcessingWithdrawn = "project.ai_processing_withdrawn";
     public const string ProductionAuthorized = "environment.production_authorized";

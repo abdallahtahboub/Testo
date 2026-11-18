@@ -1,6 +1,6 @@
 # 0033 — A test account's sign-in details, kept encrypted per environment
 
-- **Status:** Proposed (waiting for the owner's approval)
+- **Status:** Accepted (the owner approved it on 2026-11-18)
 - **Date:** 2026-11-18
 
 ## Context
@@ -19,7 +19,7 @@ The owner's rules:
 
 A hosted store is therefore an interim, and must be labelled as one.
 
-## Decision (proposed)
+## Decision
 1. **What is kept.** Per test environment, the sign-in details of **one test account**: a name for each value, such as
    `username` and `password`, and the value.
    - The screen says, in words, to use an account made for testing and never a real person's.

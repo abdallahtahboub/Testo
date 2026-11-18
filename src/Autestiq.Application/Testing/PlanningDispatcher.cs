@@ -140,7 +140,8 @@ public sealed partial class PlanningDispatcher(
         var budget = RunBudget.Default with { MaxCostUsd = Math.Min(RunBudget.Default.MaxCostUsd, left) };
 
         var planned = await new PlanningService(planner, services.GetRequiredService<ILogger<PlanningService>>())
-            .PlanAsync(testCase.Description, site, budget, [], cancellationToken)
+            // The names of the environment's sign-in values, never the values: a plan may type them by name (ADR-0033).
+            .PlanAsync(testCase.Description, site, budget, await Projects.EnvironmentSecrets.NamesAsync(database, testCase.OrganizationId, testCase.EnvironmentId, cancellationToken).ConfigureAwait(false), cancellationToken)
             .ConfigureAwait(false);
 
         var checks = planned.CheckNotes ?? [];

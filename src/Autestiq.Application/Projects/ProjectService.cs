@@ -15,6 +15,7 @@ internal sealed class ProjectService(
     ICurrentUser currentUser,
     IOrganizationContext organizationContext,
     IOriginProofService proofs,
+    ISecretProtector protector,
     TimeProvider timeProvider)
     : IProjectService
 {
@@ -175,11 +176,28 @@ internal sealed class ProjectService(
             .ConfigureAwait(false);
 
         var summaries = new List<EnvironmentSummary>(environments.Count);
+        var ids = environments.Select(environment => environment.Id).ToList();
+
+        // Names and dates only: no query here reads a value or a ciphertext out.
+        var secrets = await database.EnvironmentSecrets
+            .Where(secret => ids.Contains(secret.EnvironmentId))
+            .OrderBy(secret => secret.Name)
+            .Select(secret => new { secret.EnvironmentId, secret.Name, secret.UpdatedAt })
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
 
         foreach (var environment in environments)
         {
             var proof = await proofs.GetAsync(environment.Origin, cancellationToken).ConfigureAwait(false);
-            summaries.Add(new EnvironmentSummary(environment.Id, environment.Name, environment.Origin, proof, environment.Kind, environment.ProductionAuthorizedAt, environment.ExplorationMayActAt));
+            summaries.Add(new EnvironmentSummary(
+                environment.Id,
+                environment.Name,
+                environment.Origin,
+                proof,
+                environment.Kind,
+                environment.ProductionAuthorizedAt,
+                environment.ExplorationMayActAt,
+                [.. secrets.Where(secret => secret.EnvironmentId == environment.Id).Select(secret => new EnvironmentSecretSummary(secret.Name, secret.UpdatedAt))]));
         }
 
         return summaries;
@@ -372,6 +390,98 @@ internal sealed class ProjectService(
         environment.ExplorationMayActBy = null;
         Record(AuditActions.ExplorationActingWithdrawn, nameof(TestEnvironment), environment.Id, $"{environment.Name} ({environment.Origin})");
         await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        return OperationResult.Success;
+    }
+
+    /// <summary>A secret's name: what a plan types it by, lower case, starting with a letter.</summary>
+    private static readonly System.Text.RegularExpressions.Regex SecretName = new("^[a-z][a-z0-9_]{0,31}$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+
+    /// <summary>The longest value kept: enough for any password, not a place to store documents.</summary>
+    private const int MaxSecretLength = 500;
+
+    /// <inheritdoc />
+    public async Task<OperationResult> SetSecretAsync(Guid environmentId, string name, string value, CancellationToken cancellationToken = default)
+    {
+        if (!currentUser.Can(Permission.ManageProjects))
+        {
+            return OperationResult.Failure("Environments_Error_NotAllowed");
+        }
+
+        // Exactly as given: a password's spaces are part of it.
+        if (name is null || !SecretName.IsMatch(name) || string.IsNullOrEmpty(value) || value.Length > MaxSecretLength)
+        {
+            return OperationResult.Failure("Environments_Error_InvalidSecret");
+        }
+
+        var environment = await database.Environments.FirstOrDefaultAsync(candidate => candidate.Id == environmentId, cancellationToken).ConfigureAwait(false);
+
+        if (environment is null)
+        {
+            return OperationResult.Failure("Environments_Error_NoSuchEnvironment");
+        }
+
+        // A test account, on a test site: never a production site's (ADR-0033 §1).
+        if (environment.Kind == EnvironmentKind.Production)
+        {
+            return OperationResult.Failure("Environments_Error_SecretsOnProduction");
+        }
+
+        var ciphertext = protector.Protect(EnvironmentSecrets.Purpose(environment.OrganizationId, environment.Id), value);
+
+        var existing = await database.EnvironmentSecrets
+            .FirstOrDefaultAsync(secret => secret.EnvironmentId == environment.Id && secret.Name == name, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (existing is null)
+        {
+            database.EnvironmentSecrets.Add(new EnvironmentSecret
+            {
+                OrganizationId = environment.OrganizationId,
+                EnvironmentId = environment.Id,
+                Name = name,
+                Ciphertext = ciphertext,
+                SetBy = currentUser.UserId,
+            });
+        }
+        else
+        {
+            existing.Ciphertext = ciphertext;
+            existing.SetBy = currentUser.UserId;
+        }
+
+        // The name only. The value is in no log, no audit entry and no answer.
+        Record(AuditActions.SecretSet, nameof(TestEnvironment), environment.Id, $"{environment.Name} ({environment.Origin}): {name}");
+        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        return OperationResult.Success;
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult> DeleteSecretAsync(Guid environmentId, string name, CancellationToken cancellationToken = default)
+    {
+        if (!currentUser.Can(Permission.ManageProjects))
+        {
+            return OperationResult.Failure("Environments_Error_NotAllowed");
+        }
+
+        var environment = await database.Environments.FirstOrDefaultAsync(candidate => candidate.Id == environmentId, cancellationToken).ConfigureAwait(false);
+
+        if (environment is null)
+        {
+            return OperationResult.Failure("Environments_Error_NoSuchEnvironment");
+        }
+
+        var existing = await database.EnvironmentSecrets
+            .FirstOrDefaultAsync(secret => secret.EnvironmentId == environment.Id && secret.Name == name, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (existing is not null)
+        {
+            database.EnvironmentSecrets.Remove(existing);
+            Record(AuditActions.SecretDeleted, nameof(TestEnvironment), environment.Id, $"{environment.Name} ({environment.Origin}): {name}");
+            await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
 
         return OperationResult.Success;
     }

@@ -129,6 +129,9 @@ public static class PlanningErrors
     /// <summary>An action was missing something it cannot work without.</summary>
     public const string Incomplete = "Planning_Error_Incomplete";
 
+    /// <summary>The plan types a secret by a name it was not given (ADR-0033).</summary>
+    public const string UnknownSecret = "Planning_Error_UnknownSecret";
+
     /// <summary>The planner spent the run's token or money budget.</summary>
     public const string BudgetSpent = "Planning_Error_BudgetSpent";
 

@@ -172,7 +172,15 @@ only a footer line, because the lines are `section`s, which was a guess not chec
 `section`s and `div`s with text are now read. On our three applications nothing changes: the same elements, the same
 names and the same coverage, with test ids and without, so the snapshots a planner is shown there are as before and
 their figures stand. A worker test serves a basket built as eShopOnWeb's is and checks that each line's text is
-described and reached exactly once; it fails with the `div` change alone. **By the freeze rule above, the explorer has now been adjusted twice on
+described and reached exactly once; it fails with the `div` change alone.
+
+Seeing the lines had a cost the owner's next run showed: a basket holding each of eShopOnWeb's products now said
+something different every time, so the explorer kept and explored twelve baskets, ran out of page budget at 46 pages,
+and described 714 elements where it had described 230. **Pages reached by pressing are now kept at most four of a
+kind** (the same path and controls, whatever data they show), and none past that is explored further. Four is the
+smallest number that leaves our three applications exactly as before. Three dropped one page each from the demo
+shop and the clinic without test ids, though their coverage did not change. A worker test with five products fails
+without the limit. **By the freeze rule above, the explorer has now been adjusted twice on
 eShopOnWeb's own results**, so a planner run there is reported as such, and a clean claim still needs an application
 the explorer was never tuned on.
 

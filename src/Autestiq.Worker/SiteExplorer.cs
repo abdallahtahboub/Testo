@@ -62,9 +62,10 @@ internal static partial class SiteExplorer
 
     /// <summary>
     /// How many pages reached by pressing are kept of one kind (<see cref="Signature"/>): enough for a form's
-    /// different refusals, not a basket for every product (ADR-0024, 2026-11-18).
+    /// different refusals, not a basket for every product (ADR-0024, 2026-11-18). Four is the smallest that leaves
+    /// what our three applications show unchanged, with test ids and without; three dropped one page from two of them.
     /// </summary>
-    private const int MaxPressedPagesPerKind = 3;
+    private const int MaxPressedPagesPerKind = 4;
 
     /// <summary>Elements that hold text and nothing else: what a test checks when nothing has a test id.</summary>
     // Leaf divs and sections are in the list because sites lay out rows with them: eShopOnWeb's basket puts each line's

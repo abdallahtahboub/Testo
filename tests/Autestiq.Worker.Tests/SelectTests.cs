@@ -56,12 +56,12 @@ public class SelectTests(ListPageFixture pages) : IClassFixture<ListPageFixture>
     [Fact]
     public async Task Exploring_KeepsOnlyAFewPagesOfOneKind_ThoughEachSaysSomethingDifferent()
     {
-        // Five "Add" buttons, each to a basket naming its product: one kind of page, five things said.
+        // Five "Add" buttons, each to a basket naming its product: one kind of page, five things said, four kept.
         var snapshot = Explorations.SnapshotOf(await Jobs.ExploreAsync(pages.Origin, Explorations.Budget, exploreStates: true));
 
         var baskets = snapshot.Pages.Count(page => page.Path.StartsWith("/added", StringComparison.Ordinal));
 
-        Assert.InRange(baskets, 1, 3);
+        Assert.InRange(baskets, 1, 4);
     }
 
     [Fact]

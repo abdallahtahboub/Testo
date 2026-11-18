@@ -82,7 +82,10 @@ A hosted store is therefore an interim, and must be labelled as one.
   only, the explorer signing in on the demo shop (and failing without the change), a wrong password staying on the
   refusal, no sign-in without form typing, no value in the description, and a browser test of the panel.
 - **Unchanged:** the explore and coverage figures on our three applications, with and without test ids.
-- **Not yet measured:** eShopOnWeb signed in. It needs a paid run with the owner's yes.
+- **Not yet measured:** eShopOnWeb signed in. `--target eshop --signed-in` gives its two sign-in scenarios the
+  published demo account's user name as well as its password and writes `docs/ai-benchmark-eshop-signed-in.md`, so the
+  18-of-22 set stays as it was. The login page prints the demo account, so its values are replaced in what the planner
+  sees, as they would be on a customer's site.
 
 ## Consequences
 - **Easier:** flows behind a sign-in can be explored, planned, approved and run, on our applications and a customer's.

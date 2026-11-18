@@ -40,6 +40,18 @@ public static class EshopScenarios
     private static readonly Dictionary<string, string> DemoPassword =
         new(StringComparer.Ordinal) { ["password"] = "Pass@word1" };
 
+    /// <summary>
+    /// The scenarios with the whole published demo account, user name as well as password, so that the explorer can
+    /// sign in as an environment's stored test account lets it (ADR-0033). Only the scenarios that already carry the
+    /// password get it: the others are about what a visitor who is not signed in sees.
+    /// </summary>
+    public static IReadOnlyList<BenchmarkScenario> SignedIn =>
+    [
+        .. All.Select(scenario => scenario.Secrets is { } secrets && secrets.ContainsKey("password")
+            ? scenario with { Secrets = new Dictionary<string, string>(secrets, StringComparer.Ordinal) { ["username"] = DemoUser } }
+            : scenario),
+    ];
+
     /// <summary>Every eShopOnWeb scenario.</summary>
     public static IReadOnlyList<BenchmarkScenario> All { get; } =
     [

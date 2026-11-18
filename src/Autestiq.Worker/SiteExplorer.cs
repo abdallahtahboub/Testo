@@ -61,9 +61,12 @@ internal static partial class SiteExplorer
     private const int MaxOptionsDescribed = 25;
 
     /// <summary>Elements that hold text and nothing else: what a test checks when nothing has a test id.</summary>
+    // A leaf div is in the list because sites lay out rows with them: eShopOnWeb's basket puts each line's product name
+    // and price in bare divs, and without them the explorer saw a basket with nothing in it (ADR-0024, 2026-11-18).
     private const string LeafTextSelector =
         "td:not(:has(*)), th:not(:has(*)), li:not(:has(*)), p:not(:has(*)), dd:not(:has(*)), dt:not(:has(*)), "
-        + "span:not(:has(*)), strong:not(:has(*)), em:not(:has(*)), b:not(:has(*)), output:not(:has(*)), caption:not(:has(*))";
+        + "span:not(:has(*)), strong:not(:has(*)), em:not(:has(*)), b:not(:has(*)), output:not(:has(*)), caption:not(:has(*)), "
+        + "div:not(:has(*))";
 
     /// <summary>How many pages may be opened for each page the budget allows to be shown.</summary>
     private const int PagesOpenedPerPageShown = 4;

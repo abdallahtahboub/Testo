@@ -10,8 +10,8 @@ using Microsoft.Extensions.Logging;
 namespace Autestiq.Worker.Tests.Support;
 
 /// <summary>
-/// Two pages with a list on them, for the select action: none of our three applications has one, and their
-/// scenario sets are frozen, so the list lives here.
+/// Pages with what our three applications lack and their frozen scenario sets cannot add: a list, for the select
+/// action, and a basket laid out with bare divs, for what the explorer reads as text.
 /// </summary>
 public sealed class ListPageFixture : IAsyncLifetime
 {
@@ -37,6 +37,20 @@ public sealed class ListPageFixture : IAsyncLifetime
               <select id="brand" name="brand"><option>All</option><option>.NET</option><option>Azure</option></select>
               <button type="submit">Show</button>
             </form>
+            <p><a href="/basket">Basket</a></p>
+            </main></body></html>
+            """,
+            "text/html"));
+
+        // A basket laid out with bare divs, as eShopOnWeb's is: the text a test checks sits in leaf divs, in no cell,
+        // item or paragraph.
+        _app.MapGet("/basket", () => Results.Content(
+            """
+            <!doctype html><html lang="en"><head><title>Basket</title></head><body><main>
+            <h1>Basket</h1>
+            <article class="row"><div class="col">Roslyn Red Sheet</div><div class="col">$ 8.50</div></article>
+            <article class="row"><div class="col">Prism White TShirt</div><div class="col">$ 12.00</div></article>
+            <div class="total">Total: $ 20.50</div>
             </main></body></html>
             """,
             "text/html"));

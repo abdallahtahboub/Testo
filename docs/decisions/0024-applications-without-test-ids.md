@@ -164,6 +164,16 @@ baseline failed: the message is shown both in the form's summary and beside the 
 explorer does tell the two apart (one of them is the only copy inside a container that also says
 "Password"), but the scenario stays dropped: the set was frozen without it.
 
+**Text in bare divs (2026-11-18).** The planner's first run on eShopOnWeb (ADR-0020) lost two scenarios because the
+basket, after "Add to basket", was described with 6 elements and none of its lines: eShopOnWeb lays each line out
+in bare `div`s, and the explorer read plain text only from cells, items, paragraphs and inline elements. Leaf `div`s
+with text are now read too. On our three applications nothing changes: the same elements, the same names and the
+same coverage, with test ids and without, so the snapshots a planner is shown there are as before and their figures
+stand. A worker test serves a basket made of `div`s and checks that each line's text is described and reached
+exactly once; it fails without the change. **By the freeze rule above, the explorer has now been adjusted twice on
+eShopOnWeb's own results**, so a planner run there is reported as such, and a clean claim still needs an application
+the explorer was never tuned on.
+
 **Exact names, and a plan's own words.** What the explorer offers a plan is checked with exact names. A
 plan's step is matched exactly first as well; only when nothing has the exact name within two seconds is a
 looser match tried, so a name a person or a model shortened ("Basket" for the link "Basket (2)", whose count

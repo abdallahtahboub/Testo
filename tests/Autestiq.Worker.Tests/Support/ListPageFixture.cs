@@ -37,7 +37,7 @@ public sealed class ListPageFixture : IAsyncLifetime
               <select id="brand" name="brand"><option>All</option><option>.NET</option><option>Azure</option></select>
               <button type="submit">Show</button>
             </form>
-            <p><a href="/basket">Basket</a></p>
+            <p><a href="/basket">Basket</a> <a href="/shop">Shop</a></p>
             </main></body></html>
             """,
             "text/html"));
@@ -51,6 +51,26 @@ public sealed class ListPageFixture : IAsyncLifetime
             <article class="row"><div><section class="col">Roslyn Red Sheet</section><section class="col">$ 8.50</section></div></article>
             <article class="row"><div><section class="col">Prism White TShirt</section><section class="col">$ 12.00</section></div></article>
             <div class="total">Total: $ 20.50</div>
+            </main></body></html>
+            """,
+            "text/html"));
+
+        // Five products, each with a button that opens a basket holding it: one kind of page that says something
+        // different for every product.
+        string[] products = ["Teapot", "Cup", "Tray", "Saucer", "Spoon"];
+
+        _app.MapGet("/shop", () => Results.Content(
+            "<!doctype html><html lang=\"en\"><head><title>Shop</title></head><body><main><h1>Shop</h1>"
+            + string.Concat(products.Select(product =>
+                $"<article><h2>{product}</h2><form method=\"get\" action=\"/added\"><input type=\"hidden\" name=\"item\" value=\"{product}\"><button type=\"submit\">Add</button></form></article>"))
+            + "</main></body></html>",
+            "text/html"));
+
+        _app.MapGet("/added", (string? item) => Results.Content(
+            $"""
+            <!doctype html><html lang="en"><head><title>Basket</title></head><body><main>
+            <h1>Your basket</h1>
+            <article><div><section>{WebUtility.HtmlEncode(item ?? "nothing")}</section><section>1</section></div></article>
             </main></body></html>
             """,
             "text/html"));

@@ -98,6 +98,10 @@ internal static partial class SiteExplorer
         // What is already shown. By what pages say, not only their kind: two refusals with different messages
         // are both worth a plan's attention.
         var knownKinds = new HashSet<string>(crawled.Select(Telling), StringComparer.Ordinal);
+
+        // How many pressed-to pages of each kind are kept: a basket holding each of a shop's products is one kind of
+        // page that says something different every time, and without a limit it fills the budget and the prompt.
+        var keptOfKind = new Dictionary<string, int>(StringComparer.Ordinal);
         var searched = new HashSet<string>(StringComparer.Ordinal);
         var found = new List<PageSnapshot>();
         var queue = new Queue<(string Start, List<PressStep> Presses, PageSnapshot State)>();
@@ -174,15 +178,20 @@ internal static partial class SiteExplorer
                     }
 
                     var arrived = visit.Page with { ReachedBy = Steps(start, reached) };
+                    var kind = Signature(arrived);
+                    var full = keptOfKind.GetValueOrDefault(kind) >= MaxPressedPagesPerKind;
 
                     // The snapshot holds one page of each kind. The same page for another date, or with
-                    // another reference number, would only fill the prompt.
-                    if (knownKinds.Add(Telling(arrived)))
+                    // another reference number, would only fill the prompt. What a page says sets it apart
+                    // (two refusals with different messages), but only so many times for one kind.
+                    if (!full && knownKinds.Add(Telling(arrived)))
                     {
                         found.Add(arrived);
+                        keptOfKind[kind] = keptOfKind.GetValueOrDefault(kind) + 1;
                     }
 
-                    if (searched.Add(ContentKey(arrived)))
+                    // Nor is a kind already shown that often explored further from.
+                    if (!full && searched.Add(ContentKey(arrived)))
                     {
                         queue.Enqueue((start, reached, arrived));
                     }

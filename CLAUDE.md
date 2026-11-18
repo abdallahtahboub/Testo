@@ -19,8 +19,9 @@ verdict was reached, and never passed a broken application, so **the ADR-0020 ga
 three applications**, and the same holds with every test id removed. **Explored read-only, as a customer's site
 is, it drops to 36 of 66 runs correct (full: 62 of 66), still with no false positive**: read-only exploration
 never sees what an action leads to (ADR-0020). **On eShopOnWeb, the first application nobody here wrote, it gave the
-right verdict on 14 of 22 runs (7 of 11 scenarios), with no false positive**: the losses are mostly what the explorer
-cannot see (a basket's lines, pages behind sign-in). The gate's 90% is not met there, and no broader claim is made. **Milestone 5, the first customer flow, is under way (ADR-0030)**: part 1 built projects, environments with
+right verdict on 14 of 22 runs, and 18 of 22 (82%) after two explorer changes made on that application's own results,
+with no false positive either time**; what remains is pages behind sign-in and one guessed address. The gate's 90% is
+not met there, the 82% is not a clean measurement, and no broader claim is made. **Milestone 5, the first customer flow, is under way (ADR-0030)**: part 1 built projects, environments with
 ownership proofs, production off by default, and the app's navigation drawn from the module registry. Part 2 built
 describing a test in a sentence: the site is explored (read-only on a customer's site) and the planner writes a plan,
 **only if the project's AI permission, off by default, is given**, within the AI budgets, with what was sent recorded

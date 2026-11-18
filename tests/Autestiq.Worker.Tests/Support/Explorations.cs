@@ -24,10 +24,12 @@ internal static partial class Explorations
         bool pressing,
         bool forms,
         Func<Task>? startAfresh = null,
-        string? named = null)
+        string? named = null,
+        IReadOnlyDictionary<string, string>? secrets = null,
+        string? secretsLabel = null)
     {
         var shared = Shared.GetOrAdd(
-            $"{named ?? origin}|{pressing}|{forms}",
+            $"{named ?? origin}|{pressing}|{forms}|{secretsLabel}",
             _ => new Lazy<Task<WorkerResult>>(() => Jobs.ExploreAsync(
                 origin,
                 Budget,
@@ -37,7 +39,8 @@ internal static partial class Explorations
                 named,
 
                 // Not one test's to cancel: the others are waiting for it too.
-                CancellationToken.None)));
+                CancellationToken.None,
+                secrets)));
 
         return await shared.Value.ConfigureAwait(false);
     }

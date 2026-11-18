@@ -47,7 +47,7 @@ internal static partial class SiteExplorer
     private sealed record Pressing(IReadOnlyList<PageSnapshot> Pages, bool Truncated, int Visits, int Failed);
 
     /// <summary>Where one visit ended. No page means it could not be carried out.</summary>
-    private readonly record struct Visit(PageSnapshot? Page, FormKind Form)
+    private readonly record struct Visit(PageSnapshot? Page, FormKind Form, bool AsksForPassword = false)
     {
         public static Visit Failed => new(null, FormKind.None);
     }
@@ -94,6 +94,10 @@ internal static partial class SiteExplorer
         CancellationToken cancellationToken)
     {
         var mayType = ExplorationPolicy.MaySubmitForms(job);
+
+        // Signing in is typing into a form, so it needs what typing needs, and the account itself. The dispatcher
+        // hands one over only where the environment's owner allowed exploring to act (ADR-0032, ADR-0033).
+        var maySignIn = mayType && FormValues.CanSignIn(job.Secrets);
 
         // What is already shown. By what pages say, not only their kind: two refusals with different messages
         // are both worth a plan's attention.
@@ -174,6 +178,11 @@ internal static partial class SiteExplorer
                         if (visit.Form == FormKind.FieldsWithEmail)
                         {
                             fills.Add(FillMode.WrongEmail);
+                        }
+
+                        if (maySignIn && visit.AsksForPassword)
+                        {
+                            fills.Add(FillMode.SignIn);
                         }
                     }
 
@@ -297,6 +306,9 @@ internal static partial class SiteExplorer
         {
             FillMode.Valid => "type test values, then click " + Named(press.Target),
             FillMode.WrongEmail => "type test values with an email address that is not one, then click " + Named(press.Target),
+
+            // Named, never the values: this text goes to the planner.
+            FillMode.SignIn => "sign in with the test account (secrets username and password), then click " + Named(press.Target),
             _ => "click " + Named(press.Target),
         }),
     ];
@@ -337,6 +349,7 @@ internal static partial class SiteExplorer
         }
 
         var form = FormKind.None;
+        var asksForPassword = false;
 
         try
         {
@@ -365,14 +378,19 @@ internal static partial class SiteExplorer
                         form = fields.Count == 0 ? FormKind.None
                             : fields.Any(field => field.IsEmail) ? FormKind.FieldsWithEmail
                             : FormKind.Fields;
+                        asksForPassword = fields.Any(field => field.Type == "password");
                     }
 
                     if (typing)
                     {
                         foreach (var (field, type, isEmail) in fields)
                         {
+                            var value = press.Fill == FillMode.SignIn && job.Secrets is { } secrets
+                                ? FormValues.ForSignIn(type, isEmail, secrets)
+                                : FormValues.For(type, isEmail, press.Fill);
+
                             await field.FillAsync(
-                                FormValues.For(type, isEmail, press.Fill),
+                                value,
                                 new LocatorFillOptions { Timeout = ActionTimeout }).ConfigureAwait(false);
                         }
                     }
@@ -396,7 +414,7 @@ internal static partial class SiteExplorer
             return Visit.Failed;
         }
 
-        return new Visit(await LookAtAsync(page, here.PathAndQuery, described).ConfigureAwait(false), form);
+        return new Visit(await LookAtAsync(page, here.PathAndQuery, described).ConfigureAwait(false), form, asksForPassword);
     }
 
     /// <summary>

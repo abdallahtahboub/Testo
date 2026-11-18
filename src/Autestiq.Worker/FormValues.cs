@@ -4,7 +4,8 @@ namespace Autestiq.Worker;
 /// <remarks>
 /// The application decides nothing about what is typed. It can only be the reason one of these fixed
 /// values is chosen over another: a field that asks for an email address gets the email value. None of
-/// them is a credential, so a sign-in form is only ever seen refusing.
+/// them is a credential. The one exception is <see cref="FillMode.SignIn"/>, which types the environment's
+/// stored test account (ADR-0033), and only when the job carries one.
 /// </remarks>
 internal static class FormValues
 {
@@ -36,6 +37,27 @@ internal static class FormValues
             _ => "Test value",
         };
     }
+
+    /// <summary>The names of the stored test account's values a sign-in needs (ADR-0033).</summary>
+    public const string UsernameSecret = "username";
+
+    /// <inheritdoc cref="UsernameSecret"/>
+    public const string PasswordSecret = "password";
+
+    /// <summary>Whether a job carries a test account to sign in with: both its values, and nothing less.</summary>
+    public static bool CanSignIn(IReadOnlyDictionary<string, string>? secrets) =>
+        secrets is not null
+        && secrets.TryGetValue(UsernameSecret, out var username) && username.Length > 0
+        && secrets.TryGetValue(PasswordSecret, out var password) && password.Length > 0;
+
+    /// <summary>
+    /// What a sign-in form's field gets: the password for a password field, the user name for an email or text
+    /// field, and the usual fixed value for anything else.
+    /// </summary>
+    public static string ForSignIn(string fieldType, bool isEmail, IReadOnlyDictionary<string, string> secrets) =>
+        fieldType == "password" ? secrets[PasswordSecret]
+        : isEmail || fieldType is "text" or "email" ? secrets[UsernameSecret]
+        : For(fieldType, isEmail, FillMode.Valid);
 }
 
 /// <summary>How a form is filled before a control is pressed.</summary>
@@ -49,6 +71,12 @@ internal enum FillMode
 
     /// <summary>As <see cref="Valid"/>, except that an email field gets something that is not an address.</summary>
     WrongEmail,
+
+    /// <summary>
+    /// A sign-in with the environment's stored test account: its user name in the email or text field, its password
+    /// in the password field. Offered only for a form with a password field, and only when the job carries the account.
+    /// </summary>
+    SignIn,
 }
 
 /// <summary>What a control's form holds, which decides whether filling it is worth a visit.</summary>

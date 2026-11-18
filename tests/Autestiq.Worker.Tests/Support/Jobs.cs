@@ -25,9 +25,15 @@ internal static class Jobs
         bool submitForms = false,
         Func<Task>? startAfresh = null,
         string? named = null,
-        CancellationToken? cancellation = null) =>
+        CancellationToken? cancellation = null,
+        IReadOnlyDictionary<string, string>? secrets = null) =>
         new ScenarioRunner(TimeProvider.System) { StartAfresh = startAfresh }.RunAsync(
-            Job(named ?? origin, "explore", WorkerTask.Explore, budget) with { ExploreStates = exploreStates, SubmitForms = submitForms },
+            Job(named ?? origin, "explore", WorkerTask.Explore, budget) with
+            {
+                ExploreStates = exploreStates,
+                SubmitForms = submitForms,
+                Secrets = secrets,
+            },
             cancellation ?? TestContext.Current.CancellationToken);
 
     /// <summary>Carries out a plan.</summary>

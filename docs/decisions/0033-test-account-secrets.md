@@ -49,6 +49,41 @@ A hosted store is therefore an interim, and must be labelled as one.
 7. **Deletion.** Deleting the secrets, or the environment, removes the ciphertext. Withdrawing exploration's
    permission stops their use in explorations at once.
 
+## Built (2026-11-18)
+- **The store.** `EnvironmentSecret` (organization, environment, name, ciphertext, who set it), tenant-filtered, unique
+  per environment and name, deleted with its environment. `IProjectService.SetSecretAsync` and `DeleteSecretAsync`:
+  - `ManageProjects` only;
+  - names are lower-case words (`^[a-z][a-z0-9_]{0,31}$`), values 1 to 500 characters, kept exactly as typed;
+  - refused for production;
+  - audited as `environment.secret_set` and `environment.secret_deleted`, with the name and never the value.
+  - `ListEnvironmentsAsync` returns names and dates only. No method returns a value.
+- **Encryption.** `ISecretProtector` in Application. In Web it is ASP.NET Core Data Protection, under the purpose
+  `Autestiq.EnvironmentSecret.v1/{organization}/{environment}`. The key ring lives in the directory
+  `DataProtection:KeyDirectory`, and the application refuses to start outside Development without it. A value
+  that cannot be decrypted (another key ring, another purpose) refuses the run; it is never sent half-filled.
+  Without a protector, the store refuses to save anything.
+- **Planning and approval.** The planner is told the environment's secret names. The validator refuses a plan that
+  types any other name (`Planning_Error_UnknownSecret`). A plan typing secrets is approvable once the environment
+  has every one of them, and the dispatcher checks it again before a run.
+- **Running.** The dispatcher decrypts the values when a run starts, for runs of approved plans, and for explorations
+  only where ADR-0032's permission stands (or on our own trusted-local applications). Scripted runs get none.
+- **Exploring signed in.** With both a `username` and a `password` stored, and only where the exploration may type
+  into forms, the explorer adds one more way to fill a form that has a password field: the account's user name in
+  its email or text field and the password in its password field. The page it reaches is described as reached by
+  "sign in with the test account (secrets username and password), then click …". **Every stored value is then
+  replaced in the whole description by `[secret:<name>]` before it leaves the worker** (values of four characters
+  or more), so a page that shows "signed in as …" never sends the user name to the model. A plan therefore cannot
+  check the user name's text.
+- **The screen.** Each test environment on the Environments page has a "Test account" panel: the saved names with
+  their dates and a Remove button, and a user name and a password field (the browser is told not to fill either).
+  Saving clears both fields; nothing saved is shown again. Who set a value is in the audit log, not on the panel.
+- **Tests:** the refusals, the audit, purpose binding, another key ring, roles, production, another organization,
+  the validator, approval with and without the secret, values reaching approved runs and permitted explorations
+  only, the explorer signing in on the demo shop (and failing without the change), a wrong password staying on the
+  refusal, no sign-in without form typing, no value in the description, and a browser test of the panel.
+- **Unchanged:** the explore and coverage figures on our three applications, with and without test ids.
+- **Not yet measured:** eShopOnWeb signed in. It needs a paid run with the owner's yes.
+
 ## Consequences
 - **Easier:** flows behind a sign-in can be explored, planned, approved and run, on our applications and a customer's.
 - **Harder:** we hold a customer's test credentials, so a compromise of our servers together with the key ring would

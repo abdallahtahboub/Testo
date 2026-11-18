@@ -117,3 +117,17 @@
 .environments__production p {
   margin: 0;
 }
+
+/* Whether exploring may act (ADR-0032): a choice, not a warning, so a neutral border. */
+.environments__acting {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.environments__acting p {
+  margin: 0;
+}

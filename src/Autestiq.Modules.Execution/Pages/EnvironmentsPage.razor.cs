@@ -59,6 +59,8 @@ public sealed partial class EnvironmentsPage : ComponentBase
     /// <summary>The production environments whose acknowledgement an owner has ticked on this page.</summary>
     private HashSet<Guid> Acknowledged { get; } = [];
 
+    private HashSet<Guid> ActingAcknowledged { get; } = [];
+
     private bool IsOwner => CurrentUser.Role == Role.Owner;
 
     /// <inheritdoc />
@@ -141,6 +143,28 @@ public sealed partial class EnvironmentsPage : ComponentBase
     // The service refuses without the acknowledgement; the page passes on exactly what the owner ticked.
     private Task AuthorizeAsync(Guid environmentId) => DoAsync(async () =>
         (await ProjectService.AuthorizeProductionAsync(environmentId, Acknowledged.Contains(environmentId), CancellationToken.None).ConfigureAwait(false)).Errors);
+
+    private void AcknowledgeActing(Guid environmentId, bool acknowledged)
+    {
+        if (acknowledged)
+        {
+            ActingAcknowledged.Add(environmentId);
+        }
+        else
+        {
+            ActingAcknowledged.Remove(environmentId);
+        }
+    }
+
+    // As with production: the service refuses without the acknowledgement, and the page sends exactly what was ticked.
+    private Task AllowActingAsync(Guid environmentId) => DoAsync(async () =>
+        (await ProjectService.AllowExplorationActingAsync(environmentId, ActingAcknowledged.Contains(environmentId), CancellationToken.None).ConfigureAwait(false)).Errors);
+
+    private Task WithdrawActingAsync(Guid environmentId) => DoAsync(async () =>
+    {
+        ActingAcknowledged.Remove(environmentId);
+        return (await ProjectService.WithdrawExplorationActingAsync(environmentId, CancellationToken.None).ConfigureAwait(false)).Errors;
+    });
 
     private Task WithdrawAsync(Guid environmentId) => DoAsync(async () =>
     {

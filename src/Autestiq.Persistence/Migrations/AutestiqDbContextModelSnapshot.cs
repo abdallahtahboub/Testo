@@ -1491,6 +1491,14 @@ namespace Autestiq.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
+                    b.Property<DateTimeOffset?>("ExplorationMayActAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("exploration_may_act_at");
+
+                    b.Property<Guid?>("ExplorationMayActBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("exploration_may_act_by");
+
                     b.Property<string>("Kind")
                         .IsRequired()
                         .HasMaxLength(20)

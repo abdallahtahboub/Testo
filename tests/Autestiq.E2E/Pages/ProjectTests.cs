@@ -118,6 +118,35 @@ public class ProjectTests(AppFixture app) : BrowserTest(app)
     }
 
     [Fact]
+    public async Task Environments_ExploringMayAct_OnlyOnceAnOwnerAcknowledges_AndCanBeWithdrawn()
+    {
+        var page = await OpenSignedInAsync(Routes.Environments("SHOP"));
+        await Expect(page.Page.GetByTestId("add-environment")).ToBeEnabledAsync();
+
+        var name = $"Act{Guid.CreateVersion7():N}"[..12];
+        await page.Page.GetByTestId("environment-name").FillAsync(name);
+        await page.Page.GetByTestId("environment-origin").FillAsync($"https://{name.ToLowerInvariant()}.northwind.example");
+        await page.Page.GetByTestId("add-environment").ClickAsync();
+
+        var environment = page.Page.GetByTestId($"environment-{name}");
+        await Expect(environment.GetByTestId("acting-state")).ToContainTextAsync("only follows links");
+
+        // Without the acknowledgement the owner is told why, and nothing changes.
+        await environment.GetByTestId($"allow-acting-{name}").ClickAsync();
+        await Expect(page.Page.GetByRole(Microsoft.Playwright.AriaRole.Alert)).ToContainTextAsync("Tick the acknowledgement first");
+
+        await environment.GetByTestId($"acknowledge-acting-{name}").GetByRole(Microsoft.Playwright.AriaRole.Checkbox).CheckAsync();
+        await environment.GetByTestId($"allow-acting-{name}").ClickAsync();
+        await Expect(environment.GetByTestId("acting-state")).ToContainTextAsync("may press its buttons and send its forms with test values");
+
+        await environment.GetByTestId($"withdraw-acting-{name}").ClickAsync();
+        await Expect(environment.GetByTestId("acting-state")).ToContainTextAsync("only follows links");
+
+        page.AssertNoProblems();
+        await page.AssertAccessibleAsync();
+    }
+
+    [Fact]
     public async Task Environments_OfAProjectThisOrganizationDoesNotHave_SaysNoSuchProject()
     {
         var page = await OpenSignedInAsync(Routes.Environments("NOPE"));

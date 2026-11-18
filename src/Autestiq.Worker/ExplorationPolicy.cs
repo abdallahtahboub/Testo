@@ -46,7 +46,8 @@ public static class ExplorationPolicy
     {
         ArgumentNullException.ThrowIfNull(job);
 
-        return job.Task == WorkerTask.Explore && job.ExploreStates && IsOurOwn(job);
+        // Our own application, or a customer's whose owner allowed it (ADR-0032). Nothing else is acted on.
+        return job.Task == WorkerTask.Explore && job.ExploreStates && (IsOurOwn(job) || job.CustomerAllowsActing);
     }
 
     /// <summary>

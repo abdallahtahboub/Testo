@@ -45,7 +45,8 @@ public sealed record EnvironmentSummary(
     string Origin,
     OriginProofState? Proof,
     EnvironmentKind Kind = EnvironmentKind.Test,
-    DateTimeOffset? ProductionAuthorizedAt = null)
+    DateTimeOffset? ProductionAuthorizedAt = null,
+    DateTimeOffset? ExplorationMayActAt = null)
 {
     /// <summary>Whether runs may be aimed at it, as far as its kind goes: always for a test site, after authorization for production.</summary>
     public bool KindAllowsRuns => Kind == EnvironmentKind.Test || ProductionAuthorizedAt is not null;
@@ -102,6 +103,16 @@ public interface IProjectService
 
     /// <summary>Withdraws that authorization; runs are refused again. Owners only. Audited.</summary>
     Task<OperationResult> WithdrawProductionAsync(Guid environmentId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Allows exploring this environment to press its buttons and send its forms with test values (ADR-0032). Owners
+    /// only, with the acknowledgement that it can create records on the site; never for a production environment.
+    /// Audited.
+    /// </summary>
+    Task<OperationResult> AllowExplorationActingAsync(Guid environmentId, bool acknowledged, CancellationToken cancellationToken = default);
+
+    /// <summary>Withdraws that permission; the site is explored read-only again. Owners only. Audited.</summary>
+    Task<OperationResult> WithdrawExplorationActingAsync(Guid environmentId, CancellationToken cancellationToken = default);
 
     /// <summary>Removes an environment. Its origin's proof stays, as it belongs to the organization, not the environment.</summary>
     Task<OperationResult> RemoveEnvironmentAsync(Guid environmentId, CancellationToken cancellationToken = default);

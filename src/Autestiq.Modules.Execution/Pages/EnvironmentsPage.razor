@@ -89,6 +89,40 @@ else
                                 </div>
                             }
 
+                            @if (environment.Kind == EnvironmentKind.Test)
+                            {
+                                @* ADR-0032: exploring acts on a customer's site only with an owner's permission, never on production. *@
+                                <div class="environments__acting" data-testid="acting-state">
+                                    @if (environment.ExplorationMayActAt is { } allowedAt)
+                                    {
+                                        <p>@L["Environments_Acting_Allowed", allowedAt.ToLocalTime().ToString("d")]</p>
+                                        @if (IsOwner)
+                                        {
+                                            <TButton Variant="ButtonVariant.Ghost" Disabled="Busy || !Ready" OnClick="() => WithdrawActingAsync(environment.EnvironmentId)" data-testid="@($"withdraw-acting-{environment.Name}")">
+                                                @L["Environments_Acting_Withdraw"]
+                                            </TButton>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <p>@L["Environments_Acting_Off"]</p>
+                                        @if (IsOwner)
+                                        {
+                                            <TCheckbox Label="@L["Environments_Acting_Acknowledge"]"
+                                                       Checked="ActingAcknowledged.Contains(environment.EnvironmentId)"
+                                                       CheckedChanged="checkedNow => AcknowledgeActing(environment.EnvironmentId, checkedNow)"
+                                                       Disabled="!Ready"
+                                                       data-testid="@($"acknowledge-acting-{environment.Name}")" />
+                                            <div>
+                                                <TButton Variant="ButtonVariant.Secondary" Disabled="Busy || !Ready" OnClick="() => AllowActingAsync(environment.EnvironmentId)" data-testid="@($"allow-acting-{environment.Name}")">
+                                                    @L["Environments_Acting_Allow"]
+                                                </TButton>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            }
+
                             @if (Requests.TryGetValue(environment.Origin, out var request))
                             {
                                 <div class="environments__proof" data-testid="proof-instructions">

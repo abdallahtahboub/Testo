@@ -172,6 +172,24 @@ and two of them are the explorer's, not the model's:
 had not checked.** That is below the gate's 90%. The causes are mostly what the explorer shows, which can be improved
 and measured again without changing the frozen prompt.
 
+**After two explorer changes made on eShopOnWeb's own results (2026-11-18, the owner's run; ADR-0024):** the explorer
+now reads text in bare `section`s and `div`s, and keeps at most four pressed-to pages of a kind. Same scenarios, same
+frozen prompt.
+
+| | First run | After the explorer changes |
+|---|---|---|
+| Correct | 14/22 (7 of 11 scenarios) | **18/22 (82%), 9 of 11 scenarios** |
+| False positives | 0 | **0** |
+| False negatives | 2 | 2 (the guessed address, unchanged) |
+| No verdict | 6 | 2 (placing an order: the explorer does not sign in) |
+| Cost per plan | $0.025 | $0.036 (the snapshot is larger) |
+
+Both basket scenarios now pass. Model cost: about $0.40. Report: `docs/ai-benchmark-eshop.md`. **This figure is reported
+as measured after the explorer was adjusted on this application's results, so it is not a clean measurement of an
+unseen application.** A clean one needs an application the explorer was never tuned on. The two remaining losses are
+the explorer not signing in (which needs a store for a test account's password, ADR-0030's G-6) and one address the
+planner guessed and said it guessed.
+
 **What this supports, and what it does not.** It supports this statement: *on our three benchmark
 applications, on scenarios written after the planner was frozen, the planner's tests gave the right verdict
 on 95% of sound-application runs, caught every seeded defect where a verdict was reached, and never passed

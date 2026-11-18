@@ -148,6 +148,30 @@ them.** A customer's site is explored read-only today (ADR-0030), so no claim of
 customer's site until exploration there can see what actions do, with the customer's explicit permission, and is
 measured again.
 
+**eShopOnWeb, the first application nobody here wrote (2026-11-18, the owner's run):** eleven scenarios frozen on
+2026-11-15 before any planner saw the application, no test ids anywhere, no defect switches, so every run is on the
+sound application. Full exploration, as on our own applications.
+
+| | Baseline | Planner |
+|---|---|---|
+| Correct | 22/22 | **14/22 (64%)**, 7 of 11 scenarios |
+| False positives | 0 | **0** |
+| False negatives | 0 | 2 (one scenario) |
+| No verdict (partial plans) | 0 | 6 (three scenarios) |
+
+Nothing flaked. Model cost: about $0.55. Report: `docs/ai-benchmark-eshop.md`. The four scenarios lost have three causes,
+and two of them are the explorer's, not the model's:
+- **The basket's lines were not described.** The explorer's account of the basket page held no product names, so
+  the planner could not check which product was there. It said so and planned only part (two scenarios).
+- **Pages behind sign-in were never explored.** The explorer does not sign in, so checkout and the order
+  confirmation were never seen. The plan stopped at the login and said so (one scenario).
+- **A guessed address.** The planner went to `/Order/MyOrders`, which it marked as an assumption. The path is
+  different, and the test failed a working shop (one scenario, both runs).
+
+**So on an application we did not build, the planner gave the right verdict on 64% of runs and never passed what it
+had not checked.** That is below the gate's 90%. The causes are mostly what the explorer shows, which can be improved
+and measured again without changing the frozen prompt.
+
 **What this supports, and what it does not.** It supports this statement: *on our three benchmark
 applications, on scenarios written after the planner was frozen, the planner's tests gave the right verdict
 on 95% of sound-application runs, caught every seeded defect where a verdict was reached, and never passed

@@ -28,7 +28,7 @@ internal sealed class NoSecretProtector : ISecretProtector
 }
 
 /// <summary>Where an environment's secrets are read and named, for the services that use them.</summary>
-internal static class EnvironmentSecrets
+public static class EnvironmentSecrets
 {
     /// <summary>The purpose a value is encrypted under: one per organization and environment.</summary>
     public static string Purpose(Guid organizationId, Guid environmentId) =>

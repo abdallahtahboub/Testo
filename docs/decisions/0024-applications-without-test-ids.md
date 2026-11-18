@@ -164,6 +164,26 @@ baseline failed: the message is shown both in the form's summary and beside the 
 explorer does tell the two apart (one of them is the only copy inside a container that also says
 "Password"), but the scenario stays dropped: the set was frozen without it.
 
+**Text in bare sections and divs (2026-11-18).** The planner's first run on eShopOnWeb (ADR-0020) lost two scenarios
+because the basket, after "Add to basket", was described with 6 elements and none of its lines. eShopOnWeb lays each
+line out as bare `section`s inside an `article` (its `Pages/Basket/Index.cshtml`), and the explorer read plain text only
+from cells, items, paragraphs and inline elements. A first change read leaf `div`s; the owner's run showed it reached
+only a footer line, because the lines are `section`s, which was a guess not checked against the markup. Leaf
+`section`s and `div`s with text are now read. On our three applications nothing changes: the same elements, the same
+names and the same coverage, with test ids and without, so the snapshots a planner is shown there are as before and
+their figures stand. A worker test serves a basket built as eShopOnWeb's is and checks that each line's text is
+described and reached exactly once; it fails with the `div` change alone.
+
+Seeing the lines had a cost the owner's next run showed: a basket holding each of eShopOnWeb's products now said
+something different every time, so the explorer kept and explored twelve baskets, ran out of page budget at 46 pages,
+and described 714 elements where it had described 230. **Pages reached by pressing are now kept at most four of a
+kind** (the same path and controls, whatever data they show), and none past that is explored further. Four is the
+smallest number that leaves our three applications exactly as before. Three dropped one page each from the demo
+shop and the clinic without test ids, though their coverage did not change. A worker test with five products fails
+without the limit. **By the freeze rule above, the explorer has now been adjusted twice on
+eShopOnWeb's own results**, so a planner run there is reported as such, and a clean claim still needs an application
+the explorer was never tuned on.
+
 **Exact names, and a plan's own words.** What the explorer offers a plan is checked with exact names. A
 plan's step is matched exactly first as well; only when nothing has the exact name within two seconds is a
 looser match tried, so a name a person or a model shortened ("Basket" for the link "Basket (2)", whose count

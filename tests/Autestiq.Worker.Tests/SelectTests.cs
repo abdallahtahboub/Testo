@@ -39,6 +39,32 @@ public class SelectTests(ListPageFixture pages) : IClassFixture<ListPageFixture>
     }
 
     [Fact]
+    public async Task Exploring_DescribesTextInBareSectionsAndDivs_AndCanNameEachPieceExactly()
+    {
+        var snapshot = Explorations.SnapshotOf(await Jobs.ExploreAsync(pages.Origin));
+        var basket = Assert.Single(snapshot.Pages, page => page.Path == "/basket");
+
+        foreach (var text in new[] { "Roslyn Red Sheet", "$ 8.50", "Prism White TShirt", "$ 12.00", "Total: $ 20.50" })
+        {
+            var element = Assert.Single(basket.Elements, candidate => candidate.Role == "text" && candidate.Name == text);
+
+            // Reached, not only seen: the browser found exactly one element for it (ADR-0024).
+            Assert.NotNull(element.NamedBy);
+        }
+    }
+
+    [Fact]
+    public async Task Exploring_KeepsOnlyAFewPagesOfOneKind_ThoughEachSaysSomethingDifferent()
+    {
+        // Five "Add" buttons, each to a basket naming its product: one kind of page, five things said, four kept.
+        var snapshot = Explorations.SnapshotOf(await Jobs.ExploreAsync(pages.Origin, Explorations.Budget, exploreStates: true));
+
+        var baskets = snapshot.Pages.Count(page => page.Path.StartsWith("/added", StringComparison.Ordinal));
+
+        Assert.InRange(baskets, 1, 4);
+    }
+
+    [Fact]
     public async Task Exploring_DescribesAListWithItsOptions_AndHowToNameIt()
     {
         var snapshot = Explorations.SnapshotOf(await Jobs.ExploreAsync(pages.Origin));

@@ -60,10 +60,21 @@ internal static partial class SiteExplorer
     /// <summary>How many of a list's options are described. A country list has two hundred.</summary>
     private const int MaxOptionsDescribed = 25;
 
+    /// <summary>
+    /// How many pages reached by pressing are kept of one kind (<see cref="Signature"/>): enough for a form's
+    /// different refusals, not a basket for every product (ADR-0024, 2026-11-18). Four is the smallest that leaves
+    /// what our three applications show unchanged, with test ids and without; three dropped one page from two of them.
+    /// </summary>
+    private const int MaxPressedPagesPerKind = 4;
+
     /// <summary>Elements that hold text and nothing else: what a test checks when nothing has a test id.</summary>
+    // Leaf divs and sections are in the list because sites lay out rows with them: eShopOnWeb's basket puts each line's
+    // product name and price in bare sections inside an article, and without them the explorer saw a basket with
+    // nothing in it (ADR-0024, 2026-11-18).
     private const string LeafTextSelector =
         "td:not(:has(*)), th:not(:has(*)), li:not(:has(*)), p:not(:has(*)), dd:not(:has(*)), dt:not(:has(*)), "
-        + "span:not(:has(*)), strong:not(:has(*)), em:not(:has(*)), b:not(:has(*)), output:not(:has(*)), caption:not(:has(*))";
+        + "span:not(:has(*)), strong:not(:has(*)), em:not(:has(*)), b:not(:has(*)), output:not(:has(*)), caption:not(:has(*)), "
+        + "div:not(:has(*)), section:not(:has(*))";
 
     /// <summary>How many pages may be opened for each page the budget allows to be shown.</summary>
     private const int PagesOpenedPerPageShown = 4;

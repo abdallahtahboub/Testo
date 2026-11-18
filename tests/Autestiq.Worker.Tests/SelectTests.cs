@@ -39,7 +39,7 @@ public class SelectTests(ListPageFixture pages) : IClassFixture<ListPageFixture>
     }
 
     [Fact]
-    public async Task Exploring_DescribesTextInBareDivs_AndCanNameEachPieceExactly()
+    public async Task Exploring_DescribesTextInBareSectionsAndDivs_AndCanNameEachPieceExactly()
     {
         var snapshot = Explorations.SnapshotOf(await Jobs.ExploreAsync(pages.Origin));
         var basket = Assert.Single(snapshot.Pages, page => page.Path == "/basket");

@@ -42,14 +42,14 @@ public sealed class ListPageFixture : IAsyncLifetime
             """,
             "text/html"));
 
-        // A basket laid out with bare divs, as eShopOnWeb's is: the text a test checks sits in leaf divs, in no cell,
-        // item or paragraph.
+        // A basket laid out as eShopOnWeb's is (its Pages/Basket/Index.cshtml): each line an article holding a div of
+        // bare sections, the text a test checks in leaf sections, in no cell, item or paragraph; and a total in a bare div.
         _app.MapGet("/basket", () => Results.Content(
             """
             <!doctype html><html lang="en"><head><title>Basket</title></head><body><main>
             <h1>Basket</h1>
-            <article class="row"><div class="col">Roslyn Red Sheet</div><div class="col">$ 8.50</div></article>
-            <article class="row"><div class="col">Prism White TShirt</div><div class="col">$ 12.00</div></article>
+            <article class="row"><div><section class="col">Roslyn Red Sheet</section><section class="col">$ 8.50</section></div></article>
+            <article class="row"><div><section class="col">Prism White TShirt</section><section class="col">$ 12.00</section></div></article>
             <div class="total">Total: $ 20.50</div>
             </main></body></html>
             """,

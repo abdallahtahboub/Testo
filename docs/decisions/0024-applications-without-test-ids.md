@@ -164,13 +164,15 @@ baseline failed: the message is shown both in the form's summary and beside the 
 explorer does tell the two apart (one of them is the only copy inside a container that also says
 "Password"), but the scenario stays dropped: the set was frozen without it.
 
-**Text in bare divs (2026-11-18).** The planner's first run on eShopOnWeb (ADR-0020) lost two scenarios because the
-basket, after "Add to basket", was described with 6 elements and none of its lines: eShopOnWeb lays each line out
-in bare `div`s, and the explorer read plain text only from cells, items, paragraphs and inline elements. Leaf `div`s
-with text are now read too. On our three applications nothing changes: the same elements, the same names and the
-same coverage, with test ids and without, so the snapshots a planner is shown there are as before and their figures
-stand. A worker test serves a basket made of `div`s and checks that each line's text is described and reached
-exactly once; it fails without the change. **By the freeze rule above, the explorer has now been adjusted twice on
+**Text in bare sections and divs (2026-11-18).** The planner's first run on eShopOnWeb (ADR-0020) lost two scenarios
+because the basket, after "Add to basket", was described with 6 elements and none of its lines. eShopOnWeb lays each
+line out as bare `section`s inside an `article` (its `Pages/Basket/Index.cshtml`), and the explorer read plain text only
+from cells, items, paragraphs and inline elements. A first change read leaf `div`s; the owner's run showed it reached
+only a footer line, because the lines are `section`s, which was a guess not checked against the markup. Leaf
+`section`s and `div`s with text are now read. On our three applications nothing changes: the same elements, the same
+names and the same coverage, with test ids and without, so the snapshots a planner is shown there are as before and
+their figures stand. A worker test serves a basket built as eShopOnWeb's is and checks that each line's text is
+described and reached exactly once; it fails with the `div` change alone. **By the freeze rule above, the explorer has now been adjusted twice on
 eShopOnWeb's own results**, so a planner run there is reported as such, and a clean claim still needs an application
 the explorer was never tuned on.
 

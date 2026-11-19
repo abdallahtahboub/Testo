@@ -93,8 +93,10 @@ Screenshots are kept on our servers' disk indefinitely.
 - A per-project evidence policy: keep screenshots or not.
 - Before the first pilot at the latest. It is part 2 of Milestone 3.8, already planned.
 
-**G-6 · Secrets for sign-in scenarios have no encrypted store in the product (§5).** *Deferred, as the owner chose
-on 2026-11-17: a plan that types a secret cannot be approved until a store exists.*
+**G-6 · Secrets for sign-in scenarios have no encrypted store in the product (§5).** *Built 2026-11-18 (ADR-0033): one
+test account per test environment, encrypted with Data Protection under a per-environment purpose, key ring outside
+the database, write-only, never for production, names only to the planner, values removed from what exploring
+describes. An interim until a private agent keeps secrets on the customer's side (G-8).*
 The benchmark passes them in; the product has nowhere to keep them.
 *Recommendation:*
 - Encrypted at rest (ASP.NET Core Data Protection with a key held outside the database, or a cloud key

@@ -484,7 +484,29 @@ public sealed class RunDispatcher(
             var customerAllowsActing = run.ScenarioId == Scenarios.Exploration
                 && await ExplorationMayActAsync(database, run, stoppingToken).ConfigureAwait(false);
 
-            var job = JobFor(run, options.CurrentValue, workspace.FullName, approved, customerAllowsActing);
+            // A test account's sign-in values, decrypted only now, only for the worker (ADR-0033): for an approved plan's
+            // run, and for an exploration that may act. A value that cannot be read refuses the run rather than run it
+            // without.
+            IReadOnlyDictionary<string, string>? secrets = null;
+            var mayAct = customerAllowsActing || options.CurrentValue.TrustedLocalOrigins().Any(origin => Origins.Normalize(origin) == Origins.Normalize(run.TargetOrigin));
+            var environmentId = approved?.EnvironmentId
+                ?? (run.ScenarioId == Scenarios.Exploration && mayAct ? await EnvironmentOfAsync(database, run, stoppingToken).ConfigureAwait(false) : null);
+
+            if (environmentId is { } environment)
+            {
+                secrets = await Projects.EnvironmentSecrets.ValuesAsync(
+                    database, scope.ServiceProvider.GetRequiredService<Projects.ISecretProtector>(), run.OrganizationId, environment, stoppingToken)
+                    .ConfigureAwait(false);
+
+                if (secrets is null)
+                {
+                    await RefuseAsync(scope.ServiceProvider, run, stoppingToken,
+                        "Refused: the test account's sign-in values could not be read. Set them again on the Environments page.").ConfigureAwait(false);
+                    return;
+                }
+            }
+
+            var job = JobFor(run, options.CurrentValue, workspace.FullName, approved, customerAllowsActing, secrets);
 
             var (result, stopped) = await RunWorkerAsync(job, run.OrganizationId, stoppingToken).ConfigureAwait(false);
 
@@ -591,7 +613,8 @@ public sealed class RunDispatcher(
     /// <summary>A test's approved plan, as a run carries it out.</summary>
     /// <param name="Actions">The plan's steps.</param>
     /// <param name="ReadOnly">Whether the approval leaves data unchanged, which the worker then holds in the browser.</param>
-    public sealed record ApprovedPlan(IReadOnlyList<PlannedAction> Actions, bool ReadOnly);
+    /// <param name="EnvironmentId">The environment the test was explored against, whose sign-in values the run may need.</param>
+    public sealed record ApprovedPlan(IReadOnlyList<PlannedAction> Actions, bool ReadOnly, Guid EnvironmentId);
 
     /// <summary>
     /// The plan a run of a test may carry out, or <c>null</c> when it may carry out none: the test has no approval, its
@@ -622,13 +645,13 @@ public sealed class RunDispatcher(
         var snapshot = testCase.Snapshot is null ? null : JsonSerializer.Deserialize<SiteSnapshot>(testCase.Snapshot, Testing.TestCaseService.Json);
 
         if (plan.Coverage != PlanCoverage.Full
-            || PlanEffects.NeedsSecret(plan.Actions)
+            || PlanEffects.SecretsMissing(plan.Actions, await Projects.EnvironmentSecrets.NamesAsync(database, run.OrganizationId, testCase.EnvironmentId, cancellationToken).ConfigureAwait(false)).Count > 0
             || (!testCase.ApprovedToChangeData && PlanEffects.StepsThatMayChangeData(plan.Actions, snapshot).Count > 0))
         {
             return null;
         }
 
-        return new ApprovedPlan(plan.Actions, ReadOnly: !testCase.ApprovedToChangeData);
+        return new ApprovedPlan(plan.Actions, ReadOnly: !testCase.ApprovedToChangeData, testCase.EnvironmentId);
     }
 
     private async Task RefuseAsync(IServiceProvider services, TestRun run, CancellationToken cancellationToken, string? reason = null)
@@ -797,7 +820,13 @@ public sealed class RunDispatcher(
     /// make the loopback exception a route to whatever listens on the worker's host. A stored target that
     /// configuration does not name is reached, if at all, as any other address is: never on loopback.
     /// </remarks>
-    public static WorkerJob JobFor(TestRun run, ExecutionOptions options, string workspace, ApprovedPlan? approved = null, bool customerAllowsActing = false)
+    public static WorkerJob JobFor(
+        TestRun run,
+        ExecutionOptions options,
+        string workspace,
+        ApprovedPlan? approved = null,
+        bool customerAllowsActing = false,
+        IReadOnlyDictionary<string, string>? secrets = null)
     {
         ArgumentNullException.ThrowIfNull(run);
         ArgumentNullException.ThrowIfNull(options);
@@ -831,6 +860,7 @@ public sealed class RunDispatcher(
             // until approval of state-changing discovery exists (ADR-0030, gap analysis G-4).
             Task: exploring ? WorkerTask.Explore : plan is not null ? WorkerTask.Planned : WorkerTask.Scripted,
             Plan: plan?.Actions,
+            Secrets: secrets is { Count: > 0 } && (plan is not null || exploring) ? secrets : null,
             ExploreStates: exploring,
             SubmitForms: exploring,
 
@@ -838,6 +868,16 @@ public sealed class RunDispatcher(
             ReadOnly: plan?.ReadOnly ?? false,
             CustomerAllowsActing: exploring && customerAllowsActing);
     }
+
+    /// <summary>The environment a run's test was explored against, or <c>null</c>. Across the filter, held to the run's organization.</summary>
+    private static async Task<Guid?> EnvironmentOfAsync(AutestiqDbContext database, TestRun run, CancellationToken cancellationToken) =>
+        run.TestCaseId is not { } testCaseId
+            ? null
+            : await database.TestCases.IgnoreQueryFilters()
+                .Where(testCase => testCase.Id == testCaseId && testCase.OrganizationId == run.OrganizationId)
+                .Select(testCase => (Guid?)testCase.EnvironmentId)
+                .FirstOrDefaultAsync(cancellationToken)
+                .ConfigureAwait(false);
 
     /// <summary>
     /// Whether an exploration may act on its site: the environment it explores is a test site, not production, and

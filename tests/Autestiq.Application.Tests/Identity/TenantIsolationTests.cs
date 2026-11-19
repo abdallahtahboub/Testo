@@ -128,6 +128,13 @@ public sealed class TenantIsolationTests : IAsyncLifetime
             Name = $"Staging {Guid.CreateVersion7():N}",
             Origin = $"https://{Guid.CreateVersion7():N}.example:443",
         },
+        [typeof(Domain.Projects.EnvironmentSecret)] = seed => new Domain.Projects.EnvironmentSecret
+        {
+            OrganizationId = seed.OrganizationId,
+            EnvironmentId = seed.EnvironmentId,
+            Name = "password",
+            Ciphertext = "seed-ciphertext",
+        },
         [typeof(Domain.Testing.TestCase)] = seed => new Domain.Testing.TestCase
         {
             OrganizationId = seed.OrganizationId,

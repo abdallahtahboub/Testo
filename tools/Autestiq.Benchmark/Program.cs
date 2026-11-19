@@ -103,11 +103,14 @@ Func<IReadOnlyList<string>, bool> setDefects = options.Target switch
 // --unseen picks the set that decides the ADR-0020 gate, for whichever target is named (UnseenScenarios).
 var unseen = args.Contains("--unseen", StringComparer.Ordinal);
 
+// --signed-in gives eShopOnWeb's sign-in scenarios its whole demo account, so the explorer signs in (ADR-0033).
+var signedIn = options.Target == "eshop" && args.Contains("--signed-in", StringComparer.Ordinal);
+
 IReadOnlyList<BenchmarkScenario> targetScenarios = unseen && options.Target != "eshop" ? UnseenScenarios.For(options.Target) : options.Target switch
 {
     "booking" => BookingScenarios.All,
     "invoices" => InvoiceScenarios.All,
-    "eshop" => EshopScenarios.All,
+    "eshop" => signedIn ? EshopScenarios.SignedIn : EshopScenarios.All,
     _ => options.HeldOut ? HeldOutScenarios.All : BenchmarkScenarios.All,
 };
 
@@ -259,7 +262,8 @@ var report = Report.Write(
     options.Repetitions,
     DateTimeOffset.UtcNow,
     (external is null ? "an application of our own" : "eShopOnWeb, Microsoft's sample shop, which nobody here wrote")
-        + (options.ReadOnly ? ", explored read-only (links followed, no control pressed, no form sent), as a customer's site is" : ""));
+        + (options.ReadOnly ? ", explored read-only (links followed, no control pressed, no form sent), as a customer's site is" : "")
+        + (signedIn ? ", with the published demo account stored as the test account, so exploring signs in (ADR-0033)" : ""));
 
 Console.WriteLine($"Planning cost ${harness.Spent:0.0000} in all.");
 
@@ -403,6 +407,7 @@ internal sealed record BenchmarkOptions(
         : args.Contains("--unseen", StringComparer.Ordinal) ? $"ai-benchmark-unseen-{Value(args, "--target") ?? "demo"}.md"
         : Value(args, "--target") == "booking" ? "ai-benchmark-booking.md"
         : Value(args, "--target") == "invoices" ? "ai-benchmark-invoices.md"
+        : Value(args, "--target") == "eshop" && args.Contains("--signed-in", StringComparer.Ordinal) ? "ai-benchmark-eshop-signed-in.md"
         : Value(args, "--target") == "eshop" ? "ai-benchmark-eshop.md"
         : args.Contains("--held-out", StringComparer.Ordinal) ? "ai-benchmark-held-out.md"
         : "ai-benchmark.md";

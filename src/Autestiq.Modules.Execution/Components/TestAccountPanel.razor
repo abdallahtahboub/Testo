@@ -1,0 +1,50 @@
+@inject IStringLocalizer<ExecutionResources> L
+
+@*
+    A test environment's test account (ADR-0033): what is saved, by name and date only, and a form to set or replace
+    the user name and the password. Values are write-only: nothing here, or anywhere, shows one back.
+*@
+<div class="account" data-testid="@($"account-{Environment.Name}")">
+    <p class="account__title">@L["Account_Title"]</p>
+
+    @if (Problem is not null)
+    {
+        <p class="account__problem" role="alert">@Problem</p>
+    }
+
+    @if (Environment.Secrets is { Count: > 0 } secrets)
+    {
+        <ul class="account__saved" data-testid="account-saved">
+            @foreach (var secret in secrets)
+            {
+                <li>
+                    <span>@L["Account_Saved", secret.Name, secret.SetAt.ToLocalTime().ToString("d")]</span>
+                    @if (CanManage)
+                    {
+                        <TButton Variant="ButtonVariant.Ghost" Disabled="Busy || !Ready" OnClick="() => DeleteAsync(secret.Name)" data-testid="@($"remove-{secret.Name}")">@L["Account_Remove"]</TButton>
+                    }
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p class="t-muted" data-testid="account-none">@L["Account_None"]</p>
+    }
+
+    @if (CanManage)
+    {
+        <p class="t-muted">@L["Account_Intro"]</p>
+        <div class="account__form">
+            <TField Label="@L["Account_Username"]">
+                <TInput Context="context" Disabled="!Ready" @bind-Value="Username" autocomplete="off" data-testid="account-username" />
+            </TField>
+            <TField Label="@L["Account_Password"]">
+                <TInput Context="context" Disabled="!Ready" Type="password" @bind-Value="Password" autocomplete="new-password" data-testid="account-password" />
+            </TField>
+        </div>
+        <div>
+            <TButton Variant="ButtonVariant.Secondary" Loading="Busy" Disabled="!Ready" OnClick="SaveAsync" data-testid="account-save">@L["Account_Save"]</TButton>
+        </div>
+    }
+</div>

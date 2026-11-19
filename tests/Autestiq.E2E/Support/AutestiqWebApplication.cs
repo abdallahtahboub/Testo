@@ -55,6 +55,9 @@ internal class AutestiqWebApplication(string connectionString) : WebApplicationF
         // itself is tested against an application of its own, with a strict one (D-4).
         builder.UseSetting(AccountRateLimiting.PermitsPerMinuteKey, "100000");
 
+        // A deployed site refuses to start without a key ring for sign-in values (ADR-0033), so this one gets its own.
+        builder.UseSetting("DataProtection:KeyDirectory", Directory.CreateTempSubdirectory("autestiq-e2e-keys-").FullName);
+
         builder.ConfigureServices(services =>
         {
             services.AddSingleton<IStartupFilter, FailingPathFilter>();

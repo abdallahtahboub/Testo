@@ -44,7 +44,15 @@ public static class PlanValidator
     /// <summary>How long a target's name, text, or the text it is looked for within, may be.</summary>
     private const int MaxTargetText = 200;
 
-    public static PlanReview Review(TestPlan? plan, SiteSnapshot site, int maxActions)
+    /// <param name="plan">The plan.</param>
+    /// <param name="site">What exploring found.</param>
+    /// <param name="maxActions">The most actions a plan may have.</param>
+    /// <param name="secretNames">
+    /// The secrets the plan may type, by name (ADR-0033). A plan that names any other is refused: a secret it was not
+    /// given would fail the run for a reason that is not the application's. <c>null</c> skips the check, for callers
+    /// that judge a plan without knowing where it will run.
+    /// </param>
+    public static PlanReview Review(TestPlan? plan, SiteSnapshot site, int maxActions, IReadOnlyCollection<string>? secretNames = null)
     {
         ArgumentNullException.ThrowIfNull(site);
 
@@ -71,6 +79,11 @@ public static class PlanValidator
         foreach (var action in plan.Actions)
         {
             errors.AddRange(Refusals(action));
+
+            if (secretNames is not null && action.SecretName is { Length: > 0 } secret && !secretNames.Contains(secret, StringComparer.Ordinal))
+            {
+                errors.Add(PlanningErrors.UnknownSecret);
+            }
 
             if (Unseen(action, site) is { } note)
             {

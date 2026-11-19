@@ -665,7 +665,7 @@
     <value>A plan that covers only part of what you asked for cannot be approved. Describe the missing part as a test of its own.</value>
   </data>
   <data name="Approval_NeedsSecret" xml:space="preserve">
-    <value>This plan signs in with a secret, and Autestiq cannot store secrets yet, so it cannot be approved.</value>
+    <value>This plan signs in with a value the environment's test account does not have, so it cannot be approved. Add it on the Environments page.</value>
   </data>
   <data name="Approval_AskAnApprover" xml:space="preserve">
     <value>Ask an owner or a QA lead to approve it.</value>
@@ -698,7 +698,7 @@
     <value>A plan that covers only part of the test cannot be approved.</value>
   </data>
   <data name="Tests_Error_NeedsSecret" xml:space="preserve">
-    <value>A plan that types a secret cannot be approved yet.</value>
+    <value>This plan signs in with a value the environment's test account does not have. Add it on the Environments page.</value>
   </data>
   <data name="Tests_Error_ChangeAcknowledgementRequired" xml:space="preserve">
     <value>This plan may change data: tick the box to say you approve that.</value>
@@ -795,5 +795,38 @@
   </data>
   <data name="Test_Explored_Intro" xml:space="preserve">
     <value>Exploring pressed these controls and sent these forms with test values. Anything they created is still on your site.</value>
+  </data>
+  <data name="Account_Title" xml:space="preserve">
+    <value>Test account</value>
+  </data>
+  <data name="Account_Intro" xml:space="preserve">
+    <value>So that tests can sign in. Use an account made for testing, never a real person's. Values are encrypted and never shown again; type one to replace it.</value>
+  </data>
+  <data name="Account_None" xml:space="preserve">
+    <value>No test account: tests of pages behind a sign-in cannot be approved for this environment.</value>
+  </data>
+  <data name="Account_Saved" xml:space="preserve">
+    <value>{0}: saved {1}</value>
+  </data>
+  <data name="Account_Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Account_Username" xml:space="preserve">
+    <value>User name or email</value>
+  </data>
+  <data name="Account_Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Account_Save" xml:space="preserve">
+    <value>Save the test account</value>
+  </data>
+  <data name="Environments_Error_InvalidSecret" xml:space="preserve">
+    <value>Type a value of at most 500 characters.</value>
+  </data>
+  <data name="Environments_Error_SecretsOnProduction" xml:space="preserve">
+    <value>A production site has no test account.</value>
+  </data>
+  <data name="Planning_Error_UnknownSecret" xml:space="preserve">
+    <value>The AI's plan typed a sign-in value this environment does not have.</value>
   </data>
 </root>

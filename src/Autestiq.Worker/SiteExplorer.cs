@@ -190,7 +190,10 @@ internal static partial class SiteExplorer
             }
         }
 
-        return new Exploration(new SiteSnapshot(job.TargetOrigin, pages, truncated), visits, visitsFailed, refused);
+        // The test account's values never leave in a description: it goes to a model (ADR-0033).
+        var snapshot = SecretRedaction.Without(new SiteSnapshot(job.TargetOrigin, pages, truncated), job.Secrets);
+
+        return new Exploration(snapshot, visits, visitsFailed, refused);
     }
 
     /// <summary>

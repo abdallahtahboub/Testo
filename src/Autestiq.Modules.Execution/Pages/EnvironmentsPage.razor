@@ -91,6 +91,11 @@ else
 
                             @if (environment.Kind == EnvironmentKind.Test)
                             {
+                                <TestAccountPanel Environment="environment" CanManage="CanManage" Changed="LoadAsync" />
+                            }
+
+                            @if (environment.Kind == EnvironmentKind.Test)
+                            {
                                 @* ADR-0032: exploring acts on a customer's site only with an owner's permission, never on production. *@
                                 <div class="environments__acting" data-testid="acting-state">
                                     @if (environment.ExplorationMayActAt is { } allowedAt)

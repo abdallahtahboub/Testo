@@ -156,6 +156,19 @@ Without one, a described test is explored and then says that AI planning is not 
 sent. The budgets are in `appsettings.json` under `Planning`: $10 a month for the whole product and
 $2 per organization. Each plan's cost is counted at the price book's prices (ADR-0029).
 
+### Test accounts
+
+A test environment can keep one test account's sign-in values (ADR-0033). They are encrypted with ASP.NET Core
+Data Protection, whose key ring must live outside the database. Outside development the application refuses to
+start until it is told where:
+
+```bash
+export DataProtection__KeyDirectory=/var/lib/autestiq/keys
+```
+
+Keep that directory out of database backups and readable only by the application. Losing it makes every stored
+value unreadable: runs that need one are then refused, and the values have to be entered again.
+
 ### The AI benchmark
 
 The planner is measured rather than described. One command runs twelve controlled scenarios against

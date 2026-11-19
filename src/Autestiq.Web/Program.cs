@@ -85,6 +85,9 @@ var connectionString = builder.Configuration.GetConnectionString("Autestiq")
         + "See README.md for how to get a PostgreSQL to point it at.");
 
 builder.Services.AddAutestiqApplication(connectionString);
+
+// The key ring for test accounts' sign-in values, outside the database (ADR-0033).
+builder.AddAutestiqSecretProtection();
 builder.Services.Configure<ExecutionOptions>(builder.Configuration.GetSection(ExecutionOptions.SectionName));
 builder.Services.Configure<Autestiq.Application.Usage.UsageOptions>(builder.Configuration.GetSection(Autestiq.Application.Usage.UsageOptions.SectionName));
 builder.Services.Configure<Autestiq.Application.Testing.PlanningOptions>(builder.Configuration.GetSection(Autestiq.Application.Testing.PlanningOptions.Section));

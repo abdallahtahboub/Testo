@@ -68,7 +68,7 @@ public sealed class PlanningService(IScenarioPlanner planner, ILogger<PlanningSe
                 return new PlannedResult(null, answer.Errors, [], spent, planner.Model, sent);
             }
 
-            var review = PlanValidator.Review(answer.Plan, site, budget.MaxSteps);
+            var review = PlanValidator.Review(answer.Plan, site, budget.MaxSteps, secretNames);
 
             if (review.Allowed)
             {

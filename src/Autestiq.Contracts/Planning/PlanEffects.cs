@@ -28,12 +28,23 @@ public static class PlanEffects
         return [.. plan.Select((action, index) => (action, Number: index + 1)).Where(step => MayChangeData(step.action, snapshot)).Select(step => step.Number)];
     }
 
-    /// <summary>Whether the plan types a secret, which cannot be approved until a secret store exists (G-6).</summary>
-    public static bool NeedsSecret(IReadOnlyList<PlannedAction> plan)
+    /// <summary>Whether the plan types a secret at all.</summary>
+    public static bool NeedsSecret(IReadOnlyList<PlannedAction> plan) => SecretsTyped(plan).Count > 0;
+
+    /// <summary>The names of the secrets a plan types, each once, in order.</summary>
+    public static IReadOnlyList<string> SecretsTyped(IReadOnlyList<PlannedAction> plan)
     {
         ArgumentNullException.ThrowIfNull(plan);
 
-        return plan.Any(action => action.SecretName is { Length: > 0 });
+        return [.. plan.Select(action => action.SecretName).OfType<string>().Where(name => name.Length > 0).Distinct(StringComparer.Ordinal)];
+    }
+
+    /// <summary>The secrets a plan types that the environment does not have (ADR-0033). Empty when it can run.</summary>
+    public static IReadOnlyList<string> SecretsMissing(IReadOnlyList<PlannedAction> plan, IReadOnlyCollection<string> stored)
+    {
+        ArgumentNullException.ThrowIfNull(stored);
+
+        return [.. SecretsTyped(plan).Where(name => !stored.Contains(name, StringComparer.Ordinal))];
     }
 
     private static bool MayChangeData(PlannedAction action, SiteSnapshot? snapshot) => action.Kind switch

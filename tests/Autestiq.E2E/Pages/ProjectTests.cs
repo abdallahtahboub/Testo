@@ -147,6 +147,41 @@ public class ProjectTests(AppFixture app) : BrowserTest(app)
     }
 
     [Fact]
+    public async Task Environments_ATestAccountsPassword_IsSavedByNameOnly_AndNeverShownAgain()
+    {
+        const string password = "Not-Shown-Again-42";
+        var page = await OpenSignedInAsync(Routes.Environments("SHOP"));
+        await Expect(page.Page.GetByTestId("add-environment")).ToBeEnabledAsync();
+
+        var name = $"Acc{Guid.CreateVersion7():N}"[..12];
+        await page.Page.GetByTestId("environment-name").FillAsync(name);
+        await page.Page.GetByTestId("environment-origin").FillAsync($"https://{name.ToLowerInvariant()}.northwind.example");
+        await page.Page.GetByTestId("add-environment").ClickAsync();
+
+        var account = page.Page.GetByTestId($"account-{name}");
+        await Expect(account.GetByTestId("account-none")).ToBeVisibleAsync();
+
+        await account.GetByTestId("account-password").FillAsync(password);
+        await Expect(account.GetByTestId("account-password")).ToHaveAttributeAsync("type", "password");
+        await account.GetByTestId("account-save").ClickAsync();
+
+        await Expect(account.GetByTestId("account-saved")).ToContainTextAsync("password: saved");
+
+        // The field is emptied, and the value is nowhere in the page.
+        await Expect(account.GetByTestId("account-password")).ToHaveValueAsync("");
+        Assert.DoesNotContain(password, await page.Page.ContentAsync(), StringComparison.Ordinal);
+
+        // Nor after a fresh load from the server.
+        var again = await OpenSignedInAsync(Routes.Environments("SHOP"));
+        await Expect(again.Page.GetByTestId($"account-{name}").GetByTestId("account-saved")).ToContainTextAsync("password: saved");
+        Assert.DoesNotContain(password, await again.Page.ContentAsync(), StringComparison.Ordinal);
+
+        page.AssertNoProblems();
+        again.AssertNoProblems();
+        await again.AssertAccessibleAsync();
+    }
+
+    [Fact]
     public async Task Environments_OfAProjectThisOrganizationDoesNotHave_SaysNoSuchProject()
     {
         var page = await OpenSignedInAsync(Routes.Environments("NOPE"));

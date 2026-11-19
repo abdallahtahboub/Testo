@@ -49,6 +49,9 @@ public static class ApplicationServiceCollectionExtensions
         services.TryAddSingleton<Testing.IPlannerFactory, Testing.NoPlannerFactory>();
         services.AddScoped<Contracts.Testing.ITestCaseService, Testing.TestCaseService>();
 
+        // The host provides the real one (ADR-0033); without it, nothing can be stored, rather than stored in the clear.
+        services.TryAddSingleton<Projects.ISecretProtector, Projects.NoSecretProtector>();
+
         // Replaced by a real sender when one is chosen; until then the link goes to the log.
         services.TryAddScoped<IInvitationNotifier, LoggingInvitationNotifier>();
 

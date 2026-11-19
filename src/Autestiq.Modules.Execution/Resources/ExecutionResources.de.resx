@@ -665,7 +665,7 @@
     <value>Ein Plan, der nur einen Teil des Verlangten abdeckt, kann nicht freigegeben werden. Beschreiben Sie den fehlenden Teil als eigenen Test.</value>
   </data>
   <data name="Approval_NeedsSecret" xml:space="preserve">
-    <value>Dieser Plan meldet sich mit einem Geheimnis an, und Autestiq kann noch keine Geheimnisse speichern, daher kann er nicht freigegeben werden.</value>
+    <value>Dieser Plan meldet sich mit einem Wert an, den das Testkonto der Umgebung nicht hat, daher kann er nicht freigegeben werden. Fügen Sie ihn auf der Seite Umgebungen hinzu.</value>
   </data>
   <data name="Approval_AskAnApprover" xml:space="preserve">
     <value>Bitten Sie einen Inhaber oder die QA-Leitung um die Freigabe.</value>
@@ -698,7 +698,7 @@
     <value>Ein Plan, der nur einen Teil des Tests abdeckt, kann nicht freigegeben werden.</value>
   </data>
   <data name="Tests_Error_NeedsSecret" xml:space="preserve">
-    <value>Ein Plan, der ein Geheimnis eingibt, kann noch nicht freigegeben werden.</value>
+    <value>Dieser Plan meldet sich mit einem Wert an, den das Testkonto der Umgebung nicht hat. Fügen Sie ihn auf der Seite Umgebungen hinzu.</value>
   </data>
   <data name="Tests_Error_ChangeAcknowledgementRequired" xml:space="preserve">
     <value>Dieser Plan kann Daten ändern: Bestätigen Sie mit dem Häkchen, dass Sie das freigeben.</value>
@@ -795,5 +795,38 @@
   </data>
   <data name="Test_Explored_Intro" xml:space="preserve">
     <value>Das Erkunden hat diese Steuerelemente gedrückt und diese Formulare mit Testwerten gesendet. Was dabei entstanden ist, ist noch auf Ihrer Seite.</value>
+  </data>
+  <data name="Account_Title" xml:space="preserve">
+    <value>Testkonto</value>
+  </data>
+  <data name="Account_Intro" xml:space="preserve">
+    <value>Damit Tests sich anmelden können. Verwenden Sie ein Konto, das zum Testen angelegt wurde, nie das einer echten Person. Die Werte werden verschlüsselt und nie wieder angezeigt; geben Sie einen ein, um ihn zu ersetzen.</value>
+  </data>
+  <data name="Account_None" xml:space="preserve">
+    <value>Kein Testkonto: Tests von Seiten hinter einer Anmeldung können für diese Umgebung nicht freigegeben werden.</value>
+  </data>
+  <data name="Account_Saved" xml:space="preserve">
+    <value>{0}: gespeichert am {1}</value>
+  </data>
+  <data name="Account_Remove" xml:space="preserve">
+    <value>Entfernen</value>
+  </data>
+  <data name="Account_Username" xml:space="preserve">
+    <value>Benutzername oder E-Mail</value>
+  </data>
+  <data name="Account_Password" xml:space="preserve">
+    <value>Passwort</value>
+  </data>
+  <data name="Account_Save" xml:space="preserve">
+    <value>Testkonto speichern</value>
+  </data>
+  <data name="Environments_Error_InvalidSecret" xml:space="preserve">
+    <value>Geben Sie einen Wert mit höchstens 500 Zeichen ein.</value>
+  </data>
+  <data name="Environments_Error_SecretsOnProduction" xml:space="preserve">
+    <value>Eine Produktivseite hat kein Testkonto.</value>
+  </data>
+  <data name="Planning_Error_UnknownSecret" xml:space="preserve">
+    <value>Der Plan der KI gab einen Anmeldewert ein, den diese Umgebung nicht hat.</value>
   </data>
 </root>

@@ -46,11 +46,18 @@ public sealed record EnvironmentSummary(
     OriginProofState? Proof,
     EnvironmentKind Kind = EnvironmentKind.Test,
     DateTimeOffset? ProductionAuthorizedAt = null,
-    DateTimeOffset? ExplorationMayActAt = null)
+    DateTimeOffset? ExplorationMayActAt = null,
+    IReadOnlyList<EnvironmentSecretSummary>? Secrets = null)
 {
     /// <summary>Whether runs may be aimed at it, as far as its kind goes: always for a test site, after authorization for production.</summary>
     public bool KindAllowsRuns => Kind == EnvironmentKind.Test || ProductionAuthorizedAt is not null;
 }
+
+/// <summary>
+/// One of a test account's sign-in values for an environment, as a screen may show it: its name and when it was set,
+/// never its value (ADR-0033).
+/// </summary>
+public sealed record EnvironmentSecretSummary(string Name, DateTimeOffset SetAt);
 
 /// <summary>What is needed to create a project.</summary>
 public sealed record NewProject(string Name, string Key, string? Description);
@@ -113,6 +120,16 @@ public interface IProjectService
 
     /// <summary>Withdraws that permission; the site is explored read-only again. Owners only. Audited.</summary>
     Task<OperationResult> WithdrawExplorationActingAsync(Guid environmentId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sets one of a test account's sign-in values for a test environment, encrypted (ADR-0033). Needs
+    /// <see cref="Identity.Permission.ManageProjects"/>; never for production; audited by name, never by value. The
+    /// value is write-only: nothing returns it.
+    /// </summary>
+    Task<OperationResult> SetSecretAsync(Guid environmentId, string name, string value, CancellationToken cancellationToken = default);
+
+    /// <summary>Deletes one of an environment's sign-in values. Needs <see cref="Identity.Permission.ManageProjects"/>. Audited.</summary>
+    Task<OperationResult> DeleteSecretAsync(Guid environmentId, string name, CancellationToken cancellationToken = default);
 
     /// <summary>Removes an environment. Its origin's proof stays, as it belongs to the organization, not the environment.</summary>
     Task<OperationResult> RemoveEnvironmentAsync(Guid environmentId, CancellationToken cancellationToken = default);

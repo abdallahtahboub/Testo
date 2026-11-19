@@ -66,6 +66,9 @@ public class AutestiqDbContext(DbContextOptions<AutestiqDbContext> options, IOrg
     /// <summary>The addresses each project tests.</summary>
     public DbSet<Domain.Projects.TestEnvironment> Environments => Set<Domain.Projects.TestEnvironment>();
 
+    /// <summary>A test account's sign-in values per environment, encrypted (ADR-0033).</summary>
+    public DbSet<Domain.Projects.EnvironmentSecret> EnvironmentSecrets => Set<Domain.Projects.EnvironmentSecret>();
+
     /// <summary>Tests described in a sentence, with the plans the AI wrote for them.</summary>
     public DbSet<Domain.Testing.TestCase> TestCases => Set<Domain.Testing.TestCase>();
 

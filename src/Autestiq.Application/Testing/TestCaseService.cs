@@ -127,7 +127,7 @@ internal sealed class TestCaseService(
             testCase.SentToModel is null ? [] : JsonSerializer.Deserialize<List<string>>(testCase.SentToModel, Json) ?? [],
             exploration,
             PlanEffects.StepsThatMayChangeData(actions, snapshot),
-            PlanEffects.NeedsSecret(actions),
+            PlanEffects.SecretsMissing(actions, await EnvironmentSecretNamesAsync(testCase, cancellationToken).ConfigureAwait(false)).Count > 0,
             approval,
             runs,
             [.. snapshot?.Pages.SelectMany(page => page.ReachedBy ?? []).Distinct(StringComparer.Ordinal) ?? []]);
@@ -289,8 +289,8 @@ internal sealed class TestCaseService(
             return OperationResult.Failure("Tests_Error_PartialPlan");
         }
 
-        // G-6: there is nowhere to keep a sign-in secret yet, so no plan that types one is approved.
-        if (PlanEffects.NeedsSecret(plan.Actions))
+        // ADR-0033: a plan types only secrets the environment keeps; one it lacks would fail every run.
+        if (PlanEffects.SecretsMissing(plan.Actions, await EnvironmentSecretNamesAsync(testCase, cancellationToken).ConfigureAwait(false)).Count > 0)
         {
             return OperationResult.Failure("Tests_Error_NeedsSecret");
         }
@@ -471,6 +471,9 @@ internal sealed class TestCaseService(
 
         return OperationResult.With(exported with { Code = ApprovedTestHeader.For(testCase) + exported.Code });
     }
+
+    private Task<IReadOnlyList<string>> EnvironmentSecretNamesAsync(TestCase testCase, CancellationToken cancellationToken) =>
+        Projects.EnvironmentSecrets.NamesAsync(database, testCase.OrganizationId, testCase.EnvironmentId, cancellationToken);
 
     /// <summary>Whether a test's plan is approved, and is still the plan that was approved.</summary>
     internal static bool IsApproved(TestCase testCase) =>

@@ -18,6 +18,16 @@ public class PressingTests(DemoShopFixture shop)
 
     private Task<WorkerResult> FilledAsync() => Explorations.OnceAsync(shop.Origin, pressing: true, forms: true);
 
+    /// <summary>The shop's one account, as an environment's stored test account would hand it over (ADR-0033).</summary>
+    private static readonly Dictionary<string, string> Account = new(StringComparer.Ordinal)
+    {
+        ["username"] = DemoShop.Shop.Account,
+        ["password"] = DemoShop.Shop.Password,
+    };
+
+    private Task<WorkerResult> SignedInAsync() =>
+        Explorations.OnceAsync(shop.Origin, pressing: true, forms: true, secrets: Account, secretsLabel: "account");
+
     [Fact]
     public async Task Pressing_ShowsWhereAControlLeads()
     {
@@ -121,9 +131,57 @@ public class PressingTests(DemoShopFixture shop)
 
         Assert.True(Explorations.Shows(snapshot, "sign-in-error"));
 
-        // No value the exploration types is a credential, so the signed-in account page stays unseen.
-        // A known gap, and the right side of the line to be on.
+        // Without a test account (ADR-0033) no value the exploration types is a credential, so the signed-in
+        // account page stays unseen.
         Assert.False(Explorations.Shows(snapshot, "signed-in-as"));
+    }
+
+    [Fact]
+    public async Task Forms_WithTheTestAccount_SignIn_AndSeeWhatIsBehindIt()
+    {
+        // ADR-0033 §5: with the environment's test account, the explorer signs in and reads the page behind it.
+        var snapshot = Explorations.SnapshotOf(await SignedInAsync());
+
+        var account = snapshot.Pages.FirstOrDefault(page => page.Elements.Any(element => element.TestId == "signed-in-as"));
+
+        Assert.NotNull(account);
+        var steps = Assert.IsAssignableFrom<IReadOnlyList<string>>(account.ReachedBy);
+        Assert.Contains(steps, step => step.StartsWith("sign in with the test account", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Forms_WithTheTestAccount_NeverPutItsValuesInTheDescription()
+    {
+        // The description goes to a model, and credentials never do. The shop shows the user name once signed in.
+        var text = Explorations.Text(Explorations.SnapshotOf(await SignedInAsync()));
+
+        Assert.DoesNotContain(DemoShop.Shop.Password, text, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain(DemoShop.Shop.Account, text, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("[secret:username]", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Forms_WithAWrongPassword_StayOnTheRefusal()
+    {
+        // What the account opens is what the shop says it opens, not what the explorer assumes.
+        var wrong = new Dictionary<string, string>(Account, StringComparer.Ordinal) { ["password"] = "not-the-password" };
+        var snapshot = Explorations.SnapshotOf(
+            await Explorations.OnceAsync(shop.Origin, pressing: true, forms: true, secrets: wrong, secretsLabel: "wrong"));
+
+        Assert.False(Explorations.Shows(snapshot, "signed-in-as"));
+        Assert.True(Explorations.Shows(snapshot, "sign-in-error"));
+    }
+
+    [Fact]
+    public async Task Pressing_WithTheTestAccountButWithoutForms_NeverSignsIn()
+    {
+        // Signing in is typing into a form: an exploration that may not type may not sign in, account or not.
+        var snapshot = Explorations.SnapshotOf(
+            await Explorations.OnceAsync(shop.Origin, pressing: true, forms: false, secrets: Account, secretsLabel: "account"));
+
+        Assert.False(Explorations.Shows(snapshot, "signed-in-as"));
+        Assert.DoesNotContain(snapshot.Pages, page =>
+            page.ReachedBy is { } steps && steps.Any(step => step.StartsWith("sign in", StringComparison.Ordinal)));
     }
 
     [Fact]

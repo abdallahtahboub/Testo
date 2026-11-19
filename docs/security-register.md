@@ -326,6 +326,15 @@ that changes data when followed is neither flagged nor blocked.
 Our sealed container runs on our infrastructure; it is not private execution, and private execution is not
 private AI processing. **Mitigation:** wording reviewed against `docs/secure-onboarding-and-privacy.md` §3–4.
 
+### R-16 · Holding customers' test-account credentials — **High; mitigated 2026-11-18 (ADR-0033)**
+We hold a customer's test sign-in values, so our servers and the key ring together would reveal them.
+**Mitigation:** one test account per test environment, never production; write-only, audited by name; encrypted with
+Data Protection under a purpose naming the organization and environment, with the key ring outside the database and
+required outside development; decrypted only when a permitted run starts; never to a model, enforced by the validator
+(names only) and by the worker replacing every value in what exploring describes. **Open:** the key ring is a
+directory until hosting brings a key service; a user name is visible in screenshots; the interim ends with a private
+agent (G-8).
+
 ### R-7 · One database for every tenant — **Accepted, documented**
 
 ADR-0012 chose a shared database with filtered access and listed the consequences, including the

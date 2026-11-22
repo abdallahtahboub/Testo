@@ -829,4 +829,73 @@
   <data name="Planning_Error_UnknownSecret" xml:space="preserve">
     <value>The AI's plan typed a sign-in value this environment does not have.</value>
   </data>
+  <data name="Expected_Title" xml:space="preserve">
+    <value>Expected results</value>
+  </data>
+  <data name="Expected_Intro" xml:space="preserve">
+    <value>What the application should show at the end, written exactly as it appears. Optional: the planner checks these when exploring cannot reach the result, such as a page after paying.</value>
+  </data>
+  <data name="Expected_NoSecrets" xml:space="preserve">
+    <value>These are sent to the AI provider with the description. Never put passwords or personal data in them.</value>
+  </data>
+  <data name="Expected_Text" xml:space="preserve">
+    <value>Expected text {0}</value>
+  </data>
+  <data name="Expected_Path" xml:space="preserve">
+    <value>On page {0}</value>
+  </data>
+  <data name="Expected_Path_Hint" xml:space="preserve">
+    <value>Optional, such as /order/confirmed.</value>
+  </data>
+  <data name="Expected_Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Expected_Remove_Label" xml:space="preserve">
+    <value>Remove expected result {0}</value>
+  </data>
+  <data name="Expected_Add" xml:space="preserve">
+    <value>Add an expected result</value>
+  </data>
+  <data name="Expected_Full" xml:space="preserve">
+    <value>A test can have at most {0} expected results.</value>
+  </data>
+  <data name="Expected_On" xml:space="preserve">
+    <value>on {0}</value>
+  </data>
+  <data name="Expected_None" xml:space="preserve">
+    <value>No expected results. The planner checks only what exploring saw.</value>
+  </data>
+  <data name="Expected_Replans" xml:space="preserve">
+    <value>Saving plans the test again from what was already explored, which uses the AI budget.</value>
+  </data>
+  <data name="Expected_Save" xml:space="preserve">
+    <value>Save and plan again</value>
+  </data>
+  <data name="Expected_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Expected_Edit" xml:space="preserve">
+    <value>Change expected results</value>
+  </data>
+  <data name="Expected_Locked" xml:space="preserve">
+    <value>The plan is approved, so its expected results can't change. Withdraw the approval to change them.</value>
+  </data>
+  <data name="Evidence_Observed" xml:space="preserve">
+    <value>Observed by the explorer</value>
+  </data>
+  <data name="Evidence_StatedByTester" xml:space="preserve">
+    <value>Stated by the tester</value>
+  </data>
+  <data name="Evidence_Assumed" xml:space="preserve">
+    <value>Assumed: needs verification</value>
+  </data>
+  <data name="Tests_Error_InvalidExpectedResults" xml:space="preserve">
+    <value>Expected results need a text of at most 200 characters on one line, at most 5 of them, and a page that starts with /.</value>
+  </data>
+  <data name="Tests_Error_ExpectedResultsApproved" xml:space="preserve">
+    <value>The plan is approved, so its expected results can't change. Withdraw the approval first.</value>
+  </data>
+  <data name="Tests_Error_BeingPlanned" xml:space="preserve">
+    <value>The test is being planned right now. Try again in a moment.</value>
+  </data>
 </root>

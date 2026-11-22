@@ -548,7 +548,10 @@ internal sealed class TestCaseService(
             return OperationResult.Failure<Contracts.Export.ExportedTest>("Tests_Error_NoExporter");
         }
 
-        var exported = exporter.Export(new TestPlan(testCase.Description, plan.Actions, [], plan.Coverage));
+        var snapshot = testCase.Snapshot is null ? null : JsonSerializer.Deserialize<SiteSnapshot>(testCase.Snapshot, Json);
+        var exported = exporter.Export(
+            new TestPlan(testCase.Description, plan.Actions, [], plan.Coverage),
+            ExpectedResults.EvidenceFor(plan.Actions, snapshot, ExpectedOf(testCase)));
 
         Record(testCase, AuditActions.TestDownloaded, new { Plan = testCase.ApprovedPlanHash, exported.FileName });
         await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

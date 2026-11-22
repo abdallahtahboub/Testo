@@ -31,5 +31,10 @@ public interface ITestExporter
     ExportLanguage Language { get; }
 
     /// <summary>The plan as a test. Deterministic: the same plan gives the same code, byte for byte.</summary>
-    ExportedTest Export(TestPlan plan);
+    /// <param name="plan">The validated plan.</param>
+    /// <param name="evidence">
+    /// Where each step's expected value came from (ADR-0034 §3), in step order, written beside each check as a fixed
+    /// comment. <c>null</c> writes none, as before.
+    /// </param>
+    ExportedTest Export(TestPlan plan, IReadOnlyList<CheckEvidence?>? evidence = null);
 }

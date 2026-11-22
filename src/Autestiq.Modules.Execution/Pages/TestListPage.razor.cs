@@ -4,6 +4,7 @@ using Autestiq.Contracts.Identity;
 using Autestiq.Contracts.Projects;
 using Autestiq.Contracts.Testing;
 using Autestiq.Modules.Execution.Resources;
+using Autestiq.Modules.Execution.ViewModels;
 using Autestiq.Platform;
 
 namespace Autestiq.Modules.Execution.Pages;
@@ -99,6 +100,9 @@ public sealed partial class TestListPage : ComponentBase
         return (await ProjectService.WithdrawAiProcessingAsync(Project!.ProjectId, CancellationToken.None).ConfigureAwait(false)).Errors; // as above.
     });
 
+    /// <summary>What the tester says the application should show (ADR-0034), while the form is filled in.</summary>
+    private List<ExpectedResultRow> Expected { get; } = [];
+
     private async Task DescribeAsync()
     {
         if (Project is null || !Guid.TryParse(EnvironmentId, out var environmentId))
@@ -109,7 +113,12 @@ public sealed partial class TestListPage : ComponentBase
 
         await DoAsync(async () =>
         {
-            var described = await TestCases.DescribeAsync(Project.ProjectId, environmentId, Description ?? "", cancellationToken: CancellationToken.None).ConfigureAwait(false);
+            var described = await TestCases.DescribeAsync(
+                Project.ProjectId,
+                environmentId,
+                Description ?? "",
+                ExpectedResultRow.ToResults(Expected),
+                CancellationToken.None).ConfigureAwait(false);
 
             if (described.Succeeded)
             {

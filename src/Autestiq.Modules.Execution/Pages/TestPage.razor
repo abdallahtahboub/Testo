@@ -38,6 +38,8 @@ else
             <p class="test__asked" data-testid="test-asked">@Detail.Description</p>
         </section>
 
+        <ExpectedResultsPanel Detail="Detail" Changed="ReloadAsync" />
+
         @switch (Detail.Status)
         {
             case TestCaseStatus.Exploring:
@@ -71,6 +73,10 @@ else
                                     @if (Detail.StepsThatMayChangeData.Contains(index + 1))
                                     {
                                         <span class="test__badge"><TBadge Tone="Tone.Warning" data-testid="may-change-data">@L["Step_MayChangeData"]</TBadge></span>
+                                    }
+                                    @if (index < Detail.Evidence.Count && Detail.Evidence[index] is { } evidence)
+                                    {
+                                        <span class="test__badge"><TBadge Tone="EvidenceTone(evidence)" data-testid="@($"evidence-{index + 1}")">@L[EvidenceKey(evidence)]</TBadge></span>
                                     }
                                 </span>
                                 <span class="t-muted test__step-detail">@L[ActionKey(step.Kind)]@TargetText(step)</span>

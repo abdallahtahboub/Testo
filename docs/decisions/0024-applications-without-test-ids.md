@@ -189,3 +189,22 @@ plan's step is matched exactly first as well; only when nothing has the exact na
 looser match tried, so a name a person or a model shortened ("Basket" for the link "Basket (2)", whose count
 changes as the test runs) still finds its element, and an exact match is never passed over for a looser one
 (`Targets.LocateForStepAsync`).
+
+## `use=none` enforced by the validator (2026-11-22)
+
+The planner is told, for each element, how to name it, and `use=none` when the browser found no way to name it alone.
+The prompt says not to build a step on such an element, and on eShopOnWeb a plan did anyway: it checked the pager's
+"Showing 2 of 12 products - Page 2 - 2", which the shop shows above and below the products, and failed a sound page
+(ADR-0020). A prompt is advisory (ADR-0019 §5), so the rule is now the validator's (`PlanValidator`,
+`PlanningErrors.AmbiguousTarget`):
+- **Refused:** a step whose target matches only elements the crawl marked `use=none`, or matches only elements the
+  crawl could tell apart inside a container (`within`) while the target leaves that container out. Either way the
+  browser would find more than one element. The planner is asked again, told why in words.
+- **Not judged:** a target the crawl never saw (it may appear once the test acts; it is still noted), and a target
+  naming an element another way than the crawl chose, which may be unique too: only the run can say.
+- **Not applied** to a description that says how to name nothing (made before this decision, or by hand).
+- **It only refuses plans,** so it can turn a failing run into a retry, never a failing run into a pass. A retry costs a
+  second model call when it happens.
+- **Checked, with no model:** every hand-written baseline of our three applications (72 plans, the first and the unseen
+  sets) passes the rule against a fresh exploration of its application, so it refuses none of the plans that are known
+  to work there.

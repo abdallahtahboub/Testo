@@ -898,4 +898,7 @@
   <data name="Tests_Error_BeingPlanned" xml:space="preserve">
     <value>Der Test wird gerade geplant. Versuchen Sie es gleich noch einmal.</value>
   </data>
+  <data name="Planning_Error_AmbiguousTarget" xml:space="preserve">
+    <value>Der Plan der KI nannte ein Element, das mehrfach auf der Seite vorkommt und daher nicht eindeutig ist. Der Plan wurde abgelehnt.</value>
+  </data>
 </root>

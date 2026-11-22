@@ -90,6 +90,11 @@ public static class PlanValidator
                 errors.Add(PlanningErrors.UnknownSecret);
             }
 
+            if (Ambiguous(action, site))
+            {
+                errors.Add(PlanningErrors.AmbiguousTarget);
+            }
+
             // The tester has said this appears (ADR-0034): unseen by the crawl, but not a hope.
             if (!ExpectedResults.States(action, expected) && Unseen(action, site) is { } note)
             {
@@ -218,6 +223,41 @@ public static class PlanValidator
         {
             yield return PlanningErrors.UnknownTarget;
         }
+    }
+
+    /// <summary>
+    /// Whether a step names an element only in a way the crawl found does not tell it apart (ADR-0024).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The planner is told, for each element, how to name it, and <c>use=none</c> when nothing names it reliably. The
+    /// prompt asks it not to build a step on such an element, but a prompt is advisory (ADR-0019 §5): on eShopOnWeb a
+    /// plan checked a pager text shown twice, and failed a sound application. This is the rule in software.
+    /// </para>
+    /// <para>
+    /// Refused only when the failure is certain from what the crawl recorded: every element the target matches is one
+    /// the browser found no unique way to name, or one it could tell apart only inside a container the target leaves
+    /// out. A target the crawl never saw is not judged here (it may appear once the test acts), and neither is one
+    /// naming an element another way than the crawl chose, which may well be unique too.
+    /// </para>
+    /// <para>
+    /// A description that says how to name nothing, made before ADR-0024 or written by hand, gives the rule nothing to
+    /// go on, so it is not applied to one.
+    /// </para>
+    /// </remarks>
+    private static bool Ambiguous(PlannedAction action, SiteSnapshot site)
+    {
+        if (action.Target is not { } target || string.IsNullOrWhiteSpace(target.Value)
+            || !site.Pages.Any(page => page.Elements.Any(element => element.NamedBy is not null)))
+        {
+            return false;
+        }
+
+        var matches = site.ElementsFor(target);
+
+        return matches.Count > 0 && matches.All(element =>
+            element.NamedBy is null
+            || (element.NamedBy == target.Kind && element.Within is { Length: > 0 } && target.Within is not { Length: > 0 }));
     }
 
     /// <summary>

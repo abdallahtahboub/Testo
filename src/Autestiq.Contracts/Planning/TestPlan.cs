@@ -132,6 +132,12 @@ public static class PlanningErrors
     /// <summary>The plan types a secret by a name it was not given (ADR-0033).</summary>
     public const string UnknownSecret = "Planning_Error_UnknownSecret";
 
+    /// <summary>
+    /// A step names an element in a way the crawl found matches more than one, or none it could tell apart
+    /// (<c>use=none</c>, ADR-0024): the browser would find several and the step would fail on a sound application.
+    /// </summary>
+    public const string AmbiguousTarget = "Planning_Error_AmbiguousTarget";
+
     /// <summary>The planner spent the run's token or money budget.</summary>
     public const string BudgetSpent = "Planning_Error_BudgetSpent";
 

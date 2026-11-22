@@ -314,6 +314,8 @@ static string Explain(string error) => error switch
     PlanningErrors.UnknownTarget => "a target was named in a way that is not allowed",
     PlanningErrors.Incomplete => "an action was missing something it needs",
     PlanningErrors.BudgetSpent => "planning spent the run's token or money budget",
+    PlanningErrors.UnknownSecret => "the plan typed a secret this scenario does not hold",
+    PlanningErrors.AmbiguousTarget => "the plan named an element the crawl could not tell apart from another",
     _ => error,
 };
 

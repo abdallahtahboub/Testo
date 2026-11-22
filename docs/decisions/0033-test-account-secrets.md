@@ -74,6 +74,12 @@ A hosted store is therefore an interim, and must be labelled as one.
   replaced in the whole description by `[secret:<name>]` before it leaves the worker** (values of four characters
   or more), so a page that shows "signed in as …" never sends the user name to the model. A plan therefore cannot
   check the user name's text.
+- **A pass resting on the account's own value is not a pass.** If a planned run passes and one of its positive checks
+  (text or visible) looks for the value of a secret the plan typed, by name or as the same plain text, the worker ends
+  it **inconclusive**, naming the secret and never its value (`TypedSecretChecks`). A page can show a value the test
+  typed whether or not signing in worked: eShopOnWeb prints its demo account on its login page (ADR-0020). Failures and
+  "not there" checks are left alone, so the guard can only take away an unearned pass. **Not covered:** a downloaded
+  test runs outside the worker and does not carry this guard (ADR-0023); its text check is the plan's, as approved.
 - **The screen.** Each test environment on the Environments page has a "Test account" panel: the saved names with
   their dates and a Remove button, and a user name and a password field (the browser is told not to fill either).
   Saving clears both fields; nothing saved is shown again. Who set a value is in the audit log, not on the panel.

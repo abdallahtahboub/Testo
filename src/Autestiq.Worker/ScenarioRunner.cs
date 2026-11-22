@@ -221,6 +221,14 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
             }
         }
 
+        // A pass that rests on finding the test account's own value is not a pass (ADR-0033, TypedSecretChecks).
+        if (job.Task == WorkerTask.Planned
+            && job.Plan is { } plan
+            && TypedSecretChecks.In(plan, job.Secrets) is { Count: > 0 } names)
+        {
+            return Finish(job, RunStatus.Inconclusive, startedAt, steps, proxy, TypedSecretChecks.Explain(names));
+        }
+
         return Finish(job, RunStatus.Passed, startedAt, steps, proxy, failureReason: null);
     }
 

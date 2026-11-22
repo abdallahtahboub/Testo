@@ -115,6 +115,27 @@ public static class PlanPrompt
 
         text.Append("Plan this test:\n\n").Append(request.Scenario).Append("\n\n");
 
+        // Only when there are some, so that every request without them is what it always was (ADR-0034 §2).
+        if (request.Expected is { Count: > 0 } expected)
+        {
+            text.Append("Expected results, as the tester states them (not observed by the crawl). Check these\n")
+                .Append("exactly as written; they are what the application should show at the end:\n");
+
+            foreach (var result in expected)
+            {
+                text.Append("- \"").Append(OneLine(result.Text)).Append('"');
+
+                if (result.Path is { Length: > 0 } path)
+                {
+                    text.Append(" on ").Append(OneLine(path));
+                }
+
+                text.Append('\n');
+            }
+
+            text.Append('\n');
+        }
+
         text.Append(CultureInfo.InvariantCulture, $"At most {request.MaxActions} actions.\n");
 
         text.Append(request.SecretNames.Count > 0
@@ -236,4 +257,7 @@ public static class PlanPrompt
         PlanningErrors.Unreadable => "The answer was not JSON in the shape asked for. Answer with JSON only.",
         _ => error,
     };
+
+    /// <summary>A tester's text on one line: the service refuses line breaks, and this holds if it ever does not.</summary>
+    private static string OneLine(string text) => string.Join(' ', text.Split((char[])['\r', '\n'], StringSplitOptions.RemoveEmptyEntries));
 }

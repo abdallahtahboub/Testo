@@ -829,4 +829,73 @@
   <data name="Planning_Error_UnknownSecret" xml:space="preserve">
     <value>Der Plan der KI gab einen Anmeldewert ein, den diese Umgebung nicht hat.</value>
   </data>
+  <data name="Expected_Title" xml:space="preserve">
+    <value>Erwartete Ergebnisse</value>
+  </data>
+  <data name="Expected_Intro" xml:space="preserve">
+    <value>Was die Anwendung am Ende anzeigen soll, genau so geschrieben, wie es erscheint. Optional: Der Planer prüft diese, wenn die Erkundung das Ergebnis nicht erreicht, etwa eine Seite nach dem Bezahlen.</value>
+  </data>
+  <data name="Expected_NoSecrets" xml:space="preserve">
+    <value>Diese werden mit der Beschreibung an den KI-Anbieter gesendet. Tragen Sie niemals Passwörter oder personenbezogene Daten ein.</value>
+  </data>
+  <data name="Expected_Text" xml:space="preserve">
+    <value>Erwarteter Text {0}</value>
+  </data>
+  <data name="Expected_Path" xml:space="preserve">
+    <value>Auf Seite {0}</value>
+  </data>
+  <data name="Expected_Path_Hint" xml:space="preserve">
+    <value>Optional, etwa /order/confirmed.</value>
+  </data>
+  <data name="Expected_Remove" xml:space="preserve">
+    <value>Entfernen</value>
+  </data>
+  <data name="Expected_Remove_Label" xml:space="preserve">
+    <value>Erwartetes Ergebnis {0} entfernen</value>
+  </data>
+  <data name="Expected_Add" xml:space="preserve">
+    <value>Erwartetes Ergebnis hinzufügen</value>
+  </data>
+  <data name="Expected_Full" xml:space="preserve">
+    <value>Ein Test kann höchstens {0} erwartete Ergebnisse haben.</value>
+  </data>
+  <data name="Expected_On" xml:space="preserve">
+    <value>auf {0}</value>
+  </data>
+  <data name="Expected_None" xml:space="preserve">
+    <value>Keine erwarteten Ergebnisse. Der Planer prüft nur, was die Erkundung gesehen hat.</value>
+  </data>
+  <data name="Expected_Replans" xml:space="preserve">
+    <value>Beim Speichern wird der Test aus dem bereits Erkundeten neu geplant; das verbraucht KI-Budget.</value>
+  </data>
+  <data name="Expected_Save" xml:space="preserve">
+    <value>Speichern und neu planen</value>
+  </data>
+  <data name="Expected_Cancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="Expected_Edit" xml:space="preserve">
+    <value>Erwartete Ergebnisse ändern</value>
+  </data>
+  <data name="Expected_Locked" xml:space="preserve">
+    <value>Der Plan ist freigegeben, daher können seine erwarteten Ergebnisse nicht geändert werden. Ziehen Sie die Freigabe zurück, um sie zu ändern.</value>
+  </data>
+  <data name="Evidence_Observed" xml:space="preserve">
+    <value>Von der Erkundung beobachtet</value>
+  </data>
+  <data name="Evidence_StatedByTester" xml:space="preserve">
+    <value>Vom Tester angegeben</value>
+  </data>
+  <data name="Evidence_Assumed" xml:space="preserve">
+    <value>Angenommen: muss geprüft werden</value>
+  </data>
+  <data name="Tests_Error_InvalidExpectedResults" xml:space="preserve">
+    <value>Erwartete Ergebnisse brauchen einen Text von höchstens 200 Zeichen in einer Zeile, höchstens 5 davon, und eine Seite, die mit / beginnt.</value>
+  </data>
+  <data name="Tests_Error_ExpectedResultsApproved" xml:space="preserve">
+    <value>Der Plan ist freigegeben, daher können seine erwarteten Ergebnisse nicht geändert werden. Ziehen Sie zuerst die Freigabe zurück.</value>
+  </data>
+  <data name="Tests_Error_BeingPlanned" xml:space="preserve">
+    <value>Der Test wird gerade geplant. Versuchen Sie es gleich noch einmal.</value>
+  </data>
 </root>

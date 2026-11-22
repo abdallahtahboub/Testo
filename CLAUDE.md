@@ -31,7 +31,8 @@ and a plan approved without it runs read-only, held in the browser by the worker
 Part 4 built downloading an approved test, which completes the first customer flow. **Exploration may act on a
 customer's test site only with an Owner's explicit, audited permission, never on production (ADR-0032).** **A test
 account's sign-in values are kept per test environment (ADR-0033)**: encrypted, write-only, never production, never to a
-model; exploration signs in with them only under ADR-0032's permission. **Evidence retention is built
+model; exploration signs in with them only under ADR-0032's permission. **A tester may state expected results
+(ADR-0034)**, sent to the planner labelled as theirs; every check is labelled by software as observed, stated or assumed. **Evidence retention is built
 (3.8 part 2, ADR-0031)**: a screenshot policy per project, an hourly job that deletes expired screenshots, none stored
 when a project keeps none; object storage waits for hosting. **Exporting plans as tests** is built for Python and
 verified (ADR-0023), previewed on a test's page and downloaded once approved. Everything else about the testing journey —

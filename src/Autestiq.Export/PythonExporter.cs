@@ -31,7 +31,7 @@ public sealed class PythonExporter : ITestExporter
     public ExportLanguage Language => ExportLanguage.Python;
 
     /// <inheritdoc />
-    public ExportedTest Export(TestPlan plan)
+    public ExportedTest Export(TestPlan plan, IReadOnlyList<CheckEvidence?>? evidence = null)
     {
         ArgumentNullException.ThrowIfNull(plan);
 
@@ -50,9 +50,17 @@ public sealed class PythonExporter : ITestExporter
         code.Append(Helper);
         code.Append("\n\ndef test_").Append(name).Append("(page: Page) -> None:\n");
 
-        foreach (var action in plan.Actions)
+        for (var index = 0; index < plan.Actions.Count; index++)
         {
+            var action = plan.Actions[index];
             code.Append("    # ").Append(Comment(action.Description)).Append('\n');
+
+            // Fixed words only: nothing of the plan's or the tester's text is in this line.
+            if (evidence is not null && index < evidence.Count && evidence[index] is { } said)
+            {
+                code.Append("    # ").Append(Evidence(said)).Append('\n');
+            }
+
             code.Append("    ").Append(Statement(action, secrets)).Append('\n');
         }
 
@@ -173,6 +181,14 @@ public sealed class PythonExporter : ITestExporter
 
         return text.Append('"').ToString();
     }
+
+    /// <summary>What a check's evidence is called in the code, in fixed words (ADR-0034 §3).</summary>
+    public static string Evidence(CheckEvidence evidence) => evidence switch
+    {
+        CheckEvidence.Observed => "Evidence: observed by the explorer.",
+        CheckEvidence.StatedByTester => "Evidence: stated by the tester as an expected result, not observed.",
+        _ => "Evidence: assumed by the plan. Needs verification.",
+    };
 
     /// <summary>
     /// Text for a comment: on one line, whatever it held. Every character Python or an editor could take for the

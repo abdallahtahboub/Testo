@@ -28,6 +28,9 @@ internal static class AuditActions
     public const string EnvironmentAdded = "environment.added";
     public const string EnvironmentRemoved = "environment.removed";
     public const string TestDescribed = "test.described";
+
+    /// <summary>A test's expected results were replaced (ADR-0034). Records how many, never the texts.</summary>
+    public const string TestExpectedResultsSet = "test.expected_results_set";
     public const string TestPlanned = "test.planned";
     public const string TestApproved = "test.approved";
     public const string TestApprovalWithdrawn = "test.approval_withdrawn";

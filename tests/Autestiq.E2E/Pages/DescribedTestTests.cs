@@ -96,10 +96,85 @@ public class DescribedTestTests(AppFixture app) : BrowserTest(app)
         await page.AssertAccessibleAsync();
     }
 
+    [Theory]
+    [InlineData("light")]
+    [InlineData("dark")]
+    public async Task Test_ExpectedResults_AreShownAsTheTesters_LabelTheChecks_AndCanBeChangedUntilApproval(string theme)
+    {
+        // The tester stated the total; exploring never saw it, so its check is labelled as theirs, not as observed.
+        var number = await PlannedTestAsync(App, expectedResults: "[{\"text\":\"£11.25\"}]", explored: true);
+        await AllowAiAsync(App, allowed: true);
+
+        try
+        {
+            var list = await OpenSignedInAsync(Routes.Tests("SHOP"));
+            var address = await list.Page.GetByTestId($"test-{number}").GetAttributeAsync("href");
+            list.AssertNoProblems();
+
+            var page = await OpenSignedInAsync(
+                address ?? throw new InvalidOperationException("The test is not linked from the list."),
+                options => options.ColorScheme = theme == "dark" ? ColorScheme.Dark : ColorScheme.Light);
+            await Expect(page.Page.GetByTestId("expected-edit")).ToBeEnabledAsync();
+
+            await Expect(page.Page.GetByTestId("expected-list")).ToContainTextAsync("Stated by the tester");
+            await Expect(page.Page.GetByTestId("expected-list")).ToContainTextAsync("“£11.25”");
+            await Expect(page.Page.GetByTestId("step-3").GetByTestId("evidence-3")).ToHaveTextAsync("Stated by the tester");
+            await Expect(page.Page.GetByTestId("step-1").GetByTestId("evidence-1")).ToHaveCountAsync(0);
+            await Expect(page.Page.GetByTestId("test-python")).ToContainTextAsync("# Evidence: stated by the tester as an expected result, not observed.");
+            await page.Page.ScreenshotAsync(new() { Path = Path.Combine(Path.GetTempPath(), $"autestiq-expected-{theme}.png"), FullPage = true });
+            await page.AssertAccessibleAsync();
+
+            // Changing them: one more result, on a page; then the plan made from the old ones is discarded.
+            await page.Page.GetByTestId("expected-edit").ClickAsync();
+            await Expect(page.Page.GetByTestId("expected-warning")).ToBeVisibleAsync();
+            await page.Page.GetByTestId("expected-add").ClickAsync();
+            await page.Page.GetByTestId("expected-text-2").FillAsync("Order placed");
+            await page.Page.GetByTestId("expected-path-2").FillAsync("/order/placed");
+            await page.AssertAccessibleAsync();
+            await page.Page.GetByTestId("expected-save").ClickAsync();
+
+            await Expect(page.Page.GetByTestId("expected-list")).ToContainTextAsync("“Order placed”");
+            await Expect(page.Page.GetByTestId("expected-list")).ToContainTextAsync("on /order/placed");
+            await Expect(page.Page.GetByTestId("test-steps")).ToHaveCountAsync(0);
+
+            // A path that is not one is refused by the service, in words.
+            await page.Page.GetByTestId("expected-edit").ClickAsync();
+            await page.Page.GetByTestId("expected-path-1").FillAsync("no-slash");
+            await page.Page.GetByTestId("expected-save").ClickAsync();
+            await Expect(page.Page.GetByTestId("test-expected").GetByRole(AriaRole.Alert)).ToContainTextAsync("a page that starts with /");
+
+            // Removed again, the test says it has none.
+            await page.Page.GetByTestId("expected-remove-2").ClickAsync();
+            await page.Page.GetByTestId("expected-remove-1").ClickAsync();
+            await page.Page.GetByTestId("expected-save").ClickAsync();
+            await Expect(page.Page.GetByTestId("expected-none")).ToBeVisibleAsync();
+
+            page.AssertNoProblems();
+        }
+        finally
+        {
+            // Off again: the other tests here start from a project without the permission, as a new one is.
+            await AllowAiAsync(App, allowed: false);
+        }
+    }
+
+    /// <summary>Gives or withdraws the seeded project's AI permission directly, as the page would after its acknowledgement.</summary>
+    private static async Task AllowAiAsync(AppFixture app, bool allowed)
+    {
+        await using var connection = new NpgsqlConnection(app.ConnectionString);
+        await connection.OpenAsync();
+        await using var update = new NpgsqlCommand(
+            allowed
+                ? "UPDATE projects SET ai_processing_allowed_at = now() WHERE key_prefix = 'SHOP'"
+                : "UPDATE projects SET ai_processing_allowed_at = NULL, ai_processing_allowed_by = NULL WHERE key_prefix = 'SHOP'",
+            connection);
+        await update.ExecuteNonQueryAsync();
+    }
+
     /// <summary>
     /// A planned test, written straight into the database: planning needs a model, and the browser tests never call one.
     /// </summary>
-    private static async Task<int> PlannedTestAsync(AppFixture app)
+    private static async Task<int> PlannedTestAsync(AppFixture app, string? expectedResults = null, bool explored = false)
     {
         await using var connection = new NpgsqlConnection(app.ConnectionString);
         await connection.OpenAsync();
@@ -136,9 +211,9 @@ public class DescribedTestTests(AppFixture app) : BrowserTest(app)
             INSERT INTO environments (id, organization_id, project_id, name, origin, kind, created_at, updated_at)
             VALUES (@environment, @organization, @project, @environmentName, @origin, 'Test', now(), now());
             INSERT INTO test_cases (id, organization_id, project_id, environment_id, number, description, status, plan, notes,
-                sent_to_model, model, model_cost, planned_at, created_at, updated_at)
+                sent_to_model, model, model_cost, planned_at, created_at, updated_at, expected_results, snapshot)
             VALUES (@testCase, @organization, @project, @environment, @number, 'Add a cup and check the total', 'Planned', @plan, @notes,
-                @sent, 'claude-sonnet-5-5', 0.0123, now(), now(), now());
+                @sent, 'claude-sonnet-5-5', 0.0123, now(), now(), now(), @expected, @snapshot);
             """,
             connection);
         insert.Parameters.AddWithValue("environment", environment);
@@ -153,6 +228,10 @@ public class DescribedTestTests(AppFixture app) : BrowserTest(app)
         insert.Parameters.AddWithValue("plan", JsonSerializer.Serialize(plan, Web));
         insert.Parameters.AddWithValue("notes", JsonSerializer.Serialize(notes, Web));
         insert.Parameters.AddWithValue("sent", JsonSerializer.Serialize(Sent, Web));
+        insert.Parameters.AddWithValue("expected", (object?)expectedResults ?? DBNull.Value);
+        insert.Parameters.AddWithValue(
+            "snapshot",
+            explored ? JsonSerializer.Serialize(new SiteSnapshot("http://127.0.0.1:1", [new PageSnapshot("/", "Catalogue", "Catalogue", [])], false), Web) : DBNull.Value);
         await insert.ExecuteNonQueryAsync();
 
         return number;
@@ -187,6 +266,9 @@ public class DescribedTestTests(AppFixture app) : BrowserTest(app)
         await page.Page.GetByTestId("acknowledge-ai").GetByRole(AriaRole.Checkbox).CheckAsync();
         await page.Page.GetByTestId("allow-ai").ClickAsync();
         await Expect(permission).ToContainTextAsync("AI planning was allowed for this project");
+
+        // The form also asks for expected results (ADR-0034), and says they go to the AI provider too.
+        await Expect(page.Page.GetByTestId("expected-warning")).ToContainTextAsync("Never put passwords or personal data in them.");
 
         // The site is not proved, so the service refuses before anything is explored or sent.
         await page.Page.GetByTestId("test-description").FillAsync("Add two cups to the basket and check the total");

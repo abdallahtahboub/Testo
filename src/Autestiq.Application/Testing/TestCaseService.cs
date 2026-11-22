@@ -88,6 +88,7 @@ internal sealed class TestCaseService(
         var plan = testCase.Plan is null ? null : JsonSerializer.Deserialize<StoredPlan>(testCase.Plan, Json);
         var snapshot = testCase.Snapshot is null ? null : JsonSerializer.Deserialize<SiteSnapshot>(testCase.Snapshot, Json);
         var actions = plan?.Actions ?? [];
+        var expected = ExpectedOf(testCase);
 
         PlanApproval? approval = null;
 
@@ -130,15 +131,97 @@ internal sealed class TestCaseService(
             PlanEffects.SecretsMissing(actions, await EnvironmentSecretNamesAsync(testCase, cancellationToken).ConfigureAwait(false)).Count > 0,
             approval,
             runs,
-            [.. snapshot?.Pages.SelectMany(page => page.ReachedBy ?? []).Distinct(StringComparer.Ordinal) ?? []]);
+            [.. snapshot?.Pages.SelectMany(page => page.ReachedBy ?? []).Distinct(StringComparer.Ordinal) ?? []])
+        {
+            ExpectedResults = expected,
+
+            // By software, from the plan, the crawl and the tester's words; never from the model's own labels.
+            Evidence = ExpectedResults.EvidenceFor(actions, snapshot, expected),
+        };
+    }
+
+    /// <summary>A test's expected results, as kept (ADR-0034).</summary>
+    internal static IReadOnlyList<ExpectedResult> ExpectedOf(TestCase testCase) =>
+        testCase.ExpectedResults is null ? [] : JsonSerializer.Deserialize<List<ExpectedResult>>(testCase.ExpectedResults, Json) ?? [];
+
+    /// <inheritdoc />
+    public async Task<OperationResult> SetExpectedResultsAsync(Guid testCaseId, IReadOnlyList<ExpectedResult> expected, CancellationToken cancellationToken = default)
+    {
+        if (!currentUser.Can(Permission.ManageTestCases))
+        {
+            return OperationResult.Failure("Tests_Error_NotAllowed");
+        }
+
+        if (ExpectedResults.Normalize(expected) is not { } kept)
+        {
+            return OperationResult.Failure("Tests_Error_InvalidExpectedResults");
+        }
+
+        var testCase = await database.TestCases.FirstOrDefaultAsync(candidate => candidate.Id == testCaseId, cancellationToken).ConfigureAwait(false);
+
+        if (testCase is null)
+        {
+            return OperationResult.Failure("Tests_Error_NoSuchTest");
+        }
+
+        // An approval is of a plan made from these results; changing them under it would approve something unseen.
+        if (testCase.ApprovedAt is not null)
+        {
+            return OperationResult.Failure("Tests_Error_ExpectedResultsApproved");
+        }
+
+        // The planner may be reading them right now.
+        if (testCase.Status == TestCaseStatus.Planning)
+        {
+            return OperationResult.Failure("Tests_Error_BeingPlanned");
+        }
+
+        // They go to the AI provider when the test is planned again, so only with the permission that allows that.
+        var allowed = await database.Projects
+            .AnyAsync(project => project.Id == testCase.ProjectId && project.AiProcessingAllowedAt != null, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (!allowed)
+        {
+            return OperationResult.Failure("Tests_Error_AiNotAllowed");
+        }
+
+        testCase.ExpectedResults = kept.Count > 0 ? JsonSerializer.Serialize(kept, Json) : null;
+
+        // A plan made from the old results is not a plan of these. What was explored still stands, so the planning step
+        // plans again from it: an exploring test whose exploration has finished is the one it picks up.
+        if (testCase.Status is TestCaseStatus.Planned or TestCaseStatus.Failed && testCase.Snapshot is not null)
+        {
+            testCase.Plan = null;
+            testCase.Notes = null;
+            testCase.FailureReason = null;
+            testCase.PlannedAt = null;
+            testCase.Status = TestCaseStatus.Exploring;
+        }
+
+        // How many, never the texts: they are the customer's words about their application.
+        Record(testCase, AuditActions.TestExpectedResultsSet, new { Count = kept.Count });
+        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        return OperationResult.Success;
     }
 
     /// <inheritdoc />
-    public async Task<OperationResult<Guid>> DescribeAsync(Guid projectId, Guid environmentId, string description, CancellationToken cancellationToken = default)
+    public async Task<OperationResult<Guid>> DescribeAsync(
+        Guid projectId,
+        Guid environmentId,
+        string description,
+        IReadOnlyList<ExpectedResult>? expected = null,
+        CancellationToken cancellationToken = default)
     {
         if (!currentUser.Can(Permission.ManageTestCases))
         {
             return OperationResult.Failure<Guid>("Tests_Error_NotAllowed");
+        }
+
+        if (ExpectedResults.Normalize(expected) is not { } kept)
+        {
+            return OperationResult.Failure<Guid>("Tests_Error_InvalidExpectedResults");
         }
 
         var text = description?.Trim() ?? "";
@@ -228,6 +311,7 @@ internal sealed class TestCaseService(
             EnvironmentId = environment.Id,
             Number = testNumber,
             Description = text,
+            ExpectedResults = kept.Count > 0 ? JsonSerializer.Serialize(kept, Json) : null,
             RequestedBy = currentUser.UserId,
         };
 
@@ -464,7 +548,10 @@ internal sealed class TestCaseService(
             return OperationResult.Failure<Contracts.Export.ExportedTest>("Tests_Error_NoExporter");
         }
 
-        var exported = exporter.Export(new TestPlan(testCase.Description, plan.Actions, [], plan.Coverage));
+        var snapshot = testCase.Snapshot is null ? null : JsonSerializer.Deserialize<SiteSnapshot>(testCase.Snapshot, Json);
+        var exported = exporter.Export(
+            new TestPlan(testCase.Description, plan.Actions, [], plan.Coverage),
+            ExpectedResults.EvidenceFor(plan.Actions, snapshot, ExpectedOf(testCase)));
 
         Record(testCase, AuditActions.TestDownloaded, new { Plan = testCase.ApprovedPlanHash, exported.FileName });
         await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

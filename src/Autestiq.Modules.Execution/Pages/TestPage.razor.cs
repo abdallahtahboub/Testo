@@ -4,6 +4,7 @@ using Autestiq.Contracts.Export;
 using Autestiq.Contracts.Planning;
 using Autestiq.Contracts.Projects;
 using Autestiq.Contracts.Testing;
+using Autestiq.UI.Shared.Components;
 
 namespace Autestiq.Modules.Execution.Pages;
 
@@ -91,7 +92,7 @@ public sealed partial class TestPage : ComponentBase
         Checks = Detail?.Notes.Where(note => note.Source == PlanNoteSource.CheckedByAutestiq).ToList() ?? [];
         AiNotes = Detail?.Notes.Where(note => note.Source == PlanNoteSource.Ai).ToList() ?? [];
         Python = Detail is { Steps.Count: > 0 }
-            ? Exporter.Export(new TestPlan(Detail.Description, Detail.Steps, [], Detail.Coverage)).Code
+            ? Exporter.Export(new TestPlan(Detail.Description, Detail.Steps, [], Detail.Coverage), Detail.Evidence).Code
             : null;
     }
 
@@ -109,6 +110,22 @@ public sealed partial class TestPage : ComponentBase
         ActionKind.AssertNotVisible => "Action_AssertNotVisible",
         ActionKind.AssertUrl => "Action_AssertUrl",
         _ => "Action_Goto",
+    };
+
+    /// <summary>The words for where a check's expected value came from (ADR-0034 §3), spelled out for the resource tests.</summary>
+    private static string EvidenceKey(CheckEvidence evidence) => evidence switch
+    {
+        CheckEvidence.Observed => "Evidence_Observed",
+        CheckEvidence.StatedByTester => "Evidence_StatedByTester",
+        _ => "Evidence_Assumed",
+    };
+
+    /// <summary>The badge's tone; the words above say the same, so nothing rests on the colour.</summary>
+    private static Tone EvidenceTone(CheckEvidence evidence) => evidence switch
+    {
+        CheckEvidence.Observed => Tone.Neutral,
+        CheckEvidence.StatedByTester => Tone.Info,
+        _ => Tone.Warning,
     };
 
     /// <summary>What a step acts on, as the plan names it.</summary>

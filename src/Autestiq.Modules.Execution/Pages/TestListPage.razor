@@ -87,6 +87,7 @@ else
                         <TField Label="@L["Tests_New_Description"]" Hint="@L["Tests_New_Description_Hint"]" Required>
                             <TTextArea Context="context" @bind-Value="Description" Rows="3" Required Disabled="!Ready" data-testid="test-description" />
                         </TField>
+                        <ExpectedResultsEditor Rows="Expected" Disabled="!Ready" />
                         <p class="t-muted">@L["Tests_New_ReadOnlyNote"]</p>
                         <div>
                             <TButton Variant="ButtonVariant.Primary" Loading="Busy" Disabled="!Ready" OnClick="DescribeAsync" data-testid="describe-test">@L["Tests_New_Submit"]</TButton>

@@ -164,6 +164,44 @@ public class PlannedRunTests(DemoShopFixture shop)
         Assert.All(result.Steps, step => Assert.DoesNotContain("teapot", step.Message ?? "", StringComparison.Ordinal));
     }
 
+    /// <summary>What a tester of the demo shop would say an order ends with (ADR-0034).</summary>
+    private static readonly ExpectedResult OrderPlaced = new("Thank you. Your order is on its way.", "/order/placed");
+
+    /// <summary>Places an order, then checks the tester's stated result, as a plan written from it would.</summary>
+    private static PlannedAction[] OrderThenStatedChecks(bool addSomething) =>
+    [
+        new(ActionKind.Goto, "Open the catalogue", Path: "/"),
+        .. addSomething ? new PlannedAction[] { new(ActionKind.Click, "Add the teapot", ActionTarget.ByTestId("add-pot")) } : [],
+        new(ActionKind.Goto, "Open the checkout", Path: "/checkout"),
+        new(ActionKind.Click, "Place the order", ActionTarget.ByTestId("place-order")),
+        new(ActionKind.AssertVisible, "The shop says the order is on its way", ActionTarget.ByText(OrderPlaced.Text)),
+        new(ActionKind.AssertUrl, "On the confirmation", Path: OrderPlaced.Path),
+    ];
+
+    [Fact]
+    public async Task ChecksOfAStatedResult_PassWhenTheApplicationShowsIt()
+    {
+        var plan = OrderThenStatedChecks(addSomething: true);
+
+        var result = await Jobs.PlannedAsync(shop.Origin, plan);
+
+        Assert.Equal(RunStatus.Passed, result.Status);
+
+        // Labelled as the tester's: exploring never placed an order, so nothing observed it.
+        Assert.Equal(
+            [CheckEvidence.StatedByTester, CheckEvidence.StatedByTester],
+            ExpectedResults.EvidenceFor(plan, SiteSnapshot.Empty(shop.Origin), [OrderPlaced]).Where(evidence => evidence is not null));
+    }
+
+    [Fact]
+    public async Task ChecksOfAStatedResult_FailWhenTheApplicationDoesNotShowIt()
+    {
+        // An empty basket: the sound shop refuses the order, so the thanks never appear.
+        var result = await Jobs.PlannedAsync(shop.Origin, OrderThenStatedChecks(addSomething: false));
+
+        Assert.Equal(RunStatus.Failed, result.Status);
+    }
+
     /// <summary>The shop's one account, as an environment's stored test account hands it to a run (ADR-0033).</summary>
     private static Dictionary<string, string> Account(string password = Shop.Password) => new(StringComparer.Ordinal)
     {

@@ -196,13 +196,18 @@ public interface IScenarioPlanner
 /// <param name="PreviousErrors">
 /// On a retry, what was wrong with the last answer. Empty on the first attempt.
 /// </param>
+/// <param name="Expected">
+/// What the tester says the application should show (ADR-0034), labelled as theirs. Empty for most tests, and then
+/// the request is exactly what it was before expected results existed.
+/// </param>
 public sealed record PlanRequest(
     string Scenario,
     SiteSnapshot Site,
     IReadOnlyList<string> SecretNames,
     int MaxActions,
     int MaxTokens,
-    IReadOnlyList<string> PreviousErrors)
+    IReadOnlyList<string> PreviousErrors,
+    IReadOnlyList<ExpectedResult>? Expected = null)
 {
     /// <summary>A first attempt, with nothing yet to learn from.</summary>
     public static PlanRequest First(
@@ -210,8 +215,9 @@ public sealed record PlanRequest(
         SiteSnapshot site,
         IReadOnlyList<string> secretNames,
         int maxActions,
-        int maxTokens) =>
-        new(scenario, site, secretNames, maxActions, maxTokens, []);
+        int maxTokens,
+        IReadOnlyList<ExpectedResult>? expected = null) =>
+        new(scenario, site, secretNames, maxActions, maxTokens, [], expected);
 
     /// <summary>The same request again, with what was wrong last time.</summary>
     public PlanRequest Retry(IReadOnlyList<string> errors) => this with { PreviousErrors = errors };

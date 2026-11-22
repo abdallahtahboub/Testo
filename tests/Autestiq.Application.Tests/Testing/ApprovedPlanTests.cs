@@ -451,7 +451,7 @@ public sealed class ApprovedPlanTests : IAsyncLifetime
 
         public Contracts.Export.ExportLanguage Language => Contracts.Export.ExportLanguage.Python;
 
-        public Contracts.Export.ExportedTest Export(TestPlan plan) => new("test_it.py", Body, []);
+        public Contracts.Export.ExportedTest Export(TestPlan plan, IReadOnlyList<CheckEvidence?>? evidence = null) => new("test_it.py", Body, []);
     }
 
     // --- Which steps may change data ---

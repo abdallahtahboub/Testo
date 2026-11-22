@@ -33,19 +33,21 @@ public sealed class PlanningService(IScenarioPlanner planner, ILogger<PlanningSe
     /// <param name="site">What the crawl found. Untrusted input.</param>
     /// <param name="budget">The run's budget. Tokens and money are spent here; the rest is not.</param>
     /// <param name="secretNames">The names of the values this run holds, so a plan can say "the password".</param>
+    /// <param name="expected">What the tester says the application should show (ADR-0034), labelled as theirs.</param>
     /// <param name="cancellationToken">The usual.</param>
     public async Task<PlannedResult> PlanAsync(
         string scenario,
         SiteSnapshot site,
         RunBudget budget,
         IReadOnlyList<string> secretNames,
+        IReadOnlyList<ExpectedResult>? expected = null,
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(scenario);
         ArgumentNullException.ThrowIfNull(site);
         ArgumentNullException.ThrowIfNull(budget);
 
-        var request = PlanRequest.First(scenario, site, secretNames, budget.MaxSteps, budget.MaxModelTokens);
+        var request = PlanRequest.First(scenario, site, secretNames, budget.MaxSteps, budget.MaxModelTokens, expected);
         var spent = PlanningCost.None;
         IReadOnlyList<string> errors = [PlanningErrors.NoPlanner];
         IReadOnlyList<string> notes = [];
@@ -68,7 +70,7 @@ public sealed class PlanningService(IScenarioPlanner planner, ILogger<PlanningSe
                 return new PlannedResult(null, answer.Errors, [], spent, planner.Model, sent);
             }
 
-            var review = PlanValidator.Review(answer.Plan, site, budget.MaxSteps, secretNames);
+            var review = PlanValidator.Review(answer.Plan, site, budget.MaxSteps, secretNames, expected);
 
             if (review.Allowed)
             {

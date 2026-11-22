@@ -265,6 +265,7 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
             site,
             RunBudget.Default,
             scenario.Secrets?.Keys.ToList() ?? [],
+            scenario.Expected,
             cancellationToken).ConfigureAwait(false);
 
         Record(scenario, result);

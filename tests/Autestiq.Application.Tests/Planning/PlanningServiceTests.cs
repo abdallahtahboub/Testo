@@ -33,7 +33,7 @@ public class PlanningServiceTests
         var planner = new Planner([Answer(Good)]);
 
         var result = await Service(planner).PlanAsync(
-            "Check the catalogue", Shop, RunBudget.Default, [], TestContext.Current.CancellationToken);
+            "Check the catalogue", Shop, RunBudget.Default, [], cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.True(result.Succeeded);
         Assert.Equal(1, planner.Asked);
@@ -47,7 +47,7 @@ public class PlanningServiceTests
         var planner = new Planner([Answer([new PlannedAction(ActionKind.Goto, "Go abroad", Path: "https://collect.example/")]), Answer(Good)]);
 
         var result = await Service(planner).PlanAsync(
-            "Check the catalogue", Shop, RunBudget.Default, [], TestContext.Current.CancellationToken);
+            "Check the catalogue", Shop, RunBudget.Default, [], cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.True(result.Succeeded);
         Assert.Equal(2, planner.Asked);
@@ -66,7 +66,7 @@ public class PlanningServiceTests
         var planner = new Planner([bad, bad]);
 
         var result = await Service(planner).PlanAsync(
-            "Check the catalogue", Shop, RunBudget.Default, [], TestContext.Current.CancellationToken);
+            "Check the catalogue", Shop, RunBudget.Default, [], cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.False(result.Succeeded);
         Assert.Null(result.Plan);
@@ -92,7 +92,7 @@ public class PlanningServiceTests
         ]);
 
         var result = await Service(planner).PlanAsync(
-            "Check the catalogue", Shop, RunBudget.Default, [], TestContext.Current.CancellationToken);
+            "Check the catalogue", Shop, RunBudget.Default, [], cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.False(result.Succeeded);
         Assert.Null(result.Plan);
@@ -106,7 +106,7 @@ public class PlanningServiceTests
         var planner = new Planner([PlanResult.Failed([PlanningErrors.ProviderUnavailable], new PlanningCost(0, 0, 1, 0m, TimeSpan.Zero), "fake")]);
 
         var result = await Service(planner).PlanAsync(
-            "Check the catalogue", Shop, RunBudget.Default, [], TestContext.Current.CancellationToken);
+            "Check the catalogue", Shop, RunBudget.Default, [], cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.False(result.Succeeded);
         Assert.Contains(PlanningErrors.ProviderUnavailable, result.Errors);
@@ -128,7 +128,7 @@ public class PlanningServiceTests
             Shop,
             RunBudget.Default with { MaxModelTokens = 5_000 },
             [],
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.False(result.Succeeded);
         Assert.Contains(PlanningErrors.BudgetSpent, result.Errors);
@@ -147,7 +147,7 @@ public class PlanningServiceTests
             Shop,
             RunBudget.Default with { MaxCostUsd = 0.25m },
             [],
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.False(result.Succeeded);
         Assert.Contains(PlanningErrors.BudgetSpent, result.Errors);
@@ -171,7 +171,7 @@ public class PlanningServiceTests
         ]);
 
         var result = await Service(planner).PlanAsync(
-            "Check the basket", Shop, RunBudget.Default, [], TestContext.Current.CancellationToken);
+            "Check the basket", Shop, RunBudget.Default, [], cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.True(result.Succeeded);
         Assert.Contains(result.Notes, note => note.Contains("in pounds", StringComparison.Ordinal));
@@ -188,7 +188,7 @@ public class PlanningServiceTests
             Shop,
             RunBudget.Default,
             ["password"],
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(["password"], planner.LastRequest!.SecretNames);
     }

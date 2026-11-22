@@ -12,6 +12,9 @@ internal sealed class TestCaseConfiguration : IEntityTypeConfiguration<TestCase>
         builder.HasKey(testCase => testCase.Id);
 
         builder.Property(testCase => testCase.Description).HasMaxLength(1000).IsRequired();
+
+        // Five texts and five paths of at most 200 characters each, as JSON (ADR-0034), with room for the quoting.
+        builder.Property(testCase => testCase.ExpectedResults).HasMaxLength(4000);
         builder.Property(testCase => testCase.Status).HasConversion<string>().HasMaxLength(20).IsRequired();
         builder.Property(testCase => testCase.FailureReason).HasMaxLength(200);
         builder.Property(testCase => testCase.Model).HasMaxLength(100);

@@ -154,7 +154,12 @@ public static class EshopScenarios
                 See("The shop thanks you", "heading", "Thanks for your Order!"),
                 AssertUrl("On the success page", "/Basket/Success"),
             ],
-            Secrets: DemoPassword),
+            Secrets: DemoPassword,
+
+            // Exploring never pays (ADR-0032), so the thank-you page is never seen. The tester says what it shows, as a
+            // tester of a real shop could (ADR-0034); taken from the baseline above, which checks both. Added
+            // 2026-11-22: eShopOnWeb figures before that date were measured without it.
+            Expected: [new ExpectedResult("Thanks for your Order!", "/Basket/Success")]),
 
         new(
             "order-history-needs-sign-in",

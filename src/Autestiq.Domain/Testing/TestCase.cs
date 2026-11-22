@@ -25,6 +25,12 @@ public sealed class TestCase : Entity, IBelongsToOrganization
     /// <summary>What the person asked for, in their words.</summary>
     public required string Description { get; set; }
 
+    /// <summary>
+    /// What the person says the application should show at the end (ADR-0034), as JSON: up to five texts, each with an
+    /// optional path. <c>null</c> when none. Sent to the planner labelled as the tester's.
+    /// </summary>
+    public string? ExpectedResults { get; set; }
+
     /// <summary>Where it stands.</summary>
     public TestCaseStatus Status { get; set; } = TestCaseStatus.Exploring;
 

@@ -109,7 +109,7 @@ public sealed partial class TestListPage : ComponentBase
 
         await DoAsync(async () =>
         {
-            var described = await TestCases.DescribeAsync(Project.ProjectId, environmentId, Description ?? "", CancellationToken.None).ConfigureAwait(false);
+            var described = await TestCases.DescribeAsync(Project.ProjectId, environmentId, Description ?? "", cancellationToken: CancellationToken.None).ConfigureAwait(false);
 
             if (described.Succeeded)
             {

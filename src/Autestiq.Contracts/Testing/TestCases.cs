@@ -77,7 +77,17 @@ public sealed record TestCaseDetail(
     bool NeedsSecret,
     PlanApproval? Approval,
     IReadOnlyList<TestCaseRun> Runs,
-    IReadOnlyList<string> Explored);
+    IReadOnlyList<string> Explored)
+{
+    /// <summary>What the tester says the application should show (ADR-0034). Empty when they said nothing.</summary>
+    public IReadOnlyList<ExpectedResult> ExpectedResults { get; init; } = [];
+
+    /// <summary>
+    /// Where each step's expected value came from, in step order, decided by software (ADR-0034 §3): <c>null</c> for a
+    /// step that checks nothing.
+    /// </summary>
+    public IReadOnlyList<CheckEvidence?> Evidence { get; init; } = [];
+}
 
 /// <summary>Who approved a plan, when, and whether the approval allows changing data.</summary>
 public sealed record PlanApproval(DateTimeOffset ApprovedAt, string? ApprovedBy, bool ToChangeData);
@@ -98,8 +108,24 @@ public interface ITestCaseService
     /// <summary>One described test, or <c>null</c> when this organization has none with that id.</summary>
     Task<TestCaseDetail?> GetAsync(Guid testCaseId, CancellationToken cancellationToken = default);
 
-    /// <summary>Describes a test: queues an exploration of the environment, after which the AI plans it.</summary>
-    Task<OperationResult<Guid>> DescribeAsync(Guid projectId, Guid environmentId, string description, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Describes a test: queues an exploration of the environment, after which the AI plans it. <paramref name="expected"/>
+    /// is what the tester says the application should show (ADR-0034): up to five, refused with
+    /// <c>Tests_Error_InvalidExpectedResults</c> beyond the rules of <see cref="ExpectedResults"/>.
+    /// </summary>
+    Task<OperationResult<Guid>> DescribeAsync(
+        Guid projectId,
+        Guid environmentId,
+        string description,
+        IReadOnlyList<ExpectedResult>? expected = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Replaces a test's expected results (ADR-0034). Needs <see cref="Identity.Permission.ManageTestCases"/> and the
+    /// project's AI permission. Refused once the plan is approved, and while it is being planned. A plan made from the
+    /// old results is discarded and the test is planned again from what was already explored.
+    /// </summary>
+    Task<OperationResult> SetExpectedResultsAsync(Guid testCaseId, IReadOnlyList<ExpectedResult> expected, CancellationToken cancellationToken = default);
     /// <summary>
     /// Approves the test's plan to run (Milestone 5, part 3). Needs <see cref="Identity.Permission.ApproveTestArtifacts"/>
     /// (Owner, QA lead). Refused for a plan that is partial or types a secret, and for a plan that may change data unless

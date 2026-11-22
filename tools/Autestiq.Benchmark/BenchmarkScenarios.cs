@@ -16,12 +16,17 @@ namespace Autestiq.Benchmark;
 /// application passes.
 /// </param>
 /// <param name="Secrets">The values a run of this scenario is given, by name.</param>
+/// <param name="Expected">
+/// What the tester states the application should show (ADR-0034), given to the planner beside <paramref name="Ask"/>.
+/// Most scenarios have none, and their requests are what they were before expected results existed.
+/// </param>
 public sealed record BenchmarkScenario(
     string Id,
     string Ask,
     IReadOnlyList<PlannedAction> Baseline,
     string? Defect = null,
-    IReadOnlyDictionary<string, string>? Secrets = null);
+    IReadOnlyDictionary<string, string>? Secrets = null,
+    IReadOnlyList<ExpectedResult>? Expected = null);
 
 /// <summary>
 /// The twelve scenarios the planner is measured on.

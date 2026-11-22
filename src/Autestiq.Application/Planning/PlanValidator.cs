@@ -52,7 +52,12 @@ public static class PlanValidator
     /// given would fail the run for a reason that is not the application's. <c>null</c> skips the check, for callers
     /// that judge a plan without knowing where it will run.
     /// </param>
-    public static PlanReview Review(TestPlan? plan, SiteSnapshot site, int maxActions, IReadOnlyCollection<string>? secretNames = null)
+    public static PlanReview Review(
+        TestPlan? plan,
+        SiteSnapshot site,
+        int maxActions,
+        IReadOnlyCollection<string>? secretNames = null,
+        IReadOnlyList<ExpectedResult>? expected = null)
     {
         ArgumentNullException.ThrowIfNull(site);
 
@@ -85,7 +90,8 @@ public static class PlanValidator
                 errors.Add(PlanningErrors.UnknownSecret);
             }
 
-            if (Unseen(action, site) is { } note)
+            // The tester has said this appears (ADR-0034): unseen by the crawl, but not a hope.
+            if (!ExpectedResults.States(action, expected) && Unseen(action, site) is { } note)
             {
                 notes.Add(note);
             }

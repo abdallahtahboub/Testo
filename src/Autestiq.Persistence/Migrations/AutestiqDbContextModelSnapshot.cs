@@ -1658,6 +1658,11 @@ namespace Autestiq.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("environment_id");
 
+                    b.Property<string>("ExpectedResults")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("expected_results");
+
                     b.Property<string>("FailureReason")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")

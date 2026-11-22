@@ -141,7 +141,15 @@ public sealed partial class PlanningDispatcher(
 
         var planned = await new PlanningService(planner, services.GetRequiredService<ILogger<PlanningService>>())
             // The names of the environment's sign-in values, never the values: a plan may type them by name (ADR-0033).
-            .PlanAsync(testCase.Description, site, budget, await Projects.EnvironmentSecrets.NamesAsync(database, testCase.OrganizationId, testCase.EnvironmentId, cancellationToken).ConfigureAwait(false), cancellationToken)
+            .PlanAsync(
+                testCase.Description,
+                site,
+                budget,
+                await Projects.EnvironmentSecrets.NamesAsync(database, testCase.OrganizationId, testCase.EnvironmentId, cancellationToken).ConfigureAwait(false),
+
+                // What the tester says should be shown, labelled as theirs (ADR-0034).
+                TestCaseService.ExpectedOf(testCase),
+                cancellationToken)
             .ConfigureAwait(false);
 
         var checks = planned.CheckNotes ?? [];

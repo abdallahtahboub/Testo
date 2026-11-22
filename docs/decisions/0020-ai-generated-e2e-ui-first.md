@@ -211,6 +211,23 @@ same scenarios, same frozen prompt, `--signed-in`. **18 of 22 correct, no false 
   would be inconclusive for the planner, and for the baseline too, whose own check is the same weak one; the 18 of 22
   above is from before the guard.
 
+**Signed in, with the account guard (ADR-0033) and the tester's stated thank-you (ADR-0034) (2026-11-22, the owner's
+run):** **16 of 22 correct, no false positive.** Model cost: $0.45. Report: `docs/ai-benchmark-eshop-signed-in.md`
+(it replaces the earlier signed-in report).
+- **Placing an order: correct on both runs**, for the first time. Its last checks are the tester's stated result.
+- **Signing in shows who is signed in: inconclusive**, for the planner and for the hand-written baseline alike. Both
+  check for the account's own email, which eShopOnWeb also prints on its login page; the guard ends such a pass
+  inconclusive, as it should.
+- **The second page: a false negative this time** (correct in both earlier runs). The planner added a check on the
+  pager's "Showing 2 of 12 products - Page 2 - 2", which eShopOnWeb shows twice, above and below the products, so the
+  check found two elements and failed. The explorer had marked it as not nameable uniquely (`use=none`), and the
+  prompt says not to build a step on such an element, but nothing enforces that. A validator rule that does is
+  proposed, not built.
+- **Unchanged:** the guessed order-history address.
+
+So the number fell from 18 to 16: two passes the guard rightly no longer counts, two false negatives from one check
+the prompt alone could not prevent, and one verdict gained where there was none.
+
 **What this supports, and what it does not.** It supports this statement: *on our three benchmark
 applications, on scenarios written after the planner was frozen, the planner's tests gave the right verdict
 on 95% of sound-application runs, caught every seeded defect where a verdict was reached, and never passed

@@ -105,7 +105,9 @@ The benchmark passes them in; the product has nowhere to keep them.
 
 **G-7 · Observed, documented and assumed are not yet shown apart (§6).** *Built 2026-11-17, Milestone 5 part 2:
 "Checked by Autestiq" apart from "The AI's notes: unverified", and the tester's request on its own. The AI's notes
-are not split by the model's own labels, because that would trust the model to label itself.*
+are not split by the model's own labels, because that would trust the model to label itself. Since 2026-11-22
+(ADR-0034) a tester may state expected results, sent labelled as theirs, and every check carries a label decided by
+software: observed by the explorer, stated by the tester, or assumed and needing verification.*
 The planner's notes mix them in prose.
 *Recommendation:*
 - In part 2's plan view, label each note as observed by the crawl, given by the tester, or assumed, with

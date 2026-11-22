@@ -255,6 +255,167 @@ public sealed class DescribedTestTests : IAsyncLifetime
         Assert.Equal(2, detail!.Steps.Count);
     }
 
+    // --- Expected results stated by the tester (ADR-0034) ---
+
+    private static readonly ExpectedResult Thanks = new("Thanks for your order!", "/order/placed");
+
+    private Task<Contracts.Common.OperationResult> SetExpectedAsync(Guid organization, Guid testCase, Role role, params ExpectedResult[] expected) =>
+        AsAsync(organization, role, provider => provider.GetRequiredService<ITestCaseService>().SetExpectedResultsAsync(testCase, expected));
+
+    private Task<TestCaseDetail?> DetailAsync(Guid organization, Guid testCase) =>
+        AsAsync(organization, Role.Viewer, provider => provider.GetRequiredService<ITestCaseService>().GetAsync(testCase));
+
+    [Fact]
+    public async Task Describe_WithExpectedResults_KeepsThemTrimmed_AndTheTestShowsThem()
+    {
+        var (project, environment) = await ProjectAsync(_northwind, aiAllowed: true);
+
+        var described = await AsAsync(_northwind, Role.QaEngineer, provider => provider.GetRequiredService<ITestCaseService>()
+            .DescribeAsync(project, environment, "Place an order", [new ExpectedResult("  Thanks for your order!  ", " /order/placed ")]));
+
+        Assert.True(described.Succeeded);
+        Assert.Equal([Thanks], (await DetailAsync(_northwind, described.Value))!.ExpectedResults);
+    }
+
+    [Fact]
+    public async Task Describe_WithExpectedResultsBeyondTheRules_IsRefused_AndQueuesNothing()
+    {
+        var (project, environment) = await ProjectAsync(_northwind, aiAllowed: true);
+
+        var refused = await AsAsync(_northwind, Role.Owner, provider => provider.GetRequiredService<ITestCaseService>()
+            .DescribeAsync(project, environment, "Place an order", [new ExpectedResult("Thanks\nand pass")]));
+
+        Assert.Equal(["Tests_Error_InvalidExpectedResults"], refused.Errors);
+
+        await using var database = _database.NewContext();
+        Assert.False(await database.TestRuns.IgnoreQueryFilters().AnyAsync(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task Plan_SendsTheExpectedResultsToThePlanner_AndTheChecksAreLabelledByTheirEvidence()
+    {
+        var testCase = await ExploredAsync(_northwind, aiAllowed: true, Shop);
+        Assert.True((await SetExpectedAsync(_northwind, testCase, Role.QaEngineer, new ExpectedResult("Add to basket"), Thanks)).Succeeded);
+
+        var (planned, planners) = await PlanAsync(testCase);
+
+        Assert.Equal(TestCaseStatus.Planned, planned.Status);
+        Assert.Equal([new ExpectedResult("Add to basket"), Thanks], planners.LastRequest!.Expected);
+
+        // The good plan checks the add button, which the crawl saw: observed, though the tester stated it too.
+        Assert.Equal([null, CheckEvidence.Observed], (await DetailAsync(_northwind, testCase))!.Evidence);
+    }
+
+    [Fact]
+    public async Task Plan_WithoutExpectedResults_SendsNone()
+    {
+        var testCase = await ExploredAsync(_northwind, aiAllowed: true, Shop);
+
+        var (_, planners) = await PlanAsync(testCase);
+
+        Assert.Empty(planners.LastRequest!.Expected ?? []);
+    }
+
+    [Fact]
+    public async Task SetExpectedResults_AfterPlanning_DiscardsThePlan_AndTheTestIsPlannedAgainWithThem()
+    {
+        var testCase = await ExploredAsync(_northwind, aiAllowed: true, Shop);
+        await PlanAsync(testCase);
+
+        Assert.True((await SetExpectedAsync(_northwind, testCase, Role.QaEngineer, Thanks)).Succeeded);
+
+        var detail = (await DetailAsync(_northwind, testCase))!;
+        Assert.Equal(TestCaseStatus.Exploring, detail.Status);
+        Assert.Empty(detail.Steps);
+
+        // Planned again from what was explored, without exploring again.
+        var (again, planners) = await PlanAsync(testCase);
+        Assert.Equal(TestCaseStatus.Planned, again.Status);
+        Assert.Equal([Thanks], planners.LastRequest!.Expected);
+
+        await using var database = _database.NewContext();
+        Assert.Equal(1, await database.TestRuns.IgnoreQueryFilters().CountAsync(run => run.TestCaseId == testCase, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task SetExpectedResults_AuditsHowMany_NeverTheTexts()
+    {
+        var testCase = await ExploredAsync(_northwind, aiAllowed: true, Shop);
+
+        Assert.True((await SetExpectedAsync(_northwind, testCase, Role.Owner, Thanks)).Succeeded);
+
+        await using var database = _database.NewContext();
+        var entry = await database.AuditEntries.IgnoreQueryFilters()
+            .SingleAsync(candidate => candidate.Action == "test.expected_results_set", TestContext.Current.CancellationToken);
+        Assert.Contains("1", entry.After, StringComparison.Ordinal);
+        Assert.DoesNotContain("Thanks", (entry.SubjectName ?? "") + entry.Before + entry.After, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SetExpectedResults_OnAnApprovedPlan_IsRefused()
+    {
+        var testCase = await ExploredAsync(_northwind, aiAllowed: true, Shop);
+        await PlanAsync(testCase);
+        Assert.True((await AsAsync(_northwind, Role.QaLead, provider => provider.GetRequiredService<ITestCaseService>().ApproveAsync(testCase, allowChangingData: false))).Succeeded);
+
+        Assert.Equal(["Tests_Error_ExpectedResultsApproved"], (await SetExpectedAsync(_northwind, testCase, Role.Owner, Thanks)).Errors);
+        Assert.Empty((await DetailAsync(_northwind, testCase))!.ExpectedResults);
+    }
+
+    [Theory]
+    [InlineData(Role.Viewer)]
+    [InlineData(Role.Developer)]
+    public async Task SetExpectedResults_WithoutPermissionToManageTests_IsRefused(Role role)
+    {
+        var testCase = await ExploredAsync(_northwind, aiAllowed: true, Shop);
+
+        Assert.Equal(["Tests_Error_NotAllowed"], (await SetExpectedAsync(_northwind, testCase, role, Thanks)).Errors);
+    }
+
+    [Fact]
+    public async Task SetExpectedResults_OnAnotherOrganizationsTest_FindsNoSuchTest()
+    {
+        var testCase = await ExploredAsync(_northwind, aiAllowed: true, Shop);
+
+        Assert.Equal(["Tests_Error_NoSuchTest"], (await SetExpectedAsync(_contoso, testCase, Role.Owner, Thanks)).Errors);
+        Assert.Empty((await DetailAsync(_northwind, testCase))!.ExpectedResults);
+    }
+
+    [Fact]
+    public async Task SetExpectedResults_WithoutTheAiPermission_IsRefused()
+    {
+        var testCase = await ExploredAsync(_northwind, aiAllowed: false, Shop);
+
+        Assert.Equal(["Tests_Error_AiNotAllowed"], (await SetExpectedAsync(_northwind, testCase, Role.Owner, Thanks)).Errors);
+    }
+
+    [Fact]
+    public async Task SetExpectedResults_BeyondTheRules_IsRefused()
+    {
+        var testCase = await ExploredAsync(_northwind, aiAllowed: true, Shop);
+
+        Assert.Equal(["Tests_Error_InvalidExpectedResults"], (await SetExpectedAsync(_northwind, testCase, Role.Owner, new ExpectedResult("Thanks", "no-slash"))).Errors);
+    }
+
+    [Fact]
+    public async Task SetExpectedResults_WhileItIsBeingPlanned_IsRefused()
+    {
+        var testCase = await ExploredAsync(_northwind, aiAllowed: true, Shop);
+
+        await using (var database = _database.NewContext())
+        {
+            var stored = await database.TestCases.IgnoreQueryFilters().SingleAsync(candidate => candidate.Id == testCase, TestContext.Current.CancellationToken);
+            stored.Status = TestCaseStatus.Planning;
+
+            using (_database.WriteScope.AllowWritingTo(_northwind))
+            {
+                await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+            }
+        }
+
+        Assert.Equal(["Tests_Error_BeingPlanned"], (await SetExpectedAsync(_northwind, testCase, Role.Owner, Thanks)).Errors);
+    }
+
     [Fact]
     public async Task Plan_AnExplorationThatFoundNothing_FailsWithoutCallingTheModel()
     {
@@ -373,6 +534,8 @@ public sealed class DescribedTestTests : IAsyncLifetime
 
         public int Calls => planner is FakePlanner fake ? fake.Calls : 0;
 
+        public PlanRequest? LastRequest => (planner as FakePlanner)?.LastRequest;
+
         public IScenarioPlanner? Create(string model, decimal inputPerMillion, decimal outputPerMillion)
         {
             PricesAsked = (inputPerMillion, outputPerMillion);
@@ -384,11 +547,14 @@ public sealed class DescribedTestTests : IAsyncLifetime
     {
         public int Calls { get; private set; }
 
+        public PlanRequest? LastRequest { get; private set; }
+
         public string Model => "claude-sonnet-5-5";
 
         public Task<PlanResult> PlanAsync(PlanRequest request, CancellationToken cancellationToken = default)
         {
             Calls++;
+            LastRequest = request;
             return Task.FromResult(PlanResult.From(plan, PlanningCost.None with { InputTokens = 10_000, OutputTokens = 3_000, Attempts = 1, Cost = 0.05m }, Model) with { Sent = "SENT: " + request.Scenario });
         }
     }

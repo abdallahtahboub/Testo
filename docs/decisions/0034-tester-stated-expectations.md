@@ -1,6 +1,6 @@
 # 0034 — What the tester says the application should show
 
-- **Status:** Proposed
+- **Status:** Accepted (the owner approved it on 2026-11-22)
 - **Date:** 2026-11-22
 
 ## Context
@@ -53,6 +53,37 @@ value came from.
 5. **Measured before it is claimed.** The eShopOnWeb scenario "an order can be placed" gains the expected result
    "Thanks for your Order!" on `/Basket/Success` (taken from the hand-written baseline, which already checks both). It is
    measured with the owner's yes and a price first. The other scenarios and sets have none, so their figures stand.
+
+## Built (2026-11-22)
+- **Contracts.** `ExpectedResult(Text, Path?)`, `CheckEvidence` (observed, stated by the tester, assumed) and
+  `ExpectedResults`: `Normalize` (the rules of §1), `States` (does a check match a stated result) and `EvidenceFor` (the
+  label of each step). One place, used by the service, the validator, the test page and the export.
+- **Kept and changed.** `TestCase.ExpectedResults` (JSON, migration `TestCaseExpectedResults`).
+  `ITestCaseService.DescribeAsync` takes them; `SetExpectedResultsAsync` replaces them:
+  - `ManageTestCases` and the project's AI permission;
+  - refused once the plan is approved (`Tests_Error_ExpectedResultsApproved`) and while it is being planned;
+  - a planned or failed test whose exploration found something goes back to planning, from what was explored, with
+    no new exploration;
+  - audited as `test.expected_results_set` with how many, never the texts.
+- **To the planner.** `PlanRequest.Expected`, written by `PlanPrompt.User` as its own block before the application's
+  content, one line per result. Without results the request is byte for byte the stored request of before (a test
+  holds it). The system prompt is unchanged.
+- **The validator** raises no "not on any page the crawl saw" note for a check that matches a stated result.
+- **Labels.** `TestCaseDetail.Evidence`, shown as a badge beside each check on the test page, in words, and written as
+  a fixed comment in the exported Python (`# Evidence: …`, no tester text in it). Without labels the export is the
+  same code as before.
+- **Screens.** The describe form and the test page share `ExpectedResultsEditor`: up to five rows of text and page,
+  labelled, with the warning about passwords and personal data. The test page shows the results as "Stated by the
+  tester" and lets them be changed until approval, saying that saving plans again.
+- **Benchmark.** `BenchmarkScenario.Expected`, passed to the planner. eShopOnWeb's "an order can be placed" carries
+  "Thanks for your Order!" on `/Basket/Success`. No other scenario has any, so their requests are unchanged.
+- **Tests:** the rules and refusals (count, length, line breaks, control characters, paths), the byte-for-byte request,
+  the one-line block outside the application's content, the unchanged system prompt, the validator note, every label
+  (including both, case, other text, a negative check, and nothing taken from the model's notes), the export comment,
+  the service (describe, change, replan without re-exploring, approval lock, roles, another organization, the AI
+  permission, while planning, the audit), a planned run on the demo shop passing when the stated result is shown and
+  failing when not, the editor's component tests, and a browser test of the test page in both themes.
+- **Not yet measured:** eShopOnWeb with the stated thank-you. It needs a paid run with the owner's yes.
 
 ## Consequences
 - **Easier:**

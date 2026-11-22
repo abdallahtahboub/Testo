@@ -203,11 +203,13 @@ same scenarios, same frozen prompt, `--signed-in`. **18 of 22 correct, no false 
   verdict is the tester saying what the confirmation should say (a documented expectation, kept apart from what was
   observed), not exploration that pays.
 - **Unchanged:** the guessed order-history address (false negative).
-- **A risk to keep watching.** In `signing-in-shows-who-is-signed-in` the plan checks for `demouser@microsoft.com`, taken
-  from the scenario's description, because the description it saw shows only the marker. eShopOnWeb's login page prints
-  that address in its demo note, so a check for it that is not tied to the signed-in header could pass after a failed
-  sign-in. It passed correctly here. A deterministic guard (for example, refusing a check whose text matches a value the
-  test typed) is a candidate for later, not built.
+- **A false-positive route, now closed (2026-11-22, ADR-0033).** In `signing-in-shows-who-is-signed-in` the plan checks
+  for `demouser@microsoft.com`, taken from the scenario's description, because the description it saw shows only the
+  marker. eShopOnWeb's login page prints that address in its demo note, so the check could pass after a failed sign-in.
+  It passed correctly here. **The worker now ends such a run inconclusive instead of passed:** a pass that rests on a
+  check for a value of the test account the plan typed proves nothing. Measured again with `--signed-in`, that scenario
+  would be inconclusive for the planner, and for the baseline too, whose own check is the same weak one; the 18 of 22
+  above is from before the guard.
 
 **What this supports, and what it does not.** It supports this statement: *on our three benchmark
 applications, on scenarios written after the planner was frozen, the planner's tests gave the right verdict

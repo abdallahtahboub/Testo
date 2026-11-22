@@ -164,6 +164,86 @@ public class PlannedRunTests(DemoShopFixture shop)
         Assert.All(result.Steps, step => Assert.DoesNotContain("teapot", step.Message ?? "", StringComparison.Ordinal));
     }
 
+    /// <summary>The shop's one account, as an environment's stored test account hands it to a run (ADR-0033).</summary>
+    private static Dictionary<string, string> Account(string password = Shop.Password) => new(StringComparer.Ordinal)
+    {
+        ["username"] = Shop.Account,
+        ["password"] = password,
+    };
+
+    /// <summary>Signs in with the stored account, then makes one check.</summary>
+    private static PlannedAction[] SignInThen(PlannedAction check, bool typeUsernamePlainly = false) =>
+    [
+        new(ActionKind.Goto, "Open the sign-in page", Path: "/sign-in"),
+        typeUsernamePlainly
+            ? new(ActionKind.Type, "Type the email", ActionTarget.ByTestId("email"), Text: Shop.Account)
+            : new(ActionKind.Type, "Type the email", ActionTarget.ByTestId("email"), SecretName: "username"),
+        new(ActionKind.Type, "Type the password", ActionTarget.ByTestId("password"), SecretName: "password"),
+        new(ActionKind.Click, "Sign in", ActionTarget.ByTestId("do-sign-in")),
+        check,
+    ];
+
+    private static PlannedAction ShowsTheAccountsEmail =>
+        new(ActionKind.AssertText, "It says who is signed in", ActionTarget.ByTestId("signed-in-as"), Text: $"Signed in as {Shop.Account}");
+
+    [Fact]
+    public async Task APassThatRestsOnTheTestAccountsOwnValue_IsInconclusive_SayingWhichByName()
+    {
+        // The application could show the value the test typed whether or not the sign-in worked: eShopOnWeb prints
+        // its demo account on its login page. Such a pass proves nothing, so it is not counted as one.
+        var result = await Jobs.PlannedAsync(shop.Origin, SignInThen(ShowsTheAccountsEmail), Account());
+
+        Assert.Equal(RunStatus.Inconclusive, result.Status);
+        Assert.Contains("'username'", result.FailureReason!, StringComparison.Ordinal);
+        Assert.DoesNotContain(Shop.Account, result.FailureReason!, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain(Shop.Password, result.FailureReason!, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task APassThatRestsOnTheAccountsValueTypedPlainly_IsInconclusive_Too()
+    {
+        // A planner that read the value in the tester's description may type it as text. It is the same value.
+        var result = await Jobs.PlannedAsync(shop.Origin, SignInThen(ShowsTheAccountsEmail, typeUsernamePlainly: true), Account());
+
+        Assert.Equal(RunStatus.Inconclusive, result.Status);
+    }
+
+    [Fact]
+    public async Task ASignInCheckedBySomethingOnlyTheSignedInPageShows_Passes()
+    {
+        // The guard takes away nothing but that one kind of pass.
+        var check = new PlannedAction(ActionKind.AssertVisible, "The account page is shown", ActionTarget.ByTestId("signed-in-as"));
+
+        var result = await Jobs.PlannedAsync(shop.Origin, SignInThen(check), Account());
+
+        Assert.Equal(RunStatus.Passed, result.Status);
+    }
+
+    [Fact]
+    public async Task ACheckForTheAccountsValueThatFails_StillFails()
+    {
+        // A failure has found something; only a pass is in question.
+        var result = await Jobs.PlannedAsync(shop.Origin, SignInThen(ShowsTheAccountsEmail), Account(password: "not-the-password"));
+
+        Assert.Equal(RunStatus.Failed, result.Status);
+    }
+
+    [Fact]
+    public async Task ACheckThatTheAccountsValueIsNotThere_IsNotAffected()
+    {
+        // "Not there" cannot pass because the test typed the value, so it is left alone.
+        PlannedAction[] plan =
+        [
+            new(ActionKind.Goto, "Open the sign-in page", Path: "/sign-in"),
+            new(ActionKind.Type, "Type the email", ActionTarget.ByTestId("email"), SecretName: "username"),
+            new(ActionKind.AssertNotVisible, "Nobody is signed in yet", ActionTarget.ByText($"Signed in as {Shop.Account}")),
+        ];
+
+        var result = await Jobs.PlannedAsync(shop.Origin, plan, Account());
+
+        Assert.Equal(RunStatus.Passed, result.Status);
+    }
+
     [Fact]
     public async Task APlanThatTypesASecretTheRunDoesNotHave_FailsSayingWhichOne()
     {

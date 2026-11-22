@@ -255,6 +255,10 @@ public static class PlanPrompt
         PlanningErrors.UnknownTarget => "A target was named in a way that is not testId or roleAndName.",
         PlanningErrors.Incomplete => "An action was missing something it needs: a description, a target, a path, or text.",
         PlanningErrors.Unreadable => "The answer was not JSON in the shape asked for. Answer with JSON only.",
+        PlanningErrors.UnknownSecret => "A step typed a secretName that is not one of the names you were given.",
+        PlanningErrors.AmbiguousTarget => "A step named an element that the crawl marked use=none, or left out the within=\"...\" "
+            + "the crawl said it needs. The browser would find more than one element. Name it as its use= says, with its within, "
+            + "or check something else.",
         _ => error,
     };
 

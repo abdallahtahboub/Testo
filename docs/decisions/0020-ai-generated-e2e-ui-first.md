@@ -221,8 +221,8 @@ run):** **16 of 22 correct, no false positive.** Model cost: $0.45. Report: `doc
 - **The second page: a false negative this time** (correct in both earlier runs). The planner added a check on the
   pager's "Showing 2 of 12 products - Page 2 - 2", which eShopOnWeb shows twice, above and below the products, so the
   check found two elements and failed. The explorer had marked it as not nameable uniquely (`use=none`), and the
-  prompt says not to build a step on such an element, but nothing enforces that. A validator rule that does is
-  proposed, not built.
+  prompt says not to build a step on such an element, but nothing enforced that. **The validator now refuses such a
+  step and asks again (ADR-0024, 2026-11-22); not yet measured.**
 - **Unchanged:** the guessed order-history address.
 
 So the number fell from 18 to 16: two passes the guard rightly no longer counts, two false negatives from one check

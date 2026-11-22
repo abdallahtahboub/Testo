@@ -898,4 +898,7 @@
   <data name="Tests_Error_BeingPlanned" xml:space="preserve">
     <value>The test is being planned right now. Try again in a moment.</value>
   </data>
+  <data name="Planning_Error_AmbiguousTarget" xml:space="preserve">
+    <value>The AI's plan named an element that appears more than once on the page, so it could not be told apart. The plan was refused.</value>
+  </data>
 </root>

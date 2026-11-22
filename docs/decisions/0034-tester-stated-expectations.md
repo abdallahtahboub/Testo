@@ -83,7 +83,10 @@ value came from.
   the service (describe, change, replan without re-exploring, approval lock, roles, another organization, the AI
   permission, while planning, the audit), a planned run on the demo shop passing when the stated result is shown and
   failing when not, the editor's component tests, and a browser test of the test page in both themes.
-- **Not yet measured:** eShopOnWeb with the stated thank-you. It needs a paid run with the owner's yes.
+- **Measured on eShopOnWeb (2026-11-22, the owner's run, `--signed-in`).** "An order can be placed", inconclusive in
+  every earlier run, is **correct on both runs**: the planner's final checks are "the two the tester gave", it typed the
+  account from the stored secret, and it stated its one assumption (signing in from checkout returns to "Pay Now") and
+  waited for it. The whole set: 16 of 22 correct, **no false positive**; see ADR-0020 for the other changes.
 
 ## Consequences
 - **Easier:**

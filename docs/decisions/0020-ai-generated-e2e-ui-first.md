@@ -190,6 +190,25 @@ unseen application.** A clean one needs an application the explorer was never tu
 the explorer not signing in (which needs a store for a test account's password, ADR-0030's G-6) and one address the
 planner guessed and said it guessed.
 
+**Signed in, with the published demo account stored as the test account (2026-11-22, the owner's run; ADR-0033):**
+same scenarios, same frozen prompt, `--signed-in`. **18 of 22 correct, no false positive**, the same total. Report:
+`docs/ai-benchmark-eshop-signed-in.md`. Model cost: $0.45.
+- **The explorer signed in.** The two scenarios given the account were planned from about twice the description (about
+  28,000 tokens against 15,000), and the planner names pages it saw only signed in, the checkout among them.
+- **The account's values never reached the planner.** It says the signed-in page shows "the username secret" as text,
+  which is the marker the worker put there.
+- **Placing an order is still inconclusive, and rightly.** The explorer reached checkout signed in but never presses
+  "Pay Now": paying is on the never-pressed list (ADR-0032). So the thank-you page is unseen, and the planner wrote a
+  partial plan rather than guess its wording. That is the safety rule working, not a gap to tune away. The way to a
+  verdict is the tester saying what the confirmation should say (a documented expectation, kept apart from what was
+  observed), not exploration that pays.
+- **Unchanged:** the guessed order-history address (false negative).
+- **A risk to keep watching.** In `signing-in-shows-who-is-signed-in` the plan checks for `demouser@microsoft.com`, taken
+  from the scenario's description, because the description it saw shows only the marker. eShopOnWeb's login page prints
+  that address in its demo note, so a check for it that is not tied to the signed-in header could pass after a failed
+  sign-in. It passed correctly here. A deterministic guard (for example, refusing a check whose text matches a value the
+  test typed) is a candidate for later, not built.
+
 **What this supports, and what it does not.** It supports this statement: *on our three benchmark
 applications, on scenarios written after the planner was frozen, the planner's tests gave the right verdict
 on 95% of sound-application runs, caught every seeded defect where a verdict was reached, and never passed

@@ -254,6 +254,38 @@ PetClinic (Java, server-rendered), at commit `500158f` of `spring-projects/sprin
    application. A baseline that fails may be corrected, and the correction is reported; a scenario's words may not change.
 4. **One planner run, published as it comes,** whatever it says (`docs/ai-benchmark-petclinic.md`).
 
+**Result (2026-11-23, the owner's run, Claude Sonnet 5.5): 20 of 22 runs correct (91%), no false positive, no false
+negative.** All eleven baselines passed the application unchanged, so no baseline was corrected. Model cost: $0.47.
+- **The two runs without a verdict** are "a shared last name lists both owners": the search box has no label, so the
+  plan listed every owner and checked both Davises among them, and said, as a partial plan, that the filtering was
+  not tested. It was counted inconclusive, as it should be.
+- **The unlabelled search box** (`use=none`) was handled three ways: opening the search's address
+  (`/owners?lastName=Zygmunt`, inferred from what the crawl saw), listing all owners and following a link, or
+  stopping at partial. None of them typed into the box.
+- **Two passes are weaker than "correct" suggests**, and the set cannot tell, because it has no broken application to
+  fail:
+  - "Finding one owner opens their page" listed all owners and opened George Franklin's link. Its own note says "the
+    search-by-last-name filtering itself is not exercised", yet the plan said it covered the whole scenario. That is
+    a plan claiming more than its checks, the mistake partial coverage exists to prevent, here caught only by
+    reading the notes.
+  - "An edited address is kept" may pass without proving the edit. The benchmark runs the baseline before the
+    planner explores, so the crawl already saw Jeff Black at 99 Orchard Lane, and the planner said so: "the final
+    address check could pass without proving the edit worked". This is a flaw in how the benchmark orders runs on an
+    application it cannot reset, not in the plan.
+
+  Counting those four runs as unproven, the strict figure is 16 of 22. Both figures are given here; neither is a
+  false positive.
+
+**What this supports.** On one application nobody here wrote or tuned for, measured cleanly, with scenarios written
+from its source before any run, the planner gave a correct verdict on 91% of runs on a sound application, with no
+false positive. It does not support a claim about catching defects there (PetClinic has no defect switches), about
+applications in general (it is one small application, eleven scenarios, one run), or about read-only exploration (the
+benchmark explores with acting allowed, as our own applications are).
+
+**After publishing, and only now, proposed fixes:** run the planner's exploration before a scenario's baseline on an
+application that cannot be reset; and look at why a plan can call itself full while its own note says part was not
+tested.
+
 **What this supports, and what it does not.** It supports this statement: *on our three benchmark
 applications, on scenarios written after the planner was frozen, the planner's tests gave the right verdict
 on 95% of sound-application runs, caught every seeded defect where a verdict was reached, and never passed

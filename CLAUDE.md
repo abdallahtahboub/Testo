@@ -22,7 +22,10 @@ never sees what an action leads to (ADR-0020). **On eShopOnWeb, the first applic
 right verdict on 14 of 22 runs, and 18 of 22 (82%) after two explorer changes made on that application's own results,
 with no false positive either time**. Signed in, with the account guard, the tester's stated thank-you and ambiguous steps refused, it
 is 18 of 22, still with no false positive: placing an order now reaches a verdict, and the sign-in check the guard distrusts is inconclusive. The gate's 90% is
-not met there, the 82% is not a clean measurement, and no broader claim is made. **Milestone 5, the first customer flow, is done and accepted by the owner (2026-11-23, ADR-0030)**: part 1 built projects, environments with
+not met there, and the 82% is not a clean measurement. **The clean measurement, on Spring PetClinic (2026-11-23,
+scenarios written from its source before any run, nothing tuned): 20 of 22 runs correct (91%), no false positive**;
+two passes tested less than they claimed (16 of 22 strictly), and it is one application without defects to catch
+(ADR-0020). **Milestone 5, the first customer flow, is done and accepted by the owner (2026-11-23, ADR-0030)**: part 1 built projects, environments with
 ownership proofs, production off by default, and the app's navigation drawn from the module registry. Part 2 built
 describing a test in a sentence: the site is explored (read-only on a customer's site) and the planner writes a plan,
 **only if the project's AI permission, off by default, is given**, within the AI budgets, with what was sent recorded

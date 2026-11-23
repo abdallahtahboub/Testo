@@ -22,13 +22,13 @@ never sees what an action leads to (ADR-0020). **On eShopOnWeb, the first applic
 right verdict on 14 of 22 runs, and 18 of 22 (82%) after two explorer changes made on that application's own results,
 with no false positive either time**. Signed in, with the account guard, the tester's stated thank-you and ambiguous steps refused, it
 is 18 of 22, still with no false positive: placing an order now reaches a verdict, and the sign-in check the guard distrusts is inconclusive. The gate's 90% is
-not met there, the 82% is not a clean measurement, and no broader claim is made. **Milestone 5, the first customer flow, is under way (ADR-0030)**: part 1 built projects, environments with
+not met there, the 82% is not a clean measurement, and no broader claim is made. **Milestone 5, the first customer flow, is done and accepted by the owner (2026-11-23, ADR-0030)**: part 1 built projects, environments with
 ownership proofs, production off by default, and the app's navigation drawn from the module registry. Part 2 built
 describing a test in a sentence: the site is explored (read-only on a customer's site) and the planner writes a plan,
 **only if the project's AI permission, off by default, is given**, within the AI budgets, with what was sent recorded
 and the AI's notes labelled unverified. Part 3 built approving and running a plan: steps that may change data are
 decided by software, approval (Owner, QA lead) needs an explicit tick for them and is checked again by the dispatcher,
-and a plan approved without it runs read-only, held in the browser by the worker. No sign-in secrets are stored.
+and a plan approved without it runs read-only, held in the browser by the worker.
 Part 4 built downloading an approved test, which completes the first customer flow. **Exploration may act on a
 customer's test site only with an Owner's explicit, audited permission, never on production (ADR-0032).** **A test
 account's sign-in values are kept per test environment (ADR-0033)**: encrypted, write-only, never production, never to a

@@ -20,8 +20,8 @@ three applications**, and the same holds with every test id removed. **Explored 
 is, it drops to 36 of 66 runs correct (full: 62 of 66), still with no false positive**: read-only exploration
 never sees what an action leads to (ADR-0020). **On eShopOnWeb, the first application nobody here wrote, it gave the
 right verdict on 14 of 22 runs, and 18 of 22 (82%) after two explorer changes made on that application's own results,
-with no false positive either time**. Signed in, with the account guard and the tester's stated thank-you, it is 16 of 22,
-still with no false positive: placing an order now reaches a verdict, and the sign-in check the guard distrusts is inconclusive. The gate's 90% is
+with no false positive either time**. Signed in, with the account guard, the tester's stated thank-you and ambiguous steps refused, it
+is 18 of 22, still with no false positive: placing an order now reaches a verdict, and the sign-in check the guard distrusts is inconclusive. The gate's 90% is
 not met there, the 82% is not a clean measurement, and no broader claim is made. **Milestone 5, the first customer flow, is under way (ADR-0030)**: part 1 built projects, environments with
 ownership proofs, production off by default, and the app's navigation drawn from the module registry. Part 2 built
 describing a test in a sentence: the site is explored (read-only on a customer's site) and the planner writes a plan,

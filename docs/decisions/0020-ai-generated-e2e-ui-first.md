@@ -243,6 +243,17 @@ The same 18 of 22 as the first signed-in run, on stricter rules: a pass that cou
 and a verdict exists where there was none. These figures come after several changes made on eShopOnWeb's own results,
 so they are not a clean measurement of an application nobody here has seen; the gate's 90% is still not met here.
 
+**The clean measurement: Spring PetClinic (set up 2026-11-23, not yet run).** eShopOnWeb's figures came after
+changes made on its own results, so the owner chose a second application nobody here wrote or tuned on: Spring
+PetClinic (Java, server-rendered), at commit `500158f` of `spring-projects/spring-petclinic`. The protocol:
+1. **Written before anything ran.** Eleven scenarios and their baselines (`tools/Autestiq.Benchmark/PetclinicScenarios.cs`)
+   were written from the application's source, read and never run here.
+2. **Frozen.** The explorer, the prompt and the validator stay as they are at the commit that adds the scenarios until
+   the first planner run is published. Nothing changes in answer to PetClinic's results before then.
+3. **Baselines checked with no model first.** A run without a key shows whether each hand-written baseline passes the
+   application. A baseline that fails may be corrected, and the correction is reported; a scenario's words may not change.
+4. **One planner run, published as it comes,** whatever it says (`docs/ai-benchmark-petclinic.md`).
+
 **What this supports, and what it does not.** It supports this statement: *on our three benchmark
 applications, on scenarios written after the planner was frozen, the planner's tests gave the right verdict
 on 95% of sound-application runs, caught every seeded defect where a verdict was reached, and never passed

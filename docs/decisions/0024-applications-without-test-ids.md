@@ -208,3 +208,5 @@ The prompt says not to build a step on such an element, and on eShopOnWeb a plan
 - **Checked, with no model:** every hand-written baseline of our three applications (72 plans, the first and the unseen
   sets) passes the rule against a fresh exploration of its application, so it refuses none of the plans that are known
   to work there.
+- **eShopOnWeb (2026-11-23):** the scenario that prompted it passed, but its plan needed no retry, so the run says
+  nothing about the rule either way (ADR-0020).

@@ -222,11 +222,26 @@ run):** **16 of 22 correct, no false positive.** Model cost: $0.45. Report: `doc
   pager's "Showing 2 of 12 products - Page 2 - 2", which eShopOnWeb shows twice, above and below the products, so the
   check found two elements and failed. The explorer had marked it as not nameable uniquely (`use=none`), and the
   prompt says not to build a step on such an element, but nothing enforced that. **The validator now refuses such a
-  step and asks again (ADR-0024, 2026-11-22); not yet measured.**
+  step and asks again (ADR-0024, 2026-11-22).**
 - **Unchanged:** the guessed order-history address.
 
 So the number fell from 18 to 16: two passes the guard rightly no longer counts, two false negatives from one check
 the prompt alone could not prevent, and one verdict gained where there was none.
+
+**The same, with the validator refusing ambiguous steps (2026-11-23, the owner's run):** **18 of 22 correct, no false
+positive.** Model cost: $0.45. Report: `docs/ai-benchmark-eshop-signed-in.md` (it replaces the one above).
+- **The second page is correct again, but not because of the new rule.** Its plan cost a single model call (14,529
+  tokens; a refusal and a retry would have been about twice that): the planner did not write the pager check this time,
+  and said why ("the Previous/Next links appear twice"). The rule's evidence is its tests, and that all 72 hand-written
+  baselines of our applications pass it; this run neither supports nor contradicts it.
+- **Placing an order: correct again**, from the tester's stated result. The planner also noted that exploring had left
+  items in the shared demo account's basket, which "Pay Now" would buy too: the data change ADR-0032's permission warns
+  of, here on a demo account.
+- **Signing in: inconclusive** (the guard, planner and baseline alike). **Order history:** the same guessed address.
+
+The same 18 of 22 as the first signed-in run, on stricter rules: a pass that could not be trusted no longer counts,
+and a verdict exists where there was none. These figures come after several changes made on eShopOnWeb's own results,
+so they are not a clean measurement of an application nobody here has seen; the gate's 90% is still not met here.
 
 **What this supports, and what it does not.** It supports this statement: *on our three benchmark
 applications, on scenarios written after the planner was frozen, the planner's tests gave the right verdict

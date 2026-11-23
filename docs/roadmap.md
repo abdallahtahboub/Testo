@@ -408,7 +408,26 @@ correctly with no database at all.
 A run against a deployed instance is still worth doing before anybody quotes these numbers
 publicly.
 
-## Milestone 5 — App shell + module registry
+## Milestone 5 — The first customer flow (ADR-0030)
+**Status: done, accepted by the owner on 2026-11-23.** ADR-0020 narrowed this milestone, and ADR-0030 defined it, as
+the first customer flow: project → environment with its site proved → a test described in a sentence → the AI's plan,
+with its notes, its evidence labels and its Python → approved by a person → run → result → the approved test
+downloaded. Built in four parts, each reviewed by the owner, with the security requirements of 2026-11-17 built
+alongside: evidence retention (ADR-0031), exploring that may act (ADR-0032), test accounts (ADR-0033), expected
+results stated by the tester (ADR-0034), and the validator's refusal of ambiguous steps (ADR-0024).
+
+**Accepted with these limits, stated in the review:**
+- no clean measurement yet on an application nobody here tuned the explorer on (next, ADR-0020);
+- read-only exploration, a customer site's default, is markedly weaker (36 of 66 against 62 of 66);
+- downloaded tests do not carry the test-account guard;
+- exploring signed in changes the test account's data;
+- not pilot-ready infrastructure: the key ring and evidence on local disk, G-2's minimized AI mode not built;
+- no private agent (G-8).
+
+### Deferred from the earlier plan for this milestone (issue #4)
+The app shell as first planned, kept for when it comes back after the first pilot. Its registry-driven navigation and
+feature flags are built; its mock sign-in and mock data were superseded by real ones (ADR-0017).
+
 **Scope:** the app shell on the real sign-in from Milestone 3; app shell (registry-driven left nav, top bar with project switcher, search, notifications, user menu); `Autestiq.Mocks` with the seed data generator and all `Mock*` services (with configurable latency/failure); dashboard rendering registered widgets: quality KPIs, run trends, open defects by severity, release readiness, recent runs; feature flags hiding unfinished modules; "module not available" page.
 
 **Done when:** each module registers its nav entry with one line and appears in the nav; turning a flag off hides its nav entry, widgets and routes (tested); dashboard widgets show loading, empty, error and data states (bUnit); seed-data consistency tests pass; E2E covers sign-in → dashboard → switch project.

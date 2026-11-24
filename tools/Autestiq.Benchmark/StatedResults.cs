@@ -109,11 +109,6 @@ public static class StatedResults
             return StatedScore.NotChecked;
         }
 
-        if (planner == StatedCheck.NotReached)
-        {
-            return StatedScore.Inconclusive;
-        }
-
         bool? broken = !defectOn ? false
             : baseline switch
             {
@@ -124,7 +119,9 @@ public static class StatedResults
 
         return (broken, planner) switch
         {
+            // Neither the plan nor the baseline got that far (an earlier step had failed): there is nothing to score.
             (null, _) => StatedScore.NotScored,
+            (_, StatedCheck.NotReached) => StatedScore.Inconclusive,
             (false, StatedCheck.Passed) => StatedScore.Confirmed,
             (false, _) => StatedScore.WrongFail,
             (true, StatedCheck.Failed) => StatedScore.Caught,

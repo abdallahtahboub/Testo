@@ -42,6 +42,8 @@ public class StatedResultsTests
     [InlineData(StatedCheck.Passed, true, StatedCheck.NotReached, StatedScore.NotScored)]
     [InlineData(StatedCheck.NotChecked, true, StatedCheck.Failed, StatedScore.NotChecked)]
     [InlineData(StatedCheck.NotReached, false, StatedCheck.Passed, StatedScore.Inconclusive)]
+    [InlineData(StatedCheck.NotReached, true, StatedCheck.Failed, StatedScore.Inconclusive)]
+    [InlineData(StatedCheck.NotReached, true, StatedCheck.NotReached, StatedScore.NotScored)]
     public void Score_JudgesAgainstTheBaseline(StatedCheck planner, bool defectOn, StatedCheck baseline, StatedScore expected)
     {
         Assert.Equal(expected, StatedResults.Score(planner, defectOn, baseline));

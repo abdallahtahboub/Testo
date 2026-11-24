@@ -365,3 +365,41 @@ Until that result is published, no sales material claims that the product genera
   product no customer has used, which the directive names as the overcomplexity risk (R-10).
 - **Start with API or security testing.** Rejected for now: each needs its own vocabulary and
   threat model, and the E2E path is the one already built.
+
+## The release-candidate measurement (Milestone 5.1 R5): method, prepared 2026-11-24, not yet run
+
+**What changes in the tool, not in the product:**
+- **Every report starts with what was measured**: the source revision (flagged when the working tree had changes), the
+  release-candidate tag or "none", the model, the first 12 hex digits of the system prompt's SHA-256, how the target was
+  explored (acting or read-only, with or without test ids, with or without stated results), and how it is reset
+  between runs.
+- **`--release-candidate <tag>`** refuses to run unless the checkout is exactly that tag with no changes, so a figure
+  called "the release candidate's" can only come from it.
+- **`--stated`** gives each scenario stated expected results by rule: the texts its hand-written baseline checks
+  (scenarios that already state results keep theirs). Nobody chooses them after seeing a plan, and no tuning was ever
+  done on this condition. **Each stated result is scored on its own**, from the first execution, against the baseline:
+  on the sound application every result holds; on the broken one a result is broken when the baseline's own check of
+  it fails, and is **not scored** when the baseline stopped before it. Scores: false pass, wrong failure, caught,
+  confirmed, not checked (partial), inconclusive, not scored. False passes are listed first.
+- A stated or test-id-free run writes a report of its own (`-stated.md`, `-no-ids.md`), never over the plain one.
+
+**Verified free**, with the hand-written plans as recorded answers on the demo shop's unseen set: 9 confirmed, 3 caught,
+0 false passes, 0 wrong failures; the results after a failing step were not scored.
+
+**Limits, stated before any run:** stated results derived from baselines are exact texts, some short (a quantity such as
+"2"); a tester's own words would be looser. Only the first execution is scored per result. PetClinic has no defects, so
+its stated results can only be confirmed or wrongly failed.
+
+**The runs (the owner's, about $5–7 in all), on the release-candidate tag:**
+
+```bash
+for t in demo booking invoices; do
+  for mode in "" "--without-test-ids" "--read-only" "--stated"; do
+    dotnet run --project tools/Autestiq.Benchmark -- --target $t --unseen $mode --release-candidate <tag> --max-total-usd 2
+  done
+done
+dotnet run --project tools/Autestiq.Benchmark -- --target petclinic --release-candidate <tag> --max-total-usd 2
+dotnet run --project tools/Autestiq.Benchmark -- --target petclinic --stated --release-candidate <tag> --max-total-usd 2
+```
+
+ADR-0020's figures are replaced only by these, with the earlier figures and their qualifications kept beside them.

@@ -492,7 +492,12 @@ internal sealed record BenchmarkOptions(
 
     /// <summary>Each target and each set has its own report, so no run can overwrite another's.</summary>
     private static string ReportFileName(string[] args) =>
-        args.Contains("--read-only", StringComparer.Ordinal)
+        // A stated or test-id-free run has a report of its own beside the plain one, never in its place (R5).
+        args.Contains("--stated", StringComparer.Ordinal)
+            ? ReportFileName([.. args.Where(arg => arg != "--stated")]).Replace(".md", "-stated.md", StringComparison.Ordinal)
+        : args.Contains("--without-test-ids", StringComparer.Ordinal)
+            ? ReportFileName([.. args.Where(arg => arg != "--without-test-ids")]).Replace(".md", "-no-ids.md", StringComparison.Ordinal)
+        : args.Contains("--read-only", StringComparer.Ordinal)
             ? ReportFileName([.. args.Where(arg => arg != "--read-only")]).Replace(".md", "-read-only.md", StringComparison.Ordinal)
         : args.Contains("--unseen", StringComparer.Ordinal) ? $"ai-benchmark-unseen-{Value(args, "--target") ?? "demo"}.md"
         : Value(args, "--target") == "booking" ? "ai-benchmark-booking.md"

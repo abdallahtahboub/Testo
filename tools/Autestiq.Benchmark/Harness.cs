@@ -268,6 +268,60 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
     /// <summary>Keeps a measurement and says so, so a long run is not a blank terminal.</summary>
     private Task ResetAsync() => ResetTarget is null ? Task.CompletedTask : ResetTarget();
 
+    // --- For the lab's experiments (docs/ai-learning/experiments/): the same exploring, planning and running as
+    // the benchmark, so an experiment measures what the benchmark measures. ---
+
+    /// <summary>Switches the scenario's defect on or off.</summary>
+    internal void SwitchDefect(BenchmarkScenario scenario, bool defectOn) => Switch(scenario, defectOn);
+
+    /// <summary>Explores the target as it is now and plans the scenario, as a repair when one is given.</summary>
+    internal async Task<PlannedResult> PlanScenarioAsync(BenchmarkScenario scenario, PlanRepair? repair, CancellationToken cancellationToken)
+    {
+        // The cap, checked before each call, as for the benchmark; the caller reports the partial figures as partial.
+        if (MaxTotalUsd is { } cap && Spent >= cap)
+        {
+            StoppedAtSpendingCap = true;
+            throw new OperationCanceledException($"Planning has cost ${Spent:0.0000}, which reaches the cap of ${cap:0.00}.");
+        }
+
+        await ResetAsync().ConfigureAwait(false);
+
+        var explored = await new ScenarioRunner(TimeProvider.System) { StartAfresh = ResetTarget }
+            .RunAsync(Job(scenario, WorkerTask.Explore, null) with { Budget = ExplorationBudget }, cancellationToken)
+            .ConfigureAwait(false);
+
+        var planned = await _planning!.PlanAsync(
+            scenario.Ask,
+            explored.Snapshot ?? SiteSnapshot.Empty(origin),
+            RunBudget.Default,
+            scenario.Secrets?.Keys.ToList() ?? [],
+            scenario.Expected,
+            repair,
+            cancellationToken).ConfigureAwait(false);
+
+        Spent += planned.Cost.Cost;
+        return planned;
+    }
+
+    /// <summary>Runs a plan once against the target as it is now; the status already reconciled with its coverage.</summary>
+    internal async Task<(RunStatus Status, WorkerResult Result)> RunPlanAsync(
+        BenchmarkScenario scenario,
+        IReadOnlyList<PlannedAction> plan,
+        PlanCoverage coverage,
+        CancellationToken cancellationToken)
+    {
+        await ResetAsync().ConfigureAwait(false);
+
+        var result = await new ScenarioRunner(TimeProvider.System)
+            .RunAsync(Job(scenario, WorkerTask.Planned, plan), cancellationToken)
+            .ConfigureAwait(false);
+
+        return (PlanOutcome.Reconcile(result.Status, coverage), result);
+    }
+
+    /// <summary>The benchmark's verdict for a status, given whether the defect was on.</summary>
+    internal static Verdict VerdictFor(RunStatus status, bool defectOn) => Judge(status, defectOn);
+
     private void Report(List<Measurement> measurements, Measurement measurement)
     {
         measurements.Add(measurement);
@@ -294,7 +348,7 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
             RunBudget.Default,
             scenario.Secrets?.Keys.ToList() ?? [],
             scenario.Expected,
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken: cancellationToken).ConfigureAwait(false);
 
         Record(scenario, result);
         return result;

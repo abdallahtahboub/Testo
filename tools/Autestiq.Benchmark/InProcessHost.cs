@@ -35,7 +35,8 @@ internal sealed partial class InProcessHost : IDisposable
     /// to look like most of the world's, which have none. For developing what the product does without
     /// them, without spending the one application nobody here wrote on it.
     /// </param>
-    public static InProcessHost Start(Action<WebApplication> map, bool withoutTestIds = false)
+    /// <param name="labels">The target's control labels for <see cref="AppChanges.Relabel"/>; none when the lab changes nothing.</param>
+    public static InProcessHost Start(Action<WebApplication> map, bool withoutTestIds = false, IReadOnlyDictionary<string, string>? labels = null)
     {
         var builder = WebApplication.CreateSlimBuilder();
         builder.WebHost.UseUrls("http://127.0.0.1:0");
@@ -48,6 +49,12 @@ internal sealed partial class InProcessHost : IDisposable
             app.Use(StripTestIdsAsync);
         }
 
+        // The version change of Experiment 0001, applied only while the lab sets one. Registered after stripping test
+        // ids, so it runs first on the way out, and with no change in force it leaves every page as it was.
+        app.Use((context, next) => AppChanges.Current is { } change
+            ? RewriteHtmlAsync(context, next, html => AppChanges.Apply(html, change, labels ?? AppChanges.LabelsFor("demo")))
+            : next(context));
+
         map(app);
         app.StartAsync().GetAwaiter().GetResult();
 
@@ -58,7 +65,11 @@ internal sealed partial class InProcessHost : IDisposable
     }
 
     /// <summary>Removes every <c>data-testid</c> attribute from a page on its way out. Nothing else changes.</summary>
-    private static async Task StripTestIdsAsync(HttpContext context, RequestDelegate next)
+    private static Task StripTestIdsAsync(HttpContext context, RequestDelegate next) =>
+        RewriteHtmlAsync(context, next, html => TestIdAttribute().Replace(html, ""));
+
+    /// <summary>Rewrites an HTML page on its way out; anything else passes untouched.</summary>
+    private static async Task RewriteHtmlAsync(HttpContext context, RequestDelegate next, Func<string, string> rewrite)
     {
         var original = context.Response.Body;
         await using var buffer = new MemoryStream();
@@ -78,7 +89,7 @@ internal sealed partial class InProcessHost : IDisposable
         if (context.Response.ContentType?.StartsWith("text/html", StringComparison.OrdinalIgnoreCase) == true)
         {
             using var reader = new StreamReader(buffer, Encoding.UTF8);
-            var bytes = Encoding.UTF8.GetBytes(TestIdAttribute().Replace(await reader.ReadToEndAsync(), ""));
+            var bytes = Encoding.UTF8.GetBytes(rewrite(await reader.ReadToEndAsync()));
             context.Response.ContentLength = bytes.Length;
             await original.WriteAsync(bytes);
         }

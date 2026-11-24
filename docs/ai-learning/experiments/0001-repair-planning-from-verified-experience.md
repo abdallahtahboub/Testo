@@ -1,7 +1,34 @@
 # 0001 — Repair planning from verified experience
 
-- **Status:** Designed, awaiting the owner's approval. Not run. Nothing below is a result.
-- **Designed:** 2026-11-24
+- **Status:** Approved by the owner on 2026-11-24; built; **not run**. Nothing below is a result.
+- **Designed:** 2026-11-24. **Corrected before any run:** 2026-11-24 (below).
+
+## Correction before any run (2026-11-24)
+
+Building it showed a flaw in the first design. The benchmark explores the application *with* its fault switched on, so
+a renamed control would simply be seen by the explorer and planned around: the first plan would never fail. The
+realistic case, and the one now built, is **an application that changes after its test was written**:
+
+- **The first plan is made against the version the test was written for** (no change, no defect).
+- **It then runs against a changed version** (`tools/Autestiq.Benchmark/AppChanges.cs`), with the scenario's defect
+  off and, where it has one, on. Two changes, applied by the benchmark's in-process host as it serves each page, so our
+  applications need no code of their own:
+  - **retag**: every `data-testid` gets a new value, as when a team renames its test ids;
+  - **relabel**: buttons and links get new words for the same actions, from a list per application. Only whole control
+    texts change, never a value a test checks.
+
+  These replace the first design's overlay, duplicated label and delayed render. They are environment changes in the
+  sense of [fault-injection.md](../fault-injection.md), but of the kind a version upgrade brings. Overlays and timing
+  faults need the lab-only fault proxy (L3) and are left for a later experiment.
+- **Retrieval uses only what a real repair could observe**: the kind of step that failed, how it named its target, and
+  the kind of message. Never the change's name.
+- **Each plan runs once per variant** (the benchmark's repeat executions measure flake, which this experiment doesn't
+  study). The model's variation is covered by repeating each repair three times.
+- **Two passes, with and without test ids.** A free dry run (hand-written plans standing in for the model, 2026-11-24)
+  showed that with test ids, *relabel* never breaks a plan, because plans name controls by test id; *retag* breaks most
+  of them. So the experiment runs twice: with test ids (measuring repairs after a test-id change) and without them
+  (`--without-test-ids`, where plans name controls by role and words, so a relabel bites). The estimate rises to
+  **about $25–40** for both passes.
 
 ## Why this experiment, and how it differs from the brief
 
@@ -67,7 +94,7 @@ the verdicts.
 ## Estimated cost
 
 About 60–90 instances × (1 first plan + 3 repairs × 2 conditions) ≈ 400–600 planning calls at ~$0.03–0.05
-≈ **$12–30**. Browser runs are local. One repeat of the whole experiment roughly doubles it.
+≈ **$12–30** per pass; **about $25–40 for the two passes** (correction above). Browser runs are local.
 
 ## Configuration to record
 
@@ -80,10 +107,29 @@ Lab apps only, on loopback; the repair prompt keeps retrieved repairs in the dat
 the same validator; no customer data anywhere; the held-out family is checked to be absent from the corpus before the
 run.
 
-## Engineering needed (each needs approval, issues A3, A4, A6)
+## What was built (2026-11-24)
 
-Environment-fault switches in our apps; a repair mode in the benchmark harness; file-based experience records and a
-corpus manifest; structured retrieval in the harness. **No change to the product.**
+- `AppChanges` (retag, relabel) applied by the in-process host; unit tests that retag renames only test ids and relabel
+  only whole control texts.
+- `PlanRepair` on the planning request: the plan that ran, the failed step and the runner's message (inside data
+  markers, on one line), and the verified examples (inside their own markers). **A request without it is byte for byte
+  what it was**, which the existing golden test holds; the system prompt is unchanged. The product never sets it.
+- `Experiment0001` in the benchmark tool: corpus and evaluate phases, the three conditions, experience records as JSON
+  Lines, a corpus of verified repairs, structured retrieval, and a refusal to evaluate on an application the corpus
+  contains.
+- Not built, and not needed for this experiment: versioned scenario files (A3) and the fault proxy (L3).
+
+## How to run it (the owner, on their machine, with a model key)
+
+```bash
+dotnet run --project tools/Autestiq.Benchmark -- --target demo --experiment 0001 --phase corpus --corpus docs/ai-learning/experiments/0001-corpus.jsonl --records docs/ai-learning/experiments/0001-corpus-demo.jsonl --max-total-usd 10
+dotnet run --project tools/Autestiq.Benchmark -- --target booking --experiment 0001 --phase corpus --corpus docs/ai-learning/experiments/0001-corpus.jsonl --records docs/ai-learning/experiments/0001-corpus-booking.jsonl --max-total-usd 10
+dotnet run --project tools/Autestiq.Benchmark -- --target invoices --experiment 0001 --phase evaluate --corpus docs/ai-learning/experiments/0001-corpus.jsonl --records docs/ai-learning/experiments/0001-evaluate-invoices.jsonl --max-total-usd 15
+```
+
+Then the same three commands again with `--without-test-ids`, and `-no-ids` in the corpus and records file names
+(the evaluate phase reads the matching corpus). Each phase prints its tallies per condition; the records are the raw
+results.
 
 ## Limitations, stated in advance
 

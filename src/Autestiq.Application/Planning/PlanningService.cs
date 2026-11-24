@@ -34,6 +34,7 @@ public sealed class PlanningService(IScenarioPlanner planner, ILogger<PlanningSe
     /// <param name="budget">The run's budget. Tokens and money are spent here; the rest is not.</param>
     /// <param name="secretNames">The names of the values this run holds, so a plan can say "the password".</param>
     /// <param name="expected">What the tester says the application should show (ADR-0034), labelled as theirs.</param>
+    /// <param name="repair">A repair request from the lab (Experiment 0001); the product never sets it.</param>
     /// <param name="cancellationToken">The usual.</param>
     public async Task<PlannedResult> PlanAsync(
         string scenario,
@@ -41,13 +42,14 @@ public sealed class PlanningService(IScenarioPlanner planner, ILogger<PlanningSe
         RunBudget budget,
         IReadOnlyList<string> secretNames,
         IReadOnlyList<ExpectedResult>? expected = null,
+        PlanRepair? repair = null,
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(scenario);
         ArgumentNullException.ThrowIfNull(site);
         ArgumentNullException.ThrowIfNull(budget);
 
-        var request = PlanRequest.First(scenario, site, secretNames, budget.MaxSteps, budget.MaxModelTokens, expected);
+        var request = PlanRequest.First(scenario, site, secretNames, budget.MaxSteps, budget.MaxModelTokens, expected, repair);
         var spent = PlanningCost.None;
         IReadOnlyList<string> errors = [PlanningErrors.NoPlanner];
         IReadOnlyList<string> notes = [];

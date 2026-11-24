@@ -335,7 +335,7 @@ required outside development; decrypted only when a permitted run starts; never 
 directory until hosting brings a key service; a user name is visible in screenshots; the interim ends with a private
 agent (G-8).
 
-### R-17 · AI planning can stick, undercount and overspend — **Medium; found 2026-11-24 (pilot-readiness review)**
+### R-17 · AI planning can stick, undercount and overspend — **Medium; mitigated 2026-11-24 (ADR-0037); reservations open**
 `PlanningDispatcher` saves a test as Planning and only then calls the provider (`src/Autestiq.Application/Testing/PlanningDispatcher.cs:87-98`).
 Nothing selects Planning again, so a crash or restart leaves the test stuck for good, and its expected results can no
 longer be edited (`TestCaseService.cs:174`). The cost is written only after the call (`:162`), so a crash after the
@@ -346,6 +346,12 @@ so a single instance overspends by at most one plan's ceiling.
 lease after which an interrupted test fails visibly and is never silently re-planned; one planner per deployment by
 advisory lock. **Before more than one planner:** transactional reservations for the product and organization budgets,
 with reconciliation and concurrent-claim tests. Until then the budgets are **not** hard guarantees across instances.
+**Built (2026-11-24, ADR-0037):** attempts recorded before the call and counted at their ceiling until answered;
+re-plans counted (they had been dropping out of the month, found while building); a 15-minute lease after which the
+test fails visibly and is never re-planned on its own; an answer after recovery not kept; one planning step per
+deployment by advisory lock. Tested for a crash before the call, after a possibly billed call, and during the save,
+and for a second instance. **Open:** transactional reservations before more than one planner; reconciliation of
+interrupted attempts with the provider's usage.
 
 ### R-18 · A test's environment is not tied to its organization by the schema — **Low; found 2026-11-24**
 The test → environment foreign key is on `EnvironmentId` alone (`src/Autestiq.Persistence/Configurations/TestCaseConfiguration.cs:38-41`),

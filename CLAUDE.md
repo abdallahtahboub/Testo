@@ -55,6 +55,29 @@ Read first: `docs/architecture.md`, `docs/roadmap.md`, `docs/design-system.md`,
 - Commit after each meaningful step; small commits with clear messages (imperative mood, e.g. `Add TKpiTile component with delta indicator`).
 - Before saying a milestone is done: `dotnet build` (zero warnings) and `dotnet test` (incl. Playwright) must pass. Report failures honestly.
 
+## Knowledge management and AI collaboration (binding, owner's requirement of 2026-11-24)
+
+Autestiq is developed with several AI assistants: chiefly Claude Code for engineering, and ChatGPT for strategic
+analysis, research, independent review and company knowledge management. **The GitHub repository is the
+authoritative source of truth for engineering.** Another engineer or AI assistant must be able to understand the
+project's current state from the repository alone, without any earlier conversation. So documentation is updated in
+the same change as the implementation, and:
+
+- **Significant architectural and technical decisions** go in an ADR (`docs/decisions/`), with the reasoning and the
+  alternatives rejected, not only the choice.
+- **The roadmap and its implementation inventory** (`docs/roadmap.md` §Inventory) match the code. **Implemented and
+  planned are never mixed**: say which, every time.
+- **Business requirements, founder decisions and product constraints** are recorded: in the ADR they shape (with "the
+  owner approved it on …"), in `docs/business/`, or in `docs/secure-onboarding-and-privacy.md` for the binding rules.
+- **Benchmark results** keep their methodology, limitations and known failures beside the figures: the report in
+  `docs/ai-benchmark*.md` as the tool wrote it, and the write-up in ADR-0020.
+- **The security and risk registers** (`docs/security-register.md`, `docs/secure-onboarding-gap-analysis.md`) stay
+  accurate: a fixed defect is marked fixed, a new risk is added when it is found.
+- **Unresolved questions and technical debt** go in `docs/open-questions.md`, and leave it when they are resolved.
+- **Critical knowledge never lives only in a conversation.** If a decision, a finding or an owner's answer matters
+  beyond this session, it is written into the repository before the session moves on.
+- **Never commit** credentials, confidential customer information, or unredacted conversation logs.
+
 ## Security, privacy and onboarding (binding, owner's requirements of 2026-11-17)
 
 The full text is [`docs/secure-onboarding-and-privacy.md`](docs/secure-onboarding-and-privacy.md); its gap analysis

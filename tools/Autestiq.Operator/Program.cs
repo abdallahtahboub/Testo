@@ -1,4 +1,5 @@
 using System.Globalization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Autestiq.Application;
 using Autestiq.Application.Costs;
@@ -13,6 +14,7 @@ using Autestiq.Persistence;
 //   set-prices [--browser-hour <usd>] [--storage-gb-month <usd>] [--model <id> <input-usd> <output-usd>]...
 //              [--estimate] [--from <yyyy-MM-ddTHH:mm:ssZ>] --note <text> --by <name>
 //   cost-report [yyyy-MM] [--eur-rate <euros per dollar>]
+//   rehearsal-report <organization-slug>   the rehearsal's measures, from the content-free views (Milestone 5.1 R6)
 //   migrations                       which migrations the database has, and which it lacks
 //   migrate                          applies every migration it lacks (Milestone 5.1 R2)
 //   migrate --to <migration>|0 --yes moves to an earlier migration, or to an empty schema: a rollback
@@ -48,9 +50,42 @@ await using (services.ConfigureAwait(false))
         ["set-prices", .. var rest] => await SetPricesAsync(database, rest).ConfigureAwait(false),
         ["cost-report", .. var rest] => await CostReportAsync(database, rest).ConfigureAwait(false),
         ["migrations"] => await MigrationsAsync(database).ConfigureAwait(false),
+        ["rehearsal-report", var slug] => await RehearsalReportAsync(database, slug).ConfigureAwait(false),
         ["migrate", .. var rest] => await MigrateAsync(database, rest).ConfigureAwait(false),
         _ => Usage(),
     };
+}
+
+static async Task<int> RehearsalReportAsync(AutestiqDbContext database, string slug)
+{
+    // Operators look across organizations by design; this one names it by its slug.
+    var organization = await database.Organizations.IgnoreQueryFilters()
+        .Where(candidate => candidate.Slug == slug)
+        .Select(candidate => (Guid?)candidate.Id)
+        .FirstOrDefaultAsync()
+        .ConfigureAwait(false);
+
+    if (organization is not { } id)
+    {
+        Console.Error.WriteLine($"There is no organization {slug}.");
+        return 2;
+    }
+
+    var m = await Autestiq.Application.Analytics.RehearsalReport.ForAsync(database, id, CancellationToken.None).ConfigureAwait(false);
+
+    static string Time(double? seconds) => seconds is { } value ? TimeSpan.FromSeconds(Math.Round(value)).ToString("g", CultureInfo.InvariantCulture) : "—";
+
+    Console.WriteLine($"Rehearsal measures for {slug}");
+    Console.WriteLine($"  Tests described:                 {m.TestsDescribed}");
+    Console.WriteLine($"  Median time to first approval:   {Time(m.MedianSecondsToFirstApproval)}");
+    Console.WriteLine($"  Median time to first verdict:    {Time(m.MedianSecondsToFirstVerdict)}");
+    Console.WriteLine($"  Corrections per test:            {m.CorrectionsPerTest?.ToString("0.0", CultureInfo.InvariantCulture) ?? "—"}");
+    Console.WriteLine($"  Plans full / partial:            {m.FullPlans} / {m.PartialPlans}");
+    Console.WriteLine($"  Approved runs: verdict / inconclusive / error: {m.RunsWithVerdict} / {m.RunsInconclusive} / {m.RunsInError}");
+    Console.WriteLine($"  Median queue wait:               {Time(m.MedianQueueWaitSeconds)}");
+    Console.WriteLine($"  Active days / people returning:  {m.ActiveDays} / {m.PeopleReturning}");
+    Console.WriteLine($"  Cost per completed run:          {(m.CostPerCompletedRun is { } cost ? "$" + cost.ToString("0.0000", CultureInfo.InvariantCulture) : "—")}");
+    return 0;
 }
 
 static async Task<int> MigrationsAsync(AutestiqDbContext database)
@@ -107,6 +142,7 @@ static int Usage()
           set-plan <organization-slug> <plan-code> [version] --by <name>
           set-prices [--browser-hour <usd>] [--storage-gb-month <usd>] [--model <id> <input-usd> <output-usd>]... [--estimate] [--from <instant>] --note <text> --by <name>
           cost-report [yyyy-MM] [--eur-rate <euros per dollar>]
+          rehearsal-report <organization-slug>
           migrations
           migrate [--to <migration>|0 --yes]
         """);

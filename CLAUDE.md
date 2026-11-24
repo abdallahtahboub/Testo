@@ -44,7 +44,7 @@ model; exploration signs in with them only under ADR-0032's permission. **A test
 when a project keeps none; object storage waits for hosting. **Exporting plans as tests** is built for Python and
 verified (ADR-0023), previewed on a test's page and downloaded once approved, except a plan whose pass would rest on the test account's own value (Milestone 5.1 R4). **Not deployable yet (pilot-readiness review, 2026-11-24)**: no email provider, so no deployed host starts; no release (`develop` 184 commits ahead of `main`). Milestone 5.1,
 approved 2026-11-24, is the pre-pilot milestone; R1 (planning attempts recorded before the call, a lease, one planning
-step per deployment, ADR-0037), R4 (no download of a plan resting on the account's own value) and R2 without email (operator `migrate`, `/health/live` and `/health/ready`, ADR-0039) are built (`docs/roadmap.md`; findings in
+step per deployment, ADR-0037), R4 (no download of a plan resting on the account's own value) R2 without email (operator `migrate`, `/health/live` and `/health/ready`, ADR-0039) and R6 (content-free analytics views and the operator's `rehearsal-report`) are built (`docs/roadmap.md`; findings in
 `docs/reviews/2026-11-24-pilot-readiness.md`). Everything else about the testing journey —
 plans, requirements, a case library, suites, defects, reporting — **does not exist yet**: six of the
 seven module projects are shells. `docs/roadmap.md` §Inventory is the authoritative list of what is built.

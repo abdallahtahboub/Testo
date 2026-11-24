@@ -37,8 +37,10 @@ reached a verdict, and never passed a broken application; the same held with eve
 (ADR-0020, [`docs/ai-benchmark.md`](docs/ai-benchmark.md)). Read-only exploration, a customer site's
 default, measured 36 of 66 against 62 of 66. On two applications we did not build: eShopOnWeb 18 of 22 after
 explorer changes made on its own results, and Spring PetClinic, the clean measurement, 20 of 22 (16 of 22 strictly),
-neither with a false positive, and PetClinic without defects to catch. **All of these predate the prompt change of
-2026-11-24** and hold for the current prompt only once re-measured. The tagline is the company's, not a description of what the software does today.
+neither with a false positive, and PetClinic without defects to catch. **Re-measured on 2026-11-24 with the current
+prompt**, which makes a plan list what it does not test: our applications unchanged (64 of 66 runs correct, with and
+without test ids); PetClinic 12 of 22 correct and 10 honestly inconclusive, still no false positive. The read-only
+and eShopOnWeb figures predate that prompt. The tagline is the company's, not a description of what the software does today.
 
 [`docs/roadmap.md`](docs/roadmap.md) §Inventory is the authoritative list of what is built, and
 [`docs/security-register.md`](docs/security-register.md) is the honest list of what is not yet safe.

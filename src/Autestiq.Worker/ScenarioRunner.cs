@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.Playwright;
 using Autestiq.Contracts.Execution;
+using Autestiq.Contracts.Planning;
 using Autestiq.Worker.Egress;
 using Autestiq.Worker.Scenarios;
 

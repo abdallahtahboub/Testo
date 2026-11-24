@@ -463,6 +463,9 @@
   <data name="Tests_Error_PlanningInterrupted" xml:space="preserve">
     <value>Planning was interrupted before it finished, so there is no plan. Change the expected results or describe the test again to plan it anew.</value>
   </data>
+  <data name="Tests_Error_ExportRestsOnAccountValue" xml:space="preserve">
+    <value>This test cannot be downloaded because it checks for the test account's own value, which the test itself typed.</value>
+  </data>
   <data name="Tests_Error_NoPlan" xml:space="preserve">
     <value>No plan could be written.</value>
   </data>
@@ -717,6 +720,9 @@
   </data>
   <data name="Approval_Download" xml:space="preserve">
     <value>Download the Python test</value>
+  </data>
+  <data name="Approval_Download_RestsOnAccountValue" xml:space="preserve">
+    <value>This test cannot be downloaded: a check looks for the test account's own {0}, which the test itself typed. A page can show it whether or not signing in worked, so a downloaded file could pass when nothing was proved; Autestiq's own runs count such a pass as inconclusive. Check something only the signed-in application shows instead.</value>
   </data>
   <data name="Approval_Download_ReadOnly" xml:space="preserve">
     <value>Autestiq runs this test read-only in its own browser. The downloaded file cannot do that: run it only where a test that changes data would be acceptable. Its first lines say so too.</value>

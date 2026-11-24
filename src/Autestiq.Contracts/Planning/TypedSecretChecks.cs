@@ -1,6 +1,4 @@
-using Autestiq.Contracts.Planning;
-
-namespace Autestiq.Worker;
+namespace Autestiq.Contracts.Planning;
 
 /// <summary>
 /// Finds the checks in a plan that look for a value of the test account the plan itself typed (ADR-0033).
@@ -21,11 +19,21 @@ namespace Autestiq.Worker;
 /// <para>
 /// A value counts as typed when the plan types it by the secret's name, or types the same text plainly, as a planner
 /// that read the value in the tester's description may. Values shorter than
-/// <see cref="SecretRedaction.ShortestRedacted"/> characters are ignored, as they are when exploring.
+/// <see cref="ShortestValue"/> characters are ignored, as they are when exploring.
+/// </para>
+/// <para>
+/// Shared by the worker, which ends such a run inconclusive, and by the download, which refuses to export such a plan,
+/// so the two cannot disagree (Milestone 5.1 R4).
 /// </para>
 /// </remarks>
-internal static class TypedSecretChecks
+public static class TypedSecretChecks
 {
+    /// <summary>
+    /// The shortest value looked for, here and when exploring replaces values: a one-letter value would match every
+    /// such letter.
+    /// </summary>
+    public const int ShortestValue = 4;
+
     /// <summary>The names of the secrets whose typed values a positive check looks for, in plan order, each once.</summary>
     public static IReadOnlyList<string> In(IReadOnlyList<PlannedAction> plan, IReadOnlyDictionary<string, string>? secrets)
     {
@@ -37,7 +45,7 @@ internal static class TypedSecretChecks
         }
 
         var typed = secrets
-            .Where(secret => secret.Value.Length >= SecretRedaction.ShortestRedacted)
+            .Where(secret => secret.Value.Length >= ShortestValue)
             .Where(secret => plan.Any(action => action.Kind == ActionKind.Type
                 && (action.SecretName == secret.Key
                     || string.Equals(action.Text, secret.Value, StringComparison.OrdinalIgnoreCase))))

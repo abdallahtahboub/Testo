@@ -29,6 +29,7 @@ internal sealed class TestCaseService(
     IOptionsMonitor<PlanningOptions> planning,
     IOptionsMonitor<Usage.UsageOptions> usage,
     IEnumerable<Contracts.Export.ITestExporter> exporters,
+    Projects.ISecretProtector secrets,
     TimeProvider timeProvider)
     : ITestCaseService
 {
@@ -137,6 +138,9 @@ internal sealed class TestCaseService(
 
             // By software, from the plan, the crawl and the tester's words; never from the model's own labels.
             Evidence = ExpectedResults.EvidenceFor(actions, snapshot, expected),
+
+            // The same rule the worker holds a run to (Milestone 5.1 R4): shown before anyone tries to download.
+            ExportRefusedFor = actions.Count > 0 ? await AccountValueChecksAsync(testCase, actions, cancellationToken).ConfigureAwait(false) : [],
         };
     }
 
@@ -548,6 +552,13 @@ internal sealed class TestCaseService(
             return OperationResult.Failure<Contracts.Export.ExportedTest>("Tests_Error_NoExporter");
         }
 
+        // A downloaded test has no guard of its own: a plan whose pass would rest on finding the test account's own value,
+        // which Autestiq's runner ends inconclusive, could pass on the customer's machine. So it does not leave (R4).
+        if (await AccountValueChecksAsync(testCase, plan.Actions, cancellationToken).ConfigureAwait(false) is { Count: > 0 })
+        {
+            return OperationResult.Failure<Contracts.Export.ExportedTest>("Tests_Error_ExportRestsOnAccountValue");
+        }
+
         var snapshot = testCase.Snapshot is null ? null : JsonSerializer.Deserialize<SiteSnapshot>(testCase.Snapshot, Json);
         var exported = exporter.Export(
             new TestPlan(testCase.Description, plan.Actions, [], plan.Coverage),
@@ -557,6 +568,28 @@ internal sealed class TestCaseService(
         await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return OperationResult.With(exported with { Code = ApprovedTestHeader.For(testCase) + exported.Code });
+    }
+
+    /// <summary>
+    /// The names of the test account's values that a positive check of this plan looks for after typing them
+    /// (<see cref="TypedSecretChecks"/>). When the stored values cannot be read, every name the plan types counts: the
+    /// check fails closed rather than letting a plan out unexamined.
+    /// </summary>
+    private async Task<IReadOnlyList<string>> AccountValueChecksAsync(TestCase testCase, IReadOnlyList<PlannedAction> actions, CancellationToken cancellationToken)
+    {
+        if (!actions.Any(action => action.Kind == ActionKind.Type))
+        {
+            return [];
+        }
+
+        var values = await Projects.EnvironmentSecrets.ValuesAsync(database, secrets, testCase.OrganizationId, testCase.EnvironmentId, cancellationToken).ConfigureAwait(false);
+
+        if (values is null)
+        {
+            return [.. actions.Where(action => action.SecretName is not null).Select(action => action.SecretName!).Distinct(StringComparer.Ordinal)];
+        }
+
+        return TypedSecretChecks.In(actions, values);
     }
 
     private Task<IReadOnlyList<string>> EnvironmentSecretNamesAsync(TestCase testCase, CancellationToken cancellationToken) =>

@@ -20,4 +20,8 @@
     <ProjectReference Include="..\..\tools\Autestiq.Benchmark\Autestiq.Benchmark.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- One regression fixture for the hosted run and the download (Milestone 5.1 R4). -->
+    <Compile Include="../Shared/AccountValueFixture.cs" Link="Shared/AccountValueFixture.cs" />
+  </ItemGroup>
 </Project>

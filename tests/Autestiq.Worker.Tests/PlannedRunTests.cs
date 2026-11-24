@@ -1,6 +1,7 @@
 using Autestiq.Contracts.Execution;
 using Autestiq.Contracts.Planning;
 using Autestiq.DemoShop;
+using Autestiq.Tests.Shared;
 using Autestiq.Worker.Tests.Support;
 
 namespace Autestiq.Worker.Tests;
@@ -203,26 +204,13 @@ public class PlannedRunTests(DemoShopFixture shop)
     }
 
     /// <summary>The shop's one account, as an environment's stored test account hands it to a run (ADR-0033).</summary>
-    private static Dictionary<string, string> Account(string password = Shop.Password) => new(StringComparer.Ordinal)
-    {
-        ["username"] = Shop.Account,
-        ["password"] = password,
-    };
+    private static Dictionary<string, string> Account(string password = Shop.Password) => AccountValueFixture.Account(Shop.Account, password);
 
-    /// <summary>Signs in with the stored account, then makes one check.</summary>
+    /// <summary>Signs in with the stored account, then makes one check: the shared fixture (Milestone 5.1 R4).</summary>
     private static PlannedAction[] SignInThen(PlannedAction check, bool typeUsernamePlainly = false) =>
-    [
-        new(ActionKind.Goto, "Open the sign-in page", Path: "/sign-in"),
-        typeUsernamePlainly
-            ? new(ActionKind.Type, "Type the email", ActionTarget.ByTestId("email"), Text: Shop.Account)
-            : new(ActionKind.Type, "Type the email", ActionTarget.ByTestId("email"), SecretName: "username"),
-        new(ActionKind.Type, "Type the password", ActionTarget.ByTestId("password"), SecretName: "password"),
-        new(ActionKind.Click, "Sign in", ActionTarget.ByTestId("do-sign-in")),
-        check,
-    ];
+        AccountValueFixture.SignInThen(check, typeUsernamePlainly ? Shop.Account : null);
 
-    private static PlannedAction ShowsTheAccountsEmail =>
-        new(ActionKind.AssertText, "It says who is signed in", ActionTarget.ByTestId("signed-in-as"), Text: $"Signed in as {Shop.Account}");
+    private static PlannedAction ShowsTheAccountsEmail => AccountValueFixture.ShowsTheAccountsEmail(Shop.Account);
 
     [Fact]
     public async Task APassThatRestsOnTheTestAccountsOwnValue_IsInconclusive_SayingWhichByName()
@@ -250,9 +238,7 @@ public class PlannedRunTests(DemoShopFixture shop)
     public async Task ASignInCheckedBySomethingOnlyTheSignedInPageShows_Passes()
     {
         // The guard takes away nothing but that one kind of pass.
-        var check = new PlannedAction(ActionKind.AssertVisible, "The account page is shown", ActionTarget.ByTestId("signed-in-as"));
-
-        var result = await Jobs.PlannedAsync(shop.Origin, SignInThen(check), Account());
+        var result = await Jobs.PlannedAsync(shop.Origin, SignInThen(AccountValueFixture.ShowsTheAccountPage), Account());
 
         Assert.Equal(RunStatus.Passed, result.Status);
     }

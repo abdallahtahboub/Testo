@@ -26,7 +26,6 @@
 
 | Item | Effect | Source |
 |---|---|---|
-| Downloaded tests do not carry the test-account guard. | A downloaded test can pass by finding the account's own value; inside Autestiq's runner the same plan ends inconclusive. Confirmed still open 2026-11-24; **proposed fix: block export of such plans, with a parity test** (Milestone 5.1 R4). | ADR-0033 |
 | G-2's minimized AI mode is not built. | Every plan sends the full description of the explored site; the owner's rules want minimal data. Marked "before the first pilot". | `docs/secure-onboarding-gap-analysis.md` G-2 |
 | Evidence and the key ring live on local disk. | Not fit for more than one machine; waits on hosting. | ADR-0031, ADR-0033 |
 | Exploring signed in changes the test account's data. | Shared test accounts drift (eShopOnWeb's demo basket filled up), which hurts repeatability. | ADR-0033, ADR-0020 |

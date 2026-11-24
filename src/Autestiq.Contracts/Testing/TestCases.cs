@@ -87,6 +87,13 @@ public sealed record TestCaseDetail(
     /// step that checks nothing.
     /// </summary>
     public IReadOnlyList<CheckEvidence?> Evidence { get; init; } = [];
+
+    /// <summary>
+    /// The test account's values, by name, that a check of this plan looks for after typing them (Milestone 5.1 R4).
+    /// Not empty means the plan cannot be downloaded: Autestiq's runner ends such a pass inconclusive, and a downloaded
+    /// file has no such guard. Names only, never a value.
+    /// </summary>
+    public IReadOnlyList<string> ExportRefusedFor { get; init; } = [];
 }
 
 /// <summary>Who approved a plan, when, and whether the approval allows changing data.</summary>

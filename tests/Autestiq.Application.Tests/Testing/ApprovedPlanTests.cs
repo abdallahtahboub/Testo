@@ -10,6 +10,7 @@ using Autestiq.Contracts.Planning;
 using Autestiq.Contracts.Projects;
 using Autestiq.Contracts.Testing;
 using Autestiq.Domain.Testing;
+using Autestiq.Tests.Shared;
 
 namespace Autestiq.Application.Tests.Testing;
 
@@ -67,7 +68,7 @@ public sealed class ApprovedPlanTests : IAsyncLifetime
 
     public async ValueTask DisposeAsync() => await _database.DisposeAsync();
 
-    private async Task<T> AsAsync<T>(Guid organization, Role role, Func<ITestCaseService, Task<T>> act, bool withExporter = true)
+    private async Task<T> AsAsync<T>(Guid organization, Role role, Func<ITestCaseService, Task<T>> act, bool withExporter = true, Application.Projects.ISecretProtector? protector = null)
     {
         await using var services = _database.NewServices(collection =>
         {
@@ -75,6 +76,8 @@ public sealed class ApprovedPlanTests : IAsyncLifetime
             {
                 collection.AddSingleton<Contracts.Export.ITestExporter, FakeExporter>();
             }
+
+            collection.AddSingleton(protector ?? new PurposeBoundProtector());
         });
         _database.Principal.Become(organization, Guid.CreateVersion7(), role);
 
@@ -443,6 +446,87 @@ public sealed class ApprovedPlanTests : IAsyncLifetime
         await AsAsync(_northwind, Role.Owner, tests => tests.ApproveAsync(testCase, false));
 
         Assert.Equal(["Tests_Error_NoExporter"], (await AsAsync(_northwind, Role.Owner, tests => tests.DownloadAsync(testCase), withExporter: false)).Errors);
+    }
+
+    // --- Downloading a plan whose pass would rest on the test account's own value (Milestone 5.1 R4) ---
+
+    private const string AccountEmail = "tester@northwind.example";
+
+    /// <summary>A planned test of the shared fixture, with the environment's test account stored and the plan approved.</summary>
+    private async Task<Guid> ApprovedWithAccountAsync(IReadOnlyList<PlannedAction> plan)
+    {
+        var testCase = await PlannedAsync(plan);
+        var environment = (await StoredAsync(testCase)).EnvironmentId;
+
+        foreach (var (name, value) in AccountValueFixture.Account(AccountEmail, "correct-horse-battery"))
+        {
+            var set = await AsAsync(_northwind, Role.Owner, async _ =>
+            {
+                await using var services = _database.NewServices(collection => collection.AddSingleton<Application.Projects.ISecretProtector>(new PurposeBoundProtector()));
+                using var scope = services.CreateScope();
+                return await scope.ServiceProvider.GetRequiredService<IProjectService>().SetSecretAsync(environment, name, value);
+            });
+            Assert.True(set.Succeeded, string.Join(", ", set.Errors));
+        }
+
+        var approved = await AsAsync(_northwind, Role.Owner, tests => tests.ApproveAsync(testCase, true));
+        Assert.True(approved.Succeeded, string.Join(", ", approved.Errors));
+        return testCase;
+    }
+
+    [Fact]
+    public async Task Download_OfThePlanTheRunnerEndsInconclusive_IsRefused_AndThePageSaysWhyByName()
+    {
+        // The same fixture the worker's APassThatRestsOnTheTestAccountsOwnValue_IsInconclusive_SayingWhichByName runs.
+        var testCase = await ApprovedWithAccountAsync(AccountValueFixture.SignInThen(AccountValueFixture.ShowsTheAccountsEmail(AccountEmail)));
+
+        var downloaded = await AsAsync(_northwind, Role.Owner, tests => tests.DownloadAsync(testCase));
+        var detail = await AsAsync(_northwind, Role.Viewer, tests => tests.GetAsync(testCase));
+
+        Assert.Equal(["Tests_Error_ExportRestsOnAccountValue"], downloaded.Errors);
+        Assert.Equal(["username"], detail!.ExportRefusedFor);
+
+        await using var database = _database.NewContext();
+        Assert.False(await database.AuditEntries.IgnoreQueryFilters().AnyAsync(entry => entry.Action == "test.downloaded" && entry.SubjectId == testCase, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task Download_OfThePlanThatTypesTheAccountsValuePlainly_IsRefused_Too()
+    {
+        var testCase = await ApprovedWithAccountAsync(AccountValueFixture.SignInThen(AccountValueFixture.ShowsTheAccountsEmail(AccountEmail), typeEmailPlainly: AccountEmail));
+
+        Assert.Equal(["Tests_Error_ExportRestsOnAccountValue"], (await AsAsync(_northwind, Role.Owner, tests => tests.DownloadAsync(testCase))).Errors);
+    }
+
+    [Fact]
+    public async Task Download_OfASignInCheckedBySomethingOnlyTheSignedInPageShows_IsAllowed()
+    {
+        // The guard takes away nothing but that one kind of pass, here as in the worker.
+        var testCase = await ApprovedWithAccountAsync(AccountValueFixture.SignInThen(AccountValueFixture.ShowsTheAccountPage));
+
+        var downloaded = await AsAsync(_northwind, Role.Owner, tests => tests.DownloadAsync(testCase));
+        var detail = await AsAsync(_northwind, Role.Viewer, tests => tests.GetAsync(testCase));
+
+        Assert.True(downloaded.Succeeded, string.Join(", ", downloaded.Errors));
+        Assert.Empty(detail!.ExportRefusedFor);
+    }
+
+    [Fact]
+    public async Task Download_WhenTheStoredAccountCannotBeRead_IsRefused_RatherThanLetThroughUnexamined()
+    {
+        var testCase = await ApprovedWithAccountAsync(AccountValueFixture.SignInThen(AccountValueFixture.ShowsTheAccountPage));
+
+        // A lost or changed key ring: the values cannot be compared, so every secret the plan types counts.
+        var downloaded = await AsAsync(_northwind, Role.Owner, tests => tests.DownloadAsync(testCase), protector: new UnreadableProtector());
+
+        Assert.Equal(["Tests_Error_ExportRestsOnAccountValue"], downloaded.Errors);
+    }
+
+    private sealed class UnreadableProtector : Application.Projects.ISecretProtector
+    {
+        public string Protect(string purpose, string value) => throw new InvalidOperationException("Not for writing.");
+
+        public string? Unprotect(string purpose, string ciphertext) => null;
     }
 
     private sealed class FakeExporter : Contracts.Export.ITestExporter

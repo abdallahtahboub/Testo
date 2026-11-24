@@ -286,6 +286,13 @@ benchmark explores with acting allowed, as our own applications are).
 application that cannot be reset; and look at why a plan can call itself full while its own note says part was not
 tested.
 
+**The first is built (2026-11-23).** The benchmark now explores and plans every scenario before it carries any out,
+so no exploration sees what a baseline or a plan changed. On our applications, which are put back before each
+exploration, the order changes nothing: a replay of the hand-written plans as recorded answers gave the same verdicts
+as before (the demo shop: 36 of 36 in both columns, defects on and off). What remains on an application that cannot be
+put back: explorations still see what earlier explorations did, because exploring may act. Every figure above was
+measured with the old order; the PetClinic figure is not re-measured.
+
 **What this supports, and what it does not.** It supports this statement: *on our three benchmark
 applications, on scenarios written after the planner was frozen, the planner's tests gave the right verdict
 on 95% of sound-application runs, caught every seeded defect where a verdict was reached, and never passed

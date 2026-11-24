@@ -138,6 +138,10 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
     private readonly PlanningService? _planning =
         planner is null ? null : new PlanningService(planner, NullLogger<PlanningService>.Instance);
 
+    private static readonly bool[] SoundOnly = [false];
+
+    private static readonly bool[] SoundThenBroken = [false, true];
+
     /// <summary>Runs everything and returns one measurement per scenario, state and source.</summary>
     public async Task<IReadOnlyList<Measurement>> RunAsync(
         IReadOnlyList<BenchmarkScenario> scenarios,
@@ -147,53 +151,77 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
 
         var measurements = new List<Measurement>();
 
-        foreach (var scenario in scenarios)
+        // A scenario with no defect has one state to be in; one with a defect has two, and the second is where a false
+        // positive can happen.
+        var runs = scenarios
+            .SelectMany(scenario => (scenario.Defect is null ? SoundOnly : SoundThenBroken).Select(defectOn => (Scenario: scenario, DefectOn: defectOn)))
+            .ToList();
+
+        // Every exploration and plan comes first, before anything is carried out. An application this tool cannot put
+        // back (eShopOnWeb, PetClinic) keeps what each run changes, and an exploration made after a baseline had edited
+        // an address saw the new address already, so the planner's check of it proved nothing (ADR-0020, PetClinic).
+        // Planning everything first means no exploration ever sees what a run did. On our own applications, which are
+        // put back before each exploration, the order changes nothing.
+        var plans = new List<PlannedResult?>(runs.Count);
+
+        foreach (var (scenario, defectOn) in runs)
         {
-            // A scenario with no defect has one state to be in; one with a defect has two, and the
-            // second is where a false positive can happen.
-            var states = scenario.Defect is null ? new[] { false } : [false, true];
-
-            foreach (var defectOn in states)
+            if (_planning is null)
             {
-                Switch(scenario, defectOn);
-
-                Report(measurements, await MeasureAsync(
-                    scenario, defectOn, "baseline", scenario.Baseline, PlanCoverage.Full,
-                    PlanningCost.None, [], [], cancellationToken)
-                    .ConfigureAwait(false));
-
-                if (_planning is null)
-                {
-                    continue;
-                }
-
-                // _planning is not null, so neither is the planner it was built from.
-                var model = planner!.Model;
-
-                // Checked before each request, so the cap is overshot by at most one plan's own budget.
-                if (MaxTotalUsd is { } cap && Spent >= cap)
-                {
-                    StoppedAtSpendingCap = true;
-                    Say?.Invoke($"  Stopping: planning has cost ${Spent:0.0000}, which reaches the cap of ${cap:0.00}.");
-                    SetDefects([]);
-                    return measurements;
-                }
-
-                Say?.Invoke($"  {scenario.Id,-34} defect={(defectOn ? "on " : "off")} "
-                    + $"{model,-18} looking at the application, then planning…");
-
-                var planned = await PlanAsync(scenario, cancellationToken).ConfigureAwait(false);
-                Spent += planned.Cost.Cost;
-
-                var measured = planned.Plan is { } plan
-                    ? await MeasureAsync(
-                        scenario, defectOn, model, plan.Actions, plan.Coverage, planned.Cost, [], planned.Notes,
-                        cancellationToken)
-                        .ConfigureAwait(false)
-                    : new Measurement(scenario, defectOn, model, [], planned.Cost, planned.Errors, planned.Notes);
-
-                Report(measurements, Honestly(measured, measurements));
+                plans.Add(null);
+                continue;
             }
+
+            // Checked before each request, so the cap is overshot by at most one plan's own budget.
+            if (MaxTotalUsd is { } cap && Spent >= cap)
+            {
+                StoppedAtSpendingCap = true;
+                Say?.Invoke($"  Stopping: planning has cost ${Spent:0.0000}, which reaches the cap of ${cap:0.00}.");
+                break;
+            }
+
+            Switch(scenario, defectOn);
+
+            Say?.Invoke($"  {scenario.Id,-34} defect={(defectOn ? "on " : "off")} "
+                + $"{planner!.Model,-18} looking at the application, then planning…"); // planner is set whenever _planning is.
+
+            var planned = await PlanAsync(scenario, cancellationToken).ConfigureAwait(false);
+            Spent += planned.Cost.Cost;
+            plans.Add(planned);
+        }
+
+        for (var index = 0; index < runs.Count; index++)
+        {
+            var (scenario, defectOn) = runs[index];
+
+            // Stopped at the spending cap: what was not planned is not measured, so partial figures stay partial.
+            if (_planning is not null && index >= plans.Count)
+            {
+                break;
+            }
+
+            Switch(scenario, defectOn);
+
+            Report(measurements, await MeasureAsync(
+                scenario, defectOn, "baseline", scenario.Baseline, PlanCoverage.Full,
+                PlanningCost.None, [], [], cancellationToken)
+                .ConfigureAwait(false));
+
+            if (plans[index] is not { } planned)
+            {
+                continue;
+            }
+
+            var model = planner!.Model; // as above.
+
+            var measured = planned.Plan is { } plan
+                ? await MeasureAsync(
+                    scenario, defectOn, model, plan.Actions, plan.Coverage, planned.Cost, [], planned.Notes,
+                    cancellationToken)
+                    .ConfigureAwait(false)
+                : new Measurement(scenario, defectOn, model, [], planned.Cost, planned.Errors, planned.Notes);
+
+            Report(measurements, Honestly(measured, measurements));
         }
 
         SetDefects([]);

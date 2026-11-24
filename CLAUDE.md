@@ -40,7 +40,10 @@ model; exploration signs in with them only under ADR-0032's permission. **A test
 (ADR-0034)**, sent to the planner labelled as theirs; every check is labelled by software as observed, stated or assumed. **Evidence retention is built
 (3.8 part 2, ADR-0031)**: a screenshot policy per project, an hourly job that deletes expired screenshots, none stored
 when a project keeps none; object storage waits for hosting. **Exporting plans as tests** is built for Python and
-verified (ADR-0023), previewed on a test's page and downloaded once approved. Everything else about the testing journey —
+verified (ADR-0023), previewed on a test's page and downloaded once approved. **Not deployable yet (pilot-readiness review, 2026-11-24)**: no email provider, so no deployed host starts; no migration
+command outside development; no health checks; no release (`develop` 184 commits ahead of `main`). Milestone 5.1,
+proposed and awaiting approval, is the pre-pilot milestone (`docs/roadmap.md`; findings in
+`docs/reviews/2026-11-24-pilot-readiness.md`). Everything else about the testing journey —
 plans, requirements, a case library, suites, defects, reporting — **does not exist yet**: six of the
 seven module projects are shells. `docs/roadmap.md` §Inventory is the authoritative list of what is built.
 

@@ -335,6 +335,36 @@ required outside development; decrypted only when a permitted run starts; never 
 directory until hosting brings a key service; a user name is visible in screenshots; the interim ends with a private
 agent (G-8).
 
+### R-17 · AI planning can stick, undercount and overspend — **Medium; found 2026-11-24 (pilot-readiness review)**
+`PlanningDispatcher` saves a test as Planning and only then calls the provider (`src/Autestiq.Application/Testing/PlanningDispatcher.cs:87-98`).
+Nothing selects Planning again, so a crash or restart leaves the test stuck for good, and its expected results can no
+longer be edited (`TestCaseService.cs:174`). The cost is written only after the call (`:162`), so a crash after the
+provider billed **loses the spend from the budget**. The budget is read and then spent with no reservation
+(`AiBudget.LeftAsync`), so two planning instances can spend the same room. One instance plans one test at a time,
+so a single instance overspends by at most one plan's ceiling.
+**Fix (Milestone 5.1, R1):** an attempt row written before the call and counted at its ceiling until completed; a
+lease after which an interrupted test fails visibly and is never silently re-planned; one planner per deployment by
+advisory lock. **Before more than one planner:** transactional reservations for the product and organization budgets,
+with reconciliation and concurrent-claim tests. Until then the budgets are **not** hard guarantees across instances.
+
+### R-18 · A test's environment is not tied to its organization by the schema — **Low; found 2026-11-24**
+The test → environment foreign key is on `EnvironmentId` alone (`src/Autestiq.Persistence/Configurations/TestCaseConfiguration.cs:38-41`),
+while test → project is composite on `(OrganizationId, ProjectId)`. Creation checks the environment belongs to the
+project under the tenant filter (`TestCaseService.cs:249-251`), and no reachable path that breaks it was found, so
+this is a schema invariant, not a live bug. **Fix (before real customer data):** audit existing rows for an
+environment of another organization or project, then a composite key `(OrganizationId, ProjectId, EnvironmentId)` to
+the environment's alternate key, with a migration and PostgreSQL integration tests that a mismatched row is refused.
+
+### R-19 · Tenant controls live in the application, with one database role — **Medium; found 2026-11-24**
+Tenant isolation is the EF query filter and save guard. 49 `IgnoreQueryFilters()` calls in 15 files cross it on
+purpose (background jobs, sign-in, the product-wide budget), each with a comment. The application, migrations and
+operator commands use **one connection string and one role**, which owns the schema. PostgreSQL enforces foreign keys
+and unique keys, and nothing else about tenancy: no RLS, and no database-level append-only audit (R-4).
+**Fix, before real customer data:** separate roles for migration (owns the schema), application (data only, no DDL,
+no `DELETE` on audit and usage tables) and operator; a review list of every `IgnoreQueryFilters()` with its reason.
+**Evaluated separately, later:** native RLS, which needs a session variable per connection and a plan for the
+background jobs that cross organizations, and database-level append-only protection (R-4).
+
 ### R-7 · One database for every tenant — **Accepted, documented**
 
 ADR-0012 chose a shared database with filtered access and listed the consequences, including the

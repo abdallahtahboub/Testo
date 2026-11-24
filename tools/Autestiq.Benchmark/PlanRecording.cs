@@ -22,6 +22,9 @@ public static class PlanRecording
         var text = new StringBuilder();
 
         text.Append("{\n  \"scenarioName\": ").Append(Quote(plan.ScenarioName)).Append(",\n");
+
+        // Written, not left out: a recording without it was replayed as full, and since ADR-0035 would be read as partial.
+        text.Append("  \"coverage\": ").Append(Quote(plan.Coverage == PlanCoverage.Full ? "full" : "partial")).Append(",\n");
         text.Append("  \"notes\": [")
             .Append(string.Join(", ", plan.Notes.Select(Quote)))
             .Append("],\n");

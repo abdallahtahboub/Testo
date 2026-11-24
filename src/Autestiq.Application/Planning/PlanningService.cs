@@ -74,17 +74,31 @@ public sealed class PlanningService(IScenarioPlanner planner, ILogger<PlanningSe
 
             if (review.Allowed)
             {
+                var plan = answer.Plan!; // Allowed only when there is a plan.
+
+                // ADR-0035: a plan that leaves a stated result unchecked covers part of the request, whatever it says.
+                // Decided here, by software, from the plan and the tester's words; the model's notes are not read.
+                var missing = ExpectedResults.Unchecked(plan.Actions, expected);
+                var checkNotes = review.Notes.Concat(missing.Select(result =>
+                    $"The tester stated “{result.Text}”, and no check looks for it, so this plan covers only part of the request."))
+                    .ToList();
+
+                if (missing.Count > 0)
+                {
+                    plan = plan with { Coverage = PlanCoverage.Partial };
+                }
+
                 // The planner's own notes and the validator's are both for a person, and both are
                 // kept: one says what the model assumed, the other what it named without seeing.
-                notes = [.. answer.Plan!.Notes, .. review.Notes];
+                notes = [.. plan.Notes, .. checkNotes];
 
                 if (Overspent(spent, budget) is { } overspent)
                 {
-                    return new PlannedResult(null, [overspent], notes, spent, planner.Model, sent, review.Notes);
+                    return new PlannedResult(null, [overspent], notes, spent, planner.Model, sent, checkNotes);
                 }
 
-                PlanningLog.Planned(logger, planner.Model, answer.Plan.Actions.Count, attempt, spent.TotalTokens);
-                return new PlannedResult(answer.Plan, [], notes, spent, planner.Model, sent, review.Notes);
+                PlanningLog.Planned(logger, planner.Model, plan.Actions.Count, attempt, spent.TotalTokens);
+                return new PlannedResult(plan, [], notes, spent, planner.Model, sent, checkNotes);
             }
 
             errors = review.Errors;

@@ -189,7 +189,7 @@ public class PlanJsonTests
     [Theory]
     [InlineData("\"coverage\": \"partial\",", PlanCoverage.Partial)]
     [InlineData("\"coverage\": \"full\",", PlanCoverage.Full)]
-    [InlineData("", PlanCoverage.Full)]
+    [InlineData("", PlanCoverage.Partial)]
     [InlineData("\"coverage\": \"mostly, see notes\",", PlanCoverage.Partial)]
     public void Read_Coverage_IsPartialUnlessTheAnswerSaysOtherwise(string line, PlanCoverage expected)
     {

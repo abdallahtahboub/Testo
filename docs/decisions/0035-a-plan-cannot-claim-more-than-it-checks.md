@@ -1,6 +1,6 @@
 # 0035 — A plan cannot claim more coverage than it checks
 
-- **Status:** Proposed
+- **Status:** Accepted (the owner approved step 1 on 2026-11-24); step 2 still proposed
 - **Date:** 2026-11-24
 
 ## Context
@@ -51,6 +51,24 @@ In two steps, each with its own review:
 - **Option 4:** `notTested` in the plan's JSON and the prompt, software forcing partial when it is not empty. The prompt
   change then goes through the same re-measurement as any prompt change: the three unseen sets (with and without test
   ids) and PetClinic, run by the owner, figures published as they come.
+
+## Step 1, built (2026-11-24)
+- **Fails closed.** `PlanJson` reads a plan as full only when it says `full` (or `complete`, `all`). A missing, empty or
+  unknown coverage is partial.
+- **Stated results decide.** `ExpectedResults.Unchecked` lists the stated results no check looks for: a check that
+  something is there (text or visible) whose text matches, ignoring case and surrounding spaces. A result's page, when
+  given, says where it appears; checking the text is what makes it tested. A check that it is *not* there does not
+  count. `PlanningService` marks a plan with any such result partial and adds a "Checked by Autestiq" note naming the
+  tester's words: "The tester stated “…”, and no check looks for it, so this plan covers only part of the request."
+  The model's notes are not read.
+- **The screen** says, on a partial plan, that the notes below (Autestiq's own checks and the AI's) say which part is
+  missing. Approval was already refused for a partial plan, and a passing run of one already ends inconclusive.
+- **The benchmark's recordings** now write `coverage`. They left it out, so a recorded partial plan was replayed as full,
+  and since this change every recording would have been replayed as partial.
+- **Tests:** an empty coverage is partial; with stated results, a full plan checking them all stays full, one checking
+  none or only one of two becomes partial with a note naming each missing one (and only those), a "not there" check
+  does not count, and a plan without stated results keeps its coverage. The three refusal tests fail with the rule
+  switched off. A replay of the demo shop's hand-written plans from recordings is unchanged.
 
 ## Consequences
 - **Easier:** a plan's claim of full coverage is backed by something software checked, where the tester stated

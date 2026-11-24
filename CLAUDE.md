@@ -79,6 +79,28 @@ the same change as the implementation, and:
   beyond this session, it is written into the repository before the session moves on.
 - **Never commit** credentials, confidential customer information, or unredacted conversation logs.
 
+## AI Training & Continuous Learning Strategy
+
+Autestiq has a long-term strategic initiative to develop specialized AI intelligence for autonomous software Quality
+Assurance. The authoritative documentation is maintained in [`docs/ai-learning/`](docs/ai-learning/README.md); the
+decision is ADR-0036 (proposed, 2026-11-24). **Nothing in it is built yet unless its documents say so.**
+
+When working on AI agents, synthetic testing environments, experience collection, model evaluation, fine-tuning, or
+reinforcement learning:
+
+1. Review `docs/ai-learning/README.md` and the relevant strategy documents.
+2. Follow existing architectural, security, privacy, and development requirements.
+3. Distinguish implemented functionality from research proposals.
+4. Prioritize verified improvements over dataset size or model ownership.
+5. Preserve existing benchmark methodology and held-out evaluations.
+6. Update the relevant strategy documentation when new decisions are accepted or experiments are completed.
+7. Do not start expensive training jobs or make major architectural changes without explicit owner approval.
+8. Do not use confidential customer data for shared model training without explicit authorization.
+9. Follow the approved product roadmap and its milestone review process.
+
+The AI learning roadmap complements the main Autestiq product roadmap and does not automatically override existing
+development priorities.
+
 ## Security, privacy and onboarding (binding, owner's requirements of 2026-11-17)
 
 The full text is [`docs/secure-onboarding-and-privacy.md`](docs/secure-onboarding-and-privacy.md); its gap analysis

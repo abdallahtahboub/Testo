@@ -102,6 +102,12 @@ public class AutestiqDbContext(DbContextOptions<AutestiqDbContext> options, IOrg
     /// <summary>The files those executions produced. The bytes are in the artifact store.</summary>
     public DbSet<Artifact> Artifacts => Set<Artifact>();
 
+    /// <summary>Each request for a plan, written before the model is asked (Milestone 5.1 R1).</summary>
+    public DbSet<Domain.Testing.PlanningAttempt> PlanningAttempts => Set<Domain.Testing.PlanningAttempt>();
+
+    /// <summary>How each planning attempt ended, written once.</summary>
+    public DbSet<Domain.Testing.PlanningAttemptOutcome> PlanningAttemptOutcomes => Set<Domain.Testing.PlanningAttemptOutcome>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

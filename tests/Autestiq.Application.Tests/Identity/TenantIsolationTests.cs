@@ -34,7 +34,7 @@ public sealed class TenantIsolationTests : IAsyncLifetime
     /// at a real project and a step at a real run: the composite foreign keys are part of what is
     /// being tested, and they refuse anything else.
     /// </summary>
-    private readonly record struct SeedContext(Guid OrganizationId, Guid UserId, Guid ProjectId, Guid RunId, Guid EnvironmentId);
+    private readonly record struct SeedContext(Guid OrganizationId, Guid UserId, Guid ProjectId, Guid RunId, Guid EnvironmentId, Guid TestCaseId, Guid AttemptId);
 
     private static readonly Dictionary<Type, Func<SeedContext, object>> Seeds = new()
     {
@@ -137,11 +137,27 @@ public sealed class TenantIsolationTests : IAsyncLifetime
         },
         [typeof(Domain.Testing.TestCase)] = seed => new Domain.Testing.TestCase
         {
+            Id = seed.TestCaseId,
             OrganizationId = seed.OrganizationId,
             ProjectId = seed.ProjectId,
             EnvironmentId = seed.EnvironmentId,
             Number = 1,
             Description = "Check the basket adds up",
+        },
+        [typeof(Domain.Testing.PlanningAttempt)] = seed => new Domain.Testing.PlanningAttempt
+        {
+            Id = seed.AttemptId,
+            OrganizationId = seed.OrganizationId,
+            TestCaseId = seed.TestCaseId,
+            Model = "claude-sonnet-5-5",
+            CeilingUsd = 0.25m,
+        },
+        [typeof(Domain.Testing.PlanningAttemptOutcome)] = seed => new Domain.Testing.PlanningAttemptOutcome
+        {
+            OrganizationId = seed.OrganizationId,
+            AttemptId = seed.AttemptId,
+            End = Domain.Testing.PlanningAttemptEnd.Answered,
+            CostUsd = 0.05m,
         },
         [typeof(OriginProof)] = seed => new OriginProof
         {
@@ -383,7 +399,7 @@ public sealed class TenantIsolationTests : IAsyncLifetime
         database.Users.Add(user);
         await database.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var seedContext = new SeedContext(organization.Id, user.Id, Guid.CreateVersion7(), Guid.CreateVersion7(), Guid.CreateVersion7());
+        var seedContext = new SeedContext(organization.Id, user.Id, Guid.CreateVersion7(), Guid.CreateVersion7(), Guid.CreateVersion7(), Guid.CreateVersion7(), Guid.CreateVersion7());
 
         foreach (var seed in Seeds.Values)
         {

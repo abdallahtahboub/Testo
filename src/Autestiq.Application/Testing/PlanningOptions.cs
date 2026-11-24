@@ -20,4 +20,13 @@ public sealed class PlanningOptions
 
     /// <summary>How long the planning step waits before looking again when there is nothing to plan.</summary>
     public TimeSpan PollInterval { get; set; } = TimeSpan.FromSeconds(1);
+
+    /// <summary>
+    /// How long a test may stay in Planning before it counts as interrupted (Milestone 5.1 R1). Longer than any
+    /// planning call can take, retries included, so an answer still on its way is not overtaken.
+    /// </summary>
+    public TimeSpan Lease { get; set; } = TimeSpan.FromMinutes(15);
+
+    /// <summary>How often the planning step looks for interrupted tests.</summary>
+    public TimeSpan RecoveryInterval { get; set; } = TimeSpan.FromMinutes(1);
 }

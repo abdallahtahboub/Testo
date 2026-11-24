@@ -460,6 +460,9 @@
   <data name="Tests_Error_NoPlanner" xml:space="preserve">
     <value>Die KI-Planung ist auf diesem Server nicht eingerichtet.</value>
   </data>
+  <data name="Tests_Error_PlanningInterrupted" xml:space="preserve">
+    <value>Die Planung wurde unterbrochen, bevor sie fertig war, daher gibt es keinen Plan. Ändern Sie die erwarteten Ergebnisse oder beschreiben Sie den Test erneut, um neu zu planen.</value>
+  </data>
   <data name="Tests_Error_NoPlan" xml:space="preserve">
     <value>Es konnte kein Plan geschrieben werden.</value>
   </data>

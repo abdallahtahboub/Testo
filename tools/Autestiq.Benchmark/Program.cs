@@ -21,6 +21,9 @@ using Autestiq.DemoShop;
 //   dotnet run --project tools/Autestiq.Benchmark -- --smoke           one scenario, for CI
 //   dotnet run --project tools/Autestiq.Benchmark -- --self-check      proves the harness catches a
 //                                                                   planner that only pretends
+//   ... --stated                        each scenario also states what its baseline checks, scored one by one
+//   ... --release-candidate <tag>       refuses unless the checkout is exactly that tag, with no changes
+//                                       (Milestone 5.1 R5)
 //
 // It starts the demo shop itself, on a port of its own, and switches that shop's defects as it
 // goes. Nothing else needs to be running, and it never touches the database or the web
@@ -37,6 +40,21 @@ var withoutTestIds = args.Contains("--without-test-ids", StringComparer.Ordinal)
 
 // Explore as a customer's site is explored: links followed, no control pressed, no form sent (ADR-0030, part 2).
 var readOnly = args.Contains("--read-only", StringComparer.Ordinal);
+
+// A release-candidate measurement is of exactly that commit: refused on any other, or with uncommitted changes.
+var releaseCandidate = BenchmarkOptions.Value(args, "--release-candidate");
+var (revision, clean) = Provenance.Source();
+var tagAtHead = Provenance.TagAtHead();
+
+if (releaseCandidate is not null && (tagAtHead != releaseCandidate || !clean))
+{
+    Console.WriteLine($"--release-candidate {releaseCandidate}: the checkout is {(tagAtHead is null ? "not at a tag" : $"at {tagAtHead}")}"
+        + (clean ? "" : ", with uncommitted changes") + ". Check out the tag, with nothing changed, and run again.");
+    return 2;
+}
+
+// Each scenario states what its baseline checks, as a tester would, and every stated result is scored on its own.
+var stated = args.Contains("--stated", StringComparer.Ordinal);
 
 // A spending cap that cannot be read is not silently no cap.
 if (BenchmarkOptions.Value(args, "--max-total-usd") is { } capText
@@ -247,7 +265,7 @@ if (BenchmarkOptions.Value(args, "--experiment") is { } experiment)
 }
 
 // The held-out set is measured once, against the frozen scenarios and baselines (HeldOutScenarios).
-IReadOnlyList<BenchmarkScenario> scenarios = targetScenarios;
+IReadOnlyList<BenchmarkScenario> scenarios = stated ? StatedResults.Stated(targetScenarios) : targetScenarios;
 
 if (options.Smoke && options.Target == "demo" && !options.HeldOut)
 {
@@ -323,7 +341,17 @@ var report = Report.Write(
         _ => "an application of our own",
     })
         + (options.ReadOnly ? ", explored read-only (links followed, no control pressed, no form sent), as a customer's site is" : "")
-        + (signedIn ? ", with the published demo account stored as the test account, so exploring signs in (ADR-0033)" : ""));
+        + (signedIn ? ", with the published demo account stored as the test account, so exploring signs in (ADR-0033)" : ""),
+    new Provenance(
+        revision,
+        clean,
+        releaseCandidate,
+        planner?.Model ?? "none: the baseline only",
+        Provenance.HashOfPrompt(),
+        (options.ReadOnly ? "read-only (links followed, no control pressed, no form sent)" : "acting (controls pressed, forms sent)")
+            + (withoutTestIds ? ", served without test ids" : ", with test ids")
+            + (stated ? ", with stated expected results" : ""),
+        Provenance.ResetFor(options.Target)));
 
 Console.WriteLine($"Planning cost ${harness.Spent:0.0000} in all.");
 
@@ -464,7 +492,12 @@ internal sealed record BenchmarkOptions(
 
     /// <summary>Each target and each set has its own report, so no run can overwrite another's.</summary>
     private static string ReportFileName(string[] args) =>
-        args.Contains("--read-only", StringComparer.Ordinal)
+        // A stated or test-id-free run has a report of its own beside the plain one, never in its place (R5).
+        args.Contains("--stated", StringComparer.Ordinal)
+            ? ReportFileName([.. args.Where(arg => arg != "--stated")]).Replace(".md", "-stated.md", StringComparison.Ordinal)
+        : args.Contains("--without-test-ids", StringComparer.Ordinal)
+            ? ReportFileName([.. args.Where(arg => arg != "--without-test-ids")]).Replace(".md", "-no-ids.md", StringComparison.Ordinal)
+        : args.Contains("--read-only", StringComparer.Ordinal)
             ? ReportFileName([.. args.Where(arg => arg != "--read-only")]).Replace(".md", "-read-only.md", StringComparison.Ordinal)
         : args.Contains("--unseen", StringComparer.Ordinal) ? $"ai-benchmark-unseen-{Value(args, "--target") ?? "demo"}.md"
         : Value(args, "--target") == "booking" ? "ai-benchmark-booking.md"

@@ -8,7 +8,9 @@
 > and tenancy (ADR-0012 to ADR-0017), a separate Playwright worker in a sealed container per run (ADR-0026), and a
 > deterministic approval, validation and execution path around one bounded model call (ADR-0019). §3's markers and
 > §4's rules are current; **§12's mock authentication is superseded** by the real sign-in (ADR-0016, ADR-0017).
-> `docs/roadmap.md` §Inventory is authoritative for what is built.
+> `docs/roadmap.md` §Inventory is authoritative for what is built. **Data** (stores, classes, retention, volumes,
+> backups, analytics) is designed in [`data-architecture.md`](data-architecture.md) (accepted, ADR-0038; not yet built); **hosting**
+> is deferred to the go-live stage.
 
 ## 1. Goals
 

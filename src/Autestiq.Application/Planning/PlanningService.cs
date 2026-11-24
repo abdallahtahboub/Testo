@@ -83,7 +83,17 @@ public sealed class PlanningService(IScenarioPlanner planner, ILogger<PlanningSe
                     $"The tester stated “{result.Text}”, and no check looks for it, so this plan covers only part of the request."))
                     .ToList();
 
-                if (missing.Count > 0)
+                // Step 2: what the model itself lists as not tested makes the plan partial, whatever its coverage says.
+                // The list is the model's words, so it is shown as the AI's (unverified); the decision is software's.
+                var notTested = plan.NotTested ?? [];
+
+                if (notTested.Count > 0)
+                {
+                    checkNotes.Add($"The AI lists {notTested.Count} part(s) of the request this plan does not check, so it covers only part of the request.");
+                    plan = plan with { Notes = [.. plan.Notes, .. notTested.Select(part => "Not tested: " + part)] };
+                }
+
+                if (missing.Count > 0 || notTested.Count > 0)
                 {
                     plan = plan with { Coverage = PlanCoverage.Partial };
                 }

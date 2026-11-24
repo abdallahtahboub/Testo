@@ -293,6 +293,10 @@ as before (the demo shop: 36 of 36 in both columns, defects on and off). What re
 put back: explorations still see what earlier explorations did, because exploring may act. Every figure above was
 measured with the old order; the PetClinic figure is not re-measured.
 
+**The prompt changed on 2026-11-24 (ADR-0035 step 2: a plan lists what it does not test).** Every figure above was
+measured with the prompt before that change. Until the unseen sets and PetClinic are measured again with it, they
+describe the earlier prompt, not the current one.
+
 **What this supports, and what it does not.** It supports this statement: *on our three benchmark
 applications, on scenarios written after the planner was frozen, the planner's tests gave the right verdict
 on 95% of sound-application runs, caught every seeded defect where a verdict was reached, and never passed

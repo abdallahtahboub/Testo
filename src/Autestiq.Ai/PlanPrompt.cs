@@ -26,6 +26,7 @@ public static class PlanPrompt
         {
           "scenarioName": "a short name for what this plan tests",
           "coverage": "full or partial: partial if this plan tests less than the description asked for",
+          "notTested": ["each part of the description this plan does not check, one per item; [] when it checks everything"],
           "notes": ["anything a person should know: an assumption you made, or an assertion you think is wrong"],
           "actions": [
             { "kind": "goto",          "description": "why this step exists", "path": "/basket" },
@@ -76,7 +77,9 @@ public static class PlanPrompt
           instead. Values that follow from what you were told, such as a total from prices you were
           shown, are not guesses.
         - Say "coverage": "partial" whenever the plan tests less than the description asked for, and
-          say in notes which part is missing. Partial is about the checks: a step the description
+          list each part it does not check in "notTested", one item per part. A plan with anything in
+          "notTested" is partial, whatever "coverage" says: that is decided after you answer, so a gap
+          written only in notes, with "coverage": "full", is a plan claiming more than it checks. Partial is about the checks: a step the description
           mentions only to set the scene, such as starting a booking in order to look at the times
           offered, needs carrying out only as far as the checks require, and leaving the rest out
           is not partial. Whenever you are unsure whether something is a check, treat it as one. A partial plan that passes is reported as

@@ -1,6 +1,6 @@
 # 0035 — A plan cannot claim more coverage than it checks
 
-- **Status:** Accepted (the owner approved step 1 on 2026-11-24); step 2 still proposed
+- **Status:** Accepted (the owner approved step 1 and step 2 on 2026-11-24); step 2 built, not yet measured
 - **Date:** 2026-11-24
 
 ## Context
@@ -69,6 +69,22 @@ In two steps, each with its own review:
   none or only one of two becomes partial with a note naming each missing one (and only those), a "not there" check
   does not count, and a plan without stated results keeps its coverage. The three refusal tests fail with the rule
   switched off. A replay of the demo shop's hand-written plans from recordings is unchanged.
+
+## Step 2, built (2026-11-24), not yet measured
+- **The prompt asks for it.** The plan's JSON gains `"notTested": [...]`, one item per part of the request the plan does
+  not check, and the coverage rule says a plan with anything in it is partial whatever `coverage` says, so a gap
+  written only in notes with `full` is a plan claiming more than it checks.
+- **Software decides.** `PlanJson` reads the list as written (trimmed, blanks dropped); `PlanningService` makes any
+  plan with a non-empty list partial, beside step 1's rule. The parts themselves are the model's words, so they are
+  shown with the AI's notes ("Not tested: …"), labelled unverified; Autestiq's own note says only what software
+  decided ("The AI lists N part(s) of the request this plan does not check …").
+- **The benchmark's recordings** write the list.
+- **Tests:** the parser keeps each part and drops blanks, and leaves coverage as written; a plan saying full with
+  something not tested becomes partial with the part as an AI note and a count as Autestiq's (that test fails with the
+  rule switched off); a plan listing nothing keeps its coverage; the system prompt asks for the field.
+- **The prompt changed, so every figure measured so far was measured with the old one.** Until the re-measurement in
+  the decision above is run and published, none of them describes this prompt. The re-measurement: the three unseen
+  sets, with and without test ids, and PetClinic, about $3 at the costs those sets measured, run by the owner.
 
 ## Consequences
 - **Easier:** a plan's claim of full coverage is backed by something software checked, where the tester stated

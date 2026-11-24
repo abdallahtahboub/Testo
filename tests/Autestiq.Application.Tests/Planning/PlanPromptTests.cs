@@ -193,4 +193,12 @@ public class PlanPromptTests
 
         return count;
     }
+
+    [Fact]
+    public void System_AsksForWhatIsNotTested_AndSaysItDecidesPartial()
+    {
+        // ADR-0035 step 2: the gap goes in a field software reads, not only in notes.
+        Assert.Contains("\"notTested\"", PlanPrompt.System, StringComparison.Ordinal);
+        Assert.Contains("A plan with anything in", PlanPrompt.System, StringComparison.Ordinal);
+    }
 }

@@ -71,7 +71,7 @@ helps", in the hundreds to low thousands, not tens of thousands. Volume targets 
 
 1. **Accept or change the order:** lab and retrieval first, fine-tuning only after evidence, no training from scratch
    (ADR-0036).
-2. **Approve Experiment 0001** as designed, at its estimated cost of **about $12–30 of model calls**
+2. **Approve Experiment 0001** as designed, at its estimated cost of **about $25–40 of model calls (two passes, corrected before any run)**
    ([experiments/0001](experiments/0001-repair-planning-from-verified-experience.md)).
 3. **Approve adding two or three more self-hostable applications** to the lab (candidates in
    [data-sources.md](data-sources.md) §2).

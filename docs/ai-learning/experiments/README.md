@@ -29,4 +29,4 @@ Failed experiments and negative results stay: they are findings.
 
 | # | Title | Status |
 |---|---|---|
-| [0001](0001-repair-planning-from-verified-experience.md) | Repair planning from verified experience | Designed, awaiting approval |
+| [0001](0001-repair-planning-from-verified-experience.md) | Repair planning from verified experience | Approved 2026-11-24; built; not run |

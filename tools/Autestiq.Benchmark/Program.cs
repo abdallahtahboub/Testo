@@ -63,7 +63,7 @@ var external = options.Target switch
     _ => null,
 };
 
-using var host = external is null ? InProcessHost.Start(map, withoutTestIds) : null;
+using var host = external is null ? InProcessHost.Start(map, withoutTestIds, AppChanges.LabelsFor(options.Target)) : null;
 var origin = external ?? host!.Origin; // host is started exactly when there is no external origin.
 
 Console.WriteLine(options.Target switch
@@ -197,6 +197,55 @@ if (args.Contains("--explore", StringComparer.Ordinal))
 }
 
 var planner = Planner(options);
+
+// Experiment 0001 (docs/ai-learning/experiments/0001-repair-planning-from-verified-experience.md): repair planning,
+// on one of our own applications (the changes are applied by the in-process host), always on its unseen set.
+if (BenchmarkOptions.Value(args, "--experiment") is { } experiment)
+{
+    if (experiment != "0001" || external is not null || planner is null)
+    {
+        Console.WriteLine("--experiment 0001 needs one of our own targets (demo, booking, invoices) and a model key.");
+        return 2;
+    }
+
+    var phase = BenchmarkOptions.Value(args, "--phase");
+
+    if (phase is not ("corpus" or "evaluate"))
+    {
+        Console.WriteLine("--phase must be corpus (training applications) or evaluate (the held-out application).");
+        return 2;
+    }
+
+    var runner = new Experiment0001(
+        new Harness(origin, planner, repetitions: 1, recordingDirectory: null) { SetDefects = setDefects, ResetTarget = startAfresh, MaxTotalUsd = options.MaxTotalUsd },
+        options.Target,
+        planner.Model,
+        phase,
+        BenchmarkOptions.Value(args, "--corpus") ?? "experiment-0001-corpus.jsonl",
+        BenchmarkOptions.Value(args, "--records") ?? $"experiment-0001-{phase}-{options.Target}.jsonl",
+        int.TryParse(BenchmarkOptions.Value(args, "--repeats"), out var repeats) && repeats is > 0 and <= 5 ? repeats : 3,
+        Console.WriteLine);
+
+    Console.WriteLine($"Experiment 0001, {phase} phase, on {options.Target}'s unseen set. Planner: {planner.Model}.");
+    using var experimentStop = new CancellationTokenSource(TimeSpan.FromHours(3));
+    try
+    {
+        await runner.RunAsync(UnseenScenarios.For(options.Target), experimentStop.Token);
+    }
+    catch (OperationCanceledException stopped)
+    {
+        // Partial figures are not published as whole ones.
+        Console.WriteLine($"  Stopped early: {stopped.Message} The figures below are partial.");
+    }
+
+    foreach (var (condition, tally) in runner.Tallies.OrderBy(pair => pair.Key, StringComparer.Ordinal))
+    {
+        Console.WriteLine($"  {condition}: {tally}");
+    }
+
+    return 0;
+}
+
 // The held-out set is measured once, against the frozen scenarios and baselines (HeldOutScenarios).
 IReadOnlyList<BenchmarkScenario> scenarios = targetScenarios;
 

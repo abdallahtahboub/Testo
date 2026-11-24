@@ -527,7 +527,7 @@
     <value>Von der KI geschrieben und vom Validator von Autestiq geprüft. Er läuft erst, wenn ein Inhaber oder die QA-Leitung ihn unten freigibt.</value>
   </data>
   <data name="Test_Plan_Partial" xml:space="preserve">
-    <value>Dieser Plan deckt nur einen Teil dessen ab, was Sie verlangt haben. Die Notizen der KI sagen, welcher Teil fehlt.</value>
+    <value>Dieser Plan deckt nur einen Teil dessen ab, was Sie verlangt haben. Die Notizen unten sagen, welcher Teil fehlt: die eigenen Prüfungen von Autestiq, für ein erwartetes Ergebnis, das nichts prüft, und die der KI.</value>
   </data>
   <data name="Test_Checks" xml:space="preserve">
     <value>Von Autestiq geprüft</value>

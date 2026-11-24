@@ -193,6 +193,73 @@ public class PlanningServiceTests
         Assert.Equal(["password"], planner.LastRequest!.SecretNames);
     }
 
+    // --- ADR-0035: a plan cannot claim more coverage than it checks ---
+
+    private static readonly ExpectedResult Thanks = new("Thanks for your order!", "/order/placed");
+
+    private static readonly PlannedAction[] ChecksTheThanks =
+    [
+        .. Good,
+        new(ActionKind.AssertVisible, "The shop thanks you", ActionTarget.ByText("thanks for your order!")),
+    ];
+
+    private static Task<PlannedResult> PlanWithAsync(IReadOnlyList<PlannedAction> actions, params ExpectedResult[] expected) =>
+        Service(new Planner([Answer(actions)])).PlanAsync(
+            "Place an order", Shop, RunBudget.Default, [], expected, TestContext.Current.CancellationToken);
+
+    [Fact]
+    public async Task Plan_ThatSaysFull_ButChecksNoStatedResult_IsPartial_WithANoteNamingIt()
+    {
+        var result = await PlanWithAsync(Good, Thanks);
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(PlanCoverage.Partial, result.Plan!.Coverage);
+
+        // A note of Autestiq's own, with the tester's words, never the model's.
+        var note = Assert.Single(result.CheckNotes!);
+        Assert.Contains("“Thanks for your order!”", note, StringComparison.Ordinal);
+        Assert.Contains(note, result.Notes);
+    }
+
+    [Fact]
+    public async Task Plan_ThatChecksEveryStatedResult_StaysFull()
+    {
+        // Matched as the labels match: exact text, ignoring case and surrounding spaces.
+        var result = await PlanWithAsync(ChecksTheThanks, Thanks);
+
+        Assert.Equal(PlanCoverage.Full, result.Plan!.Coverage);
+        Assert.DoesNotContain(result.CheckNotes!, note => note.Contains("Thanks", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Plan_ThatChecksOneOfTwoStatedResults_IsPartial_NamingTheOther()
+    {
+        var result = await PlanWithAsync(ChecksTheThanks, Thanks, new ExpectedResult("Your order number is"));
+
+        Assert.Equal(PlanCoverage.Partial, result.Plan!.Coverage);
+        Assert.Contains(result.CheckNotes!, note => note.Contains("“Your order number is”", StringComparison.Ordinal));
+        Assert.DoesNotContain(result.CheckNotes!, note => note.Contains("Thanks", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Plan_WithoutStatedResults_KeepsTheCoverageItSaid()
+    {
+        var result = await PlanWithAsync(Good);
+
+        Assert.Equal(PlanCoverage.Full, result.Plan!.Coverage);
+    }
+
+    [Fact]
+    public async Task Plan_WhoseOnlyCheckOfAStatedResultSaysItIsAbsent_IsPartial()
+    {
+        // "Not shown" does not test that the thanks are shown.
+        PlannedAction[] absent = [.. Good, new(ActionKind.AssertNotVisible, "No thanks", ActionTarget.ByText("Thanks for your order!"))];
+
+        var result = await PlanWithAsync(absent, Thanks);
+
+        Assert.Equal(PlanCoverage.Partial, result.Plan!.Coverage);
+    }
+
     private static PlanResult Answer(IReadOnlyList<PlannedAction> actions) => PlanResult.From(
         new TestPlan("A plan", actions, []),
         new PlanningCost(900, 300, 1, 0.01m, TimeSpan.FromSeconds(2)),

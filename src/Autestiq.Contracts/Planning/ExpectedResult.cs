@@ -93,6 +93,30 @@ public static class ExpectedResults
     }
 
     /// <summary>
+    /// The stated results no check of the plan looks for (ADR-0035): a result counts as checked when a check that
+    /// something is there (text or visible) matches its text. Its page, when given, says where it appears; checking the
+    /// text is what makes the result tested.
+    /// </summary>
+    public static IReadOnlyList<ExpectedResult> Unchecked(IReadOnlyList<PlannedAction> actions, IReadOnlyList<ExpectedResult>? results)
+    {
+        ArgumentNullException.ThrowIfNull(actions);
+
+        if (results is not { Count: > 0 })
+        {
+            return [];
+        }
+
+        var checks = actions.Where(action => action.Kind is ActionKind.AssertText or ActionKind.AssertVisible).ToList();
+
+        return
+        [
+            .. results.Where(result => !checks.Any(check => check.Kind == ActionKind.AssertText
+                ? Same(result.Text, check.Text)
+                : Same(result.Text, check.Target?.Value))),
+        ];
+    }
+
+    /// <summary>
     /// The evidence for each action of a plan, in order: <c>null</c> for an action that checks nothing. A check that is
     /// both observed and stated is observed.
     /// </summary>

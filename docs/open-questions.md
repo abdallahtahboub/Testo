@@ -10,7 +10,7 @@
 | Question | Why it matters | Source |
 |---|---|---|
 | **Where is the product hosted?** | Decides object storage for evidence, the cloud key service for the test-account key ring, and real machine and storage prices in the price book. Several "before the first pilot" items wait on it. | ADR-0029, ADR-0031, ADR-0033 |
-| **A plan that calls itself full while its own notes say part was not tested.** | On PetClinic a plan passed without exercising the search it was asked to test, and still declared full coverage. The partial label exists to stop exactly that. | ADR-0020 (PetClinic); fix proposed in ADR-0035 |
+| **A plan that calls itself full while its own notes say part was not tested.** | On PetClinic a plan passed without exercising the search it was asked to test, and still declared full coverage. ADR-0035 step 1 (built) covers tests with stated expected results and a missing coverage; a test without stated results is still on the model's word until step 2, which changes the prompt and needs a paid re-measurement. | ADR-0020 (PetClinic), ADR-0035 |
 | **When does the first pilot start, and with whom?** | The other testing-journey modules, the app shell's dashboard and the billing sandbox all wait until after it. | ADR-0020, `docs/commercial-readiness.md` |
 | **The private agent (G-8): when, and in what form?** | Required before any claim of private execution, and the long-term home for customer secrets. | `docs/secure-onboarding-gap-analysis.md` G-8 |
 | **How should read-only exploration improve?** | It is a customer site's default until an Owner allows acting, and it measures 36 of 66 against 62 of 66. | ADR-0020, ADR-0032 |

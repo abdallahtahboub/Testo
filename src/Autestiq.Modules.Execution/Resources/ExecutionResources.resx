@@ -527,7 +527,7 @@
     <value>Written by the AI and checked by Autestiq's validator. It runs only once an owner or a QA lead approves it, below.</value>
   </data>
   <data name="Test_Plan_Partial" xml:space="preserve">
-    <value>This plan covers only part of what you asked for. The AI's notes say which part is missing.</value>
+    <value>This plan covers only part of what you asked for. The notes below say which part is missing: Autestiq's own checks, for an expected result nothing checks, and the AI's.</value>
   </data>
   <data name="Test_Checks" xml:space="preserve">
     <value>Checked by Autestiq</value>

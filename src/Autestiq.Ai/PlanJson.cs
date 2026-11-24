@@ -224,13 +224,14 @@ public static class PlanJson
     /// How much of the scenario the plan claims to cover.
     /// </summary>
     /// <remarks>
-    /// An answer that says nothing is taken as a full plan, which is the lenient reading — but a
-    /// planner that silently covers half of a scenario is the thing this field exists to catch, so
-    /// anything other than a recognized word is read as partial. Being unsure is partial.
+    /// Only a plan that says it covers everything is full. An answer that says nothing used to be read as full, the
+    /// lenient reading, which let a plan that forgot the field pass for complete; a planner that silently covers half
+    /// of a scenario is the thing this field exists to catch, so silence, like anything unrecognized, is partial
+    /// (ADR-0035). Being unsure is partial.
     /// </remarks>
     private static PlanCoverage Coverage(string? word) => word?.Trim().ToLowerInvariant() switch
     {
-        null or "" or "full" or "complete" or "all" => PlanCoverage.Full,
+        "full" or "complete" or "all" => PlanCoverage.Full,
         _ => PlanCoverage.Partial,
     };
 

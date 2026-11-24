@@ -61,6 +61,12 @@ public sealed record Measurement(
     IReadOnlyList<string> PlanningErrors,
     IReadOnlyList<string> Notes)
 {
+    /// <summary>
+    /// For each stated expected result, whether this plan's steps checked it and how they ended, in the first
+    /// execution (Milestone 5.1 R5). <c>null</c> when the scenario states none.
+    /// </summary>
+    public IReadOnlyDictionary<string, StatedCheck>? Stated { get; init; }
+
     /// <summary>Whether every repetition agreed. Disagreement is flake, and it is the application's or ours.</summary>
     public bool Flaked => Attempts.Select(attempt => attempt.Status).Distinct().Count() > 1;
 
@@ -384,6 +390,7 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
         CancellationToken cancellationToken)
     {
         var attempts = new List<Attempt>();
+        IReadOnlyDictionary<string, StatedCheck>? stated = null;
 
         for (var repetition = 0; repetition < repetitions; repetition++)
         {
@@ -402,9 +409,14 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
             var status = PlanOutcome.Reconcile(result.Status, coverage);
 
             attempts.Add(new Attempt(Judge(status, defectOn), status, clock.Elapsed, result.FailureReason));
+
+            if (repetition == 0 && scenario.Expected is { Count: > 0 })
+            {
+                stated = StatedResults.Check(scenario.Expected, plan, result.Steps);
+            }
         }
 
-        return new Measurement(scenario, defectOn, source, attempts, planning, planningErrors, notes);
+        return new Measurement(scenario, defectOn, source, attempts, planning, planningErrors, notes) { Stated = stated };
     }
 
     /// <summary>

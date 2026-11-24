@@ -20,7 +20,8 @@ public static class Report
         IReadOnlyList<Measurement> measurements,
         int repetitions,
         DateTimeOffset when,
-        string application = "an application of our own")
+        string application = "an application of our own",
+        Provenance? provenance = null)
     {
         ArgumentNullException.ThrowIfNull(measurements);
 
@@ -50,6 +51,11 @@ public static class Report
                 """).Append('\n');
         }
 
+        if (provenance is not null)
+        {
+            text.Append(provenance.Markdown());
+        }
+
         text.Append(Preamble(measurements));
 
         text.Append("\n## Summary\n\n");
@@ -70,6 +76,8 @@ public static class Report
         Row(text, "Median execution", sources, measurements, Median);
         Row(text, "Tokens per planned run", sources, measurements, group => Tokens(group));
         Row(text, "Cost per planned run", sources, measurements, group => Cost(group));
+
+        text.Append(StatedSection(measurements));
 
         text.Append("\n## Every scenario\n\n");
         text.Append("| Scenario | Defect | Source | Verdict | Status | Flaked | Execution | Tokens | Cost |\n");
@@ -252,4 +260,50 @@ public static class Report
         PlanningErrors.BudgetSpent => "planning spent the run's token or money budget",
         _ => error,
     };
+
+    /// <summary>
+    /// Each stated expected result scored on its own (Milestone 5.1 R5), with the false passes first. Empty when no
+    /// scenario states any.
+    /// </summary>
+    private static string StatedSection(IReadOnlyList<Measurement> measurements)
+    {
+        var scores = StatedResults.Scores(measurements);
+
+        if (scores.Count == 0)
+        {
+            return "";
+        }
+
+        var text = new StringBuilder("\n## Each stated expected result\n\n");
+        text.Append("Every scenario here states what the application should show, as a tester would: the texts its hand-written\n");
+        text.Append("baseline checks. Each is scored on its own, from the first execution. On the sound application every stated\n");
+        text.Append("result holds; on the broken one, a result is broken when the baseline's own check of it fails, and is not\n");
+        text.Append("scored when the baseline stopped before reaching it.\n\n");
+        text.Append("| | Results |\n|---|---|\n");
+
+        foreach (var (score, label) in new[]
+        {
+            (StatedScore.FalsePass, "**False passes** (broken, and the plan's check passed)"),
+            (StatedScore.WrongFail, "Wrong failures (holds, and the plan's check failed)"),
+            (StatedScore.Caught, "Caught (broken, and the plan's check failed)"),
+            (StatedScore.Confirmed, "Confirmed (holds, and the plan's check passed)"),
+            (StatedScore.NotChecked, "Not checked by the plan (partial)"),
+            (StatedScore.Inconclusive, "Checked, but the run ended first (inconclusive)"),
+            (StatedScore.NotScored, "Not scored (the baseline did not reach it)"),
+        })
+        {
+            text.Append("| ").Append(label).Append(" | ")
+                .Append(scores.Count(entry => entry.Score == score).ToString(CultureInfo.InvariantCulture)).Append(" |\n");
+        }
+
+        text.Append("\n| Scenario | Defect | Stated result | Score |\n|---|---|---|---|\n");
+
+        foreach (var (measurement, statedText, score) in scores.OrderBy(entry => entry.Score))
+        {
+            text.Append("| ").Append(measurement.Scenario.Id).Append(" | ").Append(measurement.DefectOn ? "on" : "off")
+                .Append(" | ").Append(statedText.Replace("|", "\\|", StringComparison.Ordinal)).Append(" | ").Append(score).Append(" |\n");
+        }
+
+        return text.ToString();
+    }
 }

@@ -432,6 +432,13 @@ feature flags are built; its mock sign-in and mock data were superseded by real 
 
 **Done when:** each module registers its nav entry with one line and appears in the nav; turning a flag off hides its nav entry, widgets and routes (tested); dashboard widgets show loading, empty, error and data states (bUnit); seed-data consistency tests pass; E2E covers sign-in → dashboard → switch project.
 
+## AI learning programme (proposed, 2026-11-24)
+A long-term programme to make Autestiq's QA intelligence improve from verified experience: a Training Lab grown from
+the benchmark harness, experience retrieval measured first, fine-tuning only on evidence, no model trained from scratch.
+**Proposed, not started; nothing in it is built.** Strategy, phases and gates in
+[`ai-learning/roadmap.md`](ai-learning/roadmap.md); decision in ADR-0036 (proposed). It complements this roadmap and
+does not reorder it; its first phases use the benchmark tool only, beside pilot readiness.
+
 ## Milestone 6 — Testing-journey modules
 Delivered **one stage at a time**, each as its own reviewable sub-milestone:
 

@@ -111,6 +111,8 @@ data:**
   item;
 - a stated backup expiry, so deleted data leaves backups within a known time.
 
+*Designed (proposed) in `docs/data-architecture.md` §5 and §8, ADR-0038.*
+
 **G-6 · Secrets for sign-in scenarios have no encrypted store in the product (§5).** *Built 2026-11-18 (ADR-0033): one
 test account per test environment, encrypted with Data Protection under a per-environment purpose, key ring outside
 the database, write-only, never for production, names only to the planner, values removed from what exploring

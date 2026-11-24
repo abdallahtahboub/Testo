@@ -50,7 +50,7 @@ step per deployment, ADR-0037) is built (`docs/roadmap.md`; findings in
 plans, requirements, a case library, suites, defects, reporting — **does not exist yet**: six of the
 seven module projects are shells. `docs/roadmap.md` §Inventory is the authoritative list of what is built.
 
-Read first: `docs/architecture.md`, `docs/roadmap.md`, `docs/design-system.md`,
+Read first: `docs/architecture.md`, `docs/data-architecture.md` (proposed), `docs/roadmap.md`, `docs/design-system.md`,
 `docs/sitemap.md`, `docs/testing-journey.md`, `docs/decisions/`.
 
 ## Working agreement

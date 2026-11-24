@@ -148,8 +148,12 @@ Measured figures where we have them, otherwise stated assumptions.
 
 ## 7. Analytics (designed; views are Milestone 5.1 R6)
 
-1. **Now (Milestone 5.1 R6):** PostgreSQL views over the operational tables, one row per run and per planning
-   attempt: durations, states, verdicts, corrections, cost. No content columns, tested column by column.
+1. **Now (Milestone 5.1 R6), built 2026-11-24:** PostgreSQL views over the operational tables (migration
+   `RehearsalMeasures`): `analytics_runs` (one row per run), `analytics_planning_attempts` (per attempt),
+   `analytics_tests` (per test: times to first approval and first verdict, corrections, coverage) and
+   `analytics_activity_days` (per project and day: people, tests, runs). No content columns: a test fixes every view's
+   columns one by one and refuses any that names content, a credential or an identity. Read by the operator's
+   `rehearsal-report <organization-slug>`.
 2. **When analytics load shows on the primary:** the same views on a read replica.
 3. **A warehouse only when one of these holds:** product analytics across years that the operational schema should
    not keep; joining with billing or CRM data; reporting customers run themselves at volume. Fed by change data
@@ -198,7 +202,7 @@ The residency decision is open. This design keeps it open and gives the study wh
 | Object storage for screenshots | ADR-0031 (waits for hosting) |
 | Least-privilege database roles; RLS evaluation | R-19 |
 | Composite environment key on tests | R-18 |
-| Analytics views | Milestone 5.1 R6 |
+| Analytics views | **Built** (Milestone 5.1 R6); a replica and a warehouse are not |
 | Query plans for the hot queries | `open-questions.md` (technical debt) |
 | Retention of the audit log and of accounting records | `open-questions.md` (needs counsel) |
 | Log collection and its retention | Waits for hosting |

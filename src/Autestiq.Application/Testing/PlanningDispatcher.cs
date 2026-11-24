@@ -20,6 +20,13 @@ namespace Autestiq.Application.Testing;
 /// stores the plan, its notes by source, exactly what was sent, and what it cost. Nothing here runs a browser: the
 /// plan runs only once a person approves it (part 3).
 /// </summary>
+/// <remarks>
+/// Milestone 5.1 R1 (R-17): one planning step per deployment, by a PostgreSQL advisory lock, so the budgets, which are
+/// read before a call and spent after it, cannot be spent twice by two instances. Each call is recorded as an attempt
+/// <em>before</em> the model is asked, and counts at its ceiling until its outcome is written. A test left in Planning
+/// past <see cref="PlanningOptions.Lease"/> is failed, saying so, and never planned again on its own: the provider may
+/// have billed it, and a person decides whether to spend again.
+/// </remarks>
 public sealed partial class PlanningDispatcher(
     IServiceScopeFactory scopes,
     IOptionsMonitor<PlanningOptions> options,
@@ -27,6 +34,12 @@ public sealed partial class PlanningDispatcher(
     ILogger<PlanningDispatcher> logger)
     : BackgroundService
 {
+    /// <summary>The advisory lock's key for the planning step, unique within the product.</summary>
+    public const int LockKey = 5_101;
+
+    private AdvisoryLock? _lock;
+    private DateTimeOffset _nextRecovery = DateTimeOffset.MinValue;
+
     /// <inheritdoc />
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -52,12 +65,26 @@ public sealed partial class PlanningDispatcher(
         }
     }
 
-    /// <summary>Moves one test along, if there is one to move. True when something was done.</summary>
+    /// <summary>
+    /// Moves one test along, if there is one to move and this is the deployment's planning step. True when something
+    /// was done.
+    /// </summary>
     public async Task<bool> PlanNextAsync(CancellationToken cancellationToken)
     {
         await using var scope = scopes.CreateAsyncScope();
         var database = scope.ServiceProvider.GetRequiredService<AutestiqDbContext>();
         var writeScope = scope.ServiceProvider.GetRequiredService<TenantWriteScope>();
+
+        if (!await HoldsLockAsync(database, cancellationToken).ConfigureAwait(false))
+        {
+            return false;
+        }
+
+        if (timeProvider.GetUtcNow() >= _nextRecovery)
+        {
+            await RecoverAsync(database, writeScope, cancellationToken).ConfigureAwait(false);
+            _nextRecovery = timeProvider.GetUtcNow() + options.CurrentValue.RecoveryInterval;
+        }
 
         // Across organizations, as the dispatcher claims runs; each test is written back under its own organization.
         var testCase = await database.TestCases.IgnoreQueryFilters()
@@ -139,6 +166,18 @@ public sealed partial class PlanningDispatcher(
         // A single plan may spend no more than its own limit, nor more than the month has left.
         var budget = RunBudget.Default with { MaxCostUsd = Math.Min(RunBudget.Default.MaxCostUsd, left) };
 
+        // Recorded before the model is asked: from here on it may be billed, whatever happens to this process.
+        var attempt = new PlanningAttempt
+        {
+            OrganizationId = testCase.OrganizationId,
+            TestCaseId = testCase.Id,
+            Model = current.Model,
+            CeilingUsd = budget.MaxCostUsd,
+        };
+
+        database.PlanningAttempts.Add(attempt);
+        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
         var planned = await new PlanningService(planner, services.GetRequiredService<ILogger<PlanningService>>())
             // The names of the environment's sign-in values, never the values: a plan may type them by name (ADR-0033).
             .PlanAsync(
@@ -156,6 +195,15 @@ public sealed partial class PlanningDispatcher(
         var notes = planned.Notes
             .Select(note => new PlanNote(note, checks.Contains(note) ? PlanNoteSource.CheckedByAutestiq : PlanNoteSource.Ai))
             .ToList();
+
+        database.PlanningAttemptOutcomes.Add(new PlanningAttemptOutcome
+        {
+            OrganizationId = testCase.OrganizationId,
+            AttemptId = attempt.Id,
+            End = PlanningAttemptEnd.Answered,
+            CostUsd = planned.Cost.Cost,
+            Tokens = planned.Cost.TotalTokens,
+        });
 
         testCase.Model = planned.Model;
         testCase.ModelTokens = planned.Cost.TotalTokens;
@@ -186,9 +234,122 @@ public sealed partial class PlanningDispatcher(
             $"test #{testCase.Number}",
             after: new { Status = testCase.Status.ToString(), testCase.Model, testCase.ModelCost });
 
-        await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (DbUpdateException exception) when (exception is DbUpdateConcurrencyException || IsDuplicate(exception))
+        {
+            // The lease ran out while the model answered, and recovery already failed the test and counted the attempt
+            // at its ceiling. Nothing of this answer is kept: the person sees the interruption and decides.
+            AnswerTooLate(logger, testCase.Id);
+            return;
+        }
+
         Planned(logger, testCase.Id, testCase.Status, testCase.ModelCost ?? 0m);
     }
+
+    /// <summary>
+    /// Fails every test left in Planning past its lease, and ends its unfinished attempts as interrupted, at their
+    /// ceiling. Never plans one again: whether the provider billed it is unknown.
+    /// </summary>
+    public async Task<int> RecoverAsync(AutestiqDbContext database, TenantWriteScope writeScope, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(database);
+        ArgumentNullException.ThrowIfNull(writeScope);
+
+        var now = timeProvider.GetUtcNow();
+        var expired = now - options.CurrentValue.Lease;
+
+        // Across organizations, as the planning step works; each is written back under its own organization.
+        var stuck = await database.TestCases.IgnoreQueryFilters()
+            .Where(candidate => candidate.Status == TestCaseStatus.Planning && candidate.PlanningStartedAt < expired)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        foreach (var testCase in stuck)
+        {
+            var open = await database.PlanningAttempts.IgnoreQueryFilters()
+                .Where(attempt => attempt.OrganizationId == testCase.OrganizationId && attempt.TestCaseId == testCase.Id
+                    && !database.PlanningAttemptOutcomes.IgnoreQueryFilters().Any(outcome => outcome.AttemptId == attempt.Id))
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            using (writeScope.AllowWritingTo(testCase.OrganizationId))
+            {
+                foreach (var attempt in open)
+                {
+                    database.PlanningAttemptOutcomes.Add(new PlanningAttemptOutcome
+                    {
+                        OrganizationId = attempt.OrganizationId,
+                        AttemptId = attempt.Id,
+                        End = PlanningAttemptEnd.Interrupted,
+                        CostUsd = attempt.CeilingUsd,
+                    });
+                }
+
+                testCase.Status = TestCaseStatus.Failed;
+                testCase.FailureReason = "Tests_Error_PlanningInterrupted";
+                testCase.PlannedAt ??= now;
+
+                new AuditWriter(database, timeProvider).Record(
+                    testCase.OrganizationId,
+                    actorUserId: null,
+                    actorEmail: null,
+                    AuditActions.TestPlanningInterrupted,
+                    nameof(TestCase),
+                    testCase.Id,
+                    $"test #{testCase.Number}",
+                    after: new { Attempts = open.Count, CountedUsd = open.Sum(attempt => attempt.CeilingUsd) });
+
+                try
+                {
+                    await database.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    Interrupted(logger, testCase.Id, open.Count);
+                }
+                catch (DbUpdateException exception) when (exception is DbUpdateConcurrencyException || IsDuplicate(exception))
+                {
+                    // The answer arrived just now and was saved first: the test is not stuck after all.
+                    database.ChangeTracker.Clear();
+                }
+            }
+        }
+
+        return stuck.Count;
+    }
+
+    /// <inheritdoc />
+    public override void Dispose()
+    {
+        _lock?.Dispose();
+        _lock = null;
+        base.Dispose();
+    }
+
+    /// <summary>Takes the deployment's planning lock, or keeps the one held, or finds another instance has it.</summary>
+    private async Task<bool> HoldsLockAsync(AutestiqDbContext database, CancellationToken cancellationToken)
+    {
+        if (_lock is not null)
+        {
+            if (await _lock.StillHeldAsync(cancellationToken).ConfigureAwait(false))
+            {
+                return true;
+            }
+
+            await _lock.DisposeAsync().ConfigureAwait(false);
+            _lock = null;
+            LockLost(logger);
+        }
+
+        var connectionString = database.Database.GetConnectionString()
+            ?? throw new InvalidOperationException("The database has no connection string.");
+
+        _lock = await AdvisoryLock.TryTakeAsync(connectionString, LockKey, cancellationToken).ConfigureAwait(false);
+        return _lock is not null;
+    }
+
+    private static bool IsDuplicate(DbUpdateException exception) =>
+        exception.InnerException is Npgsql.PostgresException { SqlState: Npgsql.PostgresErrorCodes.UniqueViolation };
 
     private async Task FailAsync(AutestiqDbContext database, TestCase testCase, string reason, CancellationToken cancellationToken)
     {
@@ -201,6 +362,15 @@ public sealed partial class PlanningDispatcher(
 
     [LoggerMessage(Level = LogLevel.Error, Message = "The planning step's loop failed.")]
     private static partial void LoopFailed(ILogger logger, Exception exception);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Test {TestCaseId} was still planning after its lease; failed, {Attempts} attempt(s) counted at their ceiling.")]
+    private static partial void Interrupted(ILogger logger, Guid testCaseId, int attempts);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "The model answered for test {TestCaseId} after its lease ran out; the answer was not kept.")]
+    private static partial void AnswerTooLate(ILogger logger, Guid testCaseId);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "The planning lock's connection was lost; taking it again.")]
+    private static partial void LockLost(ILogger logger);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Test {TestCaseId} planned: {Status}, ${Cost}.")]
     private static partial void Planned(ILogger logger, Guid testCaseId, TestCaseStatus status, decimal cost);

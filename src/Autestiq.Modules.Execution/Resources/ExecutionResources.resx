@@ -460,6 +460,9 @@
   <data name="Tests_Error_NoPlanner" xml:space="preserve">
     <value>AI planning is not set up on this server.</value>
   </data>
+  <data name="Tests_Error_PlanningInterrupted" xml:space="preserve">
+    <value>Planning was interrupted before it finished, so there is no plan. Change the expected results or describe the test again to plan it anew.</value>
+  </data>
   <data name="Tests_Error_NoPlan" xml:space="preserve">
     <value>No plan could be written.</value>
   </data>

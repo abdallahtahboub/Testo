@@ -32,6 +32,9 @@ internal static class AuditActions
     /// <summary>A test's expected results were replaced (ADR-0034). Records how many, never the texts.</summary>
     public const string TestExpectedResultsSet = "test.expected_results_set";
     public const string TestPlanned = "test.planned";
+
+    /// <summary>A test was found still planning after its lease and failed, its attempt counted at its ceiling (R-17).</summary>
+    public const string TestPlanningInterrupted = "test.planning_interrupted";
     public const string TestApproved = "test.approved";
     public const string TestApprovalWithdrawn = "test.approval_withdrawn";
     public const string TestDownloaded = "test.downloaded";

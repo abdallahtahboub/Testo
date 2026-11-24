@@ -5,7 +5,7 @@ using Autestiq.Persistence;
 namespace Autestiq.Application.Testing;
 
 /// <summary>
-/// What AI planning has cost this month, for the product and for one organization, and what a model's tokens cost
+/// What AI planning has cost this month, by its attempts (Milestone 5.1 R1), for the product and for one organization, and what a model's tokens cost
 /// now (ADR-0030). Checked before every planning call, so the budgets hold before money is spent, not after.
 /// </summary>
 public static class AiBudget
@@ -23,11 +23,21 @@ public static class AiBudget
 
         var from = MonthStart(now);
 
-        // Across every organization on purpose: the product's budget is the product's, whoever spent it.
-        var spent = await database.TestCases.IgnoreQueryFilters()
-            .Where(testCase => testCase.PlannedAt >= from && testCase.ModelCost != null)
-            .GroupBy(testCase => testCase.OrganizationId)
-            .Select(group => new { Organization = group.Key, Cost = group.Sum(testCase => testCase.ModelCost!.Value) })
+        // Across every organization on purpose: the product's budget is the product's, whoever spent it. Every attempt
+        // counts, re-plans included, and one whose outcome is not recorded counts at its ceiling: it may have been
+        // billed (Milestone 5.1 R1, R-17).
+        var spent = await database.PlanningAttempts.IgnoreQueryFilters()
+            .Where(attempt => attempt.CreatedAt >= from)
+            .Select(attempt => new
+            {
+                Organization = attempt.OrganizationId,
+                Cost = database.PlanningAttemptOutcomes.IgnoreQueryFilters()
+                    .Where(outcome => outcome.AttemptId == attempt.Id)
+                    .Select(outcome => (decimal?)outcome.CostUsd)
+                    .FirstOrDefault() ?? attempt.CeilingUsd,
+            })
+            .GroupBy(row => row.Organization)
+            .Select(group => new { Organization = group.Key, Cost = group.Sum(row => row.Cost) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 

@@ -221,7 +221,7 @@ public sealed class DescribedTestTests : IAsyncLifetime
         var planning = new PlanningOptions();
         options?.Invoke(planning);
 
-        var step = new PlanningDispatcher(
+        using var step = new PlanningDispatcher(
             services.GetRequiredService<IServiceScopeFactory>(),
             new FixedOptions<PlanningOptions>(planning),
             TimeProvider.System,
@@ -521,6 +521,17 @@ public sealed class DescribedTestTests : IAsyncLifetime
             ModelCost = cost,
             PlannedAt = DateTimeOffset.UtcNow,
         });
+
+        using (_database.WriteScope.AllowWritingTo(organization))
+        {
+            await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        // What the budgets count: the attempt and what it cost (Milestone 5.1 R1).
+        var earlier = database.TestCases.Local.Single(row => row.Number == 99 && row.OrganizationId == organization);
+        var attempt = new PlanningAttempt { OrganizationId = organization, TestCaseId = earlier.Id, Model = "claude-sonnet-5-5", CeilingUsd = cost };
+        database.PlanningAttempts.Add(attempt);
+        database.PlanningAttemptOutcomes.Add(new PlanningAttemptOutcome { OrganizationId = organization, AttemptId = attempt.Id, End = PlanningAttemptEnd.Answered, CostUsd = cost });
 
         using (_database.WriteScope.AllowWritingTo(organization))
         {

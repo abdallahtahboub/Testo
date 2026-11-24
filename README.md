@@ -23,19 +23,24 @@ This is a young codebase and the list is short on purpose. Nothing below is aspi
 | Built and working | Not built |
 |---|---|
 | Accounts, organizations, memberships, roles, invitations, audit log — on PostgreSQL, inside a tenant boundary | Test plans, requirements, a test case library, suites, defects, reporting |
-| The design system: tokens, components, light and dark themes, WCAG 2.2 AA | A store for sign-in secrets |
-| Test runs, for three scripted scenarios against our own demo shop, with screenshots per step | Downloading a test (part 4) |
-| Projects and environments, with proof of site ownership and production off by default | A deployment of any kind |
+| The design system: tokens, components, light and dark themes, WCAG 2.2 AA | Email delivery, so no deployed host can start yet |
+| Test runs against our own targets and a project's environments, with screenshots per step and a retention policy | A deployment, a release, a migration command outside development |
+| Projects and environments, with proof of site ownership and production off by default | The minimized AI mode (G-2) |
 | Describing a test in a sentence and getting the AI's plan for it, only once the project allows AI processing | |
 | Approving a plan (an explicit tick when it may change data), running it read-only unless approved otherwise, and downloading it as a Python test | |
+| One test account per test environment, encrypted and write-only (ADR-0033); tester-stated expected results (ADR-0034) | |
 | The public website: 29 routes in English and German | |
 
 **The AI planner is measured on our own applications.** On 20 scenarios written after its prompt was
 frozen, it was correct 95% of the time on sound applications, caught every seeded defect where it
 reached a verdict, and never passed a broken application; the same held with every test id removed
-(ADR-0020, [`docs/ai-benchmark.md`](docs/ai-benchmark.md)). **Applications we did not build are not
-measured yet**, and neither is the read-only exploration used on a customer's site, so no claim reaches
-beyond our applications. The tagline is the company's, not a description of what the software does today.
+(ADR-0020, [`docs/ai-benchmark.md`](docs/ai-benchmark.md)). Read-only exploration, a customer site's
+default, measured 36 of 66 against 62 of 66. On two applications we did not build: eShopOnWeb 18 of 22 after
+explorer changes made on its own results, and Spring PetClinic, the clean measurement, 20 of 22 (16 of 22 strictly),
+neither with a false positive, and PetClinic without defects to catch. **Re-measured on 2026-11-24 with the current
+prompt**, which makes a plan list what it does not test: our applications unchanged (64 of 66 runs correct, with and
+without test ids); PetClinic 12 of 22 correct and 10 honestly inconclusive, still no false positive. The read-only
+and eShopOnWeb figures predate that prompt. The tagline is the company's, not a description of what the software does today.
 
 [`docs/roadmap.md`](docs/roadmap.md) §Inventory is the authoritative list of what is built, and
 [`docs/security-register.md`](docs/security-register.md) is the honest list of what is not yet safe.
@@ -49,8 +54,9 @@ beyond our applications. The tagline is the company's, not a description of what
 - **xUnit v3** on Microsoft.Testing.Platform, **bUnit** for components
 - The Anthropic API for planning, behind a provider-agnostic interface
 
-Nothing else: no JavaScript framework, no CSS framework, no container runtime, no cloud
-dependency. The one piece of JavaScript is a small ES module for the static header.
+Nothing else: no JavaScript framework, no CSS framework, no cloud
+dependency. Docker runs the sealed worker container per run (ADR-0026). The one piece of JavaScript is a small ES
+module for the static header.
 
 ## Getting started
 

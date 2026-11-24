@@ -1,7 +1,14 @@
-# Architecture (Frontend Phase)
+# Architecture
 
 > Status: **Accepted** (Step 0 approved on 2026-11-11). Decisions marked *(ADR-xxxx)* are recorded in
 > `docs/decisions/`.
+>
+> **Current state (checked 2026-11-24).** This began as the frontend-phase plan, and §1, §7 and §12 still read that
+> way, kept as the historical plan. The product is now a layered .NET modular monolith on PostgreSQL: real identity
+> and tenancy (ADR-0012 to ADR-0017), a separate Playwright worker in a sealed container per run (ADR-0026), and a
+> deterministic approval, validation and execution path around one bounded model call (ADR-0019). §3's markers and
+> §4's rules are current; **§12's mock authentication is superseded** by the real sign-in (ADR-0016, ADR-0017).
+> `docs/roadmap.md` §Inventory is authoritative for what is built.
 
 ## 1. Goals
 
@@ -45,8 +52,8 @@ src/
   Autestiq.Modules.Planning
   Autestiq.Modules.Analysis
   Autestiq.Modules.Design
-  Autestiq.Modules.Execution        // PARTLY BUILT (M3.3): run list + one run. Suites,
-                                 // environments and regression still to come
+  Autestiq.Modules.Execution        // PARTLY BUILT (M3.3, M5): runs, projects, environments, tests,
+                                 // plans, approval, downloads. Suites and regression still to come
   Autestiq.Modules.Defects
   Autestiq.Modules.Reporting        // incl. monitoring & control, release readiness, completion
   Autestiq.Modules.Settings         // NEW: integrations, team, capability settings host
@@ -430,7 +437,7 @@ All JavaScript in the repository: `Autestiq.UI.Shared/wwwroot/js/theme.js` (ours
 - A dev-only "Feature flags" panel in Settings shows current flag states (Milestone 5.7).
   Until then the app preview page lists every module with its flag.
 
-## 12. Authentication (mock)
+## 12. Authentication (mock) *(historical: superseded by ADR-0016 and ADR-0017; the sign-in is real)*
 
 - `MockAuthenticationStateProvider` with 3–4 demo users (QA lead, QA engineer, developer,
   engineering manager) to demonstrate role-based nav.

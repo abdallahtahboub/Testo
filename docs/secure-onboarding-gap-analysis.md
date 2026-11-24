@@ -58,6 +58,12 @@ attempt's text is stored and shown on the test's page. The minimized mode is not
   while keeping structure and labels.
 - Measure it on the benchmark before offering it, because masking can lower accuracy.
 - Keep credentials and evidence out of prompts entirely, as today.
+*Pilot-readiness review, 2026-11-24: confirmed open.* The whole explored `SiteSnapshot` goes to the planner. A
+rehearsal with synthetic data does not need it; real customer data does. **Design to measure:** send only the
+elements of the pages the scenario's words and stated results point at, plus each page's title and address. Mask
+values in visible text (emails, numbers, names) while keeping labels and roles. Keep the project's opt-in and the
+record of what was sent. **Tests:** a value excluded by the policy, and every credential value, absent from the
+provider request, the stored record and the logs. **Measure** the unseen sets with and without it before offering it.
 
 **G-3 · No production flag; production is not off by default (§5).** *Built 2026-11-17, Milestone 5 part 1
 (ADR-0030).*
@@ -92,6 +98,18 @@ Screenshots are kept on our servers' disk indefinitely.
 - Retention by policy (90 days decided), deletion when a project or organization is deleted.
 - A per-project evidence policy: keep screenshots or not.
 - Before the first pilot at the latest. It is part 2 of Milestone 3.8, already planned.
+*Pilot-readiness review, 2026-11-24: screenshots only.* Still without a lifecycle:
+- `TestCase.Snapshot`, what exploring saw;
+- `TestCase.SentToModel`, the recorded planning payload, kept forever;
+- application logs and backups, which wait on hosting.
+
+There is no project or organization deletion, so nothing deletes them with their owner. **Before real customer
+data:**
+- a retention for snapshots and payloads, tied to the project's policy;
+- project and organization deletion that removes every row and file;
+- **deletion verified end to end** by a test that, after deleting, finds no row, file or link that names the deleted
+  item;
+- a stated backup expiry, so deleted data leaves backups within a known time.
 
 **G-6 · Secrets for sign-in scenarios have no encrypted store in the product (§5).** *Built 2026-11-18 (ADR-0033): one
 test account per test environment, encrypted with Data Protection under a per-environment purpose, key ring outside

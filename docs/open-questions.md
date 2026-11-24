@@ -9,7 +9,8 @@
 
 | Question | Why it matters | Source |
 |---|---|---|
-| **Where is the product hosted?** | Decides object storage for evidence, the cloud key service for the test-account key ring, and real machine and storage prices in the price book. Several "before the first pilot" items wait on it. | ADR-0029, ADR-0031, ADR-0033 |
+| **Where is the product hosted?** *Deferred by the owner on 2026-11-24 to the deployment and go-live stage.* | Decides object storage for evidence, the cloud key service for the test-account key ring, backups, real machine and storage prices in the price book, and the hosting architecture, which is not designed. Until then, work that needs a host is done provider-neutral or waits. | ADR-0029, ADR-0031, ADR-0033 |
+| **Must customer data stay in the EU (or in Germany)?** *Undecided; the owner asked for it to be studied first (2026-11-24).* | Shapes hosting, AI providers (where a model call is processed), backups and subprocessors. `Organization.DataRegion` exists but nothing enforces it. Nothing may be built or claimed as EU-only until it is decided. | `docs/commercial-readiness.md` §7 |
 | **Checks that cannot be scoped to one row or section.** | On PetClinic two plans could only check that a text is somewhere on the page ("none", "spayed"), not in the row or section the scenario names, and so ended partial (ADR-0020, 2026-11-24). Would exploration describing each text with its container, as locators already are (ADR-0024), let the planner name it? | ADR-0020, ADR-0024 |
 | **Repository visibility.** The repository is public; `LICENSE` calls the source proprietary and confidential. Make it private, or change the licence? Not changed by any session. | A public repository publishes the code, the registers and the benchmark. | Pilot-readiness review, 2026-11-24 |
 | **Which email provider?** | No deployed host can start without one (D-3's refusal). Needed for Milestone 5.1 R2. | Pilot-readiness review |
@@ -26,7 +27,6 @@
 
 | Item | Effect | Source |
 |---|---|---|
-| Downloaded tests do not carry the test-account guard. | A downloaded test can pass by finding the account's own value; inside Autestiq's runner the same plan ends inconclusive. Confirmed still open 2026-11-24; **proposed fix: block export of such plans, with a parity test** (Milestone 5.1 R4). | ADR-0033 |
 | G-2's minimized AI mode is not built. | Every plan sends the full description of the explored site; the owner's rules want minimal data. Marked "before the first pilot". | `docs/secure-onboarding-gap-analysis.md` G-2 |
 | Evidence and the key ring live on local disk. | Not fit for more than one machine; waits on hosting. | ADR-0031, ADR-0033 |
 | Exploring signed in changes the test account's data. | Shared test accounts drift (eShopOnWeb's demo basket filled up), which hurts repeatability. | ADR-0033, ADR-0020 |

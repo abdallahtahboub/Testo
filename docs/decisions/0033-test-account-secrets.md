@@ -80,6 +80,12 @@ A hosted store is therefore an interim, and must be labelled as one.
   typed whether or not signing in worked: eShopOnWeb prints its demo account on its login page (ADR-0020). Failures and
   "not there" checks are left alone, so the guard can only take away an unearned pass. **Not covered:** a downloaded
   test runs outside the worker and does not carry this guard (ADR-0023); its text check is the plan's, as approved.
+  **Amended 2026-11-24 (Milestone 5.1 R4):** such a plan is no longer downloadable. The guard moved to
+  `Autestiq.Contracts.Planning.TypedSecretChecks`, shared by the worker and the download; the download refuses
+  (`Tests_Error_ExportRestsOnAccountValue`) and the test page says why by the value's name instead of offering the file.
+  When the stored values cannot be read, every secret the plan types counts, so the check fails closed. One regression
+  fixture (`tests/Shared/AccountValueFixture.cs`) is run by the worker, where it ends inconclusive, and downloaded by
+  the application tests, where it is refused.
 - **The screen.** Each test environment on the Environments page has a "Test account" panel: the saved names with
   their dates and a Remove button, and a user name and a password field (the browser is told not to fill either).
   Saving clears both fields; nothing saved is shown again. Who set a value is in the audit log, not on the panel.

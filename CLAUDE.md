@@ -42,7 +42,7 @@ model; exploration signs in with them only under ADR-0032's permission. **A test
 (ADR-0034)**, sent to the planner labelled as theirs; every check is labelled by software as observed, stated or assumed. **Evidence retention is built
 (3.8 part 2, ADR-0031)**: a screenshot policy per project, an hourly job that deletes expired screenshots, none stored
 when a project keeps none; object storage waits for hosting. **Exporting plans as tests** is built for Python and
-verified (ADR-0023), previewed on a test's page and downloaded once approved. **Not deployable yet (pilot-readiness review, 2026-11-24)**: no email provider, so no deployed host starts; no migration
+verified (ADR-0023), previewed on a test's page and downloaded once approved, except a plan whose pass would rest on the test account's own value (Milestone 5.1 R4). **Not deployable yet (pilot-readiness review, 2026-11-24)**: no email provider, so no deployed host starts; no migration
 command outside development; no health checks; no release (`develop` 184 commits ahead of `main`). Milestone 5.1,
 approved 2026-11-24, is the pre-pilot milestone; R1 (planning attempts recorded before the call, a lease, one planning
 step per deployment, ADR-0037) is built (`docs/roadmap.md`; findings in

@@ -30,8 +30,15 @@
             }
         </div>
         @* A plain link the host serves as a file (TestDownloadEndpoints); "download" keeps the router from taking it. *@
-        <p><a href="@Routes.TestDownload(Detail.TestCaseId)" download data-testid="download-test">@L["Approval_Download"]</a></p>
-        @if (!approval.ToChangeData)
+        @if (Detail.ExportRefusedFor.Count > 0)
+        {
+            <p class="approval__problem" data-testid="download-refused">@L["Approval_Download_RestsOnAccountValue", string.Join(", ", Detail.ExportRefusedFor.Select(name => $"'{name}'"))]</p>
+        }
+        else
+        {
+            <p><a href="@Routes.TestDownload(Detail.TestCaseId)" download data-testid="download-test">@L["Approval_Download"]</a></p>
+        }
+        @if (Detail.ExportRefusedFor.Count == 0 && !approval.ToChangeData)
         {
             <p class="t-muted">@L["Approval_Download_ReadOnly"]</p>
         }

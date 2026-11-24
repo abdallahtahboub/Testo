@@ -463,6 +463,9 @@
   <data name="Tests_Error_PlanningInterrupted" xml:space="preserve">
     <value>Die Planung wurde unterbrochen, bevor sie fertig war, daher gibt es keinen Plan. Ändern Sie die erwarteten Ergebnisse oder beschreiben Sie den Test erneut, um neu zu planen.</value>
   </data>
+  <data name="Tests_Error_ExportRestsOnAccountValue" xml:space="preserve">
+    <value>Dieser Test kann nicht heruntergeladen werden, weil er nach dem eigenen Wert des Testkontos sucht, den der Test selbst eingegeben hat.</value>
+  </data>
   <data name="Tests_Error_NoPlan" xml:space="preserve">
     <value>Es konnte kein Plan geschrieben werden.</value>
   </data>
@@ -717,6 +720,9 @@
   </data>
   <data name="Approval_Download" xml:space="preserve">
     <value>Python-Test herunterladen</value>
+  </data>
+  <data name="Approval_Download_RestsOnAccountValue" xml:space="preserve">
+    <value>Dieser Test kann nicht heruntergeladen werden: Eine Prüfung sucht nach dem eigenen Wert {0} des Testkontos, den der Test selbst eingegeben hat. Eine Seite kann ihn zeigen, ob die Anmeldung geklappt hat oder nicht, daher könnte eine heruntergeladene Datei bestehen, ohne etwas zu beweisen; Autestiqs eigene Läufe werten so ein Bestehen als nicht schlüssig. Prüfen Sie stattdessen etwas, das nur die angemeldete Anwendung zeigt.</value>
   </data>
   <data name="Approval_Download_ReadOnly" xml:space="preserve">
     <value>Autestiq führt diesen Test in seinem eigenen Browser nur lesend aus. Die heruntergeladene Datei kann das nicht: Führen Sie sie nur dort aus, wo ein Test, der Daten ändert, vertretbar wäre. Das steht auch in ihren ersten Zeilen.</value>

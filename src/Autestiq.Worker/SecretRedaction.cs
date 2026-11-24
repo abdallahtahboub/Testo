@@ -23,7 +23,7 @@ namespace Autestiq.Worker;
 internal static class SecretRedaction
 {
     /// <summary>The shortest value replaced.</summary>
-    public const int ShortestRedacted = 4;
+    public const int ShortestRedacted = TypedSecretChecks.ShortestValue;
 
     /// <summary>What stands in for a value: the secret's name, never its value.</summary>
     public static string Marker(string name) => $"[secret:{name}]";

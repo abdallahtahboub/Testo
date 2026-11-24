@@ -1,6 +1,6 @@
 # 0035 — A plan cannot claim more coverage than it checks
 
-- **Status:** Accepted (the owner approved step 1 and step 2 on 2026-11-24); step 2 built, not yet measured
+- **Status:** Accepted (the owner approved step 1 and step 2 on 2026-11-24); step 2 built and measured (2026-11-24, ADR-0020)
 - **Date:** 2026-11-24
 
 ## Context
@@ -70,7 +70,7 @@ In two steps, each with its own review:
   does not count, and a plan without stated results keeps its coverage. The three refusal tests fail with the rule
   switched off. A replay of the demo shop's hand-written plans from recordings is unchanged.
 
-## Step 2, built (2026-11-24), not yet measured
+## Step 2, built (2026-11-24), measured the same day
 - **The prompt asks for it.** The plan's JSON gains `"notTested": [...]`, one item per part of the request the plan does
   not check, and the coverage rule says a plan with anything in it is partial whatever `coverage` says, so a gap
   written only in notes with `full` is a plan claiming more than it checks.
@@ -105,3 +105,12 @@ In two steps, each with its own review:
 ## Alternatives considered
 See Options 1 and 2 above, rejected for trusting a model's word more than now; and doing nothing, rejected because
 the PetClinic pass is exactly the false assurance the partial label exists to prevent.
+
+## Step 2, measured (2026-11-24)
+
+The owner's re-measurement (ADR-0020 has the table): the unseen sets unchanged or better (64 of 66 runs correct with
+and without test ids, no false positive); PetClinic 12 of 22 correct and 10 inconclusive, no false positive. All five
+partial PetClinic plans list a real, specific gap: three the unlabelled search box, two a check that cannot be scoped
+to one row or section. The decision holds: a pass that checks less than its scenario is no longer a pass. The cost is
+visible: on an application with unlabelled fields and repeated text, more runs end without a verdict, which is a
+reason to improve what exploration can name, not to loosen the rule.

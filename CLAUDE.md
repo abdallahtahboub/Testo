@@ -25,8 +25,10 @@ is 18 of 22, still with no false positive: placing an order now reaches a verdic
 not met there, and the 82% is not a clean measurement. **The clean measurement, on Spring PetClinic (2026-11-23,
 scenarios written from its source before any run, nothing tuned): 20 of 22 runs correct (91%), no false positive**;
 two passes tested less than they claimed (16 of 22 strictly), and it is one application without defects to catch
-(ADR-0020). **All these figures were measured with the prompt before 2026-11-24**, when ADR-0035 step 2 changed it
-(a plan now lists what it does not test); they describe the current prompt only once re-measured. **Milestone 5, the first customer flow, is done and accepted by the owner (2026-11-23, ADR-0030)**: part 1 built projects, environments with
+(ADR-0020). **Re-measured with the current prompt (2026-11-24, ADR-0035 step 2: a plan lists what it does not test)**: the unseen
+sets 64 of 66 runs correct with and without test ids, no false positive; **PetClinic 12 of 22 correct, 10 inconclusive,
+no false positive**, every inconclusive naming a real gap (an unlabelled search box; a check that cannot be scoped to a
+row). Read-only exploration and eShopOnWeb figures above still describe the earlier prompt. **Milestone 5, the first customer flow, is done and accepted by the owner (2026-11-23, ADR-0030)**: part 1 built projects, environments with
 ownership proofs, production off by default, and the app's navigation drawn from the module registry. Part 2 built
 describing a test in a sentence: the site is explored (read-only on a customer's site) and the planner writes a plan,
 **only if the project's AI permission, off by default, is given**, within the AI budgets, with what was sent recorded
@@ -40,7 +42,10 @@ model; exploration signs in with them only under ADR-0032's permission. **A test
 (ADR-0034)**, sent to the planner labelled as theirs; every check is labelled by software as observed, stated or assumed. **Evidence retention is built
 (3.8 part 2, ADR-0031)**: a screenshot policy per project, an hourly job that deletes expired screenshots, none stored
 when a project keeps none; object storage waits for hosting. **Exporting plans as tests** is built for Python and
-verified (ADR-0023), previewed on a test's page and downloaded once approved. Everything else about the testing journey —
+verified (ADR-0023), previewed on a test's page and downloaded once approved. **Not deployable yet (pilot-readiness review, 2026-11-24)**: no email provider, so no deployed host starts; no migration
+command outside development; no health checks; no release (`develop` 184 commits ahead of `main`). Milestone 5.1,
+proposed and awaiting approval, is the pre-pilot milestone (`docs/roadmap.md`; findings in
+`docs/reviews/2026-11-24-pilot-readiness.md`). Everything else about the testing journey —
 plans, requirements, a case library, suites, defects, reporting — **does not exist yet**: six of the
 seven module projects are shells. `docs/roadmap.md` §Inventory is the authoritative list of what is built.
 

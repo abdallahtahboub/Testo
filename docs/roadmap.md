@@ -122,7 +122,8 @@ Found by opening it in a browser rather than by a test, and worth remembering:
 ## Inventory — what is actually built
 
 > Last verified on 2026-11-17, after evidence retention (3.8 part 2, ADR-0031): `dotnet build` clean, every test green
-> locally.
+> locally. Rows checked against the code again on 2026-11-24 by the pilot-readiness review
+> ([`reviews/2026-11-24-pilot-readiness.md`](reviews/2026-11-24-pilot-readiness.md)).
 > This table is authoritative. Where another document disagrees with it, this one is right.
 
 | Area | State |
@@ -133,7 +134,7 @@ Found by opening it in a browser rather than by a test, and worth remembering:
 | Design system, 35 components | **Real** |
 | Public website | **Real.** 29 routes in English and German, with every placeholder page labeled as one |
 | App area | **Navigation drawn from the module registry** (Milestone 5). Real pages: projects, environments with ownership proofs (Milestone 5 part 1, ADR-0030), tests, their plans, approval, runs and downloads (parts 2 to 4), project settings with the screenshot policy, and the two run pages; `/app` is still a placeholder. Signing in is required everywhere (D-1 closed in Milestone 3.1) |
-| Test runs: start, stop, rerun, steps, screenshots | **Real** for three scripted scenarios against our own demo target. No customer targets yet: no screen asks for one until Milestone 5 |
+| Test runs: start, stop, rerun, steps, screenshots | **Real.** Scripted scenarios against our own targets, and approved plans against a project's environments (Milestone 5) |
 | Customer-site safety (3.5) | **Real.** Proof of site ownership, kill switch, stuck-run reaping, loopback from configuration only, a sealed container per run (ADR-0026). Customer origins are refused outside container mode |
 | Usage and quotas (3.6) | **Real.** Append-only usage ledger, per-organization concurrency and monthly minutes with reservation, rate limits on starts (ADR-0027). No screen shows usage yet |
 | Plan catalog (3.7) | **Real.** Versioned plans in the database, organizations on a version they keep until an operator moves them, limits read from that version (ADR-0028). No prices; an operator command changes plans; no screen |
@@ -144,13 +145,14 @@ Found by opening it in a browser rather than by a test, and worth remembering:
 | Described tests and their plans (Milestone 5 part 2) | **Real.** A per-project AI permission, off by default, enforced in the service and checked again before each call; a test described in a sentence; the site explored as a run (read-only on a customer's site); the plan written by the measured planner and validator, with its cost at the price book's prices, within $10 a month for the product and $2 per organization; what was sent recorded and shown; the AI's notes labelled unverified (ADR-0030); expected results stated by the tester, up to five, and every check labelled by software as observed, stated or assumed (ADR-0034). Needs `Planner__ApiKey` on the server. Read-only exploration is not yet measured |
 | Approving and running a plan (Milestone 5 part 3) | **Real.** Steps that may change data decided by software and marked; approval by Owner or QA lead with the plan's fingerprint, an explicit tick for a plan that may change data, refused for partial plans and for plans typing a secret the environment lacks; runs refused unless approved, checked again by the dispatcher; read-only runs held by a guard in the browser (ADR-0030) |
 | Test-account secrets (ADR-0033) | **Real.** One test account per test environment, set by Owner or QA lead, write-only, audited by name, never production; encrypted with Data Protection under a per-environment purpose, key ring in `DataProtection:KeyDirectory` (required outside development); names only to the planner; values to approved runs, and to explorations only with ADR-0032's permission, where the explorer signs in and the values are removed from what it describes. An interim until a private agent. On eShopOnWeb signed in: 18 of 22, no false positive; checkout reached, paying never pressed, so placing an order stays inconclusive. A run that passes only by finding the account's own value ends inconclusive. With the tester's stated thank-you (ADR-0034), placing an order is correct; with ambiguous steps refused by the validator (ADR-0024): 18 of 22, no false positive. **The clean measurement, Spring PetClinic (scenarios written from its source before any run, nothing tuned): 20 of 22 correct (91%), no false positive** (ADR-0020) |
-| AI planning: interface, vocabulary, validator, provider adapter, benchmark | **Built; the ADR-0020 gate's figures are met on our applications, with and without test ids.** On the unseen set (20 scenarios written after the prompt was frozen, 2026-11-17): 95% correct on sound applications, every defect caught where a verdict was reached, no false positive, including three defects no planner had seen; the same with every test id removed. **Explored read-only, as a customer's site is: 36 of 66 runs correct (full: 62 of 66), no false positive**; flows whose result appears only after an action are lost. **On eShopOnWeb, not built by us: 14 of 22 runs correct, then 18 of 22 (82%) after explorer changes made on its own results, no false positive either time**; pages behind sign-in remain, so the gate is not met on an application we did not build, and the 82% is not a clean measurement. Remaining misses are inconclusive: values generated at run time and states the crawl never saw. The product calls it from Milestone 5 part 2, only with the project's permission |
+| AI planning: interface, vocabulary, validator, provider adapter, benchmark | **Built; the ADR-0020 gate's figures are met on our applications, with and without test ids.** On the unseen set (20 scenarios written after the prompt was frozen, 2026-11-17): 95% correct on sound applications, every defect caught where a verdict was reached, no false positive, including three defects no planner had seen; the same with every test id removed. **Explored read-only, as a customer's site is: 36 of 66 runs correct (full: 62 of 66), no false positive**; flows whose result appears only after an action are lost. **On eShopOnWeb, not built by us: 14 of 22 runs correct, then 18 of 22 (82%) after explorer changes made on its own results, no false positive either time**; pages behind sign-in remain, so the gate is not met on an application we did not build, and the 82% is not a clean measurement. Remaining misses are inconclusive: values generated at run time and states the crawl never saw. **Re-measured 2026-11-24 with the current prompt (ADR-0035 step 2):** unseen sets 64 of 66 with and without test ids, no false positive; Spring PetClinic (clean) 12 of 22 correct, 10 inconclusive naming real gaps, no false positive; read-only and eShopOnWeb not re-measured. The product calls it from Milestone 5 part 2, only with the project's permission |
 | Browser execution: worker out of process, egress proxy, signed artifact links | **Real.** A sealed container per run in container mode (ADR-0026); process mode for development and tests |
 | The other six feature modules | **Shells.** One class each: an id and a feature flag. No pages, no services |
 | `Autestiq.Capabilities.E2EWeb` | **Empty.** An `_Imports.razor` |
 | `Autestiq.Mocks` | **Shell.** Options and a random source. No services, no seed data |
 | Plans, requirements, suites, defects, reporting | **Do not exist**, in any form, not even mocked. Environments and AI-described tests exist (Milestone 5); a test case library does not |
-| Email delivery | **Deferred.** Invitation and reset links go to the log, and the application refuses to start that way outside development (D-3 closed in Milestone 3.1) |
+| Email delivery | **Deferred.** Invitation and reset links go to the log, and the application refuses to start that way outside development (D-3 closed in Milestone 3.1). **So no non-development deployment can start today** (Milestone 5.1, R2) |
+| Deployment and release | **None.** No deployment, no migration command outside development (migrations run only when the development seed runs), no health checks, no release or tag: `develop` is 184 commits ahead of `main` (Milestone 5.1, R2, R3, R7) |
 | Authenticator enrollment | **Deferred.** Signing in with a code works; setting one up does not |
 | Breached-password check | **Partial.** An embedded list plus runs and repeats; no online check |
 
@@ -431,6 +433,41 @@ feature flags are built; its mock sign-in and mock data were superseded by real 
 **Scope:** the app shell on the real sign-in from Milestone 3; app shell (registry-driven left nav, top bar with project switcher, search, notifications, user menu); `Autestiq.Mocks` with the seed data generator and all `Mock*` services (with configurable latency/failure); dashboard rendering registered widgets: quality KPIs, run trends, open defects by severity, release readiness, recent runs; feature flags hiding unfinished modules; "module not available" page.
 
 **Done when:** each module registers its nav entry with one line and appears in the nav; turning a flag off hides its nav entry, widgets and routes (tested); dashboard widgets show loading, empty, error and data states (bUnit); seed-data consistency tests pass; E2E covers sign-in → dashboard → switch project.
+
+## Milestone 5.1 — Pilot readiness *(proposed 2026-11-24, awaiting the owner's approval; nothing in it is built)*
+**Objective.** One QA team repeatedly uses the first customer flow on one authorized staging application, with
+synthetic data and one dedicated test account, and trusts the verdict. Real customer data needs a separate readiness
+decision afterwards (the P1 items below). The findings behind it, and their evidence, are in the dated review
+[`reviews/2026-11-24-pilot-readiness.md`](reviews/2026-11-24-pilot-readiness.md).
+
+**Out of scope:** the six shell modules, a warehouse, model training, billing automation, a `RunDispatcher` rewrite,
+RLS, the minimized AI mode (G-2) and object storage. Each of these is P1 or later, kept in its register.
+
+| # | Item | Acceptance criteria (including negative and security tests) | Depends on |
+|---|---|---|---|
+| R1 | **Planning recovery and one planner** (R-17) | A test left in Planning longer than a configured lease is moved on, but never silently re-planned. If no cost was recorded, it fails with "planning was interrupted" and the person can describe it again. Each planning attempt gets a row written **before** the provider call (started, model, ceiling) and completed after it. An attempt with no completion counts against the budget at its ceiling until it is reconciled, so a crash can never undercount. The deployment runs exactly one planning instance: a PostgreSQL advisory lock, and a second instance that cannot take it does not plan, which is tested. Tests cover a crash before the call, after the call, and before the save, all with a fake planner | — |
+| R2 | **A host that can be deployed** | A migration command in `tools/Autestiq.Operator` (`migrate`, and `migrate --to <name>` for rollback), never run at web start. A real email notifier behind `IInvitationNotifier` (SMTP, provider chosen by the owner); the startup refusal stays. `/health/live` and `/health/ready` (database, key ring readable, worker image present). Tests: the host refuses to start without a notifier or key ring outside development (exists), readiness fails when the database is down, and a migration up and down round-trips on an empty database | Owner: email provider |
+| R3 | **Pilot runbook, rehearsed once** | `docs/operations/pilot-runbook.md` for an exact commit and worker image digest. It covers deployment, migration and rollback, email, worker isolation (container mode), the kill switch, health checks, alerts and recovery. It also covers a **restore rehearsal: PostgreSQL and the key ring together**, after which a stored test-account secret decrypts and a screenshot link from before the restore resolves, or is reported as deleted. Steps and results are recorded as they happened | R2; owner: hosting for the rehearsal machine |
+| R4 | **Export carries the guard** | For a plan whose positive check names a value the plan typed by secret name, export is **blocked**, saying why, until the template can carry the guard. Parity test: the same regression fixture that gives a hosted inconclusive gives a refused export, never a passing download. The test page shows the reason before download | — |
+| R5 | **Re-measure on the release candidate** | The protected unseen sets (three apps, with and without test ids, read-only) and PetClinic, run on the exact commit tagged as the candidate. The report records the revision, model, prompt hash, target version, exploration mode and reset procedure. **Each stated expected result is scored**: false pass, wrong fail, partial, inconclusive, kept apart. Tuning fixtures stay out of the held-out sets. ADR-0020's figures are replaced only by these, with the old qualifications kept beside them | The owner's re-measurement of 2026-11-24 (in progress) gives the prompt's figures; R5 repeats it on the candidate |
+| R6 | **Rehearsal measures** | One PostgreSQL view per run and per planning attempt. It gives time to first approved test, time to first verdict, manual corrections (re-describes, edits to expected results), repeat use, full, partial and inconclusive rates, queue wait, and cost per completed run. It holds **no DOM, screenshots, prompts, page text or credentials**, which a test asserts column by column | R1 (the attempt rows) |
+| R7 | **A first release** | `release/0.5.0` cut from `develop` per `CONTRIBUTING.md`, merged to `main`, tagged, with the worker image digest in the release notes | R1–R6; owner: visibility, branch protection |
+
+**Implementation order:** R1 (smallest, removes a stuck state and a budget undercount), R4, R2, R6, R3, R5, R7.
+**Smallest useful first PR:** R1's lease, recovery and single-planner lock, with its crash tests.
+
+**Checks before the staging rehearsal:** R1–R7 done; `dotnet build` clean and the full suite green on the tagged
+commit; the restore rehearsed; the kill switch exercised once on the staging host; R5's figures published with their
+limits; synthetic data and one dedicated test account only.
+
+**Checks before a pilot with real customer data (a separate decision):** G-2's minimized mode, built and measured;
+the lifecycle of snapshots, planning payloads, logs and backups (G-5); least-privilege database roles (R-19); the
+composite environment key (R-18); object storage and a key service, once hosting is decided; transactional budget
+reservations if more than one planner runs (R-17); repository visibility decided.
+
+**The rehearsal:** one QA team, one authorized staging application, synthetic data, one test account, three to five
+known journeys. It is judged by repeat use and by the time and correction needed to reach a verdict the team trusts.
+Its results decide which feature earns the next investment.
 
 ## AI learning programme (proposed, 2026-11-24)
 A long-term programme to make Autestiq's QA intelligence improve from verified experience: a Training Lab grown from

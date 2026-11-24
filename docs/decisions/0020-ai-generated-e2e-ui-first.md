@@ -294,8 +294,40 @@ put back: explorations still see what earlier explorations did, because explorin
 measured with the old order; the PetClinic figure is not re-measured.
 
 **The prompt changed on 2026-11-24 (ADR-0035 step 2: a plan lists what it does not test).** Every figure above was
-measured with the prompt before that change. Until the unseen sets and PetClinic are measured again with it, they
-describe the earlier prompt, not the current one.
+measured with the prompt before that change.
+
+**Re-measured with the current prompt (2026-11-24, the owner's runs, Claude Sonnet 5.5, $2.93 in all).** Reports as
+the tool wrote them: `docs/ai-benchmark-unseen-{demo,booking,invoices}{,-no-ids}.md`, `docs/ai-benchmark-petclinic.md`.
+Same method, sets, and two executions per plan as before; the benchmark explores and plans everything before running
+anything (built 2026-11-23).
+
+| Set | Old prompt (runs correct) | Current prompt | False positives |
+|---|---|---|---|
+| Unseen, three apps, with test ids | 62 of 66 | **64 of 66** | 0 |
+| Unseen, three apps, without test ids | 64 of 66 | **64 of 66** | 0 |
+| Spring PetClinic (clean, no defects) | 20 of 22 (16 of 22 strictly) | **12 of 22**, 10 inconclusive | 0 |
+
+- **Our applications:** every seeded defect still caught (13 of 13 per mode, both executions). The two runs without
+  a verdict are the clinic's "a taken hour is not offered again" on the sound app, inconclusive with the old prompt
+  too. Nothing got worse.
+- **PetClinic: every one of the five partial plans says, specifically and truthfully, what it did not test:**
+  - three cannot type into the unlabelled last-name search box (`use=none`), so they open the results address
+    instead and say the search form was not exercised: "finding one owner", "a shared last name", "an unknown last
+    name". The first was a pass with the old prompt whose own note admitted the gap; that is the case step 2 exists
+    for;
+  - two cannot tie a check to one part of the page: "a vet without specialties says none" checks that "none" is on
+    the page, not that it is in James Carter's row; "an owner's page shows a pet's visit" checks that Samantha and
+    "spayed" both appear, not that the visit is under Samantha. Both passed with the old prompt while checking less
+    than the scenario asked.
+- **So the drop from 20 to 12 is honesty, not lost ability**: passes that tested less than they claimed now end
+  without a verdict. It is below the strict old figure (16), because the strict count looked only at the two plans
+  whose notes admitted a gap; the new prompt surfaced three more.
+
+**What this supports.** On our three applications the current prompt meets ADR-0020's figures as before, with and
+without test ids. On PetClinic, one application nobody here wrote, **12 of 22 runs reach a correct verdict and none is
+wrong**; the rest say what they could not check. The losses are observation and naming limits (an unlabelled field; a
+check that cannot be scoped to a row or section), the same family as ADR-0020's earlier findings, and are recorded in
+`docs/open-questions.md`. Read-only exploration and eShopOnWeb were not re-measured and still describe the old prompt.
 
 **What this supports, and what it does not.** It supports this statement: *on our three benchmark
 applications, on scenarios written after the planner was frozen, the planner's tests gave the right verdict

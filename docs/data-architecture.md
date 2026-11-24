@@ -1,14 +1,15 @@
 # Data architecture
 
-> **Status: proposed (2026-11-24), awaiting the owner's review.** Decision: ADR-0038 (proposed).
+> **Status: accepted by the owner on 2026-11-24** (ADR-0038). Accepted as the design; **its §5 to §9 are not built**,
+> and each is tracked where §11 says.
 >
 > **Provider-neutral by design.** Hosting is deferred to the deployment and go-live stage, and whether customer data
 > must stay in the EU is undecided and to be studied (owner, 2026-11-24, `docs/open-questions.md`). So this document
 > names **kinds** of store and the properties each must have, never a product or a region. Where a choice depends on
 > hosting or residency, it says so.
 >
-> **Built and proposed are kept apart.** §2 and §3 describe what exists today, checked against the code on
-> 2026-11-24. Everything from §4 on is proposed unless it says "built".
+> **Built and designed are kept apart.** §2 and §3 describe what exists today, checked against the code on
+> 2026-11-24. Everything from §4 on is designed, not built, unless it says "built".
 
 Related: [`domain-model.md`](domain-model.md) (the entities and how isolation is enforced),
 [`secure-onboarding-and-privacy.md`](secure-onboarding-and-privacy.md) (the binding rules on customer data),
@@ -96,7 +97,7 @@ handled.
 Credentials never leave the worker towards the model: exploring replaces their values before anything is described
 (ADR-0033), and the validator accepts secrets by name only.
 
-## 5. Lifecycle and deletion (proposed)
+## 5. Lifecycle and deletion (designed, not built)
 
 1. **Snapshots and planning payloads follow the project's evidence policy.** The hourly retention job (ADR-0031)
    also clears `snapshot` and `sent_to_model` on tests planned before the cut-off, keeping the plan, its notes and
@@ -145,7 +146,7 @@ Measured figures where we have them, otherwise stated assumptions.
 - **Hot queries** (the queue claim, the stale-run reap, the monthly AI spend, the retention sweep) are measured with
   query plans on representative data before the pilot (review finding 4.3); indexes follow the measurements.
 
-## 7. Analytics (proposed)
+## 7. Analytics (designed; views are Milestone 5.1 R6)
 
 1. **Now (Milestone 5.1 R6):** PostgreSQL views over the operational tables, one row per run and per planning
    attempt: durations, states, verdicts, corrections, cost. No content columns, tested column by column.
@@ -157,7 +158,7 @@ Measured figures where we have them, otherwise stated assumptions.
 4. **Run history beyond 13 months** is kept as daily aggregates per project (counts by status, durations, cost),
    and the detailed rows are deleted.
 
-## 8. Backups and recovery (proposed; mechanism waits for hosting)
+## 8. Backups and recovery (designed; the mechanism waits for hosting)
 
 | Property | Proposal | Why |
 |---|---|---|
@@ -170,7 +171,7 @@ Measured figures where we have them, otherwise stated assumptions.
 | Encryption | At rest by the provider; test-account values additionally by the application (ADR-0033); in transit always TLS | |
 | Proof | A restore rehearsed before the pilot and then quarterly: database and key ring together, a stored secret decrypts, a screenshot link resolves or is reported deleted (Milestone 5.1 R3) | An untested backup is not a backup |
 
-## 9. Access to data (proposed, R-19)
+## 9. Access to data (designed, not built; R-19)
 
 - **Three database roles**: migration (owns the schema), application (data only; no DDL; no `UPDATE` or `DELETE` on
   `audit_entries`, `usage_events`, `run_costs`, `planning_attempts`, `planning_attempt_outcomes`), operator (read,

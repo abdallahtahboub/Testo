@@ -1,6 +1,6 @@
 # 0038 — Data architecture: one system of record, a class and a lifecycle for every piece of data
 
-- **Status:** Proposed
+- **Status:** Accepted (the owner accepted it on 2026-11-24)
 - **Date:** 2026-11-24
 
 ## Context
@@ -11,7 +11,7 @@ them together, and two kinds of customer content (what exploring saw, what was s
 or deletion at all. The owner deferred hosting to the go-live stage and asked for EU residency to be studied before it
 is decided, so the design must not depend on either.
 
-## Decision (proposed)
+## Decision
 The design is `docs/data-architecture.md`. Its decisions:
 1. **PostgreSQL stays the one system of record** at every size estimated (to ~1,000 customers). No warehouse, second
    database or sharding is proposed; each change has a measured trigger instead (partitioning, moving blobs out of

@@ -25,7 +25,7 @@
 ### Phase 2: Experience collection, and Experiment 0001
 - **Objectives:** experience records as files (L4); dataset manifests; deduplication by fault and workflow; tier
   separation; run Experiment 0001.
-- **Effort:** ~2–3 engineer-weeks. **Cost:** ~$12–30 for the experiment, under $100 with repeats.
+- **Effort:** ~2–3 engineer-weeks. **Cost:** ~$25–40 for the experiment (two passes), under $100 with repeats.
 - **Success:** Experiment 0001 reports, positive or negative, by its pre-registered criteria.
 - **Stop/go:** **if retrieval gives no gain on held-out families, stop before Phase 3**, publish the negative result,
   and put the effort into exploration instead.

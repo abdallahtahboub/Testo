@@ -205,7 +205,7 @@ public class PlanningServiceTests
 
     private static Task<PlannedResult> PlanWithAsync(IReadOnlyList<PlannedAction> actions, params ExpectedResult[] expected) =>
         Service(new Planner([Answer(actions)])).PlanAsync(
-            "Place an order", Shop, RunBudget.Default, [], expected, TestContext.Current.CancellationToken);
+            "Place an order", Shop, RunBudget.Default, [], expected, cancellationToken: TestContext.Current.CancellationToken);
 
     [Fact]
     public async Task Plan_ThatSaysFull_ButChecksNoStatedResult_IsPartial_WithANoteNamingIt()

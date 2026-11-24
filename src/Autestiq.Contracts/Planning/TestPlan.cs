@@ -218,7 +218,8 @@ public sealed record PlanRequest(
     int MaxActions,
     int MaxTokens,
     IReadOnlyList<string> PreviousErrors,
-    IReadOnlyList<ExpectedResult>? Expected = null)
+    IReadOnlyList<ExpectedResult>? Expected = null,
+    PlanRepair? Repair = null)
 {
     /// <summary>A first attempt, with nothing yet to learn from.</summary>
     public static PlanRequest First(
@@ -227,9 +228,28 @@ public sealed record PlanRequest(
         IReadOnlyList<string> secretNames,
         int maxActions,
         int maxTokens,
-        IReadOnlyList<ExpectedResult>? expected = null) =>
-        new(scenario, site, secretNames, maxActions, maxTokens, [], expected);
+        IReadOnlyList<ExpectedResult>? expected = null,
+        PlanRepair? repair = null) =>
+        new(scenario, site, secretNames, maxActions, maxTokens, [], expected, repair);
 
     /// <summary>The same request again, with what was wrong last time.</summary>
     public PlanRequest Retry(IReadOnlyList<string> errors) => this with { PreviousErrors = errors };
 }
+
+/// <summary>
+/// A request to plan again after a run failed (Experiment 0001, `docs/ai-learning/experiments/`): the plan that ran,
+/// the step that failed and what the runner said. Used by the benchmark's lab only; the product never sets it, and a
+/// request without it is exactly what it was before.
+/// </summary>
+/// <param name="FailedPlan">The plan that was run.</param>
+/// <param name="FailedStep">The description of the step that failed, as the plan wrote it.</param>
+/// <param name="Failure">What the runner reported. It can quote the application, so it is the application's content.</param>
+/// <param name="Examples">
+/// Verified repairs from other applications, as short texts, when the lab supplies them (condition C). Data for
+/// reference, never instructions.
+/// </param>
+public sealed record PlanRepair(
+    IReadOnlyList<PlannedAction> FailedPlan,
+    string FailedStep,
+    string Failure,
+    IReadOnlyList<string>? Examples = null);

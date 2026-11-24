@@ -48,7 +48,7 @@ only economical at sustained high utilisation over more than a year. Nothing in 
 
 | Budget | What it buys (estimate) | Recommended use |
 |---|---|---|
-| **$500** | Experiment 0001 (~$12–30); its repeats and a second app (~$50); the re-measurements; a first QLoRA trial on a rented 24–32 GB GPU if justified (a 7–8B model on ~30M training tokens ≈ 2–10 GPU-hours ≈ $5–15, plus evaluation runs) | **Phase 0–2.** Enough to learn whether retrieval helps |
+| **$500** | Experiment 0001 (~$25–40, two passes); its repeats and a second app (~$50); the re-measurements; a first QLoRA trial on a rented 24–32 GB GPU if justified (a 7–8B model on ~30M training tokens ≈ 2–10 GPU-hours ≈ $5–15, plus evaluation runs) | **Phase 0–2.** Enough to learn whether retrieval helps |
 | **$2,000** | Several hundred to a few thousand lab experiences across 5–6 apps; repeated evaluations; small human-verified sets (~100 examples) | Phase 2–3, after a positive Experiment 0001 |
 | **$5,000** | A controlled pilot of a specialist (failure classifier) with serving for evaluation; ~300 human-verified examples | Phase 4, gated |
 | **$10,000–25,000** | Larger human-verified sets (1,000–3,000), multi-family lab, several fine-tuning rounds, continuous serving of one small model (~$250–1,000/month on one rented GPU) | Phase 4–5, only on evidence |

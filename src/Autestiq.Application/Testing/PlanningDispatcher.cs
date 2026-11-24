@@ -149,7 +149,7 @@ public sealed partial class PlanningDispatcher(
 
                 // What the tester says should be shown, labelled as theirs (ADR-0034).
                 TestCaseService.ExpectedOf(testCase),
-                cancellationToken)
+                cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         var checks = planned.CheckNotes ?? [];

@@ -25,7 +25,8 @@ is 18 of 22, still with no false positive: placing an order now reaches a verdic
 not met there, and the 82% is not a clean measurement. **The clean measurement, on Spring PetClinic (2026-11-23,
 scenarios written from its source before any run, nothing tuned): 20 of 22 runs correct (91%), no false positive**;
 two passes tested less than they claimed (16 of 22 strictly), and it is one application without defects to catch
-(ADR-0020). **Milestone 5, the first customer flow, is done and accepted by the owner (2026-11-23, ADR-0030)**: part 1 built projects, environments with
+(ADR-0020). **All these figures were measured with the prompt before 2026-11-24**, when ADR-0035 step 2 changed it
+(a plan now lists what it does not test); they describe the current prompt only once re-measured. **Milestone 5, the first customer flow, is done and accepted by the owner (2026-11-23, ADR-0030)**: part 1 built projects, environments with
 ownership proofs, production off by default, and the app's navigation drawn from the module registry. Part 2 built
 describing a test in a sentence: the site is explored (read-only on a customer's site) and the planner writes a plan,
 **only if the project's AI permission, off by default, is given**, within the AI budgets, with what was sent recorded

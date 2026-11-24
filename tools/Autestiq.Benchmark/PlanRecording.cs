@@ -25,6 +25,9 @@ public static class PlanRecording
 
         // Written, not left out: a recording without it was replayed as full, and since ADR-0035 would be read as partial.
         text.Append("  \"coverage\": ").Append(Quote(plan.Coverage == PlanCoverage.Full ? "full" : "partial")).Append(",\n");
+        text.Append("  \"notTested\": [")
+            .Append(string.Join(", ", (plan.NotTested ?? []).Select(Quote)))
+            .Append("],\n");
         text.Append("  \"notes\": [")
             .Append(string.Join(", ", plan.Notes.Select(Quote)))
             .Append("],\n");

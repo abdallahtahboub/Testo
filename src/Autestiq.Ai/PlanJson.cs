@@ -64,7 +64,8 @@ public static class PlanJson
                 string.IsNullOrWhiteSpace(wire.ScenarioName) ? "A plan" : wire.ScenarioName.Trim(),
                 actions,
                 wire.Notes?.Where(note => !string.IsNullOrWhiteSpace(note)).ToList() ?? [],
-                Coverage(wire.Coverage));
+                Coverage(wire.Coverage),
+                wire.NotTested?.Where(part => !string.IsNullOrWhiteSpace(part)).Select(part => part.Trim()).ToList() ?? []);
         }
         catch (JsonException)
         {
@@ -239,7 +240,8 @@ public static class PlanJson
         string? ScenarioName,
         List<string>? Notes,
         string? Coverage,
-        List<WireAction>? Actions);
+        List<WireAction>? Actions,
+        [property: JsonPropertyName("notTested")] List<string>? NotTested = null);
 
     private sealed record WireAction(
         string? Kind,

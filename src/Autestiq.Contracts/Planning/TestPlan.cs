@@ -15,11 +15,16 @@ namespace Autestiq.Contracts.Planning;
 /// <param name="Coverage">
 /// Whether this plan covers the whole scenario or only part of it, as the planner itself reported.
 /// </param>
+/// <param name="NotTested">
+/// The parts of the request the plan says it does not check, one per line, in the model's words (ADR-0035 step 2).
+/// Any line makes the plan partial, whatever <paramref name="Coverage"/> says: decided by software.
+/// </param>
 public sealed record TestPlan(
     string ScenarioName,
     IReadOnlyList<PlannedAction> Actions,
     IReadOnlyList<string> Notes,
-    PlanCoverage Coverage = PlanCoverage.Full)
+    PlanCoverage Coverage = PlanCoverage.Full,
+    IReadOnlyList<string>? NotTested = null)
 {
     /// <summary>How many of the actions check something.</summary>
     public int AssertionCount => Actions.Count(action => action.IsAssertion);

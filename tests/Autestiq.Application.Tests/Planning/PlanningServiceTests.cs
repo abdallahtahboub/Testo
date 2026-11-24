@@ -260,6 +260,45 @@ public class PlanningServiceTests
         Assert.Equal(PlanCoverage.Partial, result.Plan!.Coverage);
     }
 
+    // --- ADR-0035 step 2: what the model lists as not tested ---
+
+    [Fact]
+    public async Task Plan_ThatSaysFull_ButListsSomethingNotTested_IsPartial_AndShowsItAsTheAis()
+    {
+        // The PetClinic case: the gap was written down, and the plan still claimed to be full.
+        var answer = PlanResult.From(
+            new TestPlan("Find Franklin", Good, [], PlanCoverage.Full, ["the filtering by last name"]),
+            new PlanningCost(900, 300, 1, 0.01m, TimeSpan.FromSeconds(2)),
+            "fake");
+
+        var result = await Service(new Planner([answer])).PlanAsync(
+            "Find the owner Franklin", Shop, RunBudget.Default, [], cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal(PlanCoverage.Partial, result.Plan!.Coverage);
+
+        // The part itself is the model's words, so it is an AI note, not one of Autestiq's checks.
+        Assert.Contains("Not tested: the filtering by last name", result.Notes);
+        Assert.DoesNotContain(result.CheckNotes!, note => note.Contains("filtering", StringComparison.Ordinal));
+
+        // Autestiq's own note says only what software decided.
+        Assert.Contains(result.CheckNotes!, note => note.Contains("1 part(s)", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Plan_ThatListsNothingNotTested_KeepsTheCoverageItSaid()
+    {
+        var answer = PlanResult.From(
+            new TestPlan("Catalogue", Good, [], PlanCoverage.Full, []),
+            new PlanningCost(900, 300, 1, 0.01m, TimeSpan.FromSeconds(2)),
+            "fake");
+
+        var result = await Service(new Planner([answer])).PlanAsync(
+            "Check the catalogue", Shop, RunBudget.Default, [], cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal(PlanCoverage.Full, result.Plan!.Coverage);
+        Assert.DoesNotContain(result.Notes, note => note.StartsWith("Not tested", StringComparison.Ordinal));
+    }
+
     private static PlanResult Answer(IReadOnlyList<PlannedAction> actions) => PlanResult.From(
         new TestPlan("A plan", actions, []),
         new PlanningCost(900, 300, 1, 0.01m, TimeSpan.FromSeconds(2)),

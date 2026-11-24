@@ -13,6 +13,11 @@ using Autestiq.Persistence;
 //   set-prices [--browser-hour <usd>] [--storage-gb-month <usd>] [--model <id> <input-usd> <output-usd>]...
 //              [--estimate] [--from <yyyy-MM-ddTHH:mm:ssZ>] --note <text> --by <name>
 //   cost-report [yyyy-MM] [--eur-rate <euros per dollar>]
+//   migrations                       which migrations the database has, and which it lacks
+//   migrate                          applies every migration it lacks (Milestone 5.1 R2)
+//   migrate --to <migration>|0 --yes moves to an earlier migration, or to an empty schema: a rollback
+//
+// The web host never migrates a deployed database itself: run migrate before starting a new version.
 //
 // Run them with: dotnet run --project tools/Autestiq.Operator -- <command> ...
 // The database is the one ConnectionStrings__Autestiq names. --by is who made the change, for the record.
@@ -42,8 +47,57 @@ await using (services.ConfigureAwait(false))
         ["set-plan", var slug, var plan, .. var rest] => await SetPlanAsync(database, scope.ServiceProvider.GetRequiredService<TenantWriteScope>(), slug, plan, rest).ConfigureAwait(false),
         ["set-prices", .. var rest] => await SetPricesAsync(database, rest).ConfigureAwait(false),
         ["cost-report", .. var rest] => await CostReportAsync(database, rest).ConfigureAwait(false),
+        ["migrations"] => await MigrationsAsync(database).ConfigureAwait(false),
+        ["migrate", .. var rest] => await MigrateAsync(database, rest).ConfigureAwait(false),
         _ => Usage(),
     };
+}
+
+static async Task<int> MigrationsAsync(AutestiqDbContext database)
+{
+    var (applied, pending) = await Autestiq.Application.Operations.DatabaseMigrations.StateAsync(database, CancellationToken.None).ConfigureAwait(false);
+
+    foreach (var name in applied)
+    {
+        Console.WriteLine($"applied  {name}");
+    }
+
+    foreach (var name in pending)
+    {
+        Console.WriteLine($"pending  {name}");
+    }
+
+    return 0;
+}
+
+static async Task<int> MigrateAsync(AutestiqDbContext database, string[] rest)
+{
+    var target = Option(rest, "--to");
+    var (applied, pending) = await Autestiq.Application.Operations.DatabaseMigrations.StateAsync(database, CancellationToken.None).ConfigureAwait(false);
+
+    // Stepping back drops what later migrations added, data with it: never without saying so.
+    var goesBack = target is not null && (target == Autestiq.Application.Operations.DatabaseMigrations.Empty
+        || applied.Contains(target, StringComparer.Ordinal) && applied[^1] != target);
+
+    if (goesBack && !rest.Contains("--yes", StringComparer.Ordinal))
+    {
+        Console.Error.WriteLine($"Moving back to {target} removes what later migrations added, data included. Take a backup, then repeat with --yes.");
+        return 2;
+    }
+
+    try
+    {
+        await Autestiq.Application.Operations.DatabaseMigrations.MigrateAsync(database, target, CancellationToken.None).ConfigureAwait(false);
+    }
+    catch (ArgumentException exception)
+    {
+        Console.Error.WriteLine(exception.Message);
+        return 2;
+    }
+
+    var (now, left) = await Autestiq.Application.Operations.DatabaseMigrations.StateAsync(database, CancellationToken.None).ConfigureAwait(false);
+    Console.WriteLine($"Was at {(applied.Count > 0 ? applied[^1] : "an empty schema")} with {pending.Count} pending; now at {(now.Count > 0 ? now[^1] : "an empty schema")} with {left.Count} pending.");
+    return 0;
 }
 
 static int Usage()
@@ -53,6 +107,8 @@ static int Usage()
           set-plan <organization-slug> <plan-code> [version] --by <name>
           set-prices [--browser-hour <usd>] [--storage-gb-month <usd>] [--model <id> <input-usd> <output-usd>]... [--estimate] [--from <instant>] --note <text> --by <name>
           cost-report [yyyy-MM] [--eur-rate <euros per dollar>]
+          migrations
+          migrate [--to <migration>|0 --yes]
         """);
     return 2;
 }

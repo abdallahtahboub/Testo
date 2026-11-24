@@ -34,7 +34,7 @@
 | On an application the benchmark cannot reset, one exploration sees what earlier explorations did. | Exploring may act; the benchmark now plans everything before running anything, but explorations still follow one another. | ADR-0020 |
 | The benchmark tool has no automated tests. | Changes to it are checked by replaying recorded plans, by hand. | PR #72 |
 | The owner search on PetClinic, eShopOnWeb's quantity field: unlabelled fields cannot be named. | The vocabulary names elements by test id, role and name, or text; a field with none of them cannot be typed into. | ADR-0024, `tools/Autestiq.Benchmark/PetclinicScenarios.cs` |
-| No migration path, health check or release outside development. | Migrations run only with the development seed; there is no `/health`; no tag exists. | Milestone 5.1 R2, R7 |
+| No release, and no email outside development. | Migrations and health endpoints are built (ADR-0039); no tag or release exists, and a deployed host still cannot start without an email provider. | Milestone 5.1 R2 (email), R7 |
 | `RunDispatcher` is 1,415 lines. | Hard to review. Extract finalization and evidence persistence once its failure paths are covered; no rewrite. | Pilot-readiness review 4.2 |
 | Hot queries are unmeasured. | The queue claim, the stale-run reap, the monthly AI spend and the retention sweep have indexes, none checked with query plans on representative data. | Pilot-readiness review 4.3 |
 | Email delivery is deferred. | Invitation and reset links go to the log; the application refuses to start that way outside development. | `docs/roadmap.md` §Inventory |

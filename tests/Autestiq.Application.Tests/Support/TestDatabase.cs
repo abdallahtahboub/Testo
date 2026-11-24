@@ -46,7 +46,7 @@ public sealed class TestDatabase : IAsyncDisposable
             ?? "Host=localhost;Port=5432;Username=postgres;Password=postgres";
 
     /// <summary>Creates the database and brings it up to the current migration.</summary>
-    public static async Task<TestDatabase> CreateAsync()
+    public static async Task<TestDatabase> CreateAsync(bool migrate = true)
     {
         var database = new TestDatabase(new NpgsqlConnectionStringBuilder(Server) { Database = "postgres" }.ToString());
 
@@ -66,6 +66,12 @@ public sealed class TestDatabase : IAsyncDisposable
                 + "On a developer machine: docker run -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16, "
                 + "or install PostgreSQL locally. See README.md.",
                 exception);
+        }
+
+        // An empty database, for the tests of migrating one (Milestone 5.1 R2).
+        if (!migrate)
+        {
+            return database;
         }
 
         await using (var migrator = database.NewContext())

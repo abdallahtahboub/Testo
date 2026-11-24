@@ -43,6 +43,9 @@ public static class ApplicationServiceCollectionExtensions
         services.AddSingleton<IArtifactStore, FileSystemArtifactStore>();
         services.AddSingleton<ArtifactLinks>();
 
+        // What the readiness endpoint asks (Milestone 5.1 R2).
+        services.AddSingleton<Operations.Readiness>();
+
         // AI planning (Milestone 5, part 2): its budgets, and no planner unless the host provides one with a key.
         services.AddOptions<Testing.PlanningOptions>();
         services.AddOptions<EvidenceRetentionOptions>();

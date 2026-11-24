@@ -25,6 +25,7 @@ using Autestiq.UI.Shared.Theming;
 using Autestiq.Web.Antiforgery;
 using Autestiq.Web.Components;
 using Autestiq.Web.Execution;
+using Autestiq.Web.Operations;
 using Autestiq.Web.Seo;
 using Autestiq.Website;
 using Autestiq.Web.Features;
@@ -169,6 +170,7 @@ app.UseImmutableFontCaching();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
+app.MapHealthEndpoints();
 app.MapPreferenceEndpoints();
 app.MapArtifactEndpoints();
 app.MapTestDownloadEndpoints();

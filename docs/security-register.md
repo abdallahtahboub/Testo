@@ -392,6 +392,12 @@ production environments are never explored; an operator turns pressing off with 
 read-only (R-14). Customers are told in the pilot's terms that exploring presses buttons and tabs, but never sends
 forms.
 
+### R-22 · Later requests on a kept-open proxy connection were not judged — **Fixed 2026-11-25 (R9)**
+The egress proxy put only the first request on each browser connection to the policy; later ones were copied to the
+same, already approved, far end without a check. No other host could be reached that way, so it was a skipped check
+rather than an escape. **Fixed:** the far end is asked to close after every answer (except a WebSocket upgrade), so
+every request opens its own connection and is judged (ADR-0026 amendment). Tested over a real socket.
+
 ### R-7 · One database for every tenant — **Accepted, documented**
 
 ADR-0012 chose a shared database with filtered access and listed the consequences, including the

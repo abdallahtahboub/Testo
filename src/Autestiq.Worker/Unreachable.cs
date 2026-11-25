@@ -27,12 +27,13 @@ public static class Unreachable
 
         if (Uri.TryCreate(targetOrigin, UriKind.Absolute, out var target))
         {
-            // The proxies write a refusal as "scheme://host:port — why".
+            // The proxies write a refusal as "scheme://host:port — why", a tunnel as https. The scheme must be the site's:
+            // a site served over http opens a tunnel to its own host only for a WebSocket, and a refused WebSocket is
+            // not a site that could not be reached. OWASP Juice Shop's was, and five runs that had loaded the shop
+            // ended "could not be reached" (R9, 2026-11-25).
             var origin = $"{target.Scheme}://{target.Host}:{target.Port} ";
-            var tunnel = $"https://{target.Host}:{target.Port} ";
 
-            if (refusals.FirstOrDefault(refusal => refusal.StartsWith(origin, StringComparison.OrdinalIgnoreCase)
-                || refusal.StartsWith(tunnel, StringComparison.OrdinalIgnoreCase)) is { } refused)
+            if (refusals.FirstOrDefault(refusal => refusal.StartsWith(origin, StringComparison.OrdinalIgnoreCase)) is { } refused)
             {
                 return refused;
             }

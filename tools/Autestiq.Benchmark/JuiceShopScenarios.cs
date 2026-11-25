@@ -3,7 +3,7 @@ using Autestiq.Contracts.Planning;
 namespace Autestiq.Benchmark;
 
 /// <summary>
-/// Ten scenarios for OWASP Juice Shop, a shop written as an Angular single-page application, which nobody here wrote
+/// Nine scenarios for OWASP Juice Shop, a shop written as an Angular single-page application, which nobody here wrote
 /// (Milestone 5.1 R9). It is the first client-side application measured: its pages are rendered in the browser, its
 /// addresses are fragments (<c>/#/about</c>), and much of its navigation is buttons, not links.
 /// </summary>
@@ -30,6 +30,18 @@ namespace Autestiq.Benchmark;
 /// <para>
 /// No scenario signs in or registers. The password fields have no ARIA role, so nothing in the vocabulary can type into
 /// them: a gap in the vocabulary, recorded rather than worked around.
+/// </para>
+/// <para>
+/// <strong>Baselines corrected after the first run with no model</strong> (2026-11-25), each because it failed the
+/// application as it is; no scenario's words changed:
+/// <list type="bullet">
+/// <item>About Us, the contact page and the login page: the welcome dialog marks the rest of the page hidden to
+/// assistive technology, so a heading is not found by its role until the dialog is dismissed. They dismiss it first.</item>
+/// <item>German: the radio's own input sits under its label, which takes the click. The label is pressed, by its text.</item>
+/// <item>"The account menu leads to the login" was removed from the set: its menu entry has the role menuitem, which the
+/// vocabulary does not have, so no baseline can be written for it. Its words were "Open the account menu and choose to
+/// log in, and check that the login page opens."</item>
+/// </list>
 /// </para>
 /// </remarks>
 public static class JuiceShopScenarios
@@ -79,6 +91,7 @@ public static class JuiceShopScenarios
             "Open the About Us page and check that it has a section on the corporate history and policy.",
             [
                 Goto("Open About Us", "/#/about"),
+                Click("Dismiss the welcome", "button", "Close Welcome Banner"),
                 See("It is About Us", "heading", "About Us"),
                 SeeText("It has the history", "Corporate History & Policy"),
             ]),
@@ -88,6 +101,7 @@ public static class JuiceShopScenarios
             "Open the contact page and check that it asks for customer feedback.",
             [
                 Goto("Open the contact page", "/#/contact"),
+                Click("Dismiss the welcome", "button", "Close Welcome Banner"),
                 See("It asks for feedback", "heading", "Customer Feedback"),
             ]),
 
@@ -98,7 +112,7 @@ public static class JuiceShopScenarios
                 Goto("Open the shop", "/#/search"),
                 Click("Dismiss the welcome", "button", "Close Welcome Banner"),
                 Click("Open the language menu", "button", "Language selection menu"),
-                Click("Choose German", "radio", "Deutsch"),
+                ClickText("Choose German", "Deutsch"),
                 SeeText("The title is German", "Alle Produkte"),
             ]),
 
@@ -114,21 +128,11 @@ public static class JuiceShopScenarios
             ]),
 
         new(
-            "the-account-menu-leads-to-the-login",
-            "Open the account menu and choose to log in, and check that the login page opens.",
-            [
-                Goto("Open the shop", "/#/search"),
-                Click("Dismiss the welcome", "button", "Close Welcome Banner"),
-                Click("Open the account menu", "button", "Show/hide account menu"),
-                Click("Choose to log in", "menuitem", "Go to login page"),
-                See("The login page opened", "heading", "Login"),
-            ]),
-
-        new(
             "the-login-page-offers-a-forgotten-password",
             "Open the login page and check that it offers help for a forgotten password.",
             [
                 Goto("Open the login page", "/#/login"),
+                Click("Dismiss the welcome", "button", "Close Welcome Banner"),
                 See("It is the login page", "heading", "Login"),
                 See("It offers help", "link", "Forgot your password?"),
             ]),
@@ -139,6 +143,9 @@ public static class JuiceShopScenarios
 
     private static PlannedAction Click(string description, string role, string name) =>
         new(ActionKind.Click, description, ActionTarget.ByRole(role, name));
+
+    private static PlannedAction ClickText(string description, string text) =>
+        new(ActionKind.Click, description, ActionTarget.ByText(text));
 
     private static PlannedAction See(string description, string role, string name) =>
         new(ActionKind.AssertVisible, description, ActionTarget.ByRole(role, name));

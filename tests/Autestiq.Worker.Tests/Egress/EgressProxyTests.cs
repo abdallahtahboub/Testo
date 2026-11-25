@@ -158,6 +158,69 @@ public class EgressProxyTests
         Assert.Contains(refusals, refusal => refusal.Contains("this machine", StringComparison.Ordinal));
     }
 
+    [Fact]
+    public async Task Get_AKeptAliveRequest_ReachesTheFarEndInOriginForm_AskingItToClose()
+    {
+        // Kept open, the browser's next request would reach the far end in proxy form, unjudged; Node's server then
+        // answered OWASP Juice Shop's scripts with its HTML page (R9). Each request must have a connection of its own.
+        using var target = new TcpListener(IPAddress.Loopback, 0);
+        target.Start();
+        var port = ((IPEndPoint)target.LocalEndpoint).Port;
+
+        var received = ReceiveOnceAsync(target, "HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nok");
+
+        await using var proxy = EgressProxy.Start(
+            new EgressPolicy([], [$"http://127.0.0.1:{port}"]),
+            _ => Assert.Fail("nothing should have been refused"));
+
+        var answer = await SendAsync(
+            proxy.Port,
+            $"GET http://127.0.0.1:{port}/main.js HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\nProxy-Connection: keep-alive\r\n\r\n");
+
+        var request = await received;
+
+        Assert.StartsWith("GET /main.js HTTP/1.1\r\n", request, StringComparison.Ordinal);
+        Assert.Contains("\r\nConnection: close\r\n", request, StringComparison.Ordinal);
+        Assert.DoesNotContain("keep-alive", request, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Proxy-", request, StringComparison.OrdinalIgnoreCase);
+        Assert.StartsWith("HTTP/1.1 200", answer, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Get_AWebSocketUpgrade_KeepsItsConnectionHeader()
+    {
+        // An upgrade needs its connection kept: "Connection: Upgrade" passes, and nothing asks the far end to close.
+        using var target = new TcpListener(IPAddress.Loopback, 0);
+        target.Start();
+        var port = ((IPEndPoint)target.LocalEndpoint).Port;
+
+        var received = ReceiveOnceAsync(target, "HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\nConnection: close\r\n\r\n");
+
+        await using var proxy = EgressProxy.Start(new EgressPolicy([], [$"http://127.0.0.1:{port}"]), _ => { });
+
+        _ = await SendAsync(
+            proxy.Port,
+            $"GET http://127.0.0.1:{port}/ws HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\nConnection: Upgrade\r\nUpgrade: websocket\r\n\r\n");
+
+        var request = await received;
+
+        Assert.Contains("\r\nConnection: Upgrade\r\n", request, StringComparison.Ordinal);
+        Assert.DoesNotContain("Connection: close", request, StringComparison.Ordinal);
+    }
+
+    /// <summary>Answers one connection with a fixed response, and says what the request was.</summary>
+    private static async Task<string> ReceiveOnceAsync(TcpListener listener, string response)
+    {
+        using var connection = await listener.AcceptTcpClientAsync();
+        var stream = connection.GetStream();
+
+        var buffer = new byte[8192];
+        var read = await stream.ReadAtLeastAsync(buffer, 1, throwOnEndOfStream: false);
+        await stream.WriteAsync(Encoding.ASCII.GetBytes(response));
+
+        return Encoding.ASCII.GetString(buffer, 0, read);
+    }
+
     /// <summary>Sends one request and reads whatever comes back until the far end closes.</summary>
     private static async Task<string> SendAsync(int proxyPort, string request)
     {

@@ -143,3 +143,16 @@ egress proxies, or with a browser error meaning no connection was made (`net::ER
 `ERR_NAME_NOT_RESOLVED` and the like), now ends **inconclusive**: "The site could not be reached (…), so nothing is known
 about the application: this is not a failure of it." A refused request to another origin (a font host, an analytics
 script) leaves a failure a failure, because the application was reached and judged (`Autestiq.Worker.Unreachable`).
+
+**Amended again (2026-11-25, R9):** only a refusal with the site's own scheme counts. A site served over http opens a
+tunnel (reported as `https://host:port`) to its own host only for a WebSocket, and a refused WebSocket is not a site that
+could not be reached: OWASP Juice Shop's was, and five runs that had loaded the shop ended "could not be reached".
+
+## Amendment (2026-11-25, R9): one request per connection through the egress proxy
+
+The proxy rewrote and judged only the first request on a connection; the browser's later requests on the same connection
+were copied to the far end as sent, in proxy form, and never put to the policy. They could only reach the server already
+approved, so nothing escaped, but a check was skipped, and Node's server (OWASP Juice Shop) answered such requests with
+its HTML page, so nothing rendered. The proxy now asks the far end to close after each answer (`Connection: close`),
+except for a WebSocket upgrade; every request opens its own connection and is rewritten and judged. The cost is a new
+connection per request, which a sealed run's budgets already allow for.

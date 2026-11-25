@@ -866,7 +866,10 @@ public sealed class RunDispatcher(
 
             // An approval that does not allow changing data is held in the browser by the worker (ReadOnlyGuard).
             ReadOnly: plan?.ReadOnly ?? false,
-            CustomerAllowsActing: exploring && customerAllowsActing);
+            CustomerAllowsActing: exploring && customerAllowsActing,
+
+            // Where it may not act, it presses with every write blocked (ADR-0041); the worker decides which applies.
+            PressGuarded: exploring && options.GuardedPressing);
     }
 
     /// <summary>The environment a run's test was explored against, or <c>null</c>. Across the filter, held to the run's organization.</summary>

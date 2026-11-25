@@ -16,7 +16,9 @@ public class ExplorationPolicyTests
         IReadOnlyList<string> trusted,
         bool press = true,
         bool submit = true,
-        WorkerTask task = WorkerTask.Explore) => new(
+        WorkerTask task = WorkerTask.Explore,
+        bool guarded = false,
+        bool customerAllows = false) => new(
         RunId: Guid.CreateVersion7(),
         ScenarioId: "policy",
         TargetOrigin: origin,
@@ -26,7 +28,9 @@ public class ExplorationPolicyTests
         ArtifactDirectory: "unused",
         Task: task,
         ExploreStates: press,
-        SubmitForms: submit);
+        SubmitForms: submit,
+        CustomerAllowsActing: customerAllows,
+        PressGuarded: guarded);
 
     [Fact]
     public void AnApplicationWeRun_WhenTheJobAsks_MayBePressedAndTypedInto()
@@ -156,5 +160,33 @@ public class ExplorationPolicyTests
         var job = Job("not an address", ["not an address"]);
 
         Assert.False(ExplorationPolicy.MayPressControls(job));
+    }
+
+    [Fact]
+    public void ACustomersApplication_GivenGuardedPressing_IsPressedGuarded_AndNeverTypedInto()
+    {
+        var job = Job("https://shop.example.com", [], guarded: true);
+
+        Assert.True(ExplorationPolicy.MayPressGuarded(job));
+        Assert.False(ExplorationPolicy.MayPressControls(job));
+        Assert.False(ExplorationPolicy.MaySubmitForms(job));
+    }
+
+    [Fact]
+    public void AnApplicationThatMayBeActedOn_IsNeverPressedGuarded()
+    {
+        // Acting and guarded pressing are never both: the guard is for what may not be acted on.
+        Assert.False(ExplorationPolicy.MayPressGuarded(Job(Ours, [Ours], guarded: true)));
+        Assert.False(ExplorationPolicy.MayPressGuarded(Job("https://shop.example.com", [], guarded: true, customerAllows: true)));
+    }
+
+    [Theory]
+    [InlineData(false, true, WorkerTask.Explore)]
+    [InlineData(true, false, WorkerTask.Explore)]
+    [InlineData(true, true, WorkerTask.Planned)]
+    [InlineData(true, true, WorkerTask.Scripted)]
+    public void GuardedPressing_NeedsAnExploration_ThatAsksToPress_AndWasGivenIt(bool press, bool guarded, WorkerTask task)
+    {
+        Assert.False(ExplorationPolicy.MayPressGuarded(Job("https://shop.example.com", [], press: press, task: task, guarded: guarded)));
     }
 }

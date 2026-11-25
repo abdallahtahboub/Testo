@@ -26,6 +26,7 @@
 | `Artifacts__Directory` | Where screenshots are kept | Yes: refuses to start without |
 | `Email__Smtp__Host`, `__Port` (587), `__User`, `__Password` (secret), `__From`, `__PublicBaseUrl` (https) | The provider's SMTP relay (ADR-0040) | Yes: refuses to start without email |
 | `Execution__Isolation=Container`, `Execution__WorkerImage=<image@digest>` | Sealed runs (ADR-0026) | Yes for customer sites |
+| `Execution__GuardedPressing=false` | Customer sites explored by following links only, pressing nothing (ADR-0041); on by default | No |
 | `Planning__*`, `Planner__ApiKey` (secret) | AI planning and its budgets (ADR-0030) | Only where AI planning is offered |
 | `Security__AllowInsecureSessionCookie` | **Never in a deployment.** Only for a local rehearsal over plain http (R-5) | No |
 

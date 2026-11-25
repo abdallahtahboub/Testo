@@ -70,6 +70,12 @@ public enum WorkerTask
 /// send its forms with test values (ADR-0032). Set only by the dispatcher, from the environment's stored permission
 /// re-read when the run starts, and never for a production site. Without it a customer's site is explored read-only.
 /// </param>
+/// <param name="PressGuarded">
+/// For <see cref="WorkerTask.Explore"/> with <see cref="ExploreStates"/> where acting is not allowed: press the
+/// application's own buttons, tabs and links anyway, with the browser letting only reads leave it (ADR-0041). Forms are
+/// never sent, nothing is typed, and a press that tried to send anything else is not described. Off, such a site is
+/// read without pressing anything, as before.
+/// </param>
 /// <param name="ReadOnly">
 /// For <see cref="WorkerTask.Planned"/>: the plan was approved as one that does not change data (ADR-0030, part 3), so
 /// the browser sends no request that could: anything but GET, HEAD and OPTIONS is blocked before it leaves the
@@ -94,7 +100,8 @@ public sealed record WorkerJob(
     bool SubmitForms = false,
     string? OriginProof = null,
     bool ReadOnly = false,
-    bool CustomerAllowsActing = false);
+    bool CustomerAllowsActing = false,
+    bool PressGuarded = false);
 
 /// <summary>Where an origin's proof file is, and what it is called.</summary>
 public static class OriginProofFile

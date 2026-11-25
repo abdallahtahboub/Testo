@@ -156,7 +156,7 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
             AcceptDownloads = false,
             IgnoreHTTPSErrors = false,
 
-            // A service worker's own requests are not seen by the routes below, so a read-only run has none.
+            // A service worker's own requests are not seen by the routes below, so a guarded run or exploration has none.
             ServiceWorkers = readOnly ? ServiceWorkerPolicy.Block : ServiceWorkerPolicy.Allow,
         }).ConfigureAwait(false);
 
@@ -174,7 +174,7 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
 
         if (job.Task == WorkerTask.Explore)
         {
-            return await LookAsync(job, page, steps, proxy, startedAt, budget).ConfigureAwait(false);
+            return await LookAsync(job, page, readOnly ? guard : null, steps, proxy, startedAt, budget).ConfigureAwait(false);
         }
 
         for (var index = 0; index < scenario.Steps.Count; index++)
@@ -247,6 +247,7 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
     private async Task<WorkerResult> LookAsync(
         WorkerJob job,
         IPage page,
+        ReadOnlyGuard? guard,
         List<WorkerStepResult> steps,
         EgressProxy proxy,
         DateTimeOffset startedAt,
@@ -256,7 +257,7 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
 
         try
         {
-            var exploration = await SiteExplorer.ExploreAsync(page, job, StartAfresh, budget).ConfigureAwait(false);
+            var exploration = await SiteExplorer.ExploreAsync(page, job, StartAfresh, guard, budget).ConfigureAwait(false);
             var snapshot = exploration.Snapshot;
 
             steps[0] = step with
@@ -454,6 +455,14 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
         {
             said += $" Pressed controls in {exploration.Visits} visit(s)"
                 + (exploration.VisitsFailed > 0 ? $", {exploration.VisitsFailed} of which could not be carried out." : ".");
+        }
+
+        if (exploration.Guarded)
+        {
+            said += " Controls were pressed with every request that could change data blocked in the browser; forms were not sent."
+                + (exploration.VisitsWithheld > 0
+                    ? $" {exploration.VisitsWithheld} visit(s) would have sent something and are not described."
+                    : "");
         }
 
         if (exploration.PressingRefused)

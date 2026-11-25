@@ -24,12 +24,20 @@ internal sealed class ReadOnlyGuard
 {
     private readonly ConcurrentQueue<string> _blocked = new();
 
-    /// <summary>Whether a job is to be guarded: a planned run approved as read-only.</summary>
+    /// <summary>
+    /// Whether a job is to be guarded: a planned run approved as read-only, and every exploration that may not act
+    /// (ADR-0041), pressing or not. A page's own scripts can send data on load, and reading a customer's site sends none.
+    /// </summary>
     public static bool Applies(WorkerJob job)
     {
         ArgumentNullException.ThrowIfNull(job);
 
-        return job.ReadOnly && job.Task == WorkerTask.Planned;
+        return job.Task switch
+        {
+            WorkerTask.Planned => job.ReadOnly,
+            WorkerTask.Explore => !ExplorationPolicy.MayPressControls(job),
+            _ => false,
+        };
     }
 
     /// <summary>Whether a request with this method only reads.</summary>

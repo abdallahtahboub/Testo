@@ -375,4 +375,10 @@ public sealed class ExecutionOptions
 
     /// <summary>How many runs may be carried out at once.</summary>
     public int MaxConcurrentRuns { get; set; } = 2;
+
+    /// <summary>
+    /// Whether an exploration that may not act presses controls with every write blocked in the browser (ADR-0041).
+    /// On by default; an operator turns it off to go back to reading only.
+    /// </summary>
+    public bool GuardedPressing { get; set; } = true;
 }

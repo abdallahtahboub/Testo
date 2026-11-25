@@ -130,6 +130,18 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
     public bool ReadOnlyExploration { get; init; }
 
     /// <summary>
+    /// With <see cref="ReadOnlyExploration"/>: press controls while the browser lets only reads leave it, as a
+    /// customer's site is explored since ADR-0041. Off by default, which is how the earlier read-only figures were measured.
+    /// </summary>
+    public bool GuardedPressing { get; init; }
+
+    /// <summary>
+    /// The same target addressed by name, which the worker never acts on: a name resolves to whatever its owner says
+    /// (ExplorationPolicy). This is how a measurement stands in for a customer's site on an application of our own.
+    /// </summary>
+    public static string AsCustomersSite(string origin) => origin.Replace("127.0.0.1", "localhost", StringComparison.Ordinal);
+
+    /// <summary>
     /// What the whole run may spend on planning, in US dollars. Once spent, no further plan is asked for, the run
     /// ends, and <see cref="StoppedAtSpendingCap"/> says so. Unset, there is no cap beyond each plan's own budget.
     /// </summary>
@@ -453,9 +465,9 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
     private WorkerJob Job(BenchmarkScenario scenario, WorkerTask task, IReadOnlyList<PlannedAction>? plan) => new(
         RunId: Guid.CreateVersion7(),
         scenario.Id,
-        origin,
+        Guarded(task) ? AsCustomersSite(origin) : origin,
         AllowedOrigins: [],
-        TrustedLocalOrigins: [origin],
+        TrustedLocalOrigins: [Guarded(task) ? AsCustomersSite(origin) : origin],
         RunBudget.Default,
         Directory.CreateTempSubdirectory("autestiq-benchmark-").FullName,
         task,
@@ -466,6 +478,12 @@ public sealed class Harness(string origin, IScenarioPlanner? planner, int repeti
         // own policy decides, from the address (Autestiq.Worker.ExplorationPolicy).
         //
         // Read-only exploration asks for neither, as the product does for a customer's site.
-        ExploreStates: task == WorkerTask.Explore && !ReadOnlyExploration,
-        SubmitForms: task == WorkerTask.Explore && !ReadOnlyExploration);
+        //
+        // Guarded, it asks to press and is given guarded pressing; addressed by name, the worker may not act on it.
+        ExploreStates: task == WorkerTask.Explore && (!ReadOnlyExploration || Guarded(task)),
+        SubmitForms: task == WorkerTask.Explore && !ReadOnlyExploration,
+        PressGuarded: Guarded(task));
+
+    /// <summary>Whether this job is an exploration with guarded pressing.</summary>
+    private bool Guarded(WorkerTask task) => task == WorkerTask.Explore && ReadOnlyExploration && GuardedPressing;
 }

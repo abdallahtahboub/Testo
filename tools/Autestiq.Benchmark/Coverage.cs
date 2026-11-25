@@ -27,19 +27,27 @@ internal static class Coverage
     /// <param name="origin">Where the target is.</param>
     /// <param name="startAfresh">Puts the target back to its starting state, when it keeps any on its server.</param>
     /// <param name="readOnly">Follow links only, as a customer's site is explored: press nothing, send no form.</param>
-    public static async Task<(SiteSnapshot Snapshot, string Said)> ExploreAsync(string origin, Func<Task>? startAfresh, bool readOnly = false)
+    /// <param name="guarded">
+    /// With <paramref name="readOnly"/>: press controls with every write blocked in the browser, as a customer's site is
+    /// explored since ADR-0041. Addressed by name, so the worker treats it as a site it may not act on.
+    /// </param>
+    public static async Task<(SiteSnapshot Snapshot, string Said)> ExploreAsync(
+        string origin, Func<Task>? startAfresh, bool readOnly = false, bool guarded = false)
     {
+        var named = readOnly && guarded ? Harness.AsCustomersSite(origin) : origin;
+
         var job = new WorkerJob(
             RunId: Guid.CreateVersion7(),
             ScenarioId: "coverage",
-            TargetOrigin: origin,
+            TargetOrigin: named,
             AllowedOrigins: [],
-            TrustedLocalOrigins: [origin],
+            TrustedLocalOrigins: [named],
             Budget: Harness.ExplorationBudget,
             ArtifactDirectory: Directory.CreateTempSubdirectory("autestiq-coverage-").FullName,
             Task: WorkerTask.Explore,
-            ExploreStates: !readOnly,
-            SubmitForms: !readOnly);
+            ExploreStates: !readOnly || guarded,
+            SubmitForms: !readOnly,
+            PressGuarded: readOnly && guarded);
 
         var result = await new ScenarioRunner(TimeProvider.System) { StartAfresh = startAfresh }
             .RunAsync(job, CancellationToken.None);

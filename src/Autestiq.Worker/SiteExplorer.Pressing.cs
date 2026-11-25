@@ -44,12 +44,42 @@ internal static partial class SiteExplorer
     private static readonly string[] NamingAttributes = ["name", "id", "data-testid", "autocomplete"];
 
     /// <summary>What pressing found, and what it took.</summary>
-    private sealed record Pressing(IReadOnlyList<PageSnapshot> Pages, bool Truncated, int Visits, int Failed);
+    private sealed record Pressing(IReadOnlyList<PageSnapshot> Pages, bool Truncated, int Visits, int Failed, int Withheld = 0);
 
-    /// <summary>Where one visit ended. No page means it could not be carried out.</summary>
-    private readonly record struct Visit(PageSnapshot? Page, FormKind Form, bool AsksForPassword = false)
+    /// <summary>
+    /// Where one visit ended. No page means it could not be carried out, or, when <see cref="Withheld"/>, that it was
+    /// carried out under the guard and is not to be described (ADR-0041).
+    /// </summary>
+    private readonly record struct Visit(PageSnapshot? Page, FormKind Form, bool AsksForPassword = false, bool Withheld = false)
     {
         public static Visit Failed => new(null, FormKind.None);
+
+        public static Visit NotDescribed => new(null, FormKind.None, Withheld: true);
+    }
+
+    /// <summary>
+    /// Whether pressing this element would send a form: a button inside one, or naming one, whose type is not
+    /// "button" or "reset" (a button sends by default, and a type it does not know is the default), or a submit or
+    /// image input. Asked by locators of ours, never by a script: the worker runs no string in the page.
+    /// </summary>
+    private static async Task<bool> SendsAFormAsync(ILocator control)
+    {
+        var inAForm = await control.Locator("xpath=ancestor::form[1]").CountAsync().ConfigureAwait(false) == 1
+            || await AttributeAsync(control, "form").ConfigureAwait(false) is { Length: > 0 };
+
+        if (!inAForm)
+        {
+            return false;
+        }
+
+        var type = (await AttributeAsync(control, "type").ConfigureAwait(false) ?? "").Trim().ToLowerInvariant();
+
+        if (await control.Locator("xpath=self::button").CountAsync().ConfigureAwait(false) == 1)
+        {
+            return type is not ("button" or "reset");
+        }
+
+        return await control.Locator("xpath=self::input").CountAsync().ConfigureAwait(false) == 1 && type is ("submit" or "image");
     }
 
     /// <summary>One control worth pressing: how to reach it, and whether it is a button.</summary>
@@ -91,9 +121,11 @@ internal static partial class SiteExplorer
         IReadOnlyList<PageSnapshot> crawled,
         Dictionary<string, PageSnapshot> described,
         Func<Task>? startAfresh,
+        ReadOnlyGuard? guard,
         CancellationToken cancellationToken)
     {
-        var mayType = ExplorationPolicy.MaySubmitForms(job);
+        // Under the guard nothing is typed, and no form is sent (ADR-0041).
+        var mayType = guard is null && ExplorationPolicy.MaySubmitForms(job);
 
         // Signing in is typing into a form, so it needs what typing needs, and the account itself. The dispatcher
         // hands one over only where the environment's owner allowed exploring to act (ADR-0032, ADR-0033).
@@ -121,6 +153,7 @@ internal static partial class SiteExplorer
 
         var visits = 0;
         var failed = 0;
+        var withheld = 0;
 
         while (queue.Count > 0)
         {
@@ -146,20 +179,28 @@ internal static partial class SiteExplorer
                     if (visits >= MaxVisits || found.Count >= MaxExploredStates)
                     {
                         // Said rather than hidden, for the same reason as the crawl's own budget.
-                        return new Pressing(found, Truncated: true, visits, failed);
+                        return new Pressing(found, Truncated: true, visits, failed, withheld);
                     }
 
                     var reached = new List<PressStep>(presses) { new(control.Target, fills[index]) };
                     var askForm = mayType && control.IsButton && index == 0;
 
-                    var visit = await VisitAsync(page, job, start, reached, mayType, askForm, described, startAfresh, cancellationToken)
+                    var visit = await VisitAsync(page, job, start, reached, mayType, askForm, described, startAfresh, guard, cancellationToken)
                         .ConfigureAwait(false);
+
+                    if (visit.Withheld)
+                    {
+                        // Carried out, and not described: what it showed is not what the application does.
+                        visits++;
+                        withheld++;
+                        break;
+                    }
 
                     if (visit.Page is null)
                     {
                         // Once more, from the start. A visit that fails once and works the second time was
                         // the browser or the network; one that fails twice is the path.
-                        visit = await VisitAsync(page, job, start, reached, mayType, askForm, described, startAfresh, cancellationToken)
+                        visit = await VisitAsync(page, job, start, reached, mayType, askForm, described, startAfresh, guard, cancellationToken)
                             .ConfigureAwait(false);
                     }
 
@@ -208,7 +249,7 @@ internal static partial class SiteExplorer
             }
         }
 
-        return new Pressing(found, Truncated: false, visits, failed);
+        return new Pressing(found, Truncated: false, visits, failed, withheld);
     }
 
     /// <summary>The controls of one page worth pressing, in the order the page offers them.</summary>
@@ -332,6 +373,7 @@ internal static partial class SiteExplorer
         bool askForm,
         Dictionary<string, PageSnapshot> described,
         Func<Task>? startAfresh,
+        ReadOnlyGuard? guard,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -351,6 +393,9 @@ internal static partial class SiteExplorer
         var form = FormKind.None;
         var asksForPassword = false;
 
+        // What the page itself tried to send while it opened is the page's, not the presses'.
+        var blockedBefore = guard?.Blocked.Count ?? 0;
+
         try
         {
             for (var index = 0; index < presses.Count; index++)
@@ -364,6 +409,12 @@ internal static partial class SiteExplorer
                 if (await target.CountAsync().ConfigureAwait(false) != 1)
                 {
                     return Visit.Failed;
+                }
+
+                // Under the guard a form is never sent, whatever its method or its button is called (ADR-0041).
+                if (guard is not null && await SendsAFormAsync(target).ConfigureAwait(false))
+                {
+                    return Visit.NotDescribed;
                 }
 
                 var typing = mayType && press.Fill != FillMode.None;
@@ -412,6 +463,13 @@ internal static partial class SiteExplorer
         {
             // A press that leaves the target has nothing to say about the target.
             return Visit.Failed;
+        }
+
+        // A press whose page tried to send something showed the page without it: an error, a spinner, or nothing. That
+        // is not what the control does, so it is not told to a planner as though it were.
+        if (guard is not null && guard.Blocked.Count > blockedBefore)
+        {
+            return Visit.NotDescribed;
         }
 
         return new Visit(await LookAtAsync(page, here.PathAndQuery, described).ConfigureAwait(false), form, asksForPassword);

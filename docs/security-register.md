@@ -382,6 +382,16 @@ check on a database without one (one row, by primary key, whichever instance is 
 <name> --yes` accepts a key ring lost for good, saying how many stored values become unusable. Tested with fakes and
 with the real host: the restore without the key ring now reports not ready.
 
+### R-21 · A GET that changes data, pressed while exploring read-only — **Medium; found 2026-11-25 (ADR-0041)**
+Guarded pressing blocks every request but GET, HEAD and OPTIONS in the browser, so a customer's site explored without
+permission to act receives only reads. A site that changes data by GET (`/logout`, `/cart/add?id=3`, a link that
+"archives") is changed all the same when such a control is pressed. **Mitigated:** controls named for ordering, paying,
+deleting, cancelling or signing out are never pressed; forms are never sent, whatever their method; nothing is typed;
+production environments are never explored; an operator turns pressing off with `Execution:GuardedPressing=false`.
+**Open:** a control with an innocent name that changes data by GET. The same limit holds for runs approved as
+read-only (R-14). Customers are told in the pilot's terms that exploring presses buttons and tabs, but never sends
+forms.
+
 ### R-7 · One database for every tenant — **Accepted, documented**
 
 ADR-0012 chose a shared database with filtered access and listed the consequences, including the

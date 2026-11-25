@@ -51,6 +51,17 @@ public static class ExplorationPolicy
     }
 
     /// <summary>
+    /// Whether this job presses controls while the browser lets only reads leave it (ADR-0041): an exploration that
+    /// asks to press, may not act, and was given guarded pressing. Never at the same time as acting.
+    /// </summary>
+    public static bool MayPressGuarded(WorkerJob job)
+    {
+        ArgumentNullException.ThrowIfNull(job);
+
+        return job.Task == WorkerTask.Explore && job.ExploreStates && job.PressGuarded && !MayPressControls(job);
+    }
+
+    /// <summary>
     /// Whether this job may also type fixed test values into forms, and press the controls that are
     /// named for sending one.
     /// </summary>

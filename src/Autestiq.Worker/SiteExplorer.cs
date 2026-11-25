@@ -11,7 +11,13 @@ namespace Autestiq.Worker;
 /// <param name="Visits">How many fresh visits were made to press controls. Each is a page load and a few presses.</param>
 /// <param name="VisitsFailed">How many of those could not be carried out, after one retry.</param>
 /// <param name="PressingRefused">Whether pressing controls was asked for and refused by <see cref="ExplorationPolicy"/>.</param>
-internal sealed record Exploration(SiteSnapshot Snapshot, int Visits, int VisitsFailed, bool PressingRefused);
+/// <param name="Guarded">Whether controls were pressed with every write blocked in the browser (ADR-0041).</param>
+/// <param name="VisitsWithheld">
+/// Guarded visits not described: the press would have sent a form, or the page tried to send something that was blocked,
+/// so what it showed is not what the application does.
+/// </param>
+internal sealed record Exploration(
+    SiteSnapshot Snapshot, int Visits, int VisitsFailed, bool PressingRefused, bool Guarded = false, int VisitsWithheld = 0);
 
 /// <summary>
 /// Walks the target and describes what is on it, so that a plan can be made against an application
@@ -94,11 +100,16 @@ internal static partial class SiteExplorer
     /// Called before every visit that presses something. Null for an application whose state lives in
     /// the browser, which clearing the cookies resets.
     /// </param>
+    /// <param name="guard">
+    /// The browser's write guard, fitted to the page's context, when the exploration may not act (ADR-0041). Null when
+    /// it may.
+    /// </param>
     /// <param name="cancellationToken">Stops the exploration.</param>
     public static async Task<Exploration> ExploreAsync(
         IPage page,
         WorkerJob job,
         Func<Task>? startAfresh,
+        ReadOnlyGuard? guard,
         CancellationToken cancellationToken)
     {
         var origin = new Uri(job.TargetOrigin);
@@ -170,17 +181,26 @@ internal static partial class SiteExplorer
 
         var visits = 0;
         var visitsFailed = 0;
+        var withheld = 0;
         var refused = false;
+        var guarded = false;
 
         if (job.ExploreStates)
         {
-            if (ExplorationPolicy.MayPressControls(job))
+            // Acting, or else pressing with every write blocked (ADR-0041); never both, and never guarded unguarded.
+            var acting = ExplorationPolicy.MayPressControls(job);
+            guarded = !acting && guard is not null && ExplorationPolicy.MayPressGuarded(job);
+
+            if (acting || guarded)
             {
-                var pressed = await PressAsync(page, job, pages, described, startAfresh, cancellationToken).ConfigureAwait(false);
+                // Nothing a guarded visit does reaches the application, so there is nothing to put back.
+                var pressed = await PressAsync(page, job, pages, described, acting ? startAfresh : null, guarded ? guard : null, cancellationToken)
+                    .ConfigureAwait(false);
                 pages.AddRange(pressed.Pages);
                 truncated |= pressed.Truncated;
                 visits = pressed.Visits;
                 visitsFailed = pressed.Failed;
+                withheld = pressed.Withheld;
             }
             else
             {
@@ -193,7 +213,7 @@ internal static partial class SiteExplorer
         // The test account's values never leave in a description: it goes to a model (ADR-0033).
         var snapshot = SecretRedaction.Without(new SiteSnapshot(job.TargetOrigin, pages, truncated), job.Secrets);
 
-        return new Exploration(snapshot, visits, visitsFailed, refused);
+        return new Exploration(snapshot, visits, visitsFailed, refused, guarded, withheld);
     }
 
     /// <summary>

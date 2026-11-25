@@ -507,6 +507,18 @@ public sealed class DescribedTestTests : IAsyncLifetime
         Assert.Equal(TimeSpan.FromMinutes(10), job.Budget.WallClock);
     }
 
+    [Fact]
+    public void AnExplorationRun_IsGivenGuardedPressing_UnlessTheOperatorTurnedItOff_AndNoOtherRunIs()
+    {
+        // The worker decides whether it applies: only where exploring may not act (ADR-0041).
+        var exploration = new Domain.Execution.TestRun { ScenarioId = Scenarios.Exploration, TargetOrigin = OurShop, TestCaseId = Guid.CreateVersion7() };
+        var scripted = new Domain.Execution.TestRun { ScenarioId = Scenarios.DemoShopBasket, TargetOrigin = OurShop };
+
+        Assert.True(RunDispatcher.JobFor(exploration, new ExecutionOptions(), "/tmp/x").PressGuarded);
+        Assert.False(RunDispatcher.JobFor(exploration, new ExecutionOptions { GuardedPressing = false }, "/tmp/x").PressGuarded);
+        Assert.False(RunDispatcher.JobFor(scripted, new ExecutionOptions(), "/tmp/x").PressGuarded);
+    }
+
     private async Task SpentAsync(Guid organization, Guid project, Guid environment, decimal cost)
     {
         await using var database = _database.NewContext();

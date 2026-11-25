@@ -41,6 +41,10 @@ var withoutTestIds = args.Contains("--without-test-ids", StringComparer.Ordinal)
 // Explore as a customer's site is explored: links followed, no control pressed, no form sent (ADR-0030, part 2).
 var readOnly = args.Contains("--read-only", StringComparer.Ordinal);
 
+// With --read-only: press controls with every write blocked in the browser, as a customer's site is explored since
+// ADR-0041. Without it, --read-only is what the earlier read-only figures measured: links only.
+var guarded = readOnly && args.Contains("--guarded", StringComparer.Ordinal);
+
 // A release-candidate measurement is of exactly that commit: refused on any other, or with uncommitted changes.
 var releaseCandidate = BenchmarkOptions.Value(args, "--release-candidate");
 var (revision, clean) = Provenance.Source();
@@ -141,7 +145,7 @@ IReadOnlyList<BenchmarkScenario> targetScenarios = unseen && external is null ? 
 // How much of what the baseline plans need the exploration shows: no key, nothing spent.
 if (args.Contains("--coverage", StringComparer.Ordinal))
 {
-    var (snapshot, said) = await Coverage.ExploreAsync(origin, startAfresh, readOnly);
+    var (snapshot, said) = await Coverage.ExploreAsync(origin, startAfresh, readOnly, guarded);
     Console.WriteLine(said);
 
     if (withoutTestIds)
@@ -150,7 +154,7 @@ if (args.Contains("--coverage", StringComparer.Ordinal))
         // says what each test id is: its role, its name, its text. The question is whether the copy without
         // them still shows that element.
         using var reference = InProcessHost.Start(map, withoutTestIds: false);
-        var (withIds, _) = await Coverage.ExploreAsync(reference.Origin, startAfresh, readOnly);
+        var (withIds, _) = await Coverage.ExploreAsync(reference.Origin, startAfresh, readOnly, guarded);
         Coverage.PrintWithoutTestIds(targetScenarios, snapshot, withIds, Console.Out);
     }
     else
@@ -184,7 +188,7 @@ if (BenchmarkOptions.Value(args, "--export-check") is { } language)
 // the crawl against an application without a key.
 if (args.Contains("--explore", StringComparer.Ordinal))
 {
-    var (snapshot, said) = await Coverage.ExploreAsync(origin, startAfresh, readOnly);
+    var (snapshot, said) = await Coverage.ExploreAsync(origin, startAfresh, readOnly, guarded);
     Console.WriteLine(said);
 
     foreach (var page in snapshot.Pages)
@@ -294,6 +298,7 @@ var clock = System.Diagnostics.Stopwatch.StartNew();
 var harness = new Harness(origin, planner, options.Repetitions, options.RecordingDirectory)
 {
     ReadOnlyExploration = options.ReadOnly,
+    GuardedPressing = guarded,
     MaxTotalUsd = options.MaxTotalUsd,
     Say = Console.WriteLine,
     SetDefects = setDefects,
@@ -340,7 +345,8 @@ var report = Report.Write(
         "petclinic" => "Spring PetClinic at commit 500158f, Spring's sample application, which nobody here wrote and the explorer was never tuned on",
         _ => "an application of our own",
     })
-        + (options.ReadOnly ? ", explored read-only (links followed, no control pressed, no form sent), as a customer's site is" : "")
+        + (options.ReadOnly && guarded ? ", explored read-only with guarded pressing (controls pressed, every write blocked in the browser, no form sent), as a customer's site is (ADR-0041)"
+            : options.ReadOnly ? ", explored read-only (links followed, no control pressed, no form sent), as a customer's site was before ADR-0041" : "")
         + (signedIn ? ", with the published demo account stored as the test account, so exploring signs in (ADR-0033)" : ""),
     new Provenance(
         revision,
@@ -348,7 +354,8 @@ var report = Report.Write(
         releaseCandidate,
         planner?.Model ?? "none: the baseline only",
         Provenance.HashOfPrompt(),
-        (options.ReadOnly ? "read-only (links followed, no control pressed, no form sent)" : "acting (controls pressed, forms sent)")
+        (options.ReadOnly && guarded ? "read-only with guarded pressing (controls pressed, writes blocked, no form sent)"
+            : options.ReadOnly ? "read-only (links followed, no control pressed, no form sent)" : "acting (controls pressed, forms sent)")
             + (withoutTestIds ? ", served without test ids" : ", with test ids")
             + (stated ? ", with stated expected results" : ""),
         Provenance.ResetFor(options.Target)));
@@ -497,6 +504,8 @@ internal sealed record BenchmarkOptions(
             ? ReportFileName([.. args.Where(arg => arg != "--stated")]).Replace(".md", "-stated.md", StringComparison.Ordinal)
         : args.Contains("--without-test-ids", StringComparer.Ordinal)
             ? ReportFileName([.. args.Where(arg => arg != "--without-test-ids")]).Replace(".md", "-no-ids.md", StringComparison.Ordinal)
+        : args.Contains("--guarded", StringComparer.Ordinal) && args.Contains("--read-only", StringComparer.Ordinal)
+            ? ReportFileName([.. args.Where(arg => arg != "--read-only" && arg != "--guarded")]).Replace(".md", "-guarded.md", StringComparison.Ordinal)
         : args.Contains("--read-only", StringComparer.Ordinal)
             ? ReportFileName([.. args.Where(arg => arg != "--read-only")]).Replace(".md", "-read-only.md", StringComparison.Ordinal)
         : args.Contains("--unseen", StringComparer.Ordinal) ? $"ai-benchmark-unseen-{Value(args, "--target") ?? "demo"}.md"

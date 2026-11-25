@@ -85,6 +85,13 @@ var connectionString = builder.Configuration.GetConnectionString("Autestiq")
         + "\"Host=localhost;Database=autestiq_dev;Username=postgres;Password=postgres\". "
         + "See README.md for how to get a PostgreSQL to point it at.");
 
+// Invitation and password-reset email, through any provider's SMTP relay (ADR-0040). Registered before the
+// application, whose development sender, which writes links to the log, is used only when none is.
+if (builder.Configuration.GetSection(Autestiq.Application.Identity.SmtpOptions.Section).Get<Autestiq.Application.Identity.SmtpOptions>() is { Host.Length: > 0 } smtp)
+{
+    builder.Services.AddAutestiqSmtpEmail(smtp);
+}
+
 builder.Services.AddAutestiqApplication(connectionString);
 
 // The key ring for test accounts' sign-in values, outside the database (ADR-0033).

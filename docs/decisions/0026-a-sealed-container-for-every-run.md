@@ -133,3 +133,13 @@ Developers who run those tests locally need Docker, as the owner accepted.
   per-host configuration. The network option needs neither, and is checked by a test.
 - **gVisor or a microVM (Firecracker) per run.** Stronger isolation of the kernel, and more to operate.
   Worth revisiting before untrusted customers at scale; not needed to close this gate.
+
+## Amendment (2026-11-25): a site that cannot be reached is not a failure of it
+
+The local rehearsal of the pilot runbook (finding F5) showed a sealed run that could not reach its site ending
+"Failed: Locator expected to have text", as if the application were wrong. **The owner decided on 2026-11-25** that such
+a run says the site could not be reached. A run that fails while a request to **its own origin** was refused by the
+egress proxies, or with a browser error meaning no connection was made (`net::ERR_CONNECTION_REFUSED`,
+`ERR_NAME_NOT_RESOLVED` and the like), now ends **inconclusive**: "The site could not be reached (…), so nothing is known
+about the application: this is not a failure of it." A refused request to another origin (a font host, an analytics
+script) leaves a failure a failure, because the application was reached and judged (`Autestiq.Worker.Unreachable`).

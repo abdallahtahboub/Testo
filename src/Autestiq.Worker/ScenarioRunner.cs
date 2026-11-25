@@ -211,6 +211,13 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
                     ? steps[index].Message
                     : Reason(ending, refusals);
 
+                // A run that could not reach its own site has found nothing about the application: it says so, as no
+                // verdict, rather than as a failure that blames the site (R3 rehearsal F5; the owner, 2026-11-25).
+                if (ending == RunStatus.Failed && Unreachable.Of(job.TargetOrigin, refusals, steps[index].Message) is { } unreachable)
+                {
+                    return Finish(job, RunStatus.Inconclusive, startedAt, steps, proxy, Unreachable.Explain(unreachable));
+                }
+
                 // A read-only run that failed after a request was blocked may have failed because it was blocked: that
                 // says nothing about the application, so it is no verdict.
                 if (ending == RunStatus.Failed && guard.Blocked.Count > 0)

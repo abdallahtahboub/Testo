@@ -31,6 +31,9 @@ public sealed partial class TestPage : ComponentBase
     [Inject]
     private TimeProvider TimeProvider { get; set; } = null!;
 
+    [Inject]
+    private DataTurns Turns { get; set; } = null!;
+
     private ITimer? _refresh;
 
     private bool Loading { get; set; } = true;
@@ -50,7 +53,7 @@ public sealed partial class TestPage : ComponentBase
     protected override async Task OnParametersSetAsync()
     {
         Loading = true;
-        Project = await ProjectService.FindAsync(ProjectKey, CancellationToken.None).ConfigureAwait(false);
+        Project = await Turns.TakeAsync(() => ProjectService.FindAsync(ProjectKey, CancellationToken.None)).ConfigureAwait(false);
         await LoadAsync().ConfigureAwait(false);
         Loading = false;
     }
@@ -68,7 +71,8 @@ public sealed partial class TestPage : ComponentBase
 
     private async Task RefreshAsync()
     {
-        if (Detail?.Status is TestCaseStatus.Exploring or TestCaseStatus.Planning)
+        // A change being saved reloads the test itself when it is done; this tick is not needed.
+        if (Detail?.Status is TestCaseStatus.Exploring or TestCaseStatus.Planning && !Turns.Busy)
         {
             await LoadAsync().ConfigureAwait(false);
             StateHasChanged();
@@ -85,7 +89,7 @@ public sealed partial class TestPage : ComponentBase
 
     private async Task LoadAsync()
     {
-        var detail = await TestCases.GetAsync(TestCaseId, CancellationToken.None).ConfigureAwait(false);
+        var detail = await Turns.TakeAsync(() => TestCases.GetAsync(TestCaseId, CancellationToken.None)).ConfigureAwait(false);
 
         // A test of another project is not this page's, even within the organization.
         Detail = Project is not null && detail is not null ? detail : null;

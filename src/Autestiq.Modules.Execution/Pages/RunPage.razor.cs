@@ -35,6 +35,9 @@ public sealed partial class RunPage : ComponentBase, IDisposable
     [Inject]
     private TimeProvider Clock { get; set; } = null!;
 
+    [Inject]
+    private DataTurns Turns { get; set; } = null!;
+
     private bool Loading { get; set; } = true;
 
     private bool Busy { get; set; }
@@ -61,7 +64,7 @@ public sealed partial class RunPage : ComponentBase, IDisposable
 
         try
         {
-            Run = await Execution.GetRunAsync(RunId, CancellationToken.None).ConfigureAwait(false);
+            Run = await Turns.TakeAsync(() => Execution.GetRunAsync(RunId, CancellationToken.None)).ConfigureAwait(false);
         }
         finally
         {
@@ -86,6 +89,12 @@ public sealed partial class RunPage : ComponentBase, IDisposable
 
     private async Task RefreshAsync()
     {
+        // A cancel or a rerun is under way and loads the run itself; this tick is not needed.
+        if (Turns.Busy)
+        {
+            return;
+        }
+
         await LoadAsync().ConfigureAwait(false);
         StateHasChanged();
     }
@@ -102,7 +111,7 @@ public sealed partial class RunPage : ComponentBase, IDisposable
 
         try
         {
-            var cancelled = await Execution.CancelRunAsync(RunId, CancellationToken.None).ConfigureAwait(false);
+            var cancelled = await Turns.TakeAsync(() => Execution.CancelRunAsync(RunId, CancellationToken.None)).ConfigureAwait(false);
 
             if (!cancelled.Succeeded)
             {
@@ -130,7 +139,7 @@ public sealed partial class RunPage : ComponentBase, IDisposable
 
         try
         {
-            var started = await Execution.RerunAsync(RunId, CancellationToken.None).ConfigureAwait(false);
+            var started = await Turns.TakeAsync(() => Execution.RerunAsync(RunId, CancellationToken.None)).ConfigureAwait(false);
 
             if (!started.Succeeded)
             {

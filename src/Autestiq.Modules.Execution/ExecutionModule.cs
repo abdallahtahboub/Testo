@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Autestiq.Modules.Execution.Resources;
 using Autestiq.Platform;
 using Autestiq.Platform.Localization;
@@ -20,6 +21,12 @@ public sealed class ExecutionModule : IFeatureModule
 
     /// <inheritdoc />
     public string? FeatureFlag => "Module.Execution";
+
+    /// <inheritdoc />
+    public void RegisterServices(IServiceCollection services) =>
+
+        // One per circuit, like the database context whose calls it puts in turn.
+        services.AddScoped<DataTurns>();
 
     /// <inheritdoc />
     public void RegisterNavigation(INavigationRegistry navigation)

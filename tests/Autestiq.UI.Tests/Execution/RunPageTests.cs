@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Autestiq.Contracts.Common;
 using Autestiq.Contracts.Execution;
+using Autestiq.Modules.Execution;
 using Autestiq.Modules.Execution.Pages;
 using Autestiq.UI.Tests.Support;
 
@@ -17,6 +18,7 @@ public class RunPageTests : DesignSystemTestContext
     public RunPageTests()
     {
         Services.AddSingleton<IExecutionService>(_execution);
+        new ExecutionModule().RegisterServices(Services);
     }
 
     [Fact]

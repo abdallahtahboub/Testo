@@ -21,7 +21,7 @@ namespace Autestiq.Benchmark;
 /// </para>
 /// <para>
 /// Juice Shop has no defect switches, so every scenario runs against the sound application. Its database is rebuilt
-/// each time the container starts, so a run starts from a fresh container.
+/// each time the container starts, so a run starts from a fresh container (<c>tools/r9/juice-shop-up.sh</c>).
 /// </para>
 /// <para>
 /// A welcome dialog covers the shop on a first visit until it is dismissed. A baseline that presses anything

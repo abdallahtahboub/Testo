@@ -502,6 +502,10 @@ Delivered **one stage at a time**, each as its own reviewable sub-milestone:
 | 6.6 | Reporting | Metrics, release readiness + go/no-go, test summary report, closure |
 | 6.7 | Settings | Integrations placeholders, team members, capability settings, profile, feature-flag panel |
 
+**Order (the owner, 2026-11-25): 6.2 Analysis and 6.3 Design first, at high priority**, because they are also stages
+B–D of the application-understanding goal; then 6.4, 6.5, 6.1, 6.6 (which is the Enterprise programme's E7) and 6.7.
+6.7's team members move to E1. Not started.
+
 **Done when (per module):** pages from `sitemap.md` exist with realistic mock data; bUnit tests for module components; Playwright smoke test per page; module only references `Contracts`, `Platform`, `UI.Shared` (dependency test passes); EN + DE complete.
 
 ## Milestone 7 — Live E2E Test Run view (showpiece)
@@ -533,9 +537,29 @@ What streams is customer evidence (`docs/secure-onboarding-and-privacy.md` §4�
 
 ---
 
+## Enterprise programme *(planned, not started; the owner asked for it on 2026-11-25)*
+What enterprise customers expect, area by area, with what exists today beside each requirement:
+[`business/enterprise-requirements.md`](business/enterprise-requirements.md). **Nothing here is built** beyond what that
+document's "Today" column says. Each milestone is planned in detail and approved before it starts, as every milestone is.
+
+| # | Milestone | Priority | What it delivers | Depends on |
+|---|---|---|---|---|
+| E1 | **Administration** | **High** | Screens for what the backend already has: members and invitations, roles, the audit log, usage against limits, organization settings, the plan (read-only) | Milestone 5.1 |
+| — | **Milestone 6.2 and 6.3** (above) | **High** | Requirements and traceability; the case library | — |
+| E2 | **Enterprise identity** | **High** | Authenticator enrollment, enforced two-factor sign-in, SSO (OpenID Connect, then SAML), domain verification, SCIM provisioning, session policy | Owner: which identity providers first |
+| E3 | **Integrations** | **High** | `Autestiq.Api` with scoped API keys (ADR-0014), signed webhooks, CI (GitHub Actions, GitLab, Azure DevOps), issue trackers (Jira, Azure Boards, GitHub), optional source hosting, Slack and Teams | Milestone 6.5 for defects; owner: which first |
+| E4 | Governance | Medium | Audit export and SIEM streaming, retention for every kind of data (G-5), deletion on request, data residency, the minimized AI mode (G-2), legal records | Owner: hosting and residency; counsel |
+| E5 | Access refinements | Medium | Per-project roles, teams, custom roles from fixed permissions, two-person approval, time-limited production access | E1 |
+| E6 | Work at scale | Medium | Search, filters and saved views, bulk actions, CSV and PDF export, shortcuts, several organizations per person | Milestone 6 |
+| E7 | Reporting (= Milestone 6.6) | Medium | Dashboards, release readiness, ISTQB summary and completion reports, scheduled reports | Milestone 6.2–6.5 |
+| E8 | Trust and certification | Later | The private agent, a security documentation pack, a penetration test, SOC 2 then ISO 27001, an accessibility statement | E9; owner: when |
+| E9 | Platform and operations | With go-live | Hosting, TLS, alerting, logs, status page, backups with tested restores, an SLA, scale-out, a trial organization | Owner: hosting |
+| E10 | Commercial | Later | Self-service plans and invoices, enterprise contracts, usage alerts | Owner: pricing and billing provider |
+
+**Order:** E1, Milestones 6.2 and 6.3, E2 and E3, then E4 to E7, with E9 at the go-live stage and E8 and E10 after it.
+Pilot readiness (Milestone 5.1) comes first; this programme does not reorder it.
+
 ## Later (out of scope for the frontend phase)
-- `Autestiq.Api`: the REST host for CI integrations, over the same use cases (ADR-0014).
 - SignalR for the live run feed, replacing the simulated one.
-- Per-organization single sign-on (OpenID Connect), behind the interfaces of ADR-0013.
 - More capabilities: API, performance, security, accessibility testing.
 - `InteractiveAuto` for the app area if needed.

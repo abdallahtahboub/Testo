@@ -190,7 +190,7 @@ public sealed class ContainerDispatcherTests : IAsyncLifetime
     public async Task ARunInASealedContainer_EndsWithAVerdict_AndLeavesNoContainerOrNetwork()
     {
         // Our own demo address, which a sealed run cannot reach by design: the browser's request is refused, so the
-        // run ends with a verdict of its own rather than an infrastructure error, and everything it made is removed.
+        // run ends saying the site could not be reached, not with an infrastructure error, and everything it made is removed.
         var options = new ChangeableOptions(new ExecutionOptions
         {
             Isolation = WorkerIsolation.Container,
@@ -209,7 +209,10 @@ public sealed class ContainerDispatcherTests : IAsyncLifetime
         {
             var finished = await FinishedAsync(runId, TimeSpan.FromMinutes(3));
 
-            Assert.True(finished.Status is not (RunStatus.Running or RunStatus.Queued or RunStatus.InfrastructureError), $"{finished.Status}: {finished.FailureReason}");
+            // Not an infrastructure error, and not "Failed" either: the site was never reached, and the run says so
+            // (ADR-0026 amendment, 2026-11-25).
+            Assert.True(finished.Status == RunStatus.Inconclusive, $"{finished.Status}: {finished.FailureReason}");
+            Assert.Contains("could not be reached", finished.FailureReason, StringComparison.Ordinal);
         }
         finally
         {

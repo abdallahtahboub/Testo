@@ -371,6 +371,12 @@ no `DELETE` on audit and usage tables) and operator; a review list of every `Ign
 **Evaluated separately, later:** native RLS, which needs a session variable per connection and a plan for the
 background jobs that cross organizations, and database-level append-only protection (R-4).
 
+### R-20 · A key ring that does not match the database goes unnoticed — **Medium; found 2026-11-25 (R3 rehearsal)**
+Restored without its key ring, the host creates a new one, reports ready, and every stored test-account value is
+silently unreadable until a run needs one and is refused (rehearsal step 10). **Fix:** a canary value written with the
+key ring when the database is first used, stored in the database, and checked by `/health/ready`: a key ring that cannot
+read it is not ready. Until then the runbook (§6) restores the database and the key ring together and checks by hand.
+
 ### R-7 · One database for every tenant — **Accepted, documented**
 
 ADR-0012 chose a shared database with filtered access and listed the consequences, including the

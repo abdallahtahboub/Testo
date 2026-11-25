@@ -102,6 +102,15 @@ builder.Services.Configure<Autestiq.Application.Testing.PlanningOptions>(builder
 builder.Services.Configure<Autestiq.Application.Execution.EvidenceRetentionOptions>(builder.Configuration.GetSection(Autestiq.Application.Execution.EvidenceRetentionOptions.Section));
 builder.Services.Configure<ArtifactStoreOptions>(builder.Configuration.GetSection(ArtifactStoreOptions.SectionName));
 
+// Evidence is customer data and is backed up with the database (data-architecture.md §8): outside development it is
+// never left in the system's temporary directory by default (found in the local rehearsal of R3, 2026-11-25).
+if (!builder.Environment.IsDevelopment() && string.IsNullOrWhiteSpace(builder.Configuration[$"{ArtifactStoreOptions.SectionName}:Directory"]))
+{
+    throw new InvalidOperationException(
+        $"{ArtifactStoreOptions.SectionName}:Directory is not configured. It names the directory where screenshots are kept, "
+        + "which is customer data and must be backed up: set it, for example with the environment variable Artifacts__Directory.");
+}
+
 // Runs are carried out by a worker process, outside this one (ADR-0018).
 builder.Services.AddAutestiqRunDispatcher();
 

@@ -130,9 +130,17 @@ public sealed partial class SmtpInvitationNotifier(SmtpOptions options, ILogger<
         string Text(string key, string culture) =>
             string.Format(CultureInfo.InvariantCulture, Texts.GetString(key, CultureInfo.GetCultureInfo(culture)) ?? key, organizationName, link);
 
+        // Each key spelled out, so the resource tests can find it.
+        var (subjectKey, bodyKey) = kind switch
+        {
+            "Email_Invitation" => ("Email_Invitation_Subject", "Email_Invitation_Body"),
+            "Email_PasswordReset" => ("Email_PasswordReset_Subject", "Email_PasswordReset_Body"),
+            _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "There is no such message."),
+        };
+
         return (
-            Text(kind + "_Subject", "en") + " / " + Text(kind + "_Subject", "de"),
-            Text(kind + "_Body", "en") + "\n\n— — —\n\n" + Text(kind + "_Body", "de") + "\n");
+            Text(subjectKey, "en") + " / " + Text(subjectKey, "de"),
+            Text(bodyKey, "en") + "\n\n— — —\n\n" + Text(bodyKey, "de") + "\n");
     }
 
     private async Task SendAsync(string email, string kind, Uri link, string organizationName, CancellationToken cancellationToken)

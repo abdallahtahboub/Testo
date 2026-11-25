@@ -3,7 +3,7 @@ using Autestiq.Contracts.Planning;
 namespace Autestiq.Benchmark;
 
 /// <summary>
-/// Ten scenarios for Gitea, a self-hosted Git service written in Go: server-rendered pages with client-side controls,
+/// Nine scenarios for Gitea, a self-hosted Git service written in Go: server-rendered pages with client-side controls,
 /// which nobody here wrote (Milestone 5.1 R9). It is R9's <strong>clean</strong> application, as PetClinic was.
 /// </summary>
 /// <remarks>
@@ -23,6 +23,14 @@ namespace Autestiq.Benchmark;
 /// installation locked, SQLite, registration open. There is one user, <c>gardener</c>, with one public repository,
 /// <c>apples</c>, described as "Crisp and sweet, picked in October." and created with a README. Nothing else is
 /// there. Gitea has no defect switches, so every scenario runs against the sound application.
+/// </para>
+/// <para>
+/// <strong>After the first run with no model</strong> (2026-11-25), nine baselines passed as written and one could not
+/// be written at all, so it was removed from the set: "a-repository-page-shows-its-readme", whose words were "Open the
+/// apples repository of gardener and check that its README shows its description." The repository page shows the
+/// description twice, at the top and in the README, so the text alone names two elements; and the README is a plain
+/// <c>div</c>, which is not among the containers a target may be scoped to (<c>Targets.Containers</c>). A gap in the
+/// vocabulary, recorded, not fixed here: the explorer and vocabulary are frozen for this application.
 /// </para>
 /// <para>
 /// No scenario signs in: a password field has no ARIA role, so the vocabulary cannot type into it (as on Juice Shop).
@@ -74,14 +82,6 @@ public static class GiteaScenarios
                 Goto("Explore the repositories", "/explore/repos"),
                 Click("Follow the menu to Users", "link", "Users"),
                 See("The gardener is listed", "link", "gardener"),
-            ]),
-
-        new(
-            "a-repository-page-shows-its-readme",
-            "Open the apples repository of gardener and check that its README shows its description.",
-            [
-                Goto("Open the repository", "/gardener/apples"),
-                SeeText("The README shows the description", "Crisp and sweet, picked in October."),
             ]),
 
         new(

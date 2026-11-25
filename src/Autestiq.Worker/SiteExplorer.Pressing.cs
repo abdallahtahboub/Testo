@@ -472,7 +472,7 @@ internal static partial class SiteExplorer
             return Visit.NotDescribed;
         }
 
-        return new Visit(await LookAtAsync(page, here.PathAndQuery, described).ConfigureAwait(false), form, asksForPassword);
+        return new Visit(await LookAtAsync(page, AddressOf(here), described).ConfigureAwait(false), form, asksForPassword);
     }
 
     /// <summary>
@@ -520,6 +520,9 @@ internal static partial class SiteExplorer
         }
 
         await page.WaitForLoadStateAsync(LoadState.Load).ConfigureAwait(false);
+
+        // What a press changed in place may still be drawing.
+        await SettleAsync(page).ConfigureAwait(false);
     }
 
     /// <summary>

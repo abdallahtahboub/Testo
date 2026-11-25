@@ -193,16 +193,7 @@ public sealed class EgressProxy : IAsyncDisposable
             .Append(CultureInfo.InvariantCulture, $"{request.Method} {uri.PathAndQuery} HTTP/1.1\r\n")
             .Append(CultureInfo.InvariantCulture, $"Host: {uri.Authority}\r\n");
 
-        foreach (var header in request.Headers)
-        {
-            if (!header.StartsWith("Host:", StringComparison.OrdinalIgnoreCase)
-                && !header.StartsWith("Proxy-", StringComparison.OrdinalIgnoreCase))
-            {
-                head.Append(CultureInfo.InvariantCulture, $"{header}\r\n");
-            }
-        }
-
-        head.Append("\r\n");
+        AppendHeaders(head, request.Headers);
 
         await upstreamStream.WriteAsync(Encoding.ASCII.GetBytes(head.ToString())).ConfigureAwait(false);
 
@@ -299,22 +290,49 @@ public sealed class EgressProxy : IAsyncDisposable
             .Append(CultureInfo.InvariantCulture, $"{request.Method} {uri.AbsoluteUri} HTTP/1.1\r\n")
             .Append(CultureInfo.InvariantCulture, $"Host: {uri.Authority}\r\n");
 
-        foreach (var header in request.Headers)
-        {
-            if (!header.StartsWith("Host:", StringComparison.OrdinalIgnoreCase)
-                && !header.StartsWith("Proxy-", StringComparison.OrdinalIgnoreCase))
-            {
-                head.Append(CultureInfo.InvariantCulture, $"{header}\r\n");
-            }
-        }
-
-        head.Append("\r\n");
+        AppendHeaders(head, request.Headers);
         await stream.WriteAsync(Encoding.ASCII.GetBytes(head.ToString())).ConfigureAwait(false);
 
         var up = CopyAsync(browser, stream, counting: false);
         var down = CopyAsync(stream, browser, counting: true);
 
         await Task.WhenAny(up, down).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// The browser's headers, less the ones that are the proxy's business, ending the head. The far end is asked to
+    /// close the connection after its answer, unless the request upgrades it (a WebSocket).
+    /// </summary>
+    /// <remarks>
+    /// Only the first request on a connection passes through here; the rest are copied as the browser sent them. Kept
+    /// open, a connection would carry the browser's next request to the far end in proxy form, with the whole address
+    /// on its first line and never checked by the policy. Kestrel and Tomcat read such a request by its path; Node's
+    /// server does not, and OWASP Juice Shop answered its own scripts with its HTML page, so nothing rendered (R9,
+    /// 2026-11-25). Closed, every request opens a connection of its own, and each is rewritten and judged.
+    /// </remarks>
+    private static void AppendHeaders(StringBuilder head, IEnumerable<string> headers)
+    {
+        var upgrading = headers.Any(header => header.StartsWith("Upgrade:", StringComparison.OrdinalIgnoreCase));
+
+        foreach (var header in headers)
+        {
+            var connection = header.StartsWith("Connection:", StringComparison.OrdinalIgnoreCase)
+                || header.StartsWith("Keep-Alive:", StringComparison.OrdinalIgnoreCase);
+
+            if (!header.StartsWith("Host:", StringComparison.OrdinalIgnoreCase)
+                && !header.StartsWith("Proxy-", StringComparison.OrdinalIgnoreCase)
+                && (upgrading || !connection))
+            {
+                head.Append(CultureInfo.InvariantCulture, $"{header}\r\n");
+            }
+        }
+
+        if (!upgrading)
+        {
+            head.Append("Connection: close\r\n");
+        }
+
+        head.Append("\r\n");
     }
 
     /// <summary>The origin check this proxy can make without resolving anything.</summary>

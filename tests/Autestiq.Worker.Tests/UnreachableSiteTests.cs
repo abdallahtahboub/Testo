@@ -64,6 +64,7 @@ public class UnreachableSiteTests(DemoShopFixture shop)
     [InlineData("https://shop.example", "https://shop.example:443 — refused: not an allowed origin", null, true)]
     [InlineData("http://127.0.0.1:5090", "http://127.0.0.1:5090 — refused: a private address", null, true)]
     [InlineData("https://shop.example", "https://fonts.example:443 — refused: not an allowed origin", null, false)]
+    [InlineData("http://127.0.0.1:3000", "https://127.0.0.1:3000 — refused: not an allowed origin", null, false)]
     [InlineData("https://shop.example", null, "page.goto: net::ERR_NAME_NOT_RESOLVED at https://shop.example/", true)]
     [InlineData("https://shop.example", null, "Locator expected to have text 'Checkout'", false)]
     public void Of_CountsOnlyTheRunsOwnOrigin_AndErrorsOfNoConnection(string target, string? refusal, string? failure, bool unreachable)

@@ -113,6 +113,12 @@ public sealed record SiteSnapshot(string Origin, IReadOnlyList<PageSnapshot> Pag
             && string.Equals(element.Name, target.Value, StringComparison.OrdinalIgnoreCase)
             && WithinMatches(element, target),
 
+        // A field by its label: the name the crawl read for it is its label.
+        TargetKind.Label =>
+            element.Role is "textbox" or "searchbox" or "combobox" or "checkbox" or "radio"
+            && string.Equals(element.Name, target.Value, StringComparison.OrdinalIgnoreCase)
+            && WithinMatches(element, target),
+
         // A list's Text is its options, not words the page shows as text.
         TargetKind.Text =>
             element.Role != "combobox"

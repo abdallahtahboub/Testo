@@ -87,7 +87,7 @@ internal static partial class SiteExplorer
 
     /// <summary>The roles worth describing: the things a plan can act on or check.</summary>
     private static readonly string[] Roles =
-        ["button", "link", "textbox", "searchbox", "checkbox", "radio", "combobox", "heading"];
+        ["button", "link", "textbox", "searchbox", "checkbox", "radio", "combobox", "heading", "menuitem", "tab"];
 
     /// <summary>
     /// Describes the target: the pages its links and its sitemap reach, within the page budget, and,
@@ -550,6 +550,12 @@ internal static partial class SiteExplorer
                 // "searchbox", and a target by role "textbox" would never find it.
                 var described = ariaRole is { } given && Targets.NameableRoles.Contains(given) ? given : role;
 
+                // A button that is a tab, or an entry of a menu, is found again by its own role's turn: once is enough.
+                if (described != role && described is "menuitem" or "tab")
+                {
+                    continue;
+                }
+
                 // A list says what it offers, so that a plan can choose by label.
                 var options = described == "combobox" ? await OptionsOfAsync(element).ConfigureAwait(false) : null;
 
@@ -625,11 +631,11 @@ internal static partial class SiteExplorer
                 continue;
             }
 
-            var (byRole, byText) = Candidates(element);
-            var chosen = await FirstUniqueAsync(page, [byRole, byText]).ConfigureAwait(false);
+            var (byRole, byLabel, byText) = Candidates(element);
+            var chosen = await FirstUniqueAsync(page, locator, [byRole, byLabel, byText]).ConfigureAwait(false);
             string? firstLabel = null;
 
-            if (chosen is null && (byRole is not null || byText is not null))
+            if (chosen is null && (byRole is not null || byLabel is not null || byText is not null))
             {
                 // Not unique on its own: narrowed by each thing its row, item or form says, nearest first, until
                 // the browser finds exactly one. The first cell is not always the one that tells it apart: two
@@ -639,7 +645,7 @@ internal static partial class SiteExplorer
 
                 foreach (var label in labels)
                 {
-                    if ((chosen = await FirstUniqueAsync(page, [byRole?.InsideOf(label), byText?.InsideOf(label)]).ConfigureAwait(false)) is not null)
+                    if ((chosen = await FirstUniqueAsync(page, locator, [byRole?.InsideOf(label), byLabel?.InsideOf(label), byText?.InsideOf(label)]).ConfigureAwait(false)) is not null)
                     {
                         break;
                     }
@@ -653,12 +659,25 @@ internal static partial class SiteExplorer
         }
     }
 
-    /// <summary>The first of the targets the browser finds exactly one element for.</summary>
-    private static async Task<ActionTarget?> FirstUniqueAsync(IPage page, ActionTarget?[] targets)
+    /// <summary>
+    /// The test an ancestor passes to be one of <see cref="TargetScopes"/>, written once from that list, so that the
+    /// labels tried for "within" come from the same containers the worker will look in. Fixed words of ours: nothing
+    /// from the application is put into it.
+    /// </summary>
+    private static readonly string ContainerTest = string.Join(
+        " or ",
+        TargetScopes.Elements.Select(name => $"self::{name}").Concat(TargetScopes.Roles.Select(role => $"@role='{role}'")));
+
+    /// <summary>The first of the targets the browser finds exactly one element for, and that one the element described.</summary>
+    /// <remarks>
+    /// Finding one element is not enough: it must be this one. A second "Close" button, outside any container, was once
+    /// told to use "Close within We use cookies", which finds the first one, in the dialog, exactly once (ADR-0042).
+    /// </remarks>
+    private static async Task<ActionTarget?> FirstUniqueAsync(IPage page, ILocator element, ActionTarget?[] targets)
     {
         foreach (var target in targets)
         {
-            if (target is not null && await FindsExactlyOneAsync(page, target).ConfigureAwait(false))
+            if (target is not null && await FindsExactlyOneAsync(page, target, element).ConfigureAwait(false))
             {
                 return target;
             }
@@ -667,11 +686,18 @@ internal static partial class SiteExplorer
         return null;
     }
 
-    /// <summary>The two ways to reach an element without a test id: by role and name, and by its exact text.</summary>
-    private static (ActionTarget? ByRole, ActionTarget? ByText) Candidates(SnapshotElement element)
+    /// <summary>
+    /// The ways to reach an element without a test id: by role and name; for a form field, by its label; and by its exact
+    /// text. A field whose role is not one a target may name, a number or a date, is reached by its label (ADR-0042).
+    /// </summary>
+    private static (ActionTarget? ByRole, ActionTarget? ByLabel, ActionTarget? ByText) Candidates(SnapshotElement element)
     {
         var byRole = Targets.NameableRoles.Contains(element.Role) && element.Name.Length > 0
             ? ActionTarget.ByRole(element.Role, element.Name)
+            : null;
+
+        var byLabel = element.Role is "textbox" or "searchbox" or "combobox" or "checkbox" or "radio" && element.Name.Length > 0
+            ? ActionTarget.ByLabel(element.Name)
             : null;
 
         // A list's Text is its options, not text it shows.
@@ -679,15 +705,19 @@ internal static partial class SiteExplorer
             ? null
             : element.Text ?? (element.Role is "text" or "button" or "link" or "heading" ? element.Name : null);
 
-        return (byRole, text is { Length: > 0 } ? ActionTarget.ByText(text) : null);
+        return (byRole, byLabel, text is { Length: > 0 } ? ActionTarget.ByText(text) : null);
     }
 
     /// <summary>Whether a target finds one element on the page, through the same code a planned run uses.</summary>
-    private static async Task<bool> FindsExactlyOneAsync(IPage page, ActionTarget target)
+    private static async Task<bool> FindsExactlyOneAsync(IPage page, ActionTarget target, ILocator element)
     {
         try
         {
-            return await Targets.Locate(page, target).CountAsync().ConfigureAwait(false) == 1;
+            var found = Targets.Locate(page, target);
+
+            // Exactly one, and it is the element: the two locators together still find it.
+            return await found.CountAsync().ConfigureAwait(false) == 1
+                && await found.And(element).CountAsync().ConfigureAwait(false) == 1;
         }
         catch (Exception exception) when (exception is PlaywrightException or TimeoutException)
         {
@@ -749,8 +779,7 @@ internal static partial class SiteExplorer
         {
             // A fixed path of ours, to the nth nearest of the containers Targets.Containers lists.
             var container = element.Locator(
-                "xpath=ancestor::*[self::tr or self::li or self::article or self::section or self::form or self::fieldset or self::dl or self::p]"
-                + $"[{level.ToString(System.Globalization.CultureInfo.InvariantCulture)}]");
+                $"xpath=ancestor::*[{ContainerTest}][{level.ToString(System.Globalization.CultureInfo.InvariantCulture)}]");
 
             try
             {
@@ -952,11 +981,18 @@ internal static partial class SiteExplorer
     {
         "button" => "button, input[type=submit], input[type=button]",
         "link" => "a[href]",
-        "textbox" => "input[type=text], input[type=email], input[type=password], input[type=search], input:not([type]), textarea",
+        // With the fields whose role is not one a target may name (a number is a "spinbutton", a date has none): those are
+        // reached by their label (ADR-0042).
+        "textbox" => "input[type=text], input[type=email], input[type=password], input[type=search], input[type=tel], input[type=url], "
+            + "input[type=number], input[type=date], input[type=time], input:not([type]), textarea",
         "checkbox" => "input[type=checkbox]",
         "radio" => "input[type=radio]",
         "combobox" => "select",
         "heading" => "h1, h2, h3",
+
+        // A menu's entries and a tab list's tabs have no element of their own: only their role says what they are.
+        "menuitem" => "[role=menuitemcheckbox], [role=menuitemradio]",
+        "tab" => "[role=tab]",
         _ => role,
     };
 

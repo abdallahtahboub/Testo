@@ -215,9 +215,10 @@ if (args.Contains("--explore", StringComparer.Ordinal))
     var byTestId = all.Count(item => item.element.NamedBy == TargetKind.TestId);
     var byRole = all.Count(item => item.element.NamedBy == TargetKind.RoleAndName);
     var byText = all.Count(item => item.element.NamedBy == TargetKind.Text);
+    var byLabel = all.Count(item => item.element.NamedBy == TargetKind.Label);
 
     Console.WriteLine($"Elements described: {all.Count}. A plan could name {byTestId} by test id, {byRole} by role and name, "
-        + $"{byText} by text; {all.Count - byTestId - byRole - byText} not at all.");
+        + $"{byLabel} by label, {byText} by text; {all.Count - byTestId - byRole - byLabel - byText} not at all.");
 
     // What nothing reaches reliably, so that it can be looked at: where a test id would help most.
     foreach (var (page, element) in all.Where(item => item.element.NamedBy is null).Take(25))

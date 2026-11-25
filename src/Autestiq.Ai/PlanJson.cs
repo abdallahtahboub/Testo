@@ -211,6 +211,9 @@ public static class PlanJson
             // compares it with the page's own words, so it is never read as anything but text.
             "text" => ActionTarget.ByText(target.Value.Trim()),
 
+            // A form field by its label, exactly as the description gives it (ADR-0042).
+            "label" => ActionTarget.ByLabel(target.Value.Trim()),
+
             _ => null,
         };
 

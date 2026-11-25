@@ -28,8 +28,8 @@ namespace Autestiq.Benchmark;
 /// dismisses it first, as a person would.
 /// </para>
 /// <para>
-/// No scenario signs in or registers. The password fields have no ARIA role, so nothing in the vocabulary can type into
-/// them: a gap in the vocabulary, recorded rather than worked around.
+/// No scenario signs in or registers. Written so because the password fields were thought to have no ARIA role; they
+/// have the textbox role (corrected 2026-11-25, ADR-0042). The scenarios are not changed for it.
 /// </para>
 /// <para>
 /// <strong>Baselines corrected after the first run with no model</strong> (2026-11-25), each because it failed the
@@ -39,7 +39,7 @@ namespace Autestiq.Benchmark;
 /// assistive technology, so a heading is not found by its role until the dialog is dismissed. They dismiss it first.</item>
 /// <item>German: the radio's own input sits under its label, which takes the click. The label is pressed, by its text.</item>
 /// <item>"The account menu leads to the login" was removed from the set: its menu entry has the role menuitem, which the
-/// vocabulary does not have, so no baseline can be written for it. Its words were "Open the account menu and choose to
+/// vocabulary did not have then (it has since ADR-0042), so no baseline could be written for it. Its words were "Open the account menu and choose to
 /// log in, and check that the login page opens."</item>
 /// </list>
 /// </para>

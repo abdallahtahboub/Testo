@@ -22,7 +22,7 @@ namespace Autestiq.Worker;
 public static class Targets
 {
     /// <summary>What can hold a repeated control or value: the containers "within" may name. Ours, and fixed.</summary>
-    internal const string Containers = "tr, li, article, section, form, fieldset, dl, p";
+    internal static readonly string Containers = TargetScopes.Selector;
 
     /// <summary>The element a target names, on this page.</summary>
     public static ILocator Locate(IPage page, ActionTarget target) => Locate(page, target, exactName: true);
@@ -73,6 +73,7 @@ public static class Targets
                 TargetKind.TestId => page.GetByTestId(target.Value),
                 TargetKind.RoleAndName => page.GetByRole(Role(target.Role), new PageGetByRoleOptions { Name = target.Value, Exact = exactName }),
                 TargetKind.Text => page.GetByText(target.Value, new PageGetByTextOptions { Exact = true }),
+                TargetKind.Label => page.GetByLabel(target.Value, new PageGetByLabelOptions { Exact = true }),
                 _ => throw Unknown(),
             };
         }
@@ -89,6 +90,7 @@ public static class Targets
             TargetKind.TestId => holder.GetByTestId(target.Value),
             TargetKind.RoleAndName => holder.GetByRole(Role(target.Role), new LocatorGetByRoleOptions { Name = target.Value, Exact = exactName }),
             TargetKind.Text => holder.GetByText(target.Value, new LocatorGetByTextOptions { Exact = true }),
+            TargetKind.Label => holder.GetByLabel(target.Value, new LocatorGetByLabelOptions { Exact = true }),
             _ => throw Unknown(),
         };
     }
@@ -108,10 +110,12 @@ public static class Targets
         "radio" => AriaRole.Radio,
         "combobox" => AriaRole.Combobox,
         "heading" => AriaRole.Heading,
+        "menuitem" => AriaRole.Menuitem,
+        "tab" => AriaRole.Tab,
         _ => throw new PlaywrightException($"'{role}' is not a role a target may name."),
     };
 
     /// <summary>The roles <see cref="Role"/> accepts.</summary>
     public static IReadOnlyList<string> NameableRoles { get; } =
-        ["button", "link", "textbox", "searchbox", "checkbox", "radio", "combobox", "heading"];
+        ["button", "link", "textbox", "searchbox", "checkbox", "radio", "combobox", "heading", "menuitem", "tab"];
 }

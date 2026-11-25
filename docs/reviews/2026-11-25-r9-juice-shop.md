@@ -76,7 +76,7 @@ After these corrections, **all 9 baselines pass** on the sound application.
 3. **Acting exploration does not finish in its budget** on an application this size.
    - Every press is a fresh page load.
    - Its controls are many, and repeated per product.
-4. **The vocabulary has no `menuitem` or `tab` role, and nothing can type into a password field** (no ARIA role).
+4. **The vocabulary has no `menuitem` or `tab` role**, and password fields were thought to have no ARIA role. They have the textbox role in Playwright, so this part was wrong (corrected 2026-11-25). The roles were added by ADR-0042.
    - Adding roles changes the planner's prompt. Every planner figure we have was measured on the current prompt, so
      the change waits until it can be re-measured (`docs/open-questions.md`).
 
@@ -139,6 +139,21 @@ Gitea 1.22.6 is a large, real application nobody here wrote, server-rendered wit
 planner run is published, which needs API credit and the owner's agreement. Gaps 1 and 3 look general rather than
 Gitea's own. Fixing them belongs on Juice Shop or our own applications, and is re-measured on Gitea only after its
 planner run.
+
+## Stronger locators (ADR-0042), measured the same day
+
+The lab sets, served without test ids. Each cell shows before / after the change.
+
+| Application | Steps shown | Elements described | By role and name | By label | By text | Not reachable |
+|---|---|---|---|---|---|---|
+| Demo shop | 39 / 39 of 40 | 147 / 147 | 81 / 81 | — / 0 | 66 / 66 | 0 / 0 |
+| Clinic | 51 / 51 of 52 | 401 / 401 | 311 / 311 | — / 0 | 90 / 90 | 0 / 0 |
+| Invoice desk | 27 / 27 of 31 | 660 | 312 | — | 348 | 0 / 0 |
+
+**Nothing fell.** Our applications have no number fields, menus, tabs or dialogs, so the new kinds are not used there.
+Elements are still named as before. That includes the check that a locator finds the element described and not
+another, which on these applications changed no choice. The new kinds are shown working by the worker's own tests
+(`StrongLocatorsTests`). The Juice Shop measurement, where menus and dialogs appear, follows when it finishes.
 
 ## What is next (not started)
 

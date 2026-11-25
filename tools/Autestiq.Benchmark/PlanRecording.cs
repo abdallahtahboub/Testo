@@ -60,6 +60,7 @@ public static class PlanRecording
             {
                 TargetKind.TestId => $"\"target\": {{ \"kind\": \"testId\", \"value\": {Quote(target.Value)}{within} }}",
                 TargetKind.Text => $"\"target\": {{ \"kind\": \"text\", \"value\": {Quote(target.Value)}{within} }}",
+                TargetKind.Label => $"\"target\": {{ \"kind\": \"label\", \"value\": {Quote(target.Value)}{within} }}",
                 _ => $"\"target\": {{ \"kind\": \"roleAndName\", \"role\": {Quote(target.Role ?? "")}, \"value\": {Quote(target.Value)}{within} }}",
             });
         }

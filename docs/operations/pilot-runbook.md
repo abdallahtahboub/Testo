@@ -77,9 +77,11 @@ unreadable without the key ring.
 1. Stop the web host.
 2. Restore the database to a new database (`pg_restore`), the key ring directory and the evidence directory.
 3. Start the web host; wait for `/health/ready`.
-4. **Check the key ring matches**: an environment's test-account values must still be usable. *Readiness does not yet
-   detect a key ring that does not match the database* (R-20): restored without its key ring, the host creates a new
-   one, reports ready, and every stored test-account value is silently unreadable.
+4. **The key ring must match**: `/health/ready` answers `not ready: key-ring` when the key ring cannot read the
+   database's canary (R-20, fixed 2026-11-25), as after restoring the database without its key ring. Restore the right
+   key ring. Only if it is lost for good: `dotnet Autestiq.Operator.dll key-ring-reset --by "<operator>" --yes`, which
+   says how many stored test-account values become unusable; each environment's test account must then be entered
+   again.
 5. Sign in, open an old run, and check its screenshot opens or is reported deleted by retention.
 
 ## 7. Health, alerts and recovery

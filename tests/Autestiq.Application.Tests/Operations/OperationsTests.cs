@@ -85,16 +85,89 @@ public sealed class OperationsTests : IAsyncLifetime
     }
 
     [Fact]
-    public void Ready_KeyRing_WhenAValueReadsBack()
+    public async Task Ready_KeyRing_OnAFreshDatabase_WritesTheCanary_AndReadsItBack()
     {
-        Assert.True(Readiness.KeyRing(new PurposeBoundProtector()).Ready);
+        await using var migrated = await TestDatabase.CreateAsync();
+        var ring = new Ring("first");
+
+        await using (var database = migrated.NewContext())
+        {
+            Assert.True((await Readiness.KeyRingAsync(database, ring, Cancellation)).Ready);
+        }
+
+        await using (var database = migrated.NewContext())
+        {
+            Assert.Equal(1, await database.KeyRingCanaries.CountAsync(Cancellation));
+            Assert.True((await Readiness.KeyRingAsync(database, ring, Cancellation)).Ready);
+        }
     }
 
     [Fact]
-    public void NotReady_KeyRing_WithoutAProtector()
+    public async Task NotReady_KeyRing_ThatDidNotWriteTheDatabase_AsAfterARestoreWithoutIt()
+    {
+        await using var migrated = await TestDatabase.CreateAsync();
+
+        await using (var database = migrated.NewContext())
+        {
+            Assert.True((await Readiness.KeyRingAsync(database, new Ring("original"), Cancellation)).Ready);
+        }
+
+        await using (var database = migrated.NewContext())
+        {
+            var check = await Readiness.KeyRingAsync(database, new Ring("a new one"), Cancellation);
+
+            Assert.False(check.Ready);
+            Assert.Contains("not the key ring", check.Reason!, StringComparison.Ordinal);
+            Assert.Equal(1, await database.KeyRingCanaries.CountAsync(Cancellation)); // never overwritten by the wrong ring
+        }
+    }
+
+    [Fact]
+    public async Task Ready_KeyRing_AfterAResetAcceptsTheLoss_WritesANewCanary()
+    {
+        await using var migrated = await TestDatabase.CreateAsync();
+
+        await using (var database = migrated.NewContext())
+        {
+            await Readiness.KeyRingAsync(database, new Ring("lost"), Cancellation);
+
+            // What the operator's key-ring-reset does.
+            await database.KeyRingCanaries.ExecuteDeleteAsync(Cancellation);
+        }
+
+        await using (var database = migrated.NewContext())
+        {
+            Assert.True((await Readiness.KeyRingAsync(database, new Ring("replacement"), Cancellation)).Ready);
+        }
+    }
+
+    [Fact]
+    public async Task Ready_KeyRing_WhenTwoInstancesCheckAtOnce_KeepsOneCanary()
+    {
+        await using var migrated = await TestDatabase.CreateAsync();
+        var ring = new Ring("shared");
+
+        async Task<bool> CheckAsync()
+        {
+            await using var database = migrated.NewContext();
+            return (await Readiness.KeyRingAsync(database, ring, Cancellation)).Ready;
+        }
+
+        var results = await Task.WhenAll(Enumerable.Range(0, 4).Select(_ => CheckAsync()));
+
+        Assert.All(results, Assert.True);
+        await using var check = migrated.NewContext();
+        Assert.Equal(1, await check.KeyRingCanaries.CountAsync(Cancellation));
+    }
+
+    [Fact]
+    public async Task NotReady_KeyRing_WithoutAProtector()
     {
         // What runs when no host provides one: nothing can be stored.
-        Assert.False(Readiness.KeyRing(new Refusing()).Ready);
+        await using var migrated = await TestDatabase.CreateAsync();
+        await using var database = migrated.NewContext();
+
+        Assert.False((await Readiness.KeyRingAsync(database, new Refusing(), Cancellation)).Ready);
     }
 
     [Fact]
@@ -122,6 +195,15 @@ public sealed class OperationsTests : IAsyncLifetime
 
         Assert.False(check.Ready);
         Assert.Contains("does-not-exist", check.Reason!, StringComparison.Ordinal);
+    }
+
+    /// <summary>A key ring that reads only what it wrote itself, as Data Protection with its own keys does.</summary>
+    private sealed class Ring(string name) : ISecretProtector
+    {
+        public string Protect(string purpose, string value) => $"{name}|{purpose}|{value}";
+
+        public string? Unprotect(string purpose, string ciphertext) =>
+            ciphertext.StartsWith($"{name}|{purpose}|", StringComparison.Ordinal) ? ciphertext[$"{name}|{purpose}|".Length..] : null;
     }
 
     private sealed class Refusing : ISecretProtector

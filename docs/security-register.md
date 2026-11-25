@@ -398,6 +398,20 @@ same, already approved, far end without a check. No other host could be reached 
 rather than an escape. **Fixed:** the far end is asked to close after every answer (except a WebSocket upgrade), so
 every request opens its own connection and is judged (ADR-0026 amendment). Tested over a real socket.
 
+### R-23 · The browser's write guard let a page's POST through while it navigated — **High; mitigated 2026-11-25, open for https**
+Found by the guarded-pressing test's own server (R9): its page posts every 300 ms, and in one of two explorations a
+POST reached the server, from the page itself (`Sec-Fetch-Mode: cors`), mid-exploration. Playwright's route, which
+`ReadOnlyGuard` blocks with, did not see every request a page sent while it navigated; the cause inside Playwright or
+Chromium is not established. **Mitigated:** the egress proxy is a second layer for a guarded run or exploration
+(`EgressProxy.ReadsOnly`): every plain-http request other than GET, HEAD or OPTIONS is refused there, and since each
+request now has a connection of its own (R-22) the proxy sees every one; a guarded page is sent to a blank page before
+its context closes. Tested: writes of every method refused by the proxy without connecting; the guarded test's server
+received nothing in three further runs. **Open:** an https site's requests are inside a tunnel the proxy cannot read, so
+there the browser's guard is the only layer, and it has been seen to leak. Before guarded pressing or a read-only
+approved run (R-14) is relied on for an https customer site, either the leak is understood and closed in the browser,
+or the egress proxy terminates TLS for guarded runs. Until then a customer is told plainly that read-only is enforced by
+two layers on http and one on https.
+
 ### R-7 · One database for every tenant — **Accepted, documented**
 
 ADR-0012 chose a shared database with filtered access and listed the consequences, including the

@@ -42,6 +42,14 @@ public sealed class EgressProxy : IAsyncDisposable
     /// <summary>Where the browser should send everything.</summary>
     public int Port => ((IPEndPoint)_listener.LocalEndpoint).Port;
 
+    /// <summary>
+    /// Whether only reads pass: a plain-http request other than GET, HEAD or OPTIONS is refused here as well as in the
+    /// browser (ADR-0041). The second layer: the browser's guard let a page's POST through while the page navigated
+    /// (R9, 2026-11-25). An https request is inside a tunnel this proxy cannot read, so there the browser's guard is
+    /// the only one.
+    /// </summary>
+    public bool ReadsOnly { get; set; }
+
     /// <summary>How much the browser has fetched, for the run's budget and its record.</summary>
     public long BytesDownloaded => Interlocked.Read(ref _bytesDownloaded);
 
@@ -164,6 +172,14 @@ public sealed class EgressProxy : IAsyncDisposable
     {
         if (!Uri.TryCreate(request.Target, UriKind.Absolute, out var uri))
         {
+            await RefuseAsync(browser).ConfigureAwait(false);
+            return;
+        }
+
+        if (ReadsOnly && !OnlyReads(request.Method))
+        {
+            // Not written as an origin: a refused write is not a site that could not be reached (Unreachable).
+            _onRefused($"a {request.Method} to {uri.AbsolutePath}, which a guarded run does not send");
             await RefuseAsync(browser).ConfigureAwait(false);
             return;
         }
@@ -347,6 +363,12 @@ public sealed class EgressProxy : IAsyncDisposable
 
         return decision.Allowed;
     }
+
+    /// <summary>Whether a request with this method only reads, as <c>ReadOnlyGuard</c> judges it in the browser.</summary>
+    private static bool OnlyReads(string method) =>
+        method.Equals("GET", StringComparison.OrdinalIgnoreCase)
+        || method.Equals("HEAD", StringComparison.OrdinalIgnoreCase)
+        || method.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase);
 
     private static async Task RefuseAsync(NetworkStream browser) =>
         await browser.WriteAsync(Encoding.ASCII.GetBytes(

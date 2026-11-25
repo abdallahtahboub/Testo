@@ -34,7 +34,7 @@ public class GuardedPressingTests(GuardedSiteFixture site) : IClassFixture<Guard
         // It pressed: a guard that holds because nothing was tried proves nothing.
         Assert.InRange(Explorations.Visits(result), 8, 150);
 
-        // fetch with POST, PUT, PATCH and DELETE, a beacon, a WebSocket, a form sent by script, and the two forms'
+        // The page's own polling, fetch with POST, PUT, PATCH and DELETE, a beacon, a WebSocket, a form sent by script, and the two forms'
         // own buttons: none of it arrived.
         Assert.Empty(site.Writes);
     }

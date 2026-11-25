@@ -119,6 +119,9 @@ public sealed class GuardedSiteFixture : IAsyncLifetime
           function send(method, path) {
             fetch(path, { method }).then(() => said('Saved'), () => said('Could not save'));
           }
+          // Live updates, as OWASP Juice Shop's are: a post every few hundred milliseconds whatever is pressed. Its block
+          // is the page's, not a press's, and must not hide what a tab shows (R9).
+          setInterval(() => fetch('/api/poll', { method: 'POST' }).catch(() => {}), 300);
           function live() {
             const socket = new WebSocket(location.origin.replace('http', 'ws') + '/ws');
             socket.onopen = () => said('Live');

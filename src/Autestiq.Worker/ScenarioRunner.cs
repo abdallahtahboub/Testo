@@ -150,6 +150,9 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
 
         var readOnly = ReadOnlyGuard.Applies(job);
 
+        // The proxy holds it too, for every plain-http request (ADR-0041): the browser's guard is not the only layer.
+        proxy.ReadsOnly = readOnly;
+
         await using var context = await browser.NewContextAsync(new BrowserNewContextOptions
         {
             BaseURL = job.TargetOrigin,
@@ -170,6 +173,9 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
         }
 
         var page = await context.NewPageAsync().ConfigureAwait(false);
+
+        // Disposed before the context, which it is declared after: a guarded page is stopped while its routes still hold.
+        await using var stopped = new StoppedFirst(page, readOnly);
         var deadline = startedAt.Add(job.Budget.WallClock);
 
         if (job.Task == WorkerTask.Explore)
@@ -491,5 +497,32 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
     {
         var line = message.Split('\n')[0].Trim();
         return line.Length > 500 ? line[..500] : line;
+    }
+
+    /// <summary>
+    /// Stops a guarded page before its context closes. Closing a context lets go of its routes before the page's scripts
+    /// stop, and a request a script sent in that moment left the browser unguarded: the guarded-pressing test's server,
+    /// whose page polls with a POST, received one (R9, 2026-11-25). Sent to a blank page first, the page has no script
+    /// left to send anything.
+    /// </summary>
+    private sealed class StoppedFirst(IPage page, bool guarded) : IAsyncDisposable
+    {
+        public async ValueTask DisposeAsync()
+        {
+            if (!guarded)
+            {
+                return;
+            }
+
+            try
+            {
+                await page.GotoAsync("about:blank").ConfigureAwait(false);
+                await page.CloseAsync().ConfigureAwait(false);
+            }
+            catch (PlaywrightException)
+            {
+                // Already closed, or the browser has gone: either way nothing of the page is left to send anything.
+            }
+        }
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Autestiq.Application.Execution;
 using Autestiq.Contracts.Execution;
 using Autestiq.Domain.Execution;
+using Autestiq.Domain.Projects;
 using Autestiq.E2E.Support;
 using Autestiq.Persistence;
 using Autestiq.Platform;
@@ -74,8 +75,18 @@ public class ArtifactAccessTests(AppFixture app) : HttpTest(app)
         using var scope = App.Services.CreateScope();
         var database = scope.ServiceProvider.GetRequiredService<AutestiqDbContext>();
 
-        // Across the filter: no one is signed in to this scope; the seeded project says whose it is.
-        var project = await database.Projects.IgnoreQueryFilters().FirstAsync(candidate => candidate.KeyPrefix == "SHOP", Cancellation);
+        // Across the filter: no one is signed in to this scope; the seeded project says whose organization it is. The run
+        // goes in an archived project of that organization, never in one a page shows: the tests share one database,
+        // and a run in the shop's project made the run list's "nothing has run yet" test depend on which ran first.
+        var seeded = await database.Projects.IgnoreQueryFilters().FirstAsync(candidate => candidate.KeyPrefix == "SHOP", Cancellation);
+        var project = await database.Projects.IgnoreQueryFilters()
+            .FirstOrDefaultAsync(candidate => candidate.OrganizationId == seeded.OrganizationId && candidate.KeyPrefix == "ARTX", Cancellation);
+
+        if (project is null)
+        {
+            project = new Project { OrganizationId = seeded.OrganizationId, Name = "Artifact checks", KeyPrefix = "ARTX", Status = ProjectStatus.Archived };
+            database.Projects.Add(project);
+        }
 
         var run = new TestRun
         {

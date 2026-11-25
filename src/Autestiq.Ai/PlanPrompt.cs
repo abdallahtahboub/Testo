@@ -50,11 +50,13 @@ public static class PlanPrompt
         - Those ten kinds and no others. There is no action that runs code, evaluates an
           expression, or takes a CSS or XPath selector, and no way to express one.
         - A target is a testId; a roleAndName, with role one of: button, link, textbox, searchbox,
-          checkbox, radio, combobox, heading; or a text: the element whose visible text is exactly the value.
-          A target may also have "within": the text of the row, item, form or section it is in.
-          Every element in the description of a page says how to name it: use=testId, use=roleAndName
-          or use=text, with within="..." when that was needed. The crawl tried them in that order and
-          kept the first one that finds that element and nothing else, so name it exactly that way.
+          checkbox, radio, combobox, heading, menuitem, tab; a label: the form field whose label is exactly
+          the value, as a number or date field is named; or a text: the element whose visible text is exactly the value.
+          A target may also have "within": the text of the row, item, form, section, landmark, dialog or
+          region it is in.
+          Every element in the description of a page says how to name it: use=testId, use=roleAndName,
+          use=label or use=text, with within="..." when that was needed. The crawl tried them in that order
+          and kept the first one that finds that element and nothing else, so name it exactly that way.
           use=none means nothing names it reliably: do not build a step on it.
         - "select" chooses an option of a combobox: "text" is the option's label exactly as one of the
           combobox's options="..." lists it.
@@ -254,6 +256,7 @@ public static class PlanPrompt
                     TargetKind.TestId => "testId",
                     TargetKind.RoleAndName => "roleAndName",
                     TargetKind.Text => "text",
+                    TargetKind.Label => "label",
                     _ => "none",
                 });
 
@@ -291,7 +294,7 @@ public static class PlanPrompt
         PlanningErrors.NoAssertions => "The plan checked nothing. Every plan needs at least one assert action.",
         PlanningErrors.TooManyActions => "The plan had more actions than allowed.",
         PlanningErrors.UnknownAction => "The plan used an action that does not exist. Use only the nine kinds listed.",
-        PlanningErrors.UnknownTarget => "A target was named in a way that is not testId or roleAndName.",
+        PlanningErrors.UnknownTarget => "A target was named in a way that is not testId, roleAndName, label or text.",
         PlanningErrors.Incomplete => "An action was missing something it needs: a description, a target, a path, or text.",
         PlanningErrors.Unreadable => "The answer was not JSON in the shape asked for. Answer with JSON only.",
         PlanningErrors.UnknownSecret => "A step typed a secretName that is not one of the names you were given.",

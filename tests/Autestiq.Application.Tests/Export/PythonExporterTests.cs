@@ -148,4 +148,16 @@ public class PythonExporterTests
 
         Assert.Contains("covers part of its scenario only", Exporter.Export(plan).Code, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void Export_ATargetByLabel_IsFoundByItsLabel_AndLooksInTheContainersTheWorkerLooksIn()
+    {
+        var code = Exporter.Export(Plan(Visible(ActionTarget.ByLabel("Password").InsideOf("Sign in")))).Code;
+
+        Assert.Contains("target(page, \"label\", \"Password\", within=\"Sign in\")", code, StringComparison.Ordinal);
+        Assert.Contains("return root.get_by_label(value, exact=True)", code, StringComparison.Ordinal);
+
+        // One list for every reader (ADR-0042): an exported test scopes "within" exactly as a hosted run does.
+        Assert.Contains($"CONTAINERS = \"{TargetScopes.Selector}\"", code, StringComparison.Ordinal);
+    }
 }

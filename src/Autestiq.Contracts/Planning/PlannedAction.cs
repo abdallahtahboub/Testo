@@ -75,6 +75,12 @@ public enum TargetKind
     /// selector, so an application that has no test ids can still be checked (ADR-0024).
     /// </summary>
     Text = 3,
+
+    /// <summary>
+    /// The form field whose label is exactly this: the visible label tied to it, or its accessible label. How a person
+    /// names a field, and the only way to name one whose role is not one a target may name, a number or a date (ADR-0042).
+    /// </summary>
+    Label = 4,
 }
 
 /// <summary>Which element on the page an action is about.</summary>
@@ -82,7 +88,8 @@ public enum TargetKind
 /// <param name="Value">The test id; the accessible name when <see cref="Role"/> is set; or the exact visible text.</param>
 /// <param name="Role">The ARIA role, for <see cref="TargetKind.RoleAndName"/>.</param>
 /// <param name="Within">
-/// When several elements fit, the text of the row, list item, form or section the right one is inside:
+/// When several elements fit, the text of the row, list item, form, section, landmark, dialog or region the right
+/// one is inside (<see cref="TargetScopes"/>):
 /// "the Add to basket button within the item that says Cast iron teapot". Matched as text, never as a
 /// selector (ADR-0024).
 /// </param>
@@ -97,6 +104,9 @@ public sealed record ActionTarget(TargetKind Kind, string Value, string? Role = 
     /// <summary>A target named by its test id.</summary>
     public static ActionTarget ByTestId(string testId) => new(TargetKind.TestId, testId);
 
+    /// <summary>A form field named by its label.</summary>
+    public static ActionTarget ByLabel(string label) => new(TargetKind.Label, label);
+
     /// <summary>A target named by what it is and what it says.</summary>
     public static ActionTarget ByRole(string role, string name) => new(TargetKind.RoleAndName, name, role);
 
@@ -106,6 +116,7 @@ public sealed record ActionTarget(TargetKind Kind, string Value, string? Role = 
         {
             TargetKind.TestId => $"#{Value}",
             TargetKind.Text => $"the text “{Value}”",
+            TargetKind.Label => $"the field labelled “{Value}”",
             _ => $"{Role} “{Value}”",
         })
         + (Within is { Length: > 0 } within ? $" within “{within}”" : "");

@@ -33,7 +33,9 @@ namespace Autestiq.Benchmark;
 /// vocabulary, recorded, not fixed here: the explorer and vocabulary are frozen for this application.
 /// </para>
 /// <para>
-/// No scenario signs in: a password field has no ARIA role, so the vocabulary cannot type into it (as on Juice Shop).
+/// No scenario signs in: a password field was thought to have no ARIA role (as on Juice Shop). It has the textbox role
+/// (corrected 2026-11-25, ADR-0042); the scenarios are not changed for it, and Gitea's first planner run uses the commit
+/// that froze them, `44ebe97` on `develop`.
 /// No scenario registers, because a registration would change what the next run sees.
 /// </para>
 /// </remarks>

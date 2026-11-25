@@ -95,6 +95,7 @@ public sealed class PythonExporter : ITestExporter
             TargetKind.TestId => "\"testId\"",
             TargetKind.RoleAndName => "\"role\"",
             TargetKind.Text => "\"text\"",
+            TargetKind.Label => "\"label\"",
             _ => throw new ArgumentOutOfRangeException(nameof(action), target.Kind, "There is no translation for that target."),
         });
         arguments.Append(", ").Append(Literal(target.Value));
@@ -249,16 +250,18 @@ public sealed class PythonExporter : ITestExporter
 
         """;
 
-    private const string Helper =
-        """
+    // The containers come from the one list the worker and the explorer read (TargetScopes), so an exported test looks
+    // where a hosted run looks.
+    private static readonly string Helper =
+        $$"""
 
         import os
         import re
 
         from playwright.sync_api import Locator, Page, TimeoutError as PlaywrightTimeoutError, expect
 
-        # Where "within" may look: the row, item, form or section an element sits in.
-        CONTAINERS = "tr, li, article, section, form, fieldset, dl, p"
+        # Where "within" may look: the row, item, form, section, landmark, dialog or region an element sits in.
+        CONTAINERS = "{{TargetScopes.Selector}}"
 
 
         def _find(root, kind: str, value: str, role: str | None, exact: bool) -> Locator:
@@ -266,6 +269,8 @@ public sealed class PythonExporter : ITestExporter
                 return root.get_by_test_id(value)
             if kind == "role":
                 return root.get_by_role(role, name=value, exact=exact)
+            if kind == "label":
+                return root.get_by_label(value, exact=True)
             return root.get_by_text(value, exact=True)
 
 

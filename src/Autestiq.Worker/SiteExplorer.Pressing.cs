@@ -293,15 +293,18 @@ internal static partial class SiteExplorer
                 continue;
             }
 
+            // A menu's entry and a tab are pressed as a button is: they change the page in place or lead somewhere. Only a
+            // button is asked what form it sends.
             var isButton = element.Role == "button";
+            var isLink = element.Role == "link";
 
-            if (!isButton && element.Role != "link")
+            if (!isButton && !isLink && element.Role is not ("menuitem" or "tab"))
             {
                 continue;
             }
 
             // A link on a page nothing has been pressed on leads where the crawl has already been.
-            if (!isButton && untouched)
+            if (isLink && untouched)
             {
                 continue;
             }
@@ -335,7 +338,7 @@ internal static partial class SiteExplorer
     /// </summary>
     private static ActionTarget? TargetFor(SnapshotElement element)
     {
-        if (element.Role is not ("button" or "link"))
+        if (element.Role is not ("button" or "link" or "menuitem" or "tab"))
         {
             return null;
         }

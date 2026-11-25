@@ -76,7 +76,7 @@ After these corrections, **all 9 baselines pass** on the sound application.
 3. **Acting exploration does not finish in its budget** on an application this size.
    - Every press is a fresh page load.
    - Its controls are many, and repeated per product.
-4. **The vocabulary has no `menuitem` or `tab` role, and nothing can type into a password field** (no ARIA role).
+4. **The vocabulary has no `menuitem` or `tab` role**, and password fields were thought to have no ARIA role. They have the textbox role in Playwright, so this part was wrong (corrected 2026-11-25). The roles were added by ADR-0042.
    - Adding roles changes the planner's prompt. Every planner figure we have was measured on the current prompt, so
      the change waits until it can be re-measured (`docs/open-questions.md`).
 

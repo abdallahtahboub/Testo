@@ -176,7 +176,7 @@ Project and namespace prefix is `Autestiq.`. The `T` prefix on design-system com
 - Service methods: async, `CancellationToken` last parameter, return Contracts DTOs (`record`s), lists via `PagedResult<T>`.
 - Every unfinished module/capability sits behind a feature flag (`Module.X`, `Capability.X`, `Feature.X`).
 - **Exported tests come from fixed templates, never from a model** (ADR-0023). `Autestiq.Export` references `Contracts` only; a plan's strings appear in exported code only as escaped literals or line-safe comments. A language is offered only after `--export-check <language>` gives the plan's verdict on every run of every benchmark set. Python is built; the language is a per-project setting once projects exist.
-- **Locators are chosen by the software, never by the model** (ADR-0024). Without a test id, the explorer tries role and accessible name, then exact text, then each narrowed to a container cell or line, and keeps the first the browser finds **exactly one** element for, through `Targets.Locate`. Never describe an element as reachable on a guess; a change that lowers the share reached shows up in `--without-test-ids --explore`.
+- **Locators are chosen by the software, never by the model** (ADR-0024, ADR-0042). Without a test id, the explorer tries role and accessible name, then a field's label, then exact text, then each narrowed to a container (`TargetScopes`: rows, items, forms, sections, landmarks, dialogs, named regions), and keeps the first the browser finds **exactly one** element for, through `Targets.Locate`, **and that one the element described**. Never describe an element as reachable on a guess; a change that lowers the share reached shows up in `--without-test-ids --explore`.
 
 ## Render modes
 

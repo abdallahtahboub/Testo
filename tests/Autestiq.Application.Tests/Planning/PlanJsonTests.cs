@@ -298,4 +298,24 @@ public class PlanJsonTests
 
         Assert.Null(Assert.IsType<TestPlan>(plan).Actions[0].Target!.Within);
     }
+
+    [Fact]
+    public void Read_ATargetByLabel_IsAFieldByItsLabel_AndKeepsItsScope()
+    {
+        // ADR-0042: a password field has no role; its label is its only name.
+        var plan = PlanJson.Read(
+            """
+            {
+              "scenarioName": "Sign in",
+              "actions": [
+                { "kind": "type", "description": "Type the password", "target": { "kind": "label", "value": "Password", "within": "Sign in" }, "secretName": "password" },
+                { "kind": "assertVisible", "description": "Signed in", "target": { "kind": "roleAndName", "role": "menuitem", "value": "Sign out" } }
+              ]
+            }
+            """);
+
+        Assert.NotNull(plan);
+        Assert.Equal(ActionTarget.ByLabel("Password").InsideOf("Sign in"), plan.Actions[0].Target);
+        Assert.Equal(ActionTarget.ByRole("menuitem", "Sign out"), plan.Actions[1].Target);
+    }
 }

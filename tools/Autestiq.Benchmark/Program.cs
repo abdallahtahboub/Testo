@@ -85,6 +85,9 @@ var external = options.Target switch
 
     // OWASP Juice Shop (R9), a client-side Angular application: docker run --rm -p 3000:3000 bkimminich/juice-shop:v17.1.1
     "juiceshop" => BenchmarkOptions.Value(args, "--origin") ?? "http://127.0.0.1:3000",
+
+    // Gitea (R9's clean application), started fresh with its seed by tools/r9/gitea-up.sh.
+    "gitea" => BenchmarkOptions.Value(args, "--origin") ?? "http://127.0.0.1:3001",
     _ => null,
 };
 
@@ -98,6 +101,7 @@ Console.WriteLine(options.Target switch
     "eshop" => $"eShopOnWeb is expected at {origin}; it is started separately.",
     "petclinic" => $"Spring PetClinic is expected at {origin}; it is started separately.",
     "juiceshop" => $"OWASP Juice Shop is expected at {origin}; it is started separately, from a fresh container.",
+    "gitea" => $"Gitea is expected at {origin}; it is started separately, fresh, by tools/r9/gitea-up.sh.",
     _ => $"The demo shop is at {origin}.",
 });
 
@@ -127,7 +131,7 @@ Func<IReadOnlyList<string>, bool> setDefects = options.Target switch
 {
     "booking" => names => Autestiq.BookingShop.Defects.Set(names),
     "invoices" => names => Autestiq.InvoiceDesk.Defects.Set(names),
-    "eshop" or "petclinic" or "juiceshop" => names => names.Count == 0,
+    "eshop" or "petclinic" or "juiceshop" or "gitea" => names => names.Count == 0,
     _ => names => Autestiq.DemoShop.Defects.Set(names),
 };
 
@@ -144,6 +148,7 @@ IReadOnlyList<BenchmarkScenario> targetScenarios = unseen && external is null ? 
     "eshop" => signedIn ? EshopScenarios.SignedIn : EshopScenarios.All,
     "petclinic" => PetclinicScenarios.All,
     "juiceshop" => JuiceShopScenarios.All,
+    "gitea" => GiteaScenarios.All,
     _ => options.HeldOut ? HeldOutScenarios.All : BenchmarkScenarios.All,
 };
 
@@ -349,6 +354,7 @@ var report = Report.Write(
         "eshop" => "eShopOnWeb, Microsoft's sample shop, which nobody here wrote",
         "petclinic" => "Spring PetClinic at commit 500158f, Spring's sample application, which nobody here wrote and the explorer was never tuned on",
         "juiceshop" => "OWASP Juice Shop 17.1.1, a client-side Angular application nobody here wrote; R9's tuning application, so never a clean measurement",
+        "gitea" => "Gitea 1.22.6, a self-hosted Git service nobody here wrote, R9's clean application: scenarios written from its source before any run, nothing tuned on it",
         _ => "an application of our own",
     })
         + (options.ReadOnly && guarded ? ", explored read-only with guarded pressing (controls pressed, every write blocked in the browser, no form sent), as a customer's site is (ADR-0041)"
@@ -521,6 +527,7 @@ internal sealed record BenchmarkOptions(
         : Value(args, "--target") == "eshop" ? "ai-benchmark-eshop.md"
         : Value(args, "--target") == "petclinic" ? "ai-benchmark-petclinic.md"
         : Value(args, "--target") == "juiceshop" ? "ai-benchmark-juiceshop.md"
+        : Value(args, "--target") == "gitea" ? "ai-benchmark-gitea.md"
         : args.Contains("--held-out", StringComparer.Ordinal) ? "ai-benchmark-held-out.md"
         : "ai-benchmark.md";
 

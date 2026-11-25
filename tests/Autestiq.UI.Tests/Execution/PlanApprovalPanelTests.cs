@@ -5,6 +5,7 @@ using Autestiq.Contracts.Export;
 using Autestiq.Contracts.Identity;
 using Autestiq.Contracts.Planning;
 using Autestiq.Contracts.Testing;
+using Autestiq.Modules.Execution;
 using Autestiq.Modules.Execution.Components;
 using Autestiq.UI.Tests.Support;
 
@@ -20,6 +21,7 @@ public class PlanApprovalPanelTests : DesignSystemTestContext
     {
         Services.AddSingleton<ITestCaseService>(new NoTestCases());
         Services.AddSingleton<ICurrentUser>(new Viewer());
+        new ExecutionModule().RegisterServices(Services);
     }
 
     private static TestCaseDetail Approved(IReadOnlyList<string> refusedFor) =>

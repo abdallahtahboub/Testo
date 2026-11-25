@@ -9,6 +9,8 @@
     <!-- Only ship the languages the product supports (trims satellite assemblies of dependencies). -->
     <SatelliteResourceLanguages>en;de</SatelliteResourceLanguages>
     <Product>Autestiq</Product>
+    <!-- The release this is (docs/releases/). Bumped on a release branch only (CONTRIBUTING.md). -->
+    <Version>0.5.0</Version>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 

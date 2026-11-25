@@ -375,6 +375,11 @@ How a page gets its mode:
   HTTP request and so no cookies. The theme choice is read from the cookie while the page
   is rendered on the server and carried over with `[PersistentState]` (`ThemeState`).
   Milestone 4 uses the same route for the signed-in user and the current project.
+- **One data call at a time per session.** An interactive session has one database context, which takes one
+  operation at a time, and the dispatcher keeps handlers apart only until their first `await`. A page that refreshes
+  itself on a timer (a test while it is explored or planned, a run while it runs) therefore makes every call through
+  `DataTurns` (scoped, in the Execution module), and its timer skips a tick while a call is under way. Without it, a
+  save at the moment of a refresh ended the session (found by CI on 2026-11-25).
 - **Friendly status pages** (`/not-found`, `/error`) are shown for GET and HEAD requests
   only; a rejected form post keeps its plain status code. On these pages the language
   comes from the URL the visitor asked for, and links and forms keep pointing at it

@@ -25,6 +25,9 @@ public sealed partial class ExpectedResultsPanel : ComponentBase
     private ICurrentUser CurrentUser { get; set; } = null!;
 
     [Inject]
+    private DataTurns Turns { get; set; } = null!;
+
+    [Inject]
     private IStringLocalizer<ExecutionResources> Localizer { get; set; } = null!;
 
     private bool Busy { get; set; }
@@ -74,7 +77,8 @@ public sealed partial class ExpectedResultsPanel : ComponentBase
 
         try
         {
-            var saved = await TestCases.SetExpectedResultsAsync(Detail.TestCaseId, ExpectedResultRow.ToResults(Rows), CancellationToken.None)
+            var expected = ExpectedResultRow.ToResults(Rows);
+            var saved = await Turns.TakeAsync(() => TestCases.SetExpectedResultsAsync(Detail.TestCaseId, expected, CancellationToken.None))
                 .ConfigureAwait(false);
 
             // The use cases answer in resource keys, never in English.

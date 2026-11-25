@@ -10,4 +10,9 @@
     <ProjectReference Include="..\Autestiq.UI.Shared\Autestiq.UI.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- DataTurns is internal to the module; its tests prove that calls never overlap. -->
+    <InternalsVisibleTo Include="Autestiq.UI.Tests" />
+  </ItemGroup>
+
 </Project>

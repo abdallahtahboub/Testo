@@ -30,6 +30,9 @@ public sealed partial class PlanApprovalPanel : ComponentBase
     [Inject]
     private NavigationManager Navigation { get; set; } = null!;
 
+    [Inject]
+    private DataTurns Turns { get; set; } = null!;
+
     private bool Busy { get; set; }
 
     /// <summary>Prerendered, the panel answers nothing; its controls stay disabled until they would work.</summary>
@@ -78,7 +81,7 @@ public sealed partial class PlanApprovalPanel : ComponentBase
 
         try
         {
-            var errors = await change().ConfigureAwait(false);
+            var errors = await Turns.TakeAsync(change).ConfigureAwait(false);
 
             // The use cases answer in resource keys, never in English (CLAUDE.md, Application).
             Problem = errors.Count > 0 ? Localizer[errors[0]].Value : null;

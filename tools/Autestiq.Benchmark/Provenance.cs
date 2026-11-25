@@ -26,7 +26,9 @@ public sealed record Provenance(
     public static (string Revision, bool Clean) Source()
     {
         var revision = Git("rev-parse", "HEAD");
-        var status = Git("status", "--porcelain", "--untracked-files=no");
+        // The benchmark's own reports do not count as changes: writing the first report must not make the next run
+        // refuse (found in the first release-candidate measurement, 2026-11-25).
+        var status = Git("status", "--porcelain", "--untracked-files=no", "--", ".", ":(exclude)docs/ai-benchmark*.md");
         return (revision ?? "unknown", revision is not null && status is { Length: 0 });
     }
 

@@ -366,7 +366,7 @@ Until that result is published, no sales material claims that the product genera
 - **Start with API or security testing.** Rejected for now: each needs its own vocabulary and
   threat model, and the E2E path is the one already built.
 
-## The release-candidate measurement (Milestone 5.1 R5): method, prepared 2026-11-24, not yet run
+## The release-candidate measurement (Milestone 5.1 R5): method, prepared 2026-11-24; measured in part 2026-11-25
 
 **What changes in the tool, not in the product:**
 - **Every report starts with what was measured**: the source revision (flagged when the working tree had changes), the
@@ -403,3 +403,40 @@ dotnet run --project tools/Autestiq.Benchmark -- --target petclinic --stated --r
 ```
 
 ADR-0020's figures are replaced only by these, with the earlier figures and their qualifications kept beside them.
+
+### Result (2026-11-25, the owner's runs on `v0.5.0-rc.1` = `f06bc39`, Claude Sonnet 5.5, prompt `E575949C8654`)
+
+Every report carries the tag, the revision with no changes, and the prompt hash. Seven of the twelve unseen runs
+completed; **the other five and both PetClinic runs did not**, and no figure below comes from them.
+
+| Run | Runs correct | False positives | Earlier figure (same prompt, 2026-11-24, or before for read-only) |
+|---|---|---|---|
+| Demo shop | **20 of 20** | 0 | 20 of 20 |
+| Demo shop, without test ids | **20 of 20** | 0 | 20 of 20 |
+| Demo shop, read-only | **4 of 20**; 8 failed the sound shop, 8 failed both | 0 | 4 of 20 |
+| Demo shop, stated results | **20 of 20** | 0 | new |
+| Clinic, read-only | **8 of 22**, 14 inconclusive | 0 | 8 of 22 |
+| Clinic, stated results | **18 of 22**, 4 inconclusive ("a taken hour is not offered again", as before) | 0 | new |
+| Invoice desk | **24 of 24** | 0 | 24 of 24 |
+
+**Each stated result** (`-stated` reports): demo shop 9 confirmed, 3 caught, 2 not scored; clinic 5 confirmed,
+2 caught. **No false pass and no wrong failure** on either.
+
+**Not completed, and why** (their reports were not published):
+- clinic, and clinic without test ids: every planning call failed with "the provider could not be reached", while the
+  next run minutes later reached it, so a passing outage;
+- invoice desk without test ids (9 of 12 plans made), read-only and with stated results: the provider account ran
+  out of credit;
+- PetClinic, plain and stated: not started for the same reason.
+
+The owner decided on 2026-11-25 to spend nothing more on model calls for now: these runs would confirm, not change,
+the conclusions, because the prompt is the one measured in full on 2026-11-24.
+
+**What this supports.** On the release candidate, with acting exploration, the planner is as accurate as on 2026-11-24
+on the applications measured, and with stated results it confirmed or caught every result it was given. Read-only
+exploration is unchanged and remains the weak point. No run on any set passed a broken application.
+
+**A flaw in the tool, found by this run:** the release-candidate guard counted the benchmark's own report, written to
+`docs/` by the first run, as an uncommitted change, and refused every later run. The owner worked around it by writing
+reports outside the repository (`--report`). Fixed after the run: the guard now ignores `docs/ai-benchmark*.md`. The
+measurement itself was of the tagged commit, unchanged.

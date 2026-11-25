@@ -1,6 +1,6 @@
 # Key flows
 
-The paths people take through Testo. Each one names the person from [`users.md`](users.md),
+The paths people take through Autestiq. Each one names the person from [`users.md`](users.md),
 the steps, and what happens when things are missing or go wrong — because that is where
 most products fall apart.
 
@@ -25,7 +25,7 @@ Invitation or sign-up  →  Create the organization  →  Invite the team
 3. **Invite the team** by email address, each with a role. Invitations can be skipped and
    done later; a one-person organization is valid.
 4. **Create the first project** — a product under test, not a customer.
-5. **Connect requirements** (Jira, Azure DevOps) or skip and write them in Testo.
+5. **Connect requirements** (Jira, Azure DevOps) or skip and write them in Autestiq.
 
 Rules:
 
@@ -153,7 +153,7 @@ Rules:
 - The lifecycle is visible as history: who changed what, when.
 
 **Goes wrong:** creating the defect while the integration with Jira is down still saves it
-in Testo and syncs later, rather than losing the report.
+in Autestiq and syncs later, rather than losing the report.
 
 ---
 

@@ -1,0 +1,69 @@
+@inject IStringLocalizer<ExecutionResources> L
+
+@*
+    What the tester says the application should show at the end of a test (ADR-0034): up to five texts, each with an
+    optional page. The parent owns the rows and sends them; this only edits them.
+*@
+<fieldset class="expected" data-testid="expected-results">
+    <legend class="expected__legend">@L["Expected_Title"]</legend>
+    <p class="t-muted expected__intro">@L["Expected_Intro"]</p>
+    <p class="expected__warning" data-testid="expected-warning">@L["Expected_NoSecrets"]</p>
+
+    @for (var index = 0; index < Rows.Count; index++)
+    {
+        var row = Rows[index];
+        var number = index + 1;
+        <div class="expected__row" data-testid="@($"expected-{number}")">
+            <TField Label="@L["Expected_Text", number]">
+                <TInput Context="context" @bind-Value="row.Text" Disabled="Disabled" maxlength="@ExpectedResults.MaxLength" data-testid="@($"expected-text-{number}")" />
+            </TField>
+            <TField Label="@L["Expected_Path", number]" Hint="@L["Expected_Path_Hint"]">
+                <TInput Context="context" @bind-Value="row.Path" Disabled="Disabled" maxlength="@ExpectedResults.MaxLength" data-testid="@($"expected-path-{number}")" />
+            </TField>
+            <div class="expected__remove">
+                <TButton Variant="ButtonVariant.Ghost" Disabled="Disabled" OnClick="() => Remove(row)" AriaLabel="@L["Expected_Remove_Label", number]" data-testid="@($"expected-remove-{number}")">@L["Expected_Remove"]</TButton>
+            </div>
+        </div>
+    }
+
+    @if (Rows.Count < ExpectedResults.MaxCount)
+    {
+        <div>
+            <TButton Variant="ButtonVariant.Secondary" Disabled="Disabled" OnClick="Add" data-testid="expected-add">@L["Expected_Add"]</TButton>
+        </div>
+    }
+    else
+    {
+        <p class="t-muted" data-testid="expected-full">@L["Expected_Full", ExpectedResults.MaxCount]</p>
+    }
+</fieldset>
+
+@code {
+    /// <summary>The rows being edited. The parent owns the list; this adds to it and removes from it.</summary>
+    [Parameter, EditorRequired]
+    public List<ExpectedResultRow> Rows { get; set; } = [];
+
+    /// <summary>Whether the fields answer: not while prerendered, not while busy, not once the plan is approved.</summary>
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    /// <summary>Raised after a row is added or removed.</summary>
+    [Parameter]
+    public EventCallback RowsChanged { get; set; }
+
+    private Task Add()
+    {
+        if (Rows.Count < ExpectedResults.MaxCount)
+        {
+            Rows.Add(new ExpectedResultRow());
+        }
+
+        return RowsChanged.InvokeAsync();
+    }
+
+    private Task Remove(ExpectedResultRow row)
+    {
+        Rows.Remove(row);
+        return RowsChanged.InvokeAsync();
+    }
+}

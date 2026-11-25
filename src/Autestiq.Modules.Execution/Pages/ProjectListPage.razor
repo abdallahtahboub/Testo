@@ -1,0 +1,75 @@
+@page "/app/projects"
+@inject IStringLocalizer<ExecutionResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    The organization's projects, and a form to add one (Milestone 5). Everything a project tests
+    hangs off it: its environments, its tests, its runs.
+*@
+<PageTitle>@L["Projects_PageTitle", Brand.Value.ProductName]</PageTitle>
+
+<div class="projects">
+    <header class="projects__header">
+        <h1>@L["Projects_Title"]</h1>
+        <p class="t-muted">@L["Projects_Intro"]</p>
+    </header>
+
+    <TAsyncView Loading="Loading" Error="@LoadError" OnRetry="LoadAsync" IsEmpty="Projects.Count == 0">
+        <EmptyContent>
+            <TEmptyState Title="@L["Projects_Empty_Title"]">@L["Projects_Empty_Text"]</TEmptyState>
+        </EmptyContent>
+        <ChildContent>
+            <ul class="projects__list" data-testid="projects">
+                @foreach (var project in Projects)
+                {
+                    <li class="projects__item">
+                        <div class="projects__text">
+                            <p class="projects__name">
+                                <a href="@Routes.Environments(project.Key)" data-testid="@($"project-{project.Key}")">@project.Name</a>
+                                <span class="projects__key">@project.Key</span>
+                            </p>
+                            @if (!string.IsNullOrWhiteSpace(project.Description))
+                            {
+                                <p class="t-muted">@project.Description</p>
+                            }
+                        </div>
+                        <p class="t-muted projects__count">
+                            <a href="@Routes.Tests(project.Key)" data-testid="@($"project-tests-{project.Key}")">@L["ProjectNav_Tests"]</a>
+                            · @L["Projects_EnvironmentCount", project.Environments]
+                        </p>
+                    </li>
+                }
+            </ul>
+        </ChildContent>
+    </TAsyncView>
+
+    @if (CanManage)
+    {
+        <section class="projects__new" aria-labelledby="projects-new">
+            <h2 id="projects-new" class="t-h4">@L["Projects_New"]</h2>
+
+            <div class="projects__form">
+                <TField Label="@L["Projects_Name"]" Required>
+                    <TInput Context="context" Disabled="!Ready" @bind-Value="Name" Required data-testid="project-name" />
+                </TField>
+                <TField Label="@L["Projects_Key"]" Hint="@L["Projects_Key_Hint"]" Required>
+                    <TInput Context="context" Disabled="!Ready" @bind-Value="Key" Required data-testid="project-key" />
+                </TField>
+                <TField Label="@L["Projects_Description"]">
+                    <TInput Context="context" Disabled="!Ready" @bind-Value="Description" data-testid="project-description" />
+                </TField>
+
+                @if (Problem is not null)
+                {
+                    <p class="projects__problem" role="alert">@Problem</p>
+                }
+
+                <div>
+                    <TButton Variant="ButtonVariant.Primary" Loading="Busy" Disabled="!Ready" OnClick="CreateAsync" data-testid="create-project">
+                        @L["Projects_Create"]
+                    </TButton>
+                </div>
+            </div>
+        </section>
+    }
+</div>

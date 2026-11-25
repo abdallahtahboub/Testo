@@ -1,0 +1,77 @@
+@inject IOptions<BrandOptions> Brand
+@inject IStringLocalizer<WebsiteResources> L
+@inject NavigationManager Navigation
+
+@*
+    One place for everything that goes in a page's head: its title, its description, and the tags
+    that decide what a link to it looks like when somebody pastes it into a chat.
+
+    Pages used to write the title and the description separately, which meant two chances to forget
+    the second one. The canonical URL and the hreflang alternates are added once for the whole site
+    in App.razor, so they are deliberately not here.
+*@
+<PageTitle>@Title – @Brand.Value.ProductName</PageTitle>
+
+<HeadContent>
+    <meta name="description" content="@Description" />
+
+    @if (NoIndex)
+    {
+        @* A placeholder that ranks is a placeholder a stranger reads first. *@
+        <meta name="robots" content="noindex, follow" />
+    }
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="@Brand.Value.ProductName" />
+    <meta property="og:title" content="@Title" />
+    <meta property="og:description" content="@Description" />
+    <meta property="og:url" content="@Absolute(LocalizedPath.For(SupportedCultures.Current, Path))" />
+    <meta property="og:locale" content="@OpenGraphLocale(SupportedCultures.Current)" />
+
+    @foreach (var other in SupportedCultures.All.Where(culture => culture != SupportedCultures.Current))
+    {
+        <meta property="og:locale:alternate" content="@OpenGraphLocale(other)" />
+    }
+
+    <meta property="og:image" content="@Absolute("/img/social-card.png")" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="@L["Social_Card_Alt", Brand.Value.ProductName]" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+</HeadContent>
+
+@code {
+    /// <summary>The page's heading, as it should read in a tab and in a shared link.</summary>
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    /// <summary>One or two sentences. What a search result or a pasted link will show.</summary>
+    [Parameter, EditorRequired]
+    public string Description { get; set; } = "";
+
+    /// <summary>
+    /// Whether this page asks search engines to skip it. True for every placeholder, and a test
+    /// holds this to <c>PublicPages.NotIndexed</c>.
+    /// </summary>
+    [Parameter]
+    public bool NoIndex { get; set; }
+
+    /// <summary>The page's own path, from <c>PublicPages</c>, for the social URL.</summary>
+    [Parameter, EditorRequired]
+    public string Path { get; set; } = "";
+
+    private string Absolute(string path) =>
+        new Uri(new Uri(Navigation.BaseUri), path).AbsoluteUri;
+
+    /// <summary>
+    /// Open Graph wants a language and a region, which our two-letter cultures do not carry. The
+    /// region here is the one those languages are most read in, and it is a hint rather than a
+    /// claim about where anybody is.
+    /// </summary>
+    private static string OpenGraphLocale(string culture) => culture switch
+    {
+        "de" => "de_DE",
+        _ => "en_GB",
+    };
+}

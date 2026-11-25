@@ -4,8 +4,8 @@
 - **Date:** 2026-11-12
 
 ## Context
-The user interface currently talks to interfaces in `Testo.Contracts`, implemented by
-`Testo.Mocks`. Real persistence replaces those implementations. The question is what sits
+The user interface currently talks to interfaces in `Autestiq.Contracts`, implemented by
+`Autestiq.Mocks`. Real persistence replaces those implementations. The question is what sits
 behind them, and whether the Blazor application should call an HTTP API or the database.
 
 A QA platform also needs a **public API**: customers push results from their CI pipelines
@@ -15,33 +15,33 @@ into it. That is a product requirement, not an internal detail.
 Three new projects behind the existing contracts:
 
 ```
-Testo.Domain        entities and the rules that are true regardless of storage
-Testo.Application   use cases; implements the Contracts interfaces
-Testo.Persistence   EF Core, PostgreSQL, migrations
+Autestiq.Domain        entities and the rules that are true regardless of storage
+Autestiq.Application   use cases; implements the Contracts interfaces
+Autestiq.Persistence   EF Core, PostgreSQL, migrations
 ```
 
-The Blazor host calls `Testo.Application` **in process**. App pages already render on the
+The Blazor host calls `Autestiq.Application` **in process**. App pages already render on the
 server, so an HTTP hop to our own API would add latency and a failure mode for nothing.
 
-`Testo.Api` is a **second host** over the same application layer, for CI integrations and
+`Autestiq.Api` is a **second host** over the same application layer, for CI integrations and
 customers. It is a separate milestone, and it shares the use cases rather than
 reimplementing them.
 
 ```
-Testo.Web (Blazor) ─┐
-                    ├─► Testo.Application ─► Testo.Domain
-Testo.Api (REST) ───┘            │
-                                 └────────► Testo.Persistence ─► PostgreSQL
+Autestiq.Web (Blazor) ─┐
+                    ├─► Autestiq.Application ─► Autestiq.Domain
+Autestiq.Api (REST) ───┘            │
+                                 └────────► Autestiq.Persistence ─► PostgreSQL
 ```
 
 ## Consequences
-- The user interface does not change when mocks are replaced: `AddTestoMocks()` becomes
-  `AddTestoApplication()`, which is what the original architecture was built for.
+- The user interface does not change when mocks are replaced: `AddAutestiqMocks()` becomes
+  `AddAutestiqApplication()`, which is what the original architecture was built for.
 - One place holds a use case, used by both hosts, so the web app and the API cannot drift.
-- `Testo.Mocks` stays, for component tests and for a demo mode that needs no database.
+- `Autestiq.Mocks` stays, for component tests and for a demo mode that needs no database.
 - Three more projects. Justified by the API host and by keeping domain rules testable
   without a database; not justified by fashion.
-- Moving the app area to WebAssembly later would mean the browser calling `Testo.Api`.
+- Moving the app area to WebAssembly later would mean the browser calling `Autestiq.Api`.
   That is why the contracts stay free of server types.
 
 ## Alternatives considered

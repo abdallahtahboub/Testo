@@ -3,7 +3,7 @@
 > Status: **Accepted.** The identity and tenancy part is built (Milestone 3); the testing-journey
 > entities are built one stage at a time in Milestone 5.
 
-What Testo stores, and how the pieces relate. This is the expensive thing to get wrong:
+What Autestiq stores, and how the pieces relate. This is the expensive thing to get wrong:
 the user interface can be rewritten in an afternoon, a schema that leaks one customer's
 data into another's cannot be unwritten.
 
@@ -92,6 +92,11 @@ request, is a separate and deliberate operation (GDPR Article 17).
 | Entity | Holds | Notes |
 |---|---|---|
 | `TestRun` | Key, suite, environment, release, capability, trigger, status, started, finished, who | One execution of a suite |
+| `UsageEvent` *(built, 3.6)* | Organization, run, category, quantity, billable, month, idempotency key | What each organization used, recorded once, never changed |
+| `PriceVersion`, `UnitPrice` *(built, 3.8)* | Number, effective from, currency; item, price, per units, estimate | What things cost us; a version never changes, and a cost uses the one in force when its run finished |
+| `RunCost` *(built, 3.8)* | Organization, run, item, quantity, price, version, amount, billable, month | What each run cost us, item by item, recorded once, never changed |
+| `Plan`, `PlanVersion` *(built, 3.7)* | Code, name; number, effective from, minutes, runs at once, projects | What each plan allows; a version never changes, and an organization keeps the one it holds |
+| `OriginProof` *(built, 3.5)* | Organization, origin, token, status, verified, expires | That an organization controls an origin a run may be aimed at |
 | `TestCaseResult` | Run, test case, version executed, status, duration, assigned defect | Status: passed, failed, blocked, skipped, not run |
 | `StepResult` | Case result, step, status, duration, actual result, message | What the live view streams |
 | `Evidence` | Step or case result, kind, storage key, captured at | Screenshots, logs, video, traces. The file lives in object storage; this row points at it |

@@ -30,7 +30,7 @@ jobs:
       DOTNET_NOLOGO: true
       DOTNET_CLI_TELEMETRY_OPTOUT: true
       # Where the tests create a database of their own for each run.
-      TESTO_TEST_DB: "Host=localhost;Port=5432;Username=postgres;Password=postgres"
+      AUTESTIQ_TEST_DB: "Host=localhost;Port=5432;Username=postgres;Password=postgres"
 
     services:
       postgres:
@@ -56,18 +56,36 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Restore
-        run: dotnet restore Testo.slnx
+        run: dotnet restore Autestiq.slnx
 
       - name: Build
-        run: dotnet build Testo.slnx --configuration Release --no-restore
+        run: dotnet build Autestiq.slnx --configuration Release --no-restore
+
+      # The sealed-run gate tests (ADR-0026) start real containers from this image, and fail without it.
+      - name: Build the worker image
+        run: |
+          dotnet publish src/Autestiq.Worker --configuration Release --output artifacts/worker -p:UseAppHost=false
+          docker build --file src/Autestiq.Worker/Dockerfile --tag autestiq-worker:dev artifacts/worker
 
       - name: Install the browser for the Playwright tests
         run: >
-          dotnet build tests/Testo.E2E --configuration Release --no-restore
+          dotnet build tests/Autestiq.E2E --configuration Release --no-restore
           -t:InstallTestBrowser -p:PlaywrightInstallArguments="--with-deps chromium"
 
+      # One test project at a time. The sealed-run tests (ADR-0026) create and remove Docker
+      # networks, each a new host interface; Chromium takes that for a network change and aborts
+      # the browser tests' requests in flight with ERR_NETWORK_CHANGED. Chromium has no documented
+      # switch to ignore it, so the browser tests must not overlap them. Tests inside a project
+      # still run in parallel.
       - name: Test
-        run: dotnet test --solution Testo.slnx --configuration Release --no-build --report-xunit-trx --results-directory TestResults
+        run: dotnet test --solution Autestiq.slnx --configuration Release --no-build --max-parallel-test-modules 1 --report-xunit-trx --results-directory TestResults
+
+      # Not the benchmark itself: that costs money and minutes. This proves the instrument can
+      # see a false positive, by giving it a planner that writes a plan designed to pass without
+      # testing anything and insisting it is caught. A report that says "0 false positives" means
+      # nothing unless this holds.
+      - name: Check the benchmark can catch a planner that only pretends
+        run: dotnet run --project tools/Autestiq.Benchmark --configuration Release --no-build -- --self-check
 
       - name: Upload test results
         if: always()

@@ -1,6 +1,6 @@
 # Contributing
 
-How we work on Testo. `CLAUDE.md` holds the detailed coding conventions; this document is
+How we work on Autestiq. `CLAUDE.md` holds the detailed coding conventions; this document is
 about the process around them.
 
 ## Branches

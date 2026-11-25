@@ -8,8 +8,8 @@
 ## Context
 
 After Milestone 3 the product has real identity, real tenancy and a real design system. It has no
-testing journey at all: the seven module projects are shells of one class each, `Testo.Mocks` holds
-options and a random source rather than services, and `Testo.Capabilities.E2EWeb` is an empty
+testing journey at all: the seven module projects are shells of one class each, `Autestiq.Mocks` holds
+options and a random source rather than services, and `Autestiq.Capabilities.E2EWeb` is an empty
 folder. Twelve pages are routable, six of which are sign-in.
 
 The approved sequence was public website → app shell → seven modules → live run view → polish. That

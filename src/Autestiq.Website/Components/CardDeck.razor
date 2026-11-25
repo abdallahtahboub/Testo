@@ -1,0 +1,63 @@
+@inject IStringLocalizer<WebsiteResources> L
+
+@*
+    A row of cards. One component rather than the same <ul> written out on thirty pages.
+
+    A card that links somewhere is a link in its entirety, so the whole card is the target rather
+    than three words inside it.
+*@
+<ul class="card-deck card-deck--@Columns" role="list">
+    @foreach (var card in Cards)
+    {
+        <li class="card-deck__item">
+            @if (card.Href is { Length: > 0 } href)
+            {
+                <a class="card card--link" href="@href">
+                    @Inner(card)
+                    <span class="card__more">
+                        @(card.LinkLabel ?? L["Card_More"])
+                        <TIcon Name="IconName.ChevronRight" Size="IconSize.Small" />
+                    </span>
+                </a>
+            }
+            else
+            {
+                <div class="card">@Inner(card)</div>
+            }
+        </li>
+    }
+</ul>
+
+@code {
+    /// <summary>One card.</summary>
+    /// <param name="Title">Its heading.</param>
+    /// <param name="Text">What it says.</param>
+    /// <param name="Href">Where it leads, when it leads anywhere.</param>
+    /// <param name="LinkLabel">What the link at the bottom says, when the default does not fit.</param>
+    /// <param name="IsPlaceholder">Whether the page behind it is a labeled placeholder.</param>
+    public sealed record Card(
+        string Title,
+        string Text,
+        string? Href = null,
+        string? LinkLabel = null,
+        bool IsPlaceholder = false);
+
+    /// <summary>The cards, in order.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<Card> Cards { get; set; } = [];
+
+    /// <summary>How many across, at the widest. Two, three or four.</summary>
+    [Parameter]
+    public int Columns { get; set; } = 3;
+
+    private RenderFragment Inner(Card card) => @<text>
+        <span class="card__title">
+            @card.Title
+            @if (card.IsPlaceholder)
+            {
+                <span class="card__placeholder">@L["Card_Placeholder"]</span>
+            }
+        </span>
+        <span class="card__text">@card.Text</span>
+    </text>;
+}

@@ -1,0 +1,422 @@
+using System.Globalization;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Autestiq.Application;
+using Autestiq.Application.Costs;
+using Autestiq.Application.Identity;
+using Autestiq.Application.Usage;
+using Autestiq.Contracts.Identity;
+using Autestiq.Domain.Costs;
+using Autestiq.Persistence;
+
+// Commands for operators, against the product's database (ADR-0028, ADR-0029).
+//
+//   set-plan <organization-slug> <plan-code> [version] --by <name>
+//   set-prices [--browser-hour <usd>] [--storage-gb-month <usd>] [--model <id> <input-usd> <output-usd>]...
+//              [--estimate] [--from <yyyy-MM-ddTHH:mm:ssZ>] --note <text> --by <name>
+//   cost-report [yyyy-MM] [--eur-rate <euros per dollar>]
+//   create-organization <slug> <name> --owner <email> --by <name>
+//                                    a new organization, its owner invited by email (needs Email__Smtp__*, ADR-0040)
+//   key-ring-reset --by <name> --yes      accepts that the key ring is lost for good (R-20): stored test-account
+//                                         values become unusable and must be entered again
+//   rehearsal-report <organization-slug>   the rehearsal's measures, from the content-free views (Milestone 5.1 R6)
+//   migrations                       which migrations the database has, and which it lacks
+//   migrate                          applies every migration it lacks (Milestone 5.1 R2)
+//   migrate --to <migration>|0 --yes moves to an earlier migration, or to an empty schema: a rollback
+//
+// The web host never migrates a deployed database itself: run migrate before starting a new version.
+//
+// Run them with: dotnet run --project tools/Autestiq.Operator -- <command> ...
+// The database is the one ConnectionStrings__Autestiq names. --by is who made the change, for the record.
+
+var connection = Environment.GetEnvironmentVariable("ConnectionStrings__Autestiq");
+
+if (connection is null)
+{
+    Console.Error.WriteLine("Set ConnectionStrings__Autestiq to the product's database.");
+    return 2;
+}
+
+// Email for the commands that send it, from the same settings the web host reads (Email__Smtp__Host and the rest).
+var smtp = new SmtpOptions
+{
+    Host = Environment.GetEnvironmentVariable("Email__Smtp__Host") ?? "",
+    Port = int.TryParse(Environment.GetEnvironmentVariable("Email__Smtp__Port"), CultureInfo.InvariantCulture, out var smtpPort) ? smtpPort : 587,
+    StartTls = !string.Equals(Environment.GetEnvironmentVariable("Email__Smtp__StartTls"), "false", StringComparison.OrdinalIgnoreCase),
+    User = Environment.GetEnvironmentVariable("Email__Smtp__User"),
+    Password = Environment.GetEnvironmentVariable("Email__Smtp__Password"),
+    From = Environment.GetEnvironmentVariable("Email__Smtp__From") ?? "",
+    PublicBaseUrl = Environment.GetEnvironmentVariable("Email__Smtp__PublicBaseUrl") ?? "",
+};
+
+var collection = new ServiceCollection();
+
+if (smtp.Host.Length > 0)
+{
+    collection.AddAutestiqSmtpEmail(smtp);
+}
+
+var services = collection
+    .AddLogging()
+    .AddSingleton<ICurrentUser>(OperatorPrincipal.Instance)
+    .AddSingleton<IOrganizationContext>(OperatorPrincipal.Instance)
+    .AddAutestiqApplication(connection)
+    .BuildServiceProvider();
+
+await using (services.ConfigureAwait(false))
+{
+    using var scope = services.CreateScope();
+    var database = scope.ServiceProvider.GetRequiredService<AutestiqDbContext>();
+
+    return args switch
+    {
+        ["set-plan", var slug, var plan, .. var rest] => await SetPlanAsync(database, scope.ServiceProvider.GetRequiredService<TenantWriteScope>(), slug, plan, rest).ConfigureAwait(false),
+        ["set-prices", .. var rest] => await SetPricesAsync(database, rest).ConfigureAwait(false),
+        ["cost-report", .. var rest] => await CostReportAsync(database, rest).ConfigureAwait(false),
+        ["migrations"] => await MigrationsAsync(database).ConfigureAwait(false),
+        ["key-ring-reset", .. var rest] => await KeyRingResetAsync(database, rest).ConfigureAwait(false),
+        ["create-organization", var slug, var name, .. var rest] => await CreateOrganizationAsync(scope.ServiceProvider, database, smtp.Host.Length > 0, slug, name, rest).ConfigureAwait(false),
+        ["rehearsal-report", var slug] => await RehearsalReportAsync(database, slug).ConfigureAwait(false),
+        ["migrate", .. var rest] => await MigrateAsync(database, rest).ConfigureAwait(false),
+        _ => Usage(),
+    };
+}
+
+static async Task<int> CreateOrganizationAsync(IServiceProvider provider, AutestiqDbContext database, bool emailConfigured, string slug, string name, string[] rest)
+{
+    var owner = Option(rest, "--owner");
+    var by = Option(rest, "--by");
+
+    if (owner is null || by is null)
+    {
+        Console.Error.WriteLine("Name the owner with --owner <email> and who is making the change with --by <name>.");
+        return 2;
+    }
+
+    // The owner's link goes by email or not at all: printed here, it would sit in a terminal's history.
+    if (!emailConfigured)
+    {
+        Console.Error.WriteLine("Email is not configured: set Email__Smtp__Host, __From and __PublicBaseUrl (and __User, __Password), so the owner's invitation can be sent.");
+        return 2;
+    }
+
+    var (organization, problem) = await OrganizationBootstrap.CreateAsync(
+        database,
+        provider.GetRequiredService<TenantWriteScope>(),
+        provider.GetRequiredService<IInvitationNotifier>(),
+        TimeProvider.System,
+        slug,
+        name,
+        owner,
+        by,
+        CancellationToken.None).ConfigureAwait(false);
+
+    if (problem is not null)
+    {
+        Console.Error.WriteLine(problem);
+        return 2;
+    }
+
+    Console.WriteLine($"Created {slug} ({organization}); the owner's invitation was sent to {owner}.");
+    return 0;
+}
+
+static async Task<int> KeyRingResetAsync(AutestiqDbContext database, string[] rest)
+{
+    var by = Option(rest, "--by");
+    var secrets = await database.EnvironmentSecrets.IgnoreQueryFilters().CountAsync().ConfigureAwait(false);
+
+    // Every stored test-account value was written with the lost key ring: say so before anything changes.
+    if (by is null || !rest.Contains("--yes", StringComparer.Ordinal))
+    {
+        Console.Error.WriteLine($"This accepts that the key ring is lost: {secrets} stored test-account value(s) can then never be read, "
+            + "and each must be entered again. If the right key ring can be restored, restore it instead. To go on: --by <name> --yes.");
+        return 2;
+    }
+
+    var removed = await database.KeyRingCanaries.ExecuteDeleteAsync().ConfigureAwait(false);
+    Console.WriteLine($"Key ring reset by {by}: {removed} canary removed; the running key ring writes a new one at the next readiness check. "
+        + $"{secrets} stored test-account value(s) are unreadable and must be entered again.");
+    return 0;
+}
+
+static async Task<int> RehearsalReportAsync(AutestiqDbContext database, string slug)
+{
+    // Operators look across organizations by design; this one names it by its slug.
+    var organization = await database.Organizations.IgnoreQueryFilters()
+        .Where(candidate => candidate.Slug == slug)
+        .Select(candidate => (Guid?)candidate.Id)
+        .FirstOrDefaultAsync()
+        .ConfigureAwait(false);
+
+    if (organization is not { } id)
+    {
+        Console.Error.WriteLine($"There is no organization {slug}.");
+        return 2;
+    }
+
+    var m = await Autestiq.Application.Analytics.RehearsalReport.ForAsync(database, id, CancellationToken.None).ConfigureAwait(false);
+
+    static string Time(double? seconds) => seconds is { } value ? TimeSpan.FromSeconds(Math.Round(value)).ToString("g", CultureInfo.InvariantCulture) : "—";
+
+    Console.WriteLine($"Rehearsal measures for {slug}");
+    Console.WriteLine($"  Tests described:                 {m.TestsDescribed}");
+    Console.WriteLine($"  Median time to first approval:   {Time(m.MedianSecondsToFirstApproval)}");
+    Console.WriteLine($"  Median time to first verdict:    {Time(m.MedianSecondsToFirstVerdict)}");
+    Console.WriteLine($"  Corrections per test:            {m.CorrectionsPerTest?.ToString("0.0", CultureInfo.InvariantCulture) ?? "—"}");
+    Console.WriteLine($"  Plans full / partial:            {m.FullPlans} / {m.PartialPlans}");
+    Console.WriteLine($"  Approved runs: verdict / inconclusive / error: {m.RunsWithVerdict} / {m.RunsInconclusive} / {m.RunsInError}");
+    Console.WriteLine($"  Median queue wait:               {Time(m.MedianQueueWaitSeconds)}");
+    Console.WriteLine($"  Active days / people returning:  {m.ActiveDays} / {m.PeopleReturning}");
+    Console.WriteLine($"  Cost per completed run:          {(m.CostPerCompletedRun is { } cost ? "$" + cost.ToString("0.0000", CultureInfo.InvariantCulture) : "—")}");
+    return 0;
+}
+
+static async Task<int> MigrationsAsync(AutestiqDbContext database)
+{
+    var (applied, pending) = await Autestiq.Application.Operations.DatabaseMigrations.StateAsync(database, CancellationToken.None).ConfigureAwait(false);
+
+    foreach (var name in applied)
+    {
+        Console.WriteLine($"applied  {name}");
+    }
+
+    foreach (var name in pending)
+    {
+        Console.WriteLine($"pending  {name}");
+    }
+
+    return 0;
+}
+
+static async Task<int> MigrateAsync(AutestiqDbContext database, string[] rest)
+{
+    var target = Option(rest, "--to");
+    var (applied, pending) = await Autestiq.Application.Operations.DatabaseMigrations.StateAsync(database, CancellationToken.None).ConfigureAwait(false);
+
+    // Stepping back drops what later migrations added, data with it: never without saying so.
+    var goesBack = target is not null && (target == Autestiq.Application.Operations.DatabaseMigrations.Empty
+        || applied.Contains(target, StringComparer.Ordinal) && applied[^1] != target);
+
+    if (goesBack && !rest.Contains("--yes", StringComparer.Ordinal))
+    {
+        Console.Error.WriteLine($"Moving back to {target} removes what later migrations added, data included. Take a backup, then repeat with --yes.");
+        return 2;
+    }
+
+    try
+    {
+        await Autestiq.Application.Operations.DatabaseMigrations.MigrateAsync(database, target, CancellationToken.None).ConfigureAwait(false);
+    }
+    catch (ArgumentException exception)
+    {
+        Console.Error.WriteLine(exception.Message);
+        return 2;
+    }
+
+    var (now, left) = await Autestiq.Application.Operations.DatabaseMigrations.StateAsync(database, CancellationToken.None).ConfigureAwait(false);
+    Console.WriteLine($"Was at {(applied.Count > 0 ? applied[^1] : "an empty schema")} with {pending.Count} pending; now at {(now.Count > 0 ? now[^1] : "an empty schema")} with {left.Count} pending.");
+    return 0;
+}
+
+static int Usage()
+{
+    Console.Error.WriteLine("""
+        Usage:
+          set-plan <organization-slug> <plan-code> [version] --by <name>
+          set-prices [--browser-hour <usd>] [--storage-gb-month <usd>] [--model <id> <input-usd> <output-usd>]... [--estimate] [--from <instant>] --note <text> --by <name>
+          cost-report [yyyy-MM] [--eur-rate <euros per dollar>]
+          create-organization <slug> <name> --owner <email> --by <name>
+          key-ring-reset --by <name> --yes
+          rehearsal-report <organization-slug>
+          migrations
+          migrate [--to <migration>|0 --yes]
+        """);
+    return 2;
+}
+
+static async Task<int> SetPlanAsync(AutestiqDbContext database, TenantWriteScope writeScope, string slug, string plan, string[] rest)
+{
+    var by = Option(rest, "--by");
+    var versionText = rest.FirstOrDefault(argument => !argument.StartsWith("--", StringComparison.Ordinal) && argument != by);
+
+    if (by is null)
+    {
+        Console.Error.WriteLine("Say who is making the change with --by.");
+        return 2;
+    }
+
+    int? version = null;
+
+    if (versionText is not null)
+    {
+        if (!int.TryParse(versionText, NumberStyles.None, CultureInfo.InvariantCulture, out var number))
+        {
+            Console.Error.WriteLine($"'{versionText}' is not a version number.");
+            return 2;
+        }
+
+        version = number;
+    }
+
+    var outcome = await PlanAssignment.MoveAsync(database, writeScope, TimeProvider.System, slug, plan, version, by, CancellationToken.None)
+        .ConfigureAwait(false);
+
+    Console.WriteLine(outcome switch
+    {
+        PlanChange.Moved => $"Moved {slug} to {plan}{(version is { } v ? $" version {v}" : "")}. Recorded in its audit log.",
+        PlanChange.Unchanged => $"{slug} is already on that version. Nothing changed.",
+        PlanChange.NoSuchOrganization => $"No organization is called {slug}.",
+        PlanChange.NoSuchPlan => $"No plan {plan}{(version is { } n ? $" with a version {n}" : "")}.",
+        PlanChange.NotYetEffective => "That version has not taken effect yet.",
+        _ => outcome.ToString(),
+    });
+
+    return outcome is PlanChange.Moved or PlanChange.Unchanged ? 0 : 1;
+}
+
+static async Task<int> SetPricesAsync(AutestiqDbContext database, string[] rest)
+{
+    var by = Option(rest, "--by");
+    var note = Option(rest, "--note");
+
+    if (by is null || note is null)
+    {
+        Console.Error.WriteLine("Say who is publishing the prices with --by, and where they came from with --note.");
+        return 2;
+    }
+
+    // --estimate marks the machine and storage figures given here as estimates; model prices are list prices.
+    var estimate = rest.Contains("--estimate", StringComparer.Ordinal);
+    var changes = new List<PriceChange>();
+
+    if (Option(rest, "--browser-hour") is { } hour)
+    {
+        if (Money(hour) is not { } price)
+        {
+            return NotMoney(hour);
+        }
+
+        changes.Add(new PriceChange(CostItems.BrowserSecond, price, PriceCatalog.SecondsPerHour, estimate));
+    }
+
+    if (Option(rest, "--storage-gb-month") is { } storage)
+    {
+        if (Money(storage) is not { } price)
+        {
+            return NotMoney(storage);
+        }
+
+        changes.Add(new PriceChange(CostItems.StorageByteMonth, price, PriceCatalog.BytesPerGigabyte, estimate));
+    }
+
+    for (var index = Array.IndexOf(rest, "--model"); index >= 0; index = Array.IndexOf(rest, "--model", index + 1))
+    {
+        if (index + 3 >= rest.Length || Money(rest[index + 2]) is not { } input || Money(rest[index + 3]) is not { } output)
+        {
+            Console.Error.WriteLine("--model takes a model id, then its input and output price per million tokens.");
+            return 2;
+        }
+
+        changes.Add(new PriceChange(CostItems.ModelInputToken(rest[index + 1]), input, PriceCatalog.TokensPerMillion, Estimate: false));
+        changes.Add(new PriceChange(CostItems.ModelOutputToken(rest[index + 1]), output, PriceCatalog.TokensPerMillion, Estimate: false));
+    }
+
+    DateTimeOffset? from = null;
+
+    if (Option(rest, "--from") is { } fromText)
+    {
+        if (!DateTimeOffset.TryParse(fromText, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var parsed))
+        {
+            Console.Error.WriteLine($"'{fromText}' is not an instant.");
+            return 2;
+        }
+
+        from = parsed;
+    }
+
+    if (changes.Count == 0)
+    {
+        Console.Error.WriteLine("Give at least one price to change.");
+        return 2;
+    }
+
+    var (outcome, version) = await PriceBook.PublishAsync(database, TimeProvider.System, changes, from, note, by, CancellationToken.None)
+        .ConfigureAwait(false);
+
+    Console.WriteLine(outcome switch
+    {
+        PricePublication.Published when version is not null => $"Published price version {version.Number}, in force from {version.EffectiveFrom:u}. Costs already recorded keep their prices.",
+        PricePublication.InThePast => "A price version cannot take effect in the past: costs already recorded used the prices in force then.",
+        PricePublication.NotAPrice => "Every price must be zero or more.",
+        PricePublication.Unchanged => "Those are the prices already in the latest version. Nothing was published.",
+        _ => outcome.ToString(),
+    });
+
+    return outcome == PricePublication.Published ? 0 : 1;
+}
+
+static async Task<int> CostReportAsync(AutestiqDbContext database, string[] rest)
+{
+    var month = rest.FirstOrDefault(argument => !argument.StartsWith("--", StringComparison.Ordinal) && argument != Option(rest, "--eur-rate"))
+        ?? UsageMeter.PeriodOf(TimeProvider.System.GetUtcNow());
+
+    if (!DateTime.TryParseExact(month, "yyyy-MM", CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
+    {
+        Console.Error.WriteLine($"'{month}' is not a month: write it as yyyy-MM.");
+        return 2;
+    }
+
+    decimal? euros = null;
+
+    if (Option(rest, "--eur-rate") is { } rateText)
+    {
+        if (Money(rateText) is not { } rate || rate == 0)
+        {
+            return NotMoney(rateText);
+        }
+
+        euros = rate;
+    }
+
+    var lines = await CostReport.ForMonthAsync(database, month, CancellationToken.None).ConfigureAwait(false);
+    Console.Write(CostReportText.Write(month, lines, euros));
+    return 0;
+}
+
+static decimal? Money(string text) =>
+    decimal.TryParse(text, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var value) ? value : null;
+
+static int NotMoney(string text)
+{
+    Console.Error.WriteLine($"'{text}' is not an amount: write it with a point, such as 0.10.");
+    return 2;
+}
+
+static string? Option(string[] arguments, string name)
+{
+    var index = Array.IndexOf(arguments, name);
+    return index >= 0 && index + 1 < arguments.Length ? arguments[index + 1] : null;
+}
+
+/// <summary>Nobody signed in and no organization in context: an operator works across organizations.</summary>
+internal sealed class OperatorPrincipal : ICurrentUser, IOrganizationContext
+{
+    public static readonly OperatorPrincipal Instance = new();
+
+    public bool IsSignedIn => false;
+
+    public Guid? UserId => null;
+
+    public string? Email => null;
+
+    public string? DisplayName => null;
+
+    public Role? Role => null;
+
+    public Guid? OrganizationId => null;
+
+    public bool Can(Permission permission) => false;
+
+    public Guid RequireOrganizationId() => throw new InvalidOperationException("An operator command has no organization in context.");
+}

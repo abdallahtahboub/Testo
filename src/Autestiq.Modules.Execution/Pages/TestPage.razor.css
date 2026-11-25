@@ -1,0 +1,97 @@
+/* One test: what was asked, the plan, the notes by source, the Python, and what was sent. */
+
+.test {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.test__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-block-start: var(--space-4);
+}
+
+.test__title h1 {
+  margin: 0;
+}
+
+.test__header > p {
+  margin: var(--space-2) 0 0;
+}
+
+.test__block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.test__block h2,
+.test__block > p {
+  margin: 0;
+}
+
+.test__block ul,
+.test__steps {
+  margin: 0;
+  padding-inline-start: var(--space-6);
+}
+
+.test__block--unverified {
+  padding: var(--space-4);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+}
+
+.test__asked {
+  padding: var(--space-3) var(--space-4);
+  border-inline-start: var(--border-width-strong) solid var(--color-border-strong);
+  background: var(--color-surface);
+}
+
+/* A list item keeps its number, which the approval refers to; its parts stack inside it. */
+.test__steps li {
+  margin-block-end: var(--space-2);
+}
+
+.test__step {
+  display: flex;
+  flex-direction: column;
+}
+
+.test__badge {
+  margin-inline-start: var(--space-2);
+}
+
+.test__step-detail {
+  font-size: var(--text-body-sm);
+  overflow-wrap: anywhere;
+}
+
+.test__partial,
+.test__problem {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+}
+
+.test__problem {
+  color: var(--color-danger);
+}
+
+.test__code {
+  margin: 0;
+  padding: var(--space-4);
+  max-block-size: 30rem;
+  overflow: auto;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-subtle);
+  font-size: var(--text-body-sm);
+}
+
+.test__sent summary {
+  cursor: pointer;
+}

@@ -1,0 +1,31 @@
+.page-section {
+  padding-block: var(--space-16);
+}
+
+.page-section--subtle {
+  background-color: var(--color-surface-subtle);
+}
+
+.page-section__head {
+  max-inline-size: 60ch;
+  margin-block-end: var(--space-10);
+}
+
+.page-section__head h2 {
+  margin: 0;
+}
+
+.page-section__head .t-overline {
+  margin: 0 0 var(--space-2);
+  color: var(--color-brand);
+}
+
+.page-section__intro {
+  margin: var(--space-4) 0 0;
+}
+
+@media (min-width: 56.25rem) {
+  .page-section {
+    padding-block: var(--space-24);
+  }
+}

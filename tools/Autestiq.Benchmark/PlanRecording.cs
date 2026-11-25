@@ -1,0 +1,89 @@
+using System.Text;
+using Autestiq.Ai;
+using Autestiq.Contracts.Planning;
+
+namespace Autestiq.Benchmark;
+
+/// <summary>
+/// Writes a plan back out in the JSON a model would have sent.
+/// </summary>
+/// <remarks>
+/// So that a recording saved from a real answer is read by exactly the parser a real answer goes
+/// through. Writing the recordings in some other shape would let the parser pass against JSON
+/// nobody will ever send it.
+/// </remarks>
+public static class PlanRecording
+{
+    /// <summary>The plan as a model's answer.</summary>
+    public static string Write(TestPlan plan)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+
+        var text = new StringBuilder();
+
+        text.Append("{\n  \"scenarioName\": ").Append(Quote(plan.ScenarioName)).Append(",\n");
+
+        // Written, not left out: a recording without it was replayed as full, and since ADR-0035 would be read as partial.
+        text.Append("  \"coverage\": ").Append(Quote(plan.Coverage == PlanCoverage.Full ? "full" : "partial")).Append(",\n");
+        text.Append("  \"notTested\": [")
+            .Append(string.Join(", ", (plan.NotTested ?? []).Select(Quote)))
+            .Append("],\n");
+        text.Append("  \"notes\": [")
+            .Append(string.Join(", ", plan.Notes.Select(Quote)))
+            .Append("],\n");
+        text.Append("  \"actions\": [\n");
+
+        for (var index = 0; index < plan.Actions.Count; index++)
+        {
+            text.Append("    ").Append(Action(plan.Actions[index]));
+            text.Append(index == plan.Actions.Count - 1 ? "\n" : ",\n");
+        }
+
+        text.Append("  ]\n}\n");
+
+        return text.ToString();
+    }
+
+    private static string Action(PlannedAction action)
+    {
+        var fields = new List<string>
+        {
+            $"\"kind\": {Quote(Kind(action.Kind))}",
+            $"\"description\": {Quote(action.Description)}",
+        };
+
+        if (action.Target is { } target)
+        {
+            var within = target.Within is { Length: > 0 } scope ? $", \"within\": {Quote(scope)}" : "";
+
+            fields.Add(target.Kind switch
+            {
+                TargetKind.TestId => $"\"target\": {{ \"kind\": \"testId\", \"value\": {Quote(target.Value)}{within} }}",
+                TargetKind.Text => $"\"target\": {{ \"kind\": \"text\", \"value\": {Quote(target.Value)}{within} }}",
+                _ => $"\"target\": {{ \"kind\": \"roleAndName\", \"role\": {Quote(target.Role ?? "")}, \"value\": {Quote(target.Value)}{within} }}",
+            });
+        }
+
+        if (action.Path is { } path)
+        {
+            fields.Add($"\"path\": {Quote(path)}");
+        }
+
+        if (action.Text is { } text)
+        {
+            fields.Add($"\"text\": {Quote(text)}");
+        }
+
+        if (action.SecretName is { } secret)
+        {
+            fields.Add($"\"secretName\": {Quote(secret)}");
+        }
+
+        return "{ " + string.Join(", ", fields) + " }";
+    }
+
+    /// <summary>The word a model writes for an action, the same one the parser reads.</summary>
+    private static string Kind(ActionKind kind) => PlanJson.Word(kind);
+
+    private static string Quote(string value) => System.Text.Json.JsonSerializer.Serialize(value);
+}

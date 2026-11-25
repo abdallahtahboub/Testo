@@ -1,0 +1,21 @@
+.placeholder-banner {
+  border-block-end: 1px solid var(--color-warning);
+  background-color: var(--color-surface-subtle);
+}
+
+.placeholder-banner__inner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding-block: var(--space-4);
+  color: var(--color-text);
+}
+
+.placeholder-banner p {
+  margin: 0;
+  max-inline-size: 80ch;
+}
+
+.placeholder-banner strong {
+  margin-inline-end: var(--space-2);
+}

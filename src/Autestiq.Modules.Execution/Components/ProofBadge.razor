@@ -1,0 +1,32 @@
+@inject IStringLocalizer<ExecutionResources> L
+
+@*
+    Where the proof that a site may be tested stands, in words and colour. Never colour alone:
+    the words are the state and the tone only reinforces it (docs/design-system.md §10).
+*@
+<TBadge Tone="Tone" data-testid="proof-status">@Text</TBadge>
+
+@code {
+    /// <summary>The proof, or <c>null</c> when nobody has asked for one.</summary>
+    [Parameter]
+    public OriginProofState? Proof { get; set; }
+
+    private string Text => Proof?.Status switch
+    {
+        OriginProofStatus.Verified when Proof.ExpiresAt is { } until => L["Proof_VerifiedUntil", until.ToLocalTime().ToString("d")],
+        OriginProofStatus.Verified => L["Proof_Verified"],
+        OriginProofStatus.Checking => L["Proof_Checking"],
+        OriginProofStatus.Failed => L["Proof_Failed"],
+        OriginProofStatus.Issued => L["Proof_Issued"],
+        _ => L["Proof_None"],
+    };
+
+    private Tone Tone => Proof?.Status switch
+    {
+        OriginProofStatus.Verified => Tone.Success,
+        OriginProofStatus.Checking => Tone.Info,
+        OriginProofStatus.Failed => Tone.Danger,
+        OriginProofStatus.Issued => Tone.Warning,
+        _ => Tone.Neutral,
+    };
+}

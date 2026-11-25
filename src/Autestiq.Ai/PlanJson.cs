@@ -1,0 +1,255 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Autestiq.Contracts.Planning;
+
+namespace Autestiq.Ai;
+
+/// <summary>
+/// Reads a model's answer into a plan, or fails. The one place a string from a provider becomes
+/// something typed.
+/// </summary>
+/// <remarks>
+/// It is strict on purpose. An unknown action kind, a target shape nobody defined, a number where
+/// a string belongs: all of them fail here rather than becoming a default that quietly means
+/// something. The validator then judges what did parse.
+/// </remarks>
+public static class PlanJson
+{
+    private static readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web)
+    {
+        PropertyNameCaseInsensitive = true,
+        ReadCommentHandling = JsonCommentHandling.Skip,
+        AllowTrailingCommas = true,
+    };
+
+    /// <summary>
+    /// Turns the answer into a plan, or returns <c>null</c>.
+    /// </summary>
+    /// <remarks>
+    /// Models like to wrap JSON in prose or a fenced block even when asked not to, so the object
+    /// is found rather than assumed to be the whole answer. That is leniency about packaging, not
+    /// about content: what is inside is read strictly.
+    /// </remarks>
+    public static TestPlan? Read(string answer)
+    {
+        if (Extract(answer) is not { Length: > 0 } json)
+        {
+            return null;
+        }
+
+        try
+        {
+            var wire = JsonSerializer.Deserialize<WirePlan>(json, Options);
+
+            if (wire?.Actions is null or { Count: 0 })
+            {
+                return null;
+            }
+
+            var actions = new List<PlannedAction>(wire.Actions.Count);
+
+            foreach (var action in wire.Actions)
+            {
+                if (Convert(action) is not { } planned)
+                {
+                    // One unreadable action makes the plan unreadable. Dropping it would change
+                    // what the plan does and nobody asked us to edit it.
+                    return null;
+                }
+
+                actions.Add(planned);
+            }
+
+            return new TestPlan(
+                string.IsNullOrWhiteSpace(wire.ScenarioName) ? "A plan" : wire.ScenarioName.Trim(),
+                actions,
+                wire.Notes?.Where(note => !string.IsNullOrWhiteSpace(note)).ToList() ?? [],
+                Coverage(wire.Coverage),
+                wire.NotTested?.Where(part => !string.IsNullOrWhiteSpace(part)).Select(part => part.Trim()).ToList() ?? []);
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>The outermost JSON object in the answer, by brace depth.</summary>
+    private static string? Extract(string answer)
+    {
+        var start = answer.IndexOf('{', StringComparison.Ordinal);
+
+        if (start < 0)
+        {
+            return null;
+        }
+
+        var depth = 0;
+        var inString = false;
+        var escaped = false;
+
+        for (var index = start; index < answer.Length; index++)
+        {
+            var character = answer[index];
+
+            if (escaped)
+            {
+                escaped = false;
+                continue;
+            }
+
+            switch (character)
+            {
+                case '\\' when inString:
+                    escaped = true;
+                    break;
+
+                case '"':
+                    inString = !inString;
+                    break;
+
+                case '{' when !inString:
+                    depth++;
+                    break;
+
+                case '}' when !inString:
+                    depth--;
+
+                    if (depth == 0)
+                    {
+                        return answer[start..(index + 1)];
+                    }
+
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        return null;
+    }
+
+    private static PlannedAction? Convert(WireAction action)
+    {
+        if (KindForWord(action.Kind) is not { } kind || string.IsNullOrWhiteSpace(action.Description))
+        {
+            return null;
+        }
+
+        ActionTarget? target = null;
+
+        if (action.Target is { } wireTarget)
+        {
+            if (Target(wireTarget) is not { } converted)
+            {
+                return null;
+            }
+
+            target = converted;
+        }
+
+        return new PlannedAction(
+            kind,
+            action.Description.Trim(),
+            target,
+            Blank(action.Path),
+            Blank(action.Text),
+            Blank(action.SecretName));
+    }
+
+    /// <summary>The word a plan uses for an action: the inverse of <see cref="Kind"/>, for writing plans out.</summary>
+    /// <remarks>
+    /// Exhaustive on purpose. A new action without a word fails here, and the round-trip test fails
+    /// with it, rather than a recording crashing halfway through a paid benchmark run.
+    /// </remarks>
+    public static string Word(ActionKind kind) => kind switch
+    {
+        ActionKind.Goto => "goto",
+        ActionKind.Click => "click",
+        ActionKind.Type => "type",
+        ActionKind.Press => "press",
+        ActionKind.WaitFor => "waitfor",
+        ActionKind.AssertText => "asserttext",
+        ActionKind.AssertVisible => "assertvisible",
+        ActionKind.AssertNotVisible => "assertnotvisible",
+        ActionKind.AssertUrl => "asserturl",
+        ActionKind.Select => "select",
+        _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "There is no word for that action."),
+    };
+
+    /// <summary>The ten words a plan may use for an action. Anything else is not a plan.</summary>
+    public static ActionKind? KindForWord(string? kind) => kind?.Trim().ToLowerInvariant() switch
+    {
+        "goto" => ActionKind.Goto,
+        "click" => ActionKind.Click,
+        "type" => ActionKind.Type,
+        "press" => ActionKind.Press,
+        "waitfor" => ActionKind.WaitFor,
+        "asserttext" => ActionKind.AssertText,
+        "assertvisible" => ActionKind.AssertVisible,
+        "assertnotvisible" => ActionKind.AssertNotVisible,
+        "asserturl" => ActionKind.AssertUrl,
+        "select" => ActionKind.Select,
+        _ => null,
+    };
+
+    private static ActionTarget? Target(WireTarget target)
+    {
+        if (string.IsNullOrWhiteSpace(target.Value))
+        {
+            return null;
+        }
+
+        var converted = target.Kind?.Trim().ToLowerInvariant() switch
+        {
+            "testid" => ActionTarget.ByTestId(target.Value.Trim()),
+
+            "roleandname" when !string.IsNullOrWhiteSpace(target.Role) =>
+                ActionTarget.ByRole(target.Role.Trim().ToLowerInvariant(), target.Value.Trim()),
+
+            // Exactly the text an element shows. Kept as written apart from the ends: the browser
+            // compares it with the page's own words, so it is never read as anything but text.
+            "text" => ActionTarget.ByText(target.Value.Trim()),
+
+            _ => null,
+        };
+
+        return converted is not null && !string.IsNullOrWhiteSpace(target.Within)
+            ? converted.InsideOf(target.Within.Trim())
+            : converted;
+    }
+
+    private static string? Blank(string? value) => string.IsNullOrWhiteSpace(value) ? null : value;
+
+    /// <summary>
+    /// How much of the scenario the plan claims to cover.
+    /// </summary>
+    /// <remarks>
+    /// Only a plan that says it covers everything is full. An answer that says nothing used to be read as full, the
+    /// lenient reading, which let a plan that forgot the field pass for complete; a planner that silently covers half
+    /// of a scenario is the thing this field exists to catch, so silence, like anything unrecognized, is partial
+    /// (ADR-0035). Being unsure is partial.
+    /// </remarks>
+    private static PlanCoverage Coverage(string? word) => word?.Trim().ToLowerInvariant() switch
+    {
+        "full" or "complete" or "all" => PlanCoverage.Full,
+        _ => PlanCoverage.Partial,
+    };
+
+    private sealed record WirePlan(
+        string? ScenarioName,
+        List<string>? Notes,
+        string? Coverage,
+        List<WireAction>? Actions,
+        [property: JsonPropertyName("notTested")] List<string>? NotTested = null);
+
+    private sealed record WireAction(
+        string? Kind,
+        string? Description,
+        WireTarget? Target,
+        string? Path,
+        string? Text,
+        [property: JsonPropertyName("secretName")] string? SecretName);
+
+    private sealed record WireTarget(string? Kind, string? Value, string? Role, string? Within);
+}

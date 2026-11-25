@@ -1,0 +1,48 @@
+/* A plan's approval and its runs. */
+
+.approval {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.approval h2,
+.approval h3,
+.approval p {
+  margin: 0;
+}
+
+.approval__problem {
+  color: var(--color-danger);
+}
+
+.approval__changes {
+  padding-inline-start: var(--space-3);
+  border-inline-start: var(--border-width-strong) solid var(--color-warning);
+}
+
+.approval__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.approval__runs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.approval__runs li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}

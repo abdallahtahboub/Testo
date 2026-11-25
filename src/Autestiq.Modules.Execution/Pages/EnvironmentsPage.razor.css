@@ -1,0 +1,133 @@
+/* A project's environments, each with its proof, then the form that adds one. */
+
+.environments {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.environments__header h1 {
+  margin-block: var(--space-1) var(--space-2);
+}
+
+.environments__header p {
+  margin: 0;
+}
+
+.environments__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.environments__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.environments__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.environments__text {
+  min-inline-size: 0;
+}
+
+.environments__text p {
+  margin: 0;
+}
+
+.environments__name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--weight-semibold);
+}
+
+.environments__origin {
+  overflow-wrap: anywhere;
+}
+
+.environments__proof {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-subtle);
+}
+
+.environments__proof p {
+  margin: 0 0 var(--space-2);
+}
+
+.environments__proof dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+}
+
+.environments__proof dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.environments__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.environments__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-inline-size: var(--measure);
+  margin-block-start: var(--space-4);
+}
+
+.environments__problem {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  color: var(--color-danger);
+}
+
+.environments__production {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+}
+
+.environments__production p {
+  margin: 0;
+}
+
+/* Whether exploring may act (ADR-0032): a choice, not a warning, so a neutral border. */
+.environments__acting {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.environments__acting p {
+  margin: 0;
+}

@@ -1,0 +1,10 @@
+@using Microsoft.AspNetCore.Authorization
+
+@*
+    Every page in this folder is part of the product and needs a signed-in person.
+
+    PageAuthorizationTests fails the build for any routable page that declares neither
+    [Authorize] nor [AllowAnonymous], so a page added here cannot end up reachable by accident
+    (D-1 in docs/security-register.md).
+*@
+@attribute [Authorize]

@@ -1,0 +1,70 @@
+@using Autestiq.Platform.Features
+@inject INavigationRegistry Registry
+@inject IFeatureFlags Flags
+@inject IStringLocalizerFactory Localizers
+@inject IStringLocalizer<SharedResources> L
+
+@*
+    The product's navigation, drawn from what the modules registered (Milestone 5), grouped by
+    stage and hiding whatever a switched-off feature flag hides. Nothing here names a module:
+    a module appears by registering its entry, and disappears when its flag is off.
+*@
+@if (Groups.Count == 0)
+{
+    <p class="app-nav__empty">@L["App_Nav_Empty"]</p>
+}
+else
+{
+    @foreach (var group in Groups)
+    {
+        <div class="app-nav__group">
+            <p class="app-nav__heading" id="@($"nav-group-{group.Key}")">@L[GroupKey(group.Key)]</p>
+            <ul class="app-nav__list" aria-labelledby="@($"nav-group-{group.Key}")">
+                @foreach (var item in group)
+                {
+                    <li>
+                        <NavLink class="app-nav__link" href="@item.Href" Match="NavLinkMatch.Prefix" data-testid="@($"nav-{item.Id}")">
+                            @if (Enum.TryParse<IconName>(item.Icon, out var icon))
+                            {
+                                <TIcon Name="icon" Size="IconSize.Small" />
+                            }
+                            <span>@Localizers.Create(item.Label.ResourceType)[item.Label.Key]</span>
+                        </NavLink>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+}
+
+@code {
+    private IReadOnlyList<IGrouping<NavGroup, NavItem>> Groups { get; set; } = [];
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        var shown = new List<NavItem>();
+
+        foreach (var item in Registry.Items)
+        {
+            if (await Flags.IsEnabledAsync(item.FeatureFlag, CancellationToken.None).ConfigureAwait(false))
+            {
+                shown.Add(item);
+            }
+        }
+
+        Groups = [.. shown.OrderBy(item => item.Order).GroupBy(item => item.Group).OrderBy(group => group.Key)];
+    }
+
+    /// <summary>The heading of a group, spelled out so that the resource tests can find each key.</summary>
+    private static string GroupKey(NavGroup group) => group switch
+    {
+        NavGroup.Overview => "App_Nav_Group_Overview",
+        NavGroup.Plan => "App_Nav_Group_Plan",
+        NavGroup.Build => "App_Nav_Group_Build",
+        NavGroup.Run => "App_Nav_Group_Run",
+        NavGroup.Report => "App_Nav_Group_Report",
+        NavGroup.Settings => "App_Nav_Group_Settings",
+        _ => "App_Nav_Group_Overview",
+    };
+}

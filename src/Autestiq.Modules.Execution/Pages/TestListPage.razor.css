@@ -1,0 +1,83 @@
+/* A project's tests: the AI permission, the form that describes a test, then every test. */
+
+.tests {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.tests__header h1 {
+  margin-block: var(--space-4) var(--space-2);
+}
+
+.tests__header > p {
+  margin: 0;
+}
+
+.tests__ai {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.tests__ai h2,
+.tests__ai p {
+  margin: 0;
+}
+
+.tests__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-inline-size: var(--measure);
+  margin-block-start: var(--space-4);
+}
+
+.tests__form > p {
+  margin: 0;
+}
+
+.tests__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tests__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.tests__text {
+  min-inline-size: 0;
+}
+
+.tests__text p {
+  margin: 0;
+}
+
+.tests__name {
+  font-weight: var(--weight-semibold);
+}
+
+.tests__problem {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  color: var(--color-danger);
+}

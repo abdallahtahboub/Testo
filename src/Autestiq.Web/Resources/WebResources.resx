@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppHome_Check_ClickButton" xml:space="preserve">
+    <value>Count a click</value>
+  </data>
+  <data name="AppHome_Check_Clicks" xml:space="preserve">
+    <value>Clicks: {0}</value>
+  </data>
+  <data name="AppHome_Check_Components" xml:space="preserve">
+    <value>Component library</value>
+  </data>
+  <data name="AppHome_Check_Connecting" xml:space="preserve">
+    <value>Connecting…</value>
+  </data>
+  <data name="AppHome_Check_Formats" xml:space="preserve">
+    <value>Date and number format</value>
+  </data>
+  <data name="AppHome_Check_Interactive" xml:space="preserve">
+    <value>Interactive (connected to the server)</value>
+  </data>
+  <data name="AppHome_Check_Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="AppHome_Check_Rendering" xml:space="preserve">
+    <value>Rendering</value>
+  </data>
+  <data name="AppHome_Check_Title" xml:space="preserve">
+    <value>Foundation check</value>
+  </data>
+  <data name="AppHome_Intro" xml:space="preserve">
+    <value>This is the empty shell of the product app. The dashboard and the modules arrive in Milestones 5 and 6.</value>
+  </data>
+  <data name="AppHome_Modules_Column_Flag" xml:space="preserve">
+    <value>Feature flag</value>
+  </data>
+  <data name="AppHome_Modules_Column_Module" xml:space="preserve">
+    <value>Module</value>
+  </data>
+  <data name="AppHome_Modules_Column_State" xml:space="preserve">
+    <value>State</value>
+  </data>
+  <data name="AppHome_Modules_Intro" xml:space="preserve">
+    <value>Every stage of the testing journey is a module behind a feature flag. A flag stays off until its module is built.</value>
+  </data>
+  <data name="AppHome_Modules_Off" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="AppHome_Modules_On" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="AppHome_Modules_Title" xml:space="preserve">
+    <value>Modules</value>
+  </data>
+  <data name="AppHome_PageTitle" xml:space="preserve">
+    <value>App preview – {0}</value>
+  </data>
+  <data name="AppHome_Title" xml:space="preserve">
+    <value>App shell preview</value>
+  </data>
+  <data name="Reconnect_Failed" xml:space="preserve">
+    <value>Could not reconnect. Please retry or reload the page.</value>
+  </data>
+  <data name="Reconnect_Paused" xml:space="preserve">
+    <value>The session was paused by the server.</value>
+  </data>
+  <data name="Reconnect_Rejoining" xml:space="preserve">
+    <value>Reconnecting to the server…</value>
+  </data>
+  <data name="Reconnect_Resume" xml:space="preserve">
+    <value>Resume</value>
+  </data>
+  <data name="Reconnect_ResumeFailed" xml:space="preserve">
+    <value>Could not resume the session. Please retry or reload the page.</value>
+  </data>
+  <data name="Reconnect_Retry" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="Reconnect_RetryAfter" xml:space="preserve">
+    <value>seconds.</value>
+  </data>
+  <data name="Reconnect_RetryBefore" xml:space="preserve">
+    <value>Reconnecting failed. Trying again in</value>
+  </data>
+  <data name="Account_SignIn_PageTitle" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
+  <data name="Account_SignIn_Title" xml:space="preserve">
+    <value>Sign in to {0}</value>
+  </data>
+  <data name="Account_SignIn_Email" xml:space="preserve">
+    <value>Email address</value>
+  </data>
+  <data name="Account_SignIn_Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Account_SignIn_RememberMe" xml:space="preserve">
+    <value>Stay signed in on this device</value>
+  </data>
+  <data name="Account_SignIn_Submit" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
+  <data name="Account_SignIn_ForgotPassword" xml:space="preserve">
+    <value>I have forgotten my password</value>
+  </data>
+  <data name="Account_SignIn_Failed" xml:space="preserve">
+    <value>That email address and password do not match an account.</value>
+  </data>
+  <data name="Account_SignIn_LockedOut" xml:space="preserve">
+    <value>Too many attempts. Try again after {0}, or reset your password to get back in now.</value>
+  </data>
+  <data name="Account_SignIn_NoMembership" xml:space="preserve">
+    <value>This account does not belong to an organization. Ask an administrator to invite you.</value>
+  </data>
+  <data name="Account_SignOut_PageTitle" xml:space="preserve">
+    <value>Sign out</value>
+  </data>
+  <data name="Account_SignOut_Title" xml:space="preserve">
+    <value>Sign out</value>
+  </data>
+  <data name="Account_SignOut_Confirm" xml:space="preserve">
+    <value>Sign out of {0}?</value>
+  </data>
+  <data name="Account_SignOut_Submit" xml:space="preserve">
+    <value>Sign out</value>
+  </data>
+  <data name="Account_SignOut_Cancel" xml:space="preserve">
+    <value>Stay signed in</value>
+  </data>
+  <data name="Account_Forgot_PageTitle" xml:space="preserve">
+    <value>Forgotten password</value>
+  </data>
+  <data name="Account_Forgot_Title" xml:space="preserve">
+    <value>Choose a new password</value>
+  </data>
+  <data name="Account_Forgot_Intro" xml:space="preserve">
+    <value>Give us the address you sign in with and we will send a link to it.</value>
+  </data>
+  <data name="Account_Forgot_Submit" xml:space="preserve">
+    <value>Send the link</value>
+  </data>
+  <data name="Account_Forgot_Sent" xml:space="preserve">
+    <value>If that address has an account, a link is on its way. It works once, and for two hours.</value>
+  </data>
+  <data name="Account_Reset_PageTitle" xml:space="preserve">
+    <value>New password</value>
+  </data>
+  <data name="Account_Reset_Title" xml:space="preserve">
+    <value>Choose a new password</value>
+  </data>
+  <data name="Account_Reset_NewPassword" xml:space="preserve">
+    <value>New password</value>
+  </data>
+  <data name="Account_Reset_Hint" xml:space="preserve">
+    <value>At least 12 characters. Length is what matters; a phrase you will remember beats a short tangle of symbols.</value>
+  </data>
+  <data name="Account_Reset_Submit" xml:space="preserve">
+    <value>Save the password</value>
+  </data>
+  <data name="Account_Reset_Done" xml:space="preserve">
+    <value>Your password is saved. You can sign in with it now.</value>
+  </data>
+  <data name="Account_TwoFactor_PageTitle" xml:space="preserve">
+    <value>One-time code</value>
+  </data>
+  <data name="Account_TwoFactor_Title" xml:space="preserve">
+    <value>Enter your one-time code</value>
+  </data>
+  <data name="Account_TwoFactor_Intro" xml:space="preserve">
+    <value>Open your authenticator app and type the six digits it shows.</value>
+  </data>
+  <data name="Account_TwoFactor_Code" xml:space="preserve">
+    <value>Six-digit code</value>
+  </data>
+  <data name="Account_TwoFactor_Submit" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="Account_TwoFactor_Failed" xml:space="preserve">
+    <value>That code is not right, or it has already expired. Try the next one.</value>
+  </data>
+  <data name="Account_TwoFactor_SetupRequired" xml:space="preserve">
+    <value>{0} requires a second factor. Setting one up is part of Milestone 4; until then, ask an administrator to turn the requirement off.</value>
+  </data>
+  <data name="Account_Accept_PageTitle" xml:space="preserve">
+    <value>Accept invitation</value>
+  </data>
+  <data name="Account_Accept_Title" xml:space="preserve">
+    <value>Join {0}</value>
+  </data>
+  <data name="Account_Accept_Intro" xml:space="preserve">
+    <value>{0} invited you to {1} as {2}.</value>
+  </data>
+  <data name="Account_Accept_DisplayName" xml:space="preserve">
+    <value>Your name</value>
+  </data>
+  <data name="Account_Accept_Password" xml:space="preserve">
+    <value>Choose a password</value>
+  </data>
+  <data name="Account_Accept_Submit" xml:space="preserve">
+    <value>Join</value>
+  </data>
+  <data name="Account_Accept_SubmitExisting" xml:space="preserve">
+    <value>Accept the invitation</value>
+  </data>
+  <data name="Account_Accept_NotUsable" xml:space="preserve">
+    <value>This link no longer works. It may have been used already, withdrawn, or it may have expired. Ask for a new one.</value>
+  </data>
+  <data name="Account_Accept_Done" xml:space="preserve">
+    <value>You have joined {0}. Sign in to get started.</value>
+  </data>
+  <data name="Account_Error_EmailRequired" xml:space="preserve">
+    <value>Enter the address you sign in with.</value>
+  </data>
+  <data name="Account_Error_PasswordRequired" xml:space="preserve">
+    <value>Enter your password.</value>
+  </data>
+  <data name="Account_Error_CodeRequired" xml:space="preserve">
+    <value>Enter the six digits from your authenticator app.</value>
+  </data>
+  <data name="Account_Error_NameRequired" xml:space="preserve">
+    <value>Enter the name your colleagues will see.</value>
+  </data>
+  <data name="Password_PasswordTooShort" xml:space="preserve">
+    <value>That password is too short. Twelve characters or more.</value>
+  </data>
+  <data name="Password_Breached" xml:space="preserve">
+    <value>That password appears in lists attackers already have. Choose another.</value>
+  </data>
+  <data name="Password_PasswordRequiresUniqueChars" xml:space="preserve">
+    <value>That password repeats too few different characters.</value>
+  </data>
+  <data name="PasswordReset_Error_LinkNotUsable" xml:space="preserve">
+    <value>This link no longer works. It may have been used already, or it may have expired. Ask for a new one.</value>
+  </data>
+  <data name="Invitation_Error_NotUsable" xml:space="preserve">
+    <value>This invitation no longer works. It may have been used already, withdrawn, or it may have expired.</value>
+  </data>
+  <data name="Invitation_Error_AccountDetailsMissing" xml:space="preserve">
+    <value>Give your name and choose a password to finish joining.</value>
+  </data>
+  <data name="Password_NotAcceptable" xml:space="preserve">
+    <value>That password cannot be used. Choose another.</value>
+  </data>
+</root>

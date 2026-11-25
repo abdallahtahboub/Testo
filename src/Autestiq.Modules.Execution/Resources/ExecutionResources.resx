@@ -1,0 +1,913 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Nav_Runs" xml:space="preserve">
+    <value>Test runs</value>
+  </data>
+  <data name="RunList_PageTitle" xml:space="preserve">
+    <value>Test runs – {0}</value>
+  </data>
+  <data name="RunList_Title" xml:space="preserve">
+    <value>Test runs</value>
+  </data>
+  <data name="RunList_Intro" xml:space="preserve">
+    <value>Every run of a scenario against the demo application, newest first.</value>
+  </data>
+  <data name="RunList_Start" xml:space="preserve">
+    <value>Start a run</value>
+  </data>
+  <data name="RunList_StartScenario" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="RunList_Empty_Title" xml:space="preserve">
+    <value>Nothing has run yet</value>
+  </data>
+  <data name="RunList_Empty_Text" xml:space="preserve">
+    <value>Start a scenario and it will appear here while it runs.</value>
+  </data>
+  <data name="RunList_Column_Run" xml:space="preserve">
+    <value>Run</value>
+  </data>
+  <data name="RunList_Column_Scenario" xml:space="preserve">
+    <value>Scenario</value>
+  </data>
+  <data name="RunList_Column_Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="RunList_Column_Queued" xml:space="preserve">
+    <value>Queued</value>
+  </data>
+  <data name="RunList_Attempt" xml:space="preserve">
+    <value>Attempt {0}</value>
+  </data>
+  <data name="Run_PageTitle" xml:space="preserve">
+    <value>Run {0} – {1}</value>
+  </data>
+  <data name="Run_Title" xml:space="preserve">
+    <value>Run {0}: {1}</value>
+  </data>
+  <data name="Run_Target" xml:space="preserve">
+    <value>Ran against {0}</value>
+  </data>
+  <data name="Run_Cancel" xml:space="preserve">
+    <value>Stop this run</value>
+  </data>
+  <data name="Run_Rerun" xml:space="preserve">
+    <value>Run it again</value>
+  </data>
+  <data name="Run_BackToList" xml:space="preserve">
+    <value>All runs</value>
+  </data>
+  <data name="Run_Steps_Title" xml:space="preserve">
+    <value>Steps</value>
+  </data>
+  <data name="Run_Steps_Screenshot" xml:space="preserve">
+    <value>Screenshot of step {0}</value>
+  </data>
+  <data name="Run_NotFound_Title" xml:space="preserve">
+    <value>No such run</value>
+  </data>
+  <data name="Run_NotFound_Text" xml:space="preserve">
+    <value>This run does not exist, or it belongs to another organization.</value>
+  </data>
+  <data name="Run_Failure_Title" xml:space="preserve">
+    <value>Why it stopped</value>
+  </data>
+  <data name="Status_Queued" xml:space="preserve">
+    <value>Queued</value>
+  </data>
+  <data name="Status_Running" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="Status_Passed" xml:space="preserve">
+    <value>Passed</value>
+  </data>
+  <data name="Status_Failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="Status_Cancelled" xml:space="preserve">
+    <value>Stopped</value>
+  </data>
+  <data name="Status_TimedOut" xml:space="preserve">
+    <value>Out of time</value>
+  </data>
+  <data name="Status_BudgetExceeded" xml:space="preserve">
+    <value>Over budget</value>
+  </data>
+  <data name="Status_InfrastructureError" xml:space="preserve">
+    <value>Could not run</value>
+  </data>
+  <data name="Status_Inconclusive" xml:space="preserve">
+    <value>Inconclusive</value>
+  </data>
+  <data name="StepStatus_Pending" xml:space="preserve">
+    <value>Not started</value>
+  </data>
+  <data name="StepStatus_Running" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="StepStatus_Passed" xml:space="preserve">
+    <value>Passed</value>
+  </data>
+  <data name="StepStatus_Failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="StepStatus_Skipped" xml:space="preserve">
+    <value>Skipped</value>
+  </data>
+  <data name="Execution_Error_NotAllowed" xml:space="preserve">
+    <value>Your role does not allow starting or stopping test runs.</value>
+  </data>
+  <data name="Execution_Error_NoSuchScenario" xml:space="preserve">
+    <value>There is no scenario by that name.</value>
+  </data>
+  <data name="Execution_Error_NoSuchProject" xml:space="preserve">
+    <value>There is no project by that name.</value>
+  </data>
+  <data name="Execution_Error_NoSuchRun" xml:space="preserve">
+    <value>There is no such run.</value>
+  </data>
+  <data name="Execution_Error_Paused" xml:space="preserve">
+    <value>Runs are paused at the moment. Please try again later.</value>
+  </data>
+  <data name="Execution_Error_InvalidOrigin" xml:space="preserve">
+    <value>That is not a website address this can check: use https://, a host and nothing after it.</value>
+  </data>
+  <data name="Execution_Error_NoSuchProof" xml:space="preserve">
+    <value>No proof was asked for for that address yet.</value>
+  </data>
+  <data name="Execution_Error_MinutesUsedUp" xml:space="preserve">
+    <value>This organization has used all of its browser minutes for the month. Runs can start again next month, or after a plan change.</value>
+  </data>
+  <data name="Execution_Error_TooManyStarts" xml:space="preserve">
+    <value>Too many requests in the last minute. Please wait a moment and try again.</value>
+  </data>
+  <data name="Execution_Error_AlreadyFinished" xml:space="preserve">
+    <value>That run has already finished.</value>
+  </data>
+  <data name="Run_Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Run_Timing_Queued" xml:space="preserve">
+    <value>Queued</value>
+  </data>
+  <data name="Run_Timing_Started" xml:space="preserve">
+    <value>Started</value>
+  </data>
+  <data name="Run_Timing_Finished" xml:space="preserve">
+    <value>Finished</value>
+  </data>
+  <data name="Run_Steps_Took" xml:space="preserve">
+    <value>{0} s</value>
+  </data>
+  <data name="Nav_Projects" xml:space="preserve">
+    <value>Projects</value>
+  </data>
+  <data name="Projects_PageTitle" xml:space="preserve">
+    <value>Projects – {0}</value>
+  </data>
+  <data name="Projects_Title" xml:space="preserve">
+    <value>Projects</value>
+  </data>
+  <data name="Projects_Intro" xml:space="preserve">
+    <value>A project is one application you test. Its environments, tests and runs belong to it.</value>
+  </data>
+  <data name="Projects_Empty_Title" xml:space="preserve">
+    <value>No projects yet</value>
+  </data>
+  <data name="Projects_Empty_Text" xml:space="preserve">
+    <value>Add one below to start testing an application.</value>
+  </data>
+  <data name="Projects_EnvironmentCount" xml:space="preserve">
+    <value>Environments: {0}</value>
+  </data>
+  <data name="Projects_New" xml:space="preserve">
+    <value>Add a project</value>
+  </data>
+  <data name="Projects_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Projects_Key" xml:space="preserve">
+    <value>Key</value>
+  </data>
+  <data name="Projects_Key_Hint" xml:space="preserve">
+    <value>2 to 10 letters and digits, starting with a letter, such as SHOP. It appears in addresses and cannot be changed.</value>
+  </data>
+  <data name="Projects_Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Projects_Create" xml:space="preserve">
+    <value>Add the project</value>
+  </data>
+  <data name="Projects_LoadFailed" xml:space="preserve">
+    <value>The projects could not be loaded.</value>
+  </data>
+  <data name="Projects_Error_NotAllowed" xml:space="preserve">
+    <value>Only an owner or an admin can add projects.</value>
+  </data>
+  <data name="Projects_Error_NameRequired" xml:space="preserve">
+    <value>Give the project a name of up to 200 characters.</value>
+  </data>
+  <data name="Projects_Error_InvalidKey" xml:space="preserve">
+    <value>The key must be 2 to 10 letters and digits, starting with a letter.</value>
+  </data>
+  <data name="Projects_Error_KeyTaken" xml:space="preserve">
+    <value>Another project already uses that key.</value>
+  </data>
+  <data name="Projects_Error_PlanLimit" xml:space="preserve">
+    <value>Your plan does not allow another project.</value>
+  </data>
+  <data name="Environments_PageTitle" xml:space="preserve">
+    <value>Environments of {0} – {1}</value>
+  </data>
+  <data name="Environments_Title" xml:space="preserve">
+    <value>Environments</value>
+  </data>
+  <data name="Environments_Intro" xml:space="preserve">
+    <value>An environment is one address of the application, such as its staging site. Tests run against an environment only once you have proved the site is yours.</value>
+  </data>
+  <data name="Environments_NoSuchProject" xml:space="preserve">
+    <value>No such project</value>
+  </data>
+  <data name="Environments_NoSuchProject_Text" xml:space="preserve">
+    <value>There is no project with that key in this organization.</value>
+  </data>
+  <data name="Environments_BackToProjects" xml:space="preserve">
+    <value>Back to the projects</value>
+  </data>
+  <data name="Environments_Empty_Title" xml:space="preserve">
+    <value>No environments yet</value>
+  </data>
+  <data name="Environments_Empty_Text" xml:space="preserve">
+    <value>Add the address of the site you want to test.</value>
+  </data>
+  <data name="Environments_Proof_Instructions" xml:space="preserve">
+    <value>To prove the site is yours, publish a file at this address holding exactly this text, then choose Check now.</value>
+  </data>
+  <data name="Environments_Proof_File" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="Environments_Proof_Token" xml:space="preserve">
+    <value>Text</value>
+  </data>
+  <data name="Environments_Prove" xml:space="preserve">
+    <value>Prove ownership</value>
+  </data>
+  <data name="Environments_Check" xml:space="preserve">
+    <value>Check now</value>
+  </data>
+  <data name="Environments_Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Environments_New" xml:space="preserve">
+    <value>Add an environment</value>
+  </data>
+  <data name="Environments_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Environments_Name_Hint" xml:space="preserve">
+    <value>Such as Staging or Production.</value>
+  </data>
+  <data name="Environments_Origin" xml:space="preserve">
+    <value>Address</value>
+  </data>
+  <data name="Environments_Origin_Hint" xml:space="preserve">
+    <value>The site's address, such as https://staging.example.com, with nothing after it.</value>
+  </data>
+  <data name="Environments_Add" xml:space="preserve">
+    <value>Add the environment</value>
+  </data>
+  <data name="Environments_LoadFailed" xml:space="preserve">
+    <value>The environments could not be loaded.</value>
+  </data>
+  <data name="Environments_Error_NotAllowed" xml:space="preserve">
+    <value>Only an owner or an admin can change environments.</value>
+  </data>
+  <data name="Environments_Error_NameRequired" xml:space="preserve">
+    <value>Give the environment a name of up to 100 characters.</value>
+  </data>
+  <data name="Environments_Error_InvalidOrigin" xml:space="preserve">
+    <value>That is not a website address this can test: use https://, a host and nothing after it.</value>
+  </data>
+  <data name="Environments_Error_NoSuchProject" xml:space="preserve">
+    <value>There is no such project.</value>
+  </data>
+  <data name="Environments_Error_NameTaken" xml:space="preserve">
+    <value>This project already has an environment with that name.</value>
+  </data>
+  <data name="Environments_Error_OriginTaken" xml:space="preserve">
+    <value>This project already has an environment at that address.</value>
+  </data>
+  <data name="Environments_Error_NoSuchEnvironment" xml:space="preserve">
+    <value>There is no such environment.</value>
+  </data>
+  <data name="Proof_None" xml:space="preserve">
+    <value>Not proved</value>
+  </data>
+  <data name="Proof_Issued" xml:space="preserve">
+    <value>Waiting for the file</value>
+  </data>
+  <data name="Proof_Checking" xml:space="preserve">
+    <value>Checking</value>
+  </data>
+  <data name="Proof_Verified" xml:space="preserve">
+    <value>Proved</value>
+  </data>
+  <data name="Proof_VerifiedUntil" xml:space="preserve">
+    <value>Proved until {0}</value>
+  </data>
+  <data name="Proof_Failed" xml:space="preserve">
+    <value>Check failed</value>
+  </data>
+  <data name="Environments_Production" xml:space="preserve">
+    <value>Production</value>
+  </data>
+  <data name="Environments_IsProduction" xml:space="preserve">
+    <value>This is a production site</value>
+  </data>
+  <data name="Environments_IsProduction_Hint" xml:space="preserve">
+    <value>The live site real customers use. Tests are refused against it until an owner authorizes them.</value>
+  </data>
+  <data name="Environments_Production_Refused" xml:space="preserve">
+    <value>Tests are refused against this production site until an owner authorizes them. Tests can change real data here: orders, bookings, accounts.</value>
+  </data>
+  <data name="Environments_Production_Acknowledge" xml:space="preserve">
+    <value>I understand that tests can create, change or delete real data on this site.</value>
+  </data>
+  <data name="Environments_Production_Authorize" xml:space="preserve">
+    <value>Authorize production testing</value>
+  </data>
+  <data name="Environments_Production_Authorized" xml:space="preserve">
+    <value>An owner authorized tests against this production site on {0}.</value>
+  </data>
+  <data name="Environments_Production_Withdraw" xml:space="preserve">
+    <value>Withdraw the authorization</value>
+  </data>
+  <data name="Environments_Error_InvalidKind" xml:space="preserve">
+    <value>Choose whether this is a test site or a production site.</value>
+  </data>
+  <data name="Environments_Error_OwnerOnly" xml:space="preserve">
+    <value>Only an owner can authorize or withdraw production testing.</value>
+  </data>
+  <data name="Environments_Error_AcknowledgementRequired" xml:space="preserve">
+    <value>Tick the acknowledgement first: tests can change real data on a production site.</value>
+  </data>
+  <data name="Environments_Error_NotProduction" xml:space="preserve">
+    <value>This is a test site; it needs no authorization.</value>
+  </data>
+  <data name="Tests_PageTitle" xml:space="preserve">
+    <value>Tests of {0} – {1}</value>
+  </data>
+  <data name="Tests_Title" xml:space="preserve">
+    <value>Tests</value>
+  </data>
+  <data name="Tests_Intro" xml:space="preserve">
+    <value>Describe a test in a sentence. Autestiq explores the site and the AI writes a plan, which you review before anything runs.</value>
+  </data>
+  <data name="Tests_Ai_Title" xml:space="preserve">
+    <value>AI planning</value>
+  </data>
+  <data name="Tests_Ai_Off" xml:space="preserve">
+    <value>AI planning is off for this project. Nothing from it is sent to an AI provider until someone who manages projects allows it.</value>
+  </data>
+  <data name="Tests_Ai_Allowed" xml:space="preserve">
+    <value>AI planning was allowed for this project on {0}.</value>
+  </data>
+  <data name="Tests_Ai_Acknowledge" xml:space="preserve">
+    <value>I allow this project's discovered page content to be sent to the AI provider for planning, as described above.</value>
+  </data>
+  <data name="Tests_Ai_Allow" xml:space="preserve">
+    <value>Allow AI planning</value>
+  </data>
+  <data name="Tests_Ai_Withdraw" xml:space="preserve">
+    <value>Withdraw the permission</value>
+  </data>
+  <data name="Tests_Ai_AskAnAdmin" xml:space="preserve">
+    <value>Ask an owner or an admin to allow it.</value>
+  </data>
+  <data name="Tests_New" xml:space="preserve">
+    <value>Describe a test</value>
+  </data>
+  <data name="Tests_New_NoEnvironment" xml:space="preserve">
+    <value>Add an environment first:</value>
+  </data>
+  <data name="Tests_New_Environment" xml:space="preserve">
+    <value>Environment</value>
+  </data>
+  <data name="Tests_New_Description" xml:space="preserve">
+    <value>What should be tested?</value>
+  </data>
+  <data name="Tests_New_Description_Hint" xml:space="preserve">
+    <value>One or two sentences, as a tester would say it. For example: Add two cups to the basket and check it says £22.50.</value>
+  </data>
+  <data name="Tests_New_ReadOnlyNote" xml:space="preserve">
+    <value>On your own site, exploring only follows links unless an owner allowed it to act on the Environments page.</value>
+  </data>
+  <data name="Tests_New_Submit" xml:space="preserve">
+    <value>Explore and plan</value>
+  </data>
+  <data name="Tests_List" xml:space="preserve">
+    <value>Described tests</value>
+  </data>
+  <data name="Tests_Empty_Title" xml:space="preserve">
+    <value>No tests yet</value>
+  </data>
+  <data name="Tests_Empty_Text" xml:space="preserve">
+    <value>Describe one above and its plan will appear here.</value>
+  </data>
+  <data name="Tests_LoadFailed" xml:space="preserve">
+    <value>The tests could not be loaded.</value>
+  </data>
+  <data name="Tests_Error_NotAllowed" xml:space="preserve">
+    <value>Only an owner, a QA lead or a QA engineer can describe tests.</value>
+  </data>
+  <data name="Tests_Error_DescriptionRequired" xml:space="preserve">
+    <value>Describe the test in up to 1,000 characters.</value>
+  </data>
+  <data name="Tests_Error_NoSuchProject" xml:space="preserve">
+    <value>There is no such project.</value>
+  </data>
+  <data name="Tests_Error_AiNotAllowed" xml:space="preserve">
+    <value>AI planning is not allowed for this project.</value>
+  </data>
+  <data name="Tests_Error_NoSuchEnvironment" xml:space="preserve">
+    <value>Choose one of this project's environments.</value>
+  </data>
+  <data name="Tests_Error_ProductionNotAuthorized" xml:space="preserve">
+    <value>That is a production site that an owner has not authorized for testing.</value>
+  </data>
+  <data name="Tests_Error_Paused" xml:space="preserve">
+    <value>Testing is paused for now. Please try again later.</value>
+  </data>
+  <data name="Tests_Error_SiteNotAllowed" xml:space="preserve">
+    <value>That site cannot be tested yet: prove it is yours on the Environments page first.</value>
+  </data>
+  <data name="Tests_Error_MinutesUsedUp" xml:space="preserve">
+    <value>This month's browser minutes are used up.</value>
+  </data>
+  <data name="Tests_Error_AiBudgetSpent" xml:space="preserve">
+    <value>This month's AI planning budget is spent.</value>
+  </data>
+  <data name="Tests_Error_TooManyStarts" xml:space="preserve">
+    <value>Too many requests in the last minute. Please wait a moment and try again.</value>
+  </data>
+  <data name="Tests_Error_ExplorationFailed" xml:space="preserve">
+    <value>Exploring the site did not succeed, so there was nothing to plan from.</value>
+  </data>
+  <data name="Tests_Error_NoPlanner" xml:space="preserve">
+    <value>AI planning is not set up on this server.</value>
+  </data>
+  <data name="Tests_Error_PlanningInterrupted" xml:space="preserve">
+    <value>Planning was interrupted before it finished, so there is no plan. Change the expected results or describe the test again to plan it anew.</value>
+  </data>
+  <data name="Tests_Error_ExportRestsOnAccountValue" xml:space="preserve">
+    <value>This test cannot be downloaded because it checks for the test account's own value, which the test itself typed.</value>
+  </data>
+  <data name="Tests_Error_NoPlan" xml:space="preserve">
+    <value>No plan could be written.</value>
+  </data>
+  <data name="Projects_Error_AiAcknowledgementRequired" xml:space="preserve">
+    <value>Tick the permission first: it sends page content to the AI provider.</value>
+  </data>
+  <data name="Projects_Error_NoSuchProject" xml:space="preserve">
+    <value>There is no such project.</value>
+  </data>
+  <data name="Environments_Error_InUse" xml:space="preserve">
+    <value>Tests were explored against this environment, so it stays.</value>
+  </data>
+  <data name="AiNotice_Sent_Title" xml:space="preserve">
+    <value>Sent to the AI provider:</value>
+  </data>
+  <data name="AiNotice_Sent" xml:space="preserve">
+    <value>your test description, and what exploring found on the site: page addresses, titles, headings, and the names and visible text of buttons, links, fields and other elements. On a real site that can include names, emails or orders shown on its pages.</value>
+  </data>
+  <data name="AiNotice_Never_Title" xml:space="preserve">
+    <value>Never sent:</value>
+  </data>
+  <data name="AiNotice_Never" xml:space="preserve">
+    <value>passwords and other secrets, screenshots, recordings or network traces.</value>
+  </data>
+  <data name="TestStatus_Exploring" xml:space="preserve">
+    <value>Exploring</value>
+  </data>
+  <data name="TestStatus_Planning" xml:space="preserve">
+    <value>Planning</value>
+  </data>
+  <data name="TestStatus_Planned" xml:space="preserve">
+    <value>Planned</value>
+  </data>
+  <data name="TestStatus_Failed" xml:space="preserve">
+    <value>No plan</value>
+  </data>
+  <data name="Test_PageTitle" xml:space="preserve">
+    <value>Test #{0} – {1}</value>
+  </data>
+  <data name="Test_NoSuchTest" xml:space="preserve">
+    <value>No such test</value>
+  </data>
+  <data name="Test_NoSuchTest_Text" xml:space="preserve">
+    <value>There is no test with that number in this project.</value>
+  </data>
+  <data name="Test_Title" xml:space="preserve">
+    <value>Test #{0}</value>
+  </data>
+  <data name="Test_Against" xml:space="preserve">
+    <value>Against {0}, {1}</value>
+  </data>
+  <data name="Test_Asked" xml:space="preserve">
+    <value>What you asked for</value>
+  </data>
+  <data name="Test_Exploring" xml:space="preserve">
+    <value>Exploring the site. This can take a few minutes; the page updates by itself.</value>
+  </data>
+  <data name="Test_Planning" xml:space="preserve">
+    <value>The AI is writing the plan. The page updates by itself.</value>
+  </data>
+  <data name="Test_Plan" xml:space="preserve">
+    <value>The plan</value>
+  </data>
+  <data name="Test_Plan_NotApproved" xml:space="preserve">
+    <value>Written by the AI and checked by Autestiq's validator. It runs only once an owner or a QA lead approves it, below.</value>
+  </data>
+  <data name="Test_Plan_Partial" xml:space="preserve">
+    <value>This plan covers only part of what you asked for. The notes below say which part is missing: Autestiq's own checks, for an expected result nothing checks, and the AI's.</value>
+  </data>
+  <data name="Test_Checks" xml:space="preserve">
+    <value>Checked by Autestiq</value>
+  </data>
+  <data name="Test_Checks_Intro" xml:space="preserve">
+    <value>What Autestiq's own software found when it checked the plan against the explored site.</value>
+  </data>
+  <data name="Test_AiNotes" xml:space="preserve">
+    <value>The AI's notes: unverified</value>
+  </data>
+  <data name="Test_AiNotes_Intro" xml:space="preserve">
+    <value>The AI's reasoning, assumptions and what it noticed while exploring. Treat them as things to check, not as facts or requirements.</value>
+  </data>
+  <data name="Test_Python" xml:space="preserve">
+    <value>As a Python test</value>
+  </data>
+  <data name="Test_Python_Intro" xml:space="preserve">
+    <value>The plan written out by fixed templates, never by the AI. It can be downloaded once the plan is approved.</value>
+  </data>
+  <data name="Test_Sent" xml:space="preserve">
+    <value>What was sent to the AI</value>
+  </data>
+  <data name="Test_Sent_Intro" xml:space="preserve">
+    <value>Exactly the text about your application that was sent to {0}, with a fixed instruction text beside it. Planning cost ${1}.</value>
+  </data>
+  <data name="Test_Sent_Attempt" xml:space="preserve">
+    <value>Attempt {0}</value>
+  </data>
+  <data name="Action_Goto" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="Action_Click" xml:space="preserve">
+    <value>Click</value>
+  </data>
+  <data name="Action_Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Action_Press" xml:space="preserve">
+    <value>Press</value>
+  </data>
+  <data name="Action_WaitFor" xml:space="preserve">
+    <value>Wait for</value>
+  </data>
+  <data name="Action_Select" xml:space="preserve">
+    <value>Choose</value>
+  </data>
+  <data name="Action_AssertText" xml:space="preserve">
+    <value>Check the text</value>
+  </data>
+  <data name="Action_AssertVisible" xml:space="preserve">
+    <value>Check it is shown</value>
+  </data>
+  <data name="Action_AssertNotVisible" xml:space="preserve">
+    <value>Check it is not shown</value>
+  </data>
+  <data name="Action_AssertUrl" xml:space="preserve">
+    <value>Check the address</value>
+  </data>
+  <data name="ProjectNav_Label" xml:space="preserve">
+    <value>Project</value>
+  </data>
+  <data name="ProjectNav_Tests" xml:space="preserve">
+    <value>Tests</value>
+  </data>
+  <data name="Planning_Error_Unreadable" xml:space="preserve">
+    <value>The AI's answer was not a plan.</value>
+  </data>
+  <data name="Planning_Error_UnknownAction" xml:space="preserve">
+    <value>The AI's plan used a step that does not exist.</value>
+  </data>
+  <data name="Planning_Error_UnknownTarget" xml:space="preserve">
+    <value>The AI's plan named something exploring never saw.</value>
+  </data>
+  <data name="Planning_Error_ForeignOrigin" xml:space="preserve">
+    <value>The AI's plan went to another site.</value>
+  </data>
+  <data name="Planning_Error_TooManyActions" xml:space="preserve">
+    <value>The AI's plan was longer than allowed.</value>
+  </data>
+  <data name="Planning_Error_NoAssertions" xml:space="preserve">
+    <value>The AI's plan checked nothing.</value>
+  </data>
+  <data name="Planning_Error_Incomplete" xml:space="preserve">
+    <value>A step of the AI's plan was missing something it needs.</value>
+  </data>
+  <data name="Planning_Error_BudgetSpent" xml:space="preserve">
+    <value>Planning reached its spending limit.</value>
+  </data>
+  <data name="Planning_Error_ProviderUnavailable" xml:space="preserve">
+    <value>The AI provider could not be reached.</value>
+  </data>
+  <data name="Planning_Error_ProviderRefusedTheKey" xml:space="preserve">
+    <value>The AI provider refused this server's key.</value>
+  </data>
+  <data name="Planning_Error_ProviderOutOfCredit" xml:space="preserve">
+    <value>The AI provider's account has run out of credit.</value>
+  </data>
+  <data name="Planning_Error_ProviderRateLimited" xml:space="preserve">
+    <value>The AI provider asked us to slow down. Please try again in a moment.</value>
+  </data>
+  <data name="Planning_Error_NoPlanner" xml:space="preserve">
+    <value>AI planning is not set up on this server.</value>
+  </data>
+  <data name="Approval_Title" xml:space="preserve">
+    <value>Approval</value>
+  </data>
+  <data name="Approval_NotApproved" xml:space="preserve">
+    <value>Nothing runs until an owner or a QA lead approves this plan.</value>
+  </data>
+  <data name="Approval_Changes" xml:space="preserve">
+    <value>Steps {0} may change data on the site: they press a button, press a key or choose an option, or act on something exploring did not see as a link. Autestiq's software decides this from the plan, not the AI.</value>
+  </data>
+  <data name="Approval_ReadsOnly" xml:space="preserve">
+    <value>No step of this plan should change data, so it runs read-only: the browser blocks every request that could change data. A link that changes data when it is followed would not be caught.</value>
+  </data>
+  <data name="Approval_AllowChange" xml:space="preserve">
+    <value>I approve this plan to change data on {0}, for example by submitting forms or placing orders.</value>
+  </data>
+  <data name="Approval_Approve" xml:space="preserve">
+    <value>Approve the plan</value>
+  </data>
+  <data name="Approval_Approved" xml:space="preserve">
+    <value>Approved by {0} on {1}.</value>
+  </data>
+  <data name="Approval_Approved_ChangesData" xml:space="preserve">
+    <value>This approval allows the plan to change data.</value>
+  </data>
+  <data name="Approval_Approved_ReadOnly" xml:space="preserve">
+    <value>Its runs are read-only.</value>
+  </data>
+  <data name="Approval_Withdraw" xml:space="preserve">
+    <value>Withdraw the approval</value>
+  </data>
+  <data name="Approval_Partial" xml:space="preserve">
+    <value>A plan that covers only part of what you asked for cannot be approved. Describe the missing part as a test of its own.</value>
+  </data>
+  <data name="Approval_NeedsSecret" xml:space="preserve">
+    <value>This plan signs in with a value the environment's test account does not have, so it cannot be approved. Add it on the Environments page.</value>
+  </data>
+  <data name="Approval_AskAnApprover" xml:space="preserve">
+    <value>Ask an owner or a QA lead to approve it.</value>
+  </data>
+  <data name="Approval_Run" xml:space="preserve">
+    <value>Run the test</value>
+  </data>
+  <data name="Approval_Runs" xml:space="preserve">
+    <value>Runs</value>
+  </data>
+  <data name="Approval_Runs_Empty" xml:space="preserve">
+    <value>It has not run yet.</value>
+  </data>
+  <data name="Approval_Run_Item" xml:space="preserve">
+    <value>Run #{0}</value>
+  </data>
+  <data name="Step_MayChangeData" xml:space="preserve">
+    <value>May change data</value>
+  </data>
+  <data name="Tests_Error_NotApprover" xml:space="preserve">
+    <value>Only an owner or a QA lead can approve a plan.</value>
+  </data>
+  <data name="Tests_Error_NoSuchTest" xml:space="preserve">
+    <value>There is no such test.</value>
+  </data>
+  <data name="Tests_Error_NotPlanned" xml:space="preserve">
+    <value>This test has no plan to approve.</value>
+  </data>
+  <data name="Tests_Error_PartialPlan" xml:space="preserve">
+    <value>A plan that covers only part of the test cannot be approved.</value>
+  </data>
+  <data name="Tests_Error_NeedsSecret" xml:space="preserve">
+    <value>This plan signs in with a value the environment's test account does not have. Add it on the Environments page.</value>
+  </data>
+  <data name="Tests_Error_ChangeAcknowledgementRequired" xml:space="preserve">
+    <value>This plan may change data: tick the box to say you approve that.</value>
+  </data>
+  <data name="Tests_Error_CannotRun" xml:space="preserve">
+    <value>Only an owner, a QA lead or a QA engineer can run tests.</value>
+  </data>
+  <data name="Tests_Error_NotApproved" xml:space="preserve">
+    <value>This plan is not approved, or is not the plan that was approved.</value>
+  </data>
+  <data name="Approval_Changes_One" xml:space="preserve">
+    <value>Step {0} may change data on the site: it presses a button, presses a key or chooses an option, or acts on something exploring did not see as a link. Autestiq's software decides this from the plan, not the AI.</value>
+  </data>
+  <data name="Approval_Download" xml:space="preserve">
+    <value>Download the Python test</value>
+  </data>
+  <data name="Approval_Download_RestsOnAccountValue" xml:space="preserve">
+    <value>This test cannot be downloaded: a check looks for the test account's own {0}, which the test itself typed. A page can show it whether or not signing in worked, so a downloaded file could pass when nothing was proved; Autestiq's own runs count such a pass as inconclusive. Check something only the signed-in application shows instead.</value>
+  </data>
+  <data name="Approval_Download_ReadOnly" xml:space="preserve">
+    <value>Autestiq runs this test read-only in its own browser. The downloaded file cannot do that: run it only where a test that changes data would be acceptable. Its first lines say so too.</value>
+  </data>
+  <data name="Tests_Error_NoExporter" xml:space="preserve">
+    <value>Downloading tests is not set up on this server.</value>
+  </data>
+  <data name="ProjectNav_Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Settings_PageTitle" xml:space="preserve">
+    <value>Settings of {0} – {1}</value>
+  </data>
+  <data name="Settings_Title" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Settings_Evidence_Title" xml:space="preserve">
+    <value>Screenshots</value>
+  </data>
+  <data name="Settings_Evidence_Intro" xml:space="preserve">
+    <value>Each step of a run keeps a screenshot as evidence. A screenshot can show whatever your site showed, personal data included, so you choose how long it is kept. Run results and steps are always kept.</value>
+  </data>
+  <data name="Settings_Evidence_Label" xml:space="preserve">
+    <value>Keep screenshots for</value>
+  </data>
+  <data name="Settings_Evidence_Hint" xml:space="preserve">
+    <value>A shorter time also applies to screenshots already kept: they are deleted within the hour.</value>
+  </data>
+  <data name="Settings_Evidence_Days90" xml:space="preserve">
+    <value>90 days</value>
+  </data>
+  <data name="Settings_Evidence_Days30" xml:space="preserve">
+    <value>30 days</value>
+  </data>
+  <data name="Settings_Evidence_Days7" xml:space="preserve">
+    <value>7 days</value>
+  </data>
+  <data name="Settings_Evidence_None" xml:space="preserve">
+    <value>Keep no screenshots</value>
+  </data>
+  <data name="Settings_Evidence_Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Settings_Evidence_Saved" xml:space="preserve">
+    <value>Saved.</value>
+  </data>
+  <data name="Settings_AskAnAdmin" xml:space="preserve">
+    <value>Only an owner, an admin or a QA lead can change this.</value>
+  </data>
+  <data name="Projects_Error_InvalidRetention" xml:space="preserve">
+    <value>Choose one of the times offered.</value>
+  </data>
+  <data name="Run_Steps_ScreenshotDeleted" xml:space="preserve">
+    <value>The screenshot was deleted under the project's evidence policy, or was never kept.</value>
+  </data>
+  <data name="Environments_Acting_Off" xml:space="preserve">
+    <value>Exploring this site only follows links: it presses no button and sends no form. That keeps your data unchanged, but tests of anything that happens after a button press are weaker.</value>
+  </data>
+  <data name="Environments_Acting_Acknowledge" xml:space="preserve">
+    <value>I allow exploring this site to press its buttons and send its forms with test values. It can create records, such as test bookings or orders, that I may need to remove. Buttons named for paying, ordering, deleting, cancelling or signing out are never pressed.</value>
+  </data>
+  <data name="Environments_Acting_Allow" xml:space="preserve">
+    <value>Allow exploring to act</value>
+  </data>
+  <data name="Environments_Acting_Allowed" xml:space="preserve">
+    <value>Since {0}, exploring this site may press its buttons and send its forms with test values.</value>
+  </data>
+  <data name="Environments_Acting_Withdraw" xml:space="preserve">
+    <value>Withdraw: follow links only</value>
+  </data>
+  <data name="Environments_Error_ActingAcknowledgementRequired" xml:space="preserve">
+    <value>Tick the acknowledgement first: exploring that acts can create records on your site.</value>
+  </data>
+  <data name="Environments_Error_ActingOnProduction" xml:space="preserve">
+    <value>Exploring never acts on a production site.</value>
+  </data>
+  <data name="Test_Explored" xml:space="preserve">
+    <value>What exploring did</value>
+  </data>
+  <data name="Test_Explored_Intro" xml:space="preserve">
+    <value>Exploring pressed these controls and sent these forms with test values. Anything they created is still on your site.</value>
+  </data>
+  <data name="Account_Title" xml:space="preserve">
+    <value>Test account</value>
+  </data>
+  <data name="Account_Intro" xml:space="preserve">
+    <value>So that tests can sign in. Use an account made for testing, never a real person's. Values are encrypted and never shown again; type one to replace it.</value>
+  </data>
+  <data name="Account_None" xml:space="preserve">
+    <value>No test account: tests of pages behind a sign-in cannot be approved for this environment.</value>
+  </data>
+  <data name="Account_Saved" xml:space="preserve">
+    <value>{0}: saved {1}</value>
+  </data>
+  <data name="Account_Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Account_Username" xml:space="preserve">
+    <value>User name or email</value>
+  </data>
+  <data name="Account_Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Account_Save" xml:space="preserve">
+    <value>Save the test account</value>
+  </data>
+  <data name="Environments_Error_InvalidSecret" xml:space="preserve">
+    <value>Type a value of at most 500 characters.</value>
+  </data>
+  <data name="Environments_Error_SecretsOnProduction" xml:space="preserve">
+    <value>A production site has no test account.</value>
+  </data>
+  <data name="Planning_Error_UnknownSecret" xml:space="preserve">
+    <value>The AI's plan typed a sign-in value this environment does not have.</value>
+  </data>
+  <data name="Expected_Title" xml:space="preserve">
+    <value>Expected results</value>
+  </data>
+  <data name="Expected_Intro" xml:space="preserve">
+    <value>What the application should show at the end, written exactly as it appears. Optional: the planner checks these when exploring cannot reach the result, such as a page after paying.</value>
+  </data>
+  <data name="Expected_NoSecrets" xml:space="preserve">
+    <value>These are sent to the AI provider with the description. Never put passwords or personal data in them.</value>
+  </data>
+  <data name="Expected_Text" xml:space="preserve">
+    <value>Expected text {0}</value>
+  </data>
+  <data name="Expected_Path" xml:space="preserve">
+    <value>On page {0}</value>
+  </data>
+  <data name="Expected_Path_Hint" xml:space="preserve">
+    <value>Optional, such as /order/confirmed.</value>
+  </data>
+  <data name="Expected_Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Expected_Remove_Label" xml:space="preserve">
+    <value>Remove expected result {0}</value>
+  </data>
+  <data name="Expected_Add" xml:space="preserve">
+    <value>Add an expected result</value>
+  </data>
+  <data name="Expected_Full" xml:space="preserve">
+    <value>A test can have at most {0} expected results.</value>
+  </data>
+  <data name="Expected_On" xml:space="preserve">
+    <value>on {0}</value>
+  </data>
+  <data name="Expected_None" xml:space="preserve">
+    <value>No expected results. The planner checks only what exploring saw.</value>
+  </data>
+  <data name="Expected_Replans" xml:space="preserve">
+    <value>Saving plans the test again from what was already explored, which uses the AI budget.</value>
+  </data>
+  <data name="Expected_Save" xml:space="preserve">
+    <value>Save and plan again</value>
+  </data>
+  <data name="Expected_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Expected_Edit" xml:space="preserve">
+    <value>Change expected results</value>
+  </data>
+  <data name="Expected_Locked" xml:space="preserve">
+    <value>The plan is approved, so its expected results can't change. Withdraw the approval to change them.</value>
+  </data>
+  <data name="Evidence_Observed" xml:space="preserve">
+    <value>Observed by the explorer</value>
+  </data>
+  <data name="Evidence_StatedByTester" xml:space="preserve">
+    <value>Stated by the tester</value>
+  </data>
+  <data name="Evidence_Assumed" xml:space="preserve">
+    <value>Assumed: needs verification</value>
+  </data>
+  <data name="Tests_Error_InvalidExpectedResults" xml:space="preserve">
+    <value>Expected results need a text of at most 200 characters on one line, at most 5 of them, and a page that starts with /.</value>
+  </data>
+  <data name="Tests_Error_ExpectedResultsApproved" xml:space="preserve">
+    <value>The plan is approved, so its expected results can't change. Withdraw the approval first.</value>
+  </data>
+  <data name="Tests_Error_BeingPlanned" xml:space="preserve">
+    <value>The test is being planned right now. Try again in a moment.</value>
+  </data>
+  <data name="Planning_Error_AmbiguousTarget" xml:space="preserve">
+    <value>The AI's plan named an element that appears more than once on the page, so it could not be told apart. The plan was refused.</value>
+  </data>
+</root>

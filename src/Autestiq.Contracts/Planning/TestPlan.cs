@@ -1,0 +1,255 @@
+using Autestiq.Contracts.Common;
+
+namespace Autestiq.Contracts.Planning;
+
+/// <summary>
+/// What a planner produced: the actions to carry out, and enough about where they came from to
+/// judge them later.
+/// </summary>
+/// <param name="ScenarioName">What this plan is a plan for, in a person's words.</param>
+/// <param name="Actions">The actions, in order.</param>
+/// <param name="Notes">
+/// Anything the planner wants a person to know — an assumption it made, an assertion it would
+/// like changed. Never acted on; a suggestion is not an action (ADR-0019 §3).
+/// </param>
+/// <param name="Coverage">
+/// Whether this plan covers the whole scenario or only part of it, as the planner itself reported.
+/// </param>
+/// <param name="NotTested">
+/// The parts of the request the plan says it does not check, one per line, in the model's words (ADR-0035 step 2).
+/// Any line makes the plan partial, whatever <paramref name="Coverage"/> says: decided by software.
+/// </param>
+public sealed record TestPlan(
+    string ScenarioName,
+    IReadOnlyList<PlannedAction> Actions,
+    IReadOnlyList<string> Notes,
+    PlanCoverage Coverage = PlanCoverage.Full,
+    IReadOnlyList<string>? NotTested = null)
+{
+    /// <summary>How many of the actions check something.</summary>
+    public int AssertionCount => Actions.Count(action => action.IsAssertion);
+}
+
+/// <summary>How much of what was asked for a plan actually covers.</summary>
+/// <remarks>
+/// <para>
+/// Structured, not prose. The planner was already saying "I could only do part of this" in its
+/// notes, and notes are never acted on — so a plan that deliberately tested half the scenario,
+/// passed that half, and reported <em>Passed</em> was the result. Which is the exact shape of the
+/// mistake this product exists to prevent: an assurance covering less than it appears to.
+/// </para>
+/// <para>
+/// A field the run can read means the honest outcome can be produced rather than hoped for
+/// (<see cref="PlanOutcome"/>).
+/// </para>
+/// </remarks>
+public enum PlanCoverage
+{
+    /// <summary>Everything the scenario asked for is in the plan.</summary>
+    Full = 1,
+
+    /// <summary>Only part of it is. The planner says which part in its notes.</summary>
+    Partial = 2,
+}
+
+/// <summary>What one planning call cost.</summary>
+/// <param name="InputTokens">Tokens sent.</param>
+/// <param name="OutputTokens">Tokens received.</param>
+/// <param name="Attempts">How many times the planner was asked, including retries after invalid answers.</param>
+/// <param name="Cost">What it came to, in US dollars, by the provider's published price list.</param>
+/// <param name="Elapsed">How long the planning took.</param>
+public readonly record struct PlanningCost(
+    int InputTokens,
+    int OutputTokens,
+    int Attempts,
+    decimal Cost,
+    TimeSpan Elapsed)
+{
+    /// <summary>Nothing spent: the fake and the recorded planners, and a run that never planned.</summary>
+    public static PlanningCost None => new(0, 0, 0, 0m, TimeSpan.Zero);
+
+    /// <summary>Every token, which is what a budget is about.</summary>
+    public int TotalTokens => InputTokens + OutputTokens;
+
+    /// <summary>Adds up two attempts at the same plan.</summary>
+    public static PlanningCost operator +(PlanningCost first, PlanningCost second) => new(
+        first.InputTokens + second.InputTokens,
+        first.OutputTokens + second.OutputTokens,
+        first.Attempts + second.Attempts,
+        first.Cost + second.Cost,
+        first.Elapsed + second.Elapsed);
+
+    /// <summary>Adds up two attempts at the same plan.</summary>
+    public PlanningCost Add(PlanningCost other) => this + other;
+}
+
+/// <summary>A plan, or why there is none, and what the attempt cost either way.</summary>
+/// <param name="Plan">The plan, when there is one.</param>
+/// <param name="Errors">Resource keys saying why there is none.</param>
+/// <param name="Cost">What the attempt cost. Charged whether or not it worked.</param>
+/// <param name="Model">Which model answered, for the record.</param>
+public sealed record PlanResult(
+    TestPlan? Plan,
+    IReadOnlyList<string> Errors,
+    PlanningCost Cost,
+    string Model,
+    string? Sent = null)
+{
+    /// <summary>Whether there is a plan.</summary>
+    public bool Succeeded => Plan is not null;
+
+    /// <summary>A plan that was produced and validated.</summary>
+    public static PlanResult From(TestPlan plan, PlanningCost cost, string model) => new(plan, [], cost, model);
+
+    /// <summary>No plan, and why. The cost is still reported: a failed attempt is still billed.</summary>
+    public static PlanResult Failed(IReadOnlyList<string> errors, PlanningCost cost, string model) =>
+        new(null, errors, cost, model);
+}
+
+/// <summary>Resource keys a planner or its validator may answer with.</summary>
+/// <remarks>
+/// Keys, not sentences: the application layer never decides what language a person reads
+/// (<c>CLAUDE.md</c>, Architecture rules).
+/// </remarks>
+public static class PlanningErrors
+{
+    /// <summary>The model's answer was not the shape a plan has.</summary>
+    public const string Unreadable = "Planning_Error_Unreadable";
+
+    /// <summary>The answer named an action that does not exist.</summary>
+    public const string UnknownAction = "Planning_Error_UnknownAction";
+
+    /// <summary>The answer named something no page has.</summary>
+    public const string UnknownTarget = "Planning_Error_UnknownTarget";
+
+    /// <summary>The answer wanted to leave the run's own target.</summary>
+    public const string ForeignOrigin = "Planning_Error_ForeignOrigin";
+
+    /// <summary>The plan has more actions than the run's budget allows.</summary>
+    public const string TooManyActions = "Planning_Error_TooManyActions";
+
+    /// <summary>The plan checks nothing, so it cannot find a defect.</summary>
+    public const string NoAssertions = "Planning_Error_NoAssertions";
+
+    /// <summary>An action was missing something it cannot work without.</summary>
+    public const string Incomplete = "Planning_Error_Incomplete";
+
+    /// <summary>The plan types a secret by a name it was not given (ADR-0033).</summary>
+    public const string UnknownSecret = "Planning_Error_UnknownSecret";
+
+    /// <summary>
+    /// A step names an element in a way the crawl found matches more than one, or none it could tell apart
+    /// (<c>use=none</c>, ADR-0024): the browser would find several and the step would fail on a sound application.
+    /// </summary>
+    public const string AmbiguousTarget = "Planning_Error_AmbiguousTarget";
+
+    /// <summary>The planner spent the run's token or money budget.</summary>
+    public const string BudgetSpent = "Planning_Error_BudgetSpent";
+
+    /// <summary>The provider could not be reached, or would not answer.</summary>
+    public const string ProviderUnavailable = "Planning_Error_ProviderUnavailable";
+
+    /// <summary>
+    /// The provider refused the credentials: the key is wrong, expired, or not a key for this API.
+    /// </summary>
+    /// <remarks>
+    /// Separate from <see cref="ProviderUnavailable"/> because the two need opposite responses, and
+    /// reporting both as "could not be reached" sends somebody to check their network when the
+    /// answer is in their console. Found the first time a person ran the benchmark.
+    /// </remarks>
+    public const string ProviderRefusedTheKey = "Planning_Error_ProviderRefusedTheKey";
+
+    /// <summary>
+    /// The provider answered that the account has no credit left. Separate, because the answer is a
+    /// payment, and a run that stops for it part way is incomplete rather than failed. Found when a
+    /// benchmark run stopped four scenarios from the end and its report said "could not be reached".
+    /// </summary>
+    public const string ProviderOutOfCredit = "Planning_Error_ProviderOutOfCredit";
+
+    /// <summary>The provider asked for fewer requests: wait, then try again.</summary>
+    public const string ProviderRateLimited = "Planning_Error_ProviderRateLimited";
+
+    /// <summary>No planner is configured, so nothing can be planned.</summary>
+    public const string NoPlanner = "Planning_Error_NoPlanner";
+}
+
+/// <summary>Turns a scenario in a person's words into a plan a browser can carry out.</summary>
+/// <remarks>
+/// Provider-agnostic by construction: the implementations are an adapter per provider, plus a
+/// recorded one that replays a stored answer so that tests cost nothing and never vary.
+/// </remarks>
+public interface IScenarioPlanner
+{
+    /// <summary>Which model this planner uses, for the record and for the benchmark table.</summary>
+    string Model { get; }
+
+    /// <summary>
+    /// Plans the scenario. Never throws for a bad answer from the provider: an answer that cannot
+    /// be used is a <see cref="PlanResult"/> saying so, because that is a thing worth recording
+    /// rather than an exception worth losing.
+    /// </summary>
+    Task<PlanResult> PlanAsync(PlanRequest request, CancellationToken cancellationToken = default);
+}
+
+/// <summary>Everything a planner is allowed to know.</summary>
+/// <remarks>
+/// Deliberately short. It holds no credential, no organization and no run id: a planner is given a
+/// scenario and a description of an application, and returns actions.
+/// </remarks>
+/// <param name="Scenario">What the person wants tested, in their words.</param>
+/// <param name="Site">What a deterministic crawl found. Untrusted input (ADR-0019 §5).</param>
+/// <param name="SecretNames">
+/// The names of the values this run holds, so a plan can say "type the password" without the
+/// planner ever seeing one.
+/// </param>
+/// <param name="MaxActions">The most actions a plan may have.</param>
+/// <param name="MaxTokens">The most tokens this planning may spend.</param>
+/// <param name="PreviousErrors">
+/// On a retry, what was wrong with the last answer. Empty on the first attempt.
+/// </param>
+/// <param name="Expected">
+/// What the tester says the application should show (ADR-0034), labelled as theirs. Empty for most tests, and then
+/// the request is exactly what it was before expected results existed.
+/// </param>
+public sealed record PlanRequest(
+    string Scenario,
+    SiteSnapshot Site,
+    IReadOnlyList<string> SecretNames,
+    int MaxActions,
+    int MaxTokens,
+    IReadOnlyList<string> PreviousErrors,
+    IReadOnlyList<ExpectedResult>? Expected = null,
+    PlanRepair? Repair = null)
+{
+    /// <summary>A first attempt, with nothing yet to learn from.</summary>
+    public static PlanRequest First(
+        string scenario,
+        SiteSnapshot site,
+        IReadOnlyList<string> secretNames,
+        int maxActions,
+        int maxTokens,
+        IReadOnlyList<ExpectedResult>? expected = null,
+        PlanRepair? repair = null) =>
+        new(scenario, site, secretNames, maxActions, maxTokens, [], expected, repair);
+
+    /// <summary>The same request again, with what was wrong last time.</summary>
+    public PlanRequest Retry(IReadOnlyList<string> errors) => this with { PreviousErrors = errors };
+}
+
+/// <summary>
+/// A request to plan again after a run failed (Experiment 0001, `docs/ai-learning/experiments/`): the plan that ran,
+/// the step that failed and what the runner said. Used by the benchmark's lab only; the product never sets it, and a
+/// request without it is exactly what it was before.
+/// </summary>
+/// <param name="FailedPlan">The plan that was run.</param>
+/// <param name="FailedStep">The description of the step that failed, as the plan wrote it.</param>
+/// <param name="Failure">What the runner reported. It can quote the application, so it is the application's content.</param>
+/// <param name="Examples">
+/// Verified repairs from other applications, as short texts, when the lab supplies them (condition C). Data for
+/// reference, never instructions.
+/// </param>
+public sealed record PlanRepair(
+    IReadOnlyList<PlannedAction> FailedPlan,
+    string FailedStep,
+    string Failure,
+    IReadOnlyList<string>? Examples = null);

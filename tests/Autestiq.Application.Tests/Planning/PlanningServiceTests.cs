@@ -1,0 +1,324 @@
+using Microsoft.Extensions.Logging.Abstractions;
+using Autestiq.Application.Planning;
+using Autestiq.Contracts.Execution;
+using Autestiq.Contracts.Planning;
+
+namespace Autestiq.Application.Tests.Planning;
+
+/// <summary>
+/// The only place the application speaks to a model, so the only place where "what if it answers
+/// badly" has to be settled. The planner here is a fake that answers whatever the test wants.
+/// </summary>
+public class PlanningServiceTests
+{
+    private static readonly SiteSnapshot Shop = new(
+        "http://127.0.0.1:5090",
+        [
+            new PageSnapshot("/", "Catalogue", "Catalogue",
+                [new SnapshotElement("button", "Add to basket", "add-pot")]),
+        ],
+        Truncated: false);
+
+    private static readonly PlannedAction[] Good =
+    [
+        new(ActionKind.Goto, "Open the catalogue", Path: "/"),
+        new(ActionKind.AssertVisible, "The teapot can be added", ActionTarget.ByTestId("add-pot")),
+    ];
+
+    private static PlanningService Service(Planner planner) => new(planner, NullLogger<PlanningService>.Instance);
+
+    [Fact]
+    public async Task Plan_WhenTheFirstAnswerIsGood_AsksOnceAndCharges()
+    {
+        var planner = new Planner([Answer(Good)]);
+
+        var result = await Service(planner).PlanAsync(
+            "Check the catalogue", Shop, RunBudget.Default, [], cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(1, planner.Asked);
+        Assert.Equal(1_200, result.Cost.TotalTokens);
+    }
+
+    [Fact]
+    public async Task Plan_WhenTheFirstAnswerIsRefused_AsksAgainWithTheErrors()
+    {
+        // A model given its own mistake usually fixes it, which is worth exactly one more call.
+        var planner = new Planner([Answer([new PlannedAction(ActionKind.Goto, "Go abroad", Path: "https://collect.example/")]), Answer(Good)]);
+
+        var result = await Service(planner).PlanAsync(
+            "Check the catalogue", Shop, RunBudget.Default, [], cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(2, planner.Asked);
+
+        // It was told what was wrong, rather than asked the same question twice.
+        Assert.Contains(PlanningErrors.ForeignOrigin, planner.LastRequest!.PreviousErrors);
+
+        // And both attempts are paid for.
+        Assert.Equal(2_400, result.Cost.TotalTokens);
+    }
+
+    [Fact]
+    public async Task Plan_WhenTheSecondAnswerIsAlsoRefused_GivesUpWithoutRunningAnything()
+    {
+        var bad = Answer([new PlannedAction(ActionKind.Goto, "Go abroad", Path: "https://collect.example/")]);
+        var planner = new Planner([bad, bad]);
+
+        var result = await Service(planner).PlanAsync(
+            "Check the catalogue", Shop, RunBudget.Default, [], cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.False(result.Succeeded);
+        Assert.Null(result.Plan);
+        Assert.Contains(PlanningErrors.ForeignOrigin, result.Errors);
+
+        // Twice and no more: an argument with a model is not a strategy, and each round is money.
+        Assert.Equal(PlanningService.MaxAttempts, planner.Asked);
+    }
+
+    [Fact]
+    public async Task Plan_NeverReturnsThePartOfABadPlanThatWouldHaveWorked()
+    {
+        // The temptation this guards against: the first two actions of that plan are fine, and
+        // running them would produce a run that reports steps for a test nobody approved.
+        var planner = new Planner(
+        [
+            Answer(
+            [
+                new PlannedAction(ActionKind.Goto, "Open the catalogue", Path: "/"),
+                new PlannedAction(ActionKind.AssertVisible, "The teapot", ActionTarget.ByTestId("add-pot")),
+                new PlannedAction(ActionKind.Goto, "Then leave", Path: "https://collect.example/"),
+            ]),
+        ]);
+
+        var result = await Service(planner).PlanAsync(
+            "Check the catalogue", Shop, RunBudget.Default, [], cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.False(result.Succeeded);
+        Assert.Null(result.Plan);
+    }
+
+    [Fact]
+    public async Task Plan_WhenTheProviderCannotBeReached_StopsRatherThanRetrying()
+    {
+        // Nothing to re-ask about: a second call to a provider that is down costs time and tells
+        // us the same thing.
+        var planner = new Planner([PlanResult.Failed([PlanningErrors.ProviderUnavailable], new PlanningCost(0, 0, 1, 0m, TimeSpan.Zero), "fake")]);
+
+        var result = await Service(planner).PlanAsync(
+            "Check the catalogue", Shop, RunBudget.Default, [], cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.False(result.Succeeded);
+        Assert.Contains(PlanningErrors.ProviderUnavailable, result.Errors);
+        Assert.Equal(1, planner.Asked);
+    }
+
+    [Fact]
+    public async Task Plan_WhenTheFirstAttemptSpendsTheTokenBudget_DoesNotAskAgain()
+    {
+        var expensive = PlanResult.From(
+            new TestPlan("A plan", [new PlannedAction(ActionKind.Goto, "Go abroad", Path: "https://collect.example/")], []),
+            new PlanningCost(9_000, 1_000, 1, 0.02m, TimeSpan.FromSeconds(3)),
+            "fake");
+
+        var planner = new Planner([expensive, Answer(Good)]);
+
+        var result = await Service(planner).PlanAsync(
+            "Check the catalogue",
+            Shop,
+            RunBudget.Default with { MaxModelTokens = 5_000 },
+            [],
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.False(result.Succeeded);
+        Assert.Contains(PlanningErrors.BudgetSpent, result.Errors);
+        Assert.Equal(1, planner.Asked);
+    }
+
+    [Fact]
+    public async Task Plan_WhenAGoodPlanCostMoreThanTheMoneyBudget_IsNotRun()
+    {
+        // The plan is fine and we still cannot afford it. Reported as the budget rather than as a
+        // fault in the plan, because that is what happened.
+        var planner = new Planner([PlanResult.From(new TestPlan("A plan", Good, []), new PlanningCost(100, 100, 1, 5.00m, TimeSpan.FromSeconds(2)), "fake")]);
+
+        var result = await Service(planner).PlanAsync(
+            "Check the catalogue",
+            Shop,
+            RunBudget.Default with { MaxCostUsd = 0.25m },
+            [],
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.False(result.Succeeded);
+        Assert.Contains(PlanningErrors.BudgetSpent, result.Errors);
+    }
+
+    [Fact]
+    public async Task Plan_KeepsWhatTheModelWantedAPersonToKnowAndWhatTheValidatorNoticed()
+    {
+        var planner = new Planner(
+        [
+            PlanResult.From(
+                new TestPlan(
+                    "A plan",
+                    [
+                        new PlannedAction(ActionKind.Goto, "Open the catalogue", Path: "/"),
+                        new PlannedAction(ActionKind.AssertVisible, "The line is there", ActionTarget.ByTestId("line-pot")),
+                    ],
+                    ["I assumed prices are in pounds."]),
+                new PlanningCost(700, 500, 1, 0.01m, TimeSpan.FromSeconds(2)),
+                "fake"),
+        ]);
+
+        var result = await Service(planner).PlanAsync(
+            "Check the basket", Shop, RunBudget.Default, [], cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.True(result.Succeeded);
+        Assert.Contains(result.Notes, note => note.Contains("in pounds", StringComparison.Ordinal));
+        Assert.Contains(result.Notes, note => note.Contains("line-pot", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Plan_TellsThePlannerOnlyTheNamesOfTheRunsSecrets()
+    {
+        var planner = new Planner([Answer(Good)]);
+
+        await Service(planner).PlanAsync(
+            "Sign in and check the basket",
+            Shop,
+            RunBudget.Default,
+            ["password"],
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal(["password"], planner.LastRequest!.SecretNames);
+    }
+
+    // --- ADR-0035: a plan cannot claim more coverage than it checks ---
+
+    private static readonly ExpectedResult Thanks = new("Thanks for your order!", "/order/placed");
+
+    private static readonly PlannedAction[] ChecksTheThanks =
+    [
+        .. Good,
+        new(ActionKind.AssertVisible, "The shop thanks you", ActionTarget.ByText("thanks for your order!")),
+    ];
+
+    private static Task<PlannedResult> PlanWithAsync(IReadOnlyList<PlannedAction> actions, params ExpectedResult[] expected) =>
+        Service(new Planner([Answer(actions)])).PlanAsync(
+            "Place an order", Shop, RunBudget.Default, [], expected, cancellationToken: TestContext.Current.CancellationToken);
+
+    [Fact]
+    public async Task Plan_ThatSaysFull_ButChecksNoStatedResult_IsPartial_WithANoteNamingIt()
+    {
+        var result = await PlanWithAsync(Good, Thanks);
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(PlanCoverage.Partial, result.Plan!.Coverage);
+
+        // A note of Autestiq's own, with the tester's words, never the model's.
+        var note = Assert.Single(result.CheckNotes!);
+        Assert.Contains("“Thanks for your order!”", note, StringComparison.Ordinal);
+        Assert.Contains(note, result.Notes);
+    }
+
+    [Fact]
+    public async Task Plan_ThatChecksEveryStatedResult_StaysFull()
+    {
+        // Matched as the labels match: exact text, ignoring case and surrounding spaces.
+        var result = await PlanWithAsync(ChecksTheThanks, Thanks);
+
+        Assert.Equal(PlanCoverage.Full, result.Plan!.Coverage);
+        Assert.DoesNotContain(result.CheckNotes!, note => note.Contains("Thanks", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Plan_ThatChecksOneOfTwoStatedResults_IsPartial_NamingTheOther()
+    {
+        var result = await PlanWithAsync(ChecksTheThanks, Thanks, new ExpectedResult("Your order number is"));
+
+        Assert.Equal(PlanCoverage.Partial, result.Plan!.Coverage);
+        Assert.Contains(result.CheckNotes!, note => note.Contains("“Your order number is”", StringComparison.Ordinal));
+        Assert.DoesNotContain(result.CheckNotes!, note => note.Contains("Thanks", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Plan_WithoutStatedResults_KeepsTheCoverageItSaid()
+    {
+        var result = await PlanWithAsync(Good);
+
+        Assert.Equal(PlanCoverage.Full, result.Plan!.Coverage);
+    }
+
+    [Fact]
+    public async Task Plan_WhoseOnlyCheckOfAStatedResultSaysItIsAbsent_IsPartial()
+    {
+        // "Not shown" does not test that the thanks are shown.
+        PlannedAction[] absent = [.. Good, new(ActionKind.AssertNotVisible, "No thanks", ActionTarget.ByText("Thanks for your order!"))];
+
+        var result = await PlanWithAsync(absent, Thanks);
+
+        Assert.Equal(PlanCoverage.Partial, result.Plan!.Coverage);
+    }
+
+    // --- ADR-0035 step 2: what the model lists as not tested ---
+
+    [Fact]
+    public async Task Plan_ThatSaysFull_ButListsSomethingNotTested_IsPartial_AndShowsItAsTheAis()
+    {
+        // The PetClinic case: the gap was written down, and the plan still claimed to be full.
+        var answer = PlanResult.From(
+            new TestPlan("Find Franklin", Good, [], PlanCoverage.Full, ["the filtering by last name"]),
+            new PlanningCost(900, 300, 1, 0.01m, TimeSpan.FromSeconds(2)),
+            "fake");
+
+        var result = await Service(new Planner([answer])).PlanAsync(
+            "Find the owner Franklin", Shop, RunBudget.Default, [], cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal(PlanCoverage.Partial, result.Plan!.Coverage);
+
+        // The part itself is the model's words, so it is an AI note, not one of Autestiq's checks.
+        Assert.Contains("Not tested: the filtering by last name", result.Notes);
+        Assert.DoesNotContain(result.CheckNotes!, note => note.Contains("filtering", StringComparison.Ordinal));
+
+        // Autestiq's own note says only what software decided.
+        Assert.Contains(result.CheckNotes!, note => note.Contains("1 part(s)", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Plan_ThatListsNothingNotTested_KeepsTheCoverageItSaid()
+    {
+        var answer = PlanResult.From(
+            new TestPlan("Catalogue", Good, [], PlanCoverage.Full, []),
+            new PlanningCost(900, 300, 1, 0.01m, TimeSpan.FromSeconds(2)),
+            "fake");
+
+        var result = await Service(new Planner([answer])).PlanAsync(
+            "Check the catalogue", Shop, RunBudget.Default, [], cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal(PlanCoverage.Full, result.Plan!.Coverage);
+        Assert.DoesNotContain(result.Notes, note => note.StartsWith("Not tested", StringComparison.Ordinal));
+    }
+
+    private static PlanResult Answer(IReadOnlyList<PlannedAction> actions) => PlanResult.From(
+        new TestPlan("A plan", actions, []),
+        new PlanningCost(900, 300, 1, 0.01m, TimeSpan.FromSeconds(2)),
+        "fake");
+
+    /// <summary>A planner that answers from a list, in order, and remembers what it was asked.</summary>
+    private sealed class Planner(IReadOnlyList<PlanResult> answers) : IScenarioPlanner
+    {
+        public string Model => "fake";
+
+        public int Asked { get; private set; }
+
+        public PlanRequest? LastRequest { get; private set; }
+
+        public Task<PlanResult> PlanAsync(PlanRequest request, CancellationToken cancellationToken = default)
+        {
+            LastRequest = request;
+            var answer = answers[Math.Min(Asked, answers.Count - 1)];
+            Asked++;
+            return Task.FromResult(answer);
+        }
+    }
+}

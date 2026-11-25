@@ -1,0 +1,16 @@
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.Extensions.Localization
+@using Autestiq.Contracts.Testing
+@using Autestiq.UI.Shared.Components
+@using Autestiq.UI.Shared.Resources
+@using Autestiq.UI.Shared.Showcase
+@using Autestiq.UI.Shared.Showcase.Sections
+
+@*
+    A development tool, behind Feature.Showcase, which a test asserts is off by default. It is
+    reachable without a session so that the design system can be reviewed before there is one.
+*@
+@attribute [AllowAnonymous]

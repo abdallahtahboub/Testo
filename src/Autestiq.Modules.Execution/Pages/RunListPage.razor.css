@@ -1,0 +1,77 @@
+/* The run list: the scenarios a person may start, then every run. */
+
+.runs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.runs__header h1 {
+  margin-block-end: var(--space-2);
+}
+
+.runs__scenario-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.runs__scenario {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.runs__scenario-text {
+  min-inline-size: 0;
+}
+
+.runs__scenario-name {
+  margin: 0 0 var(--space-1);
+  font-weight: var(--weight-semibold);
+}
+
+.runs__scenario-text p:last-child {
+  margin: 0;
+  max-inline-size: var(--measure);
+}
+
+.runs__problem {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  color: var(--color-danger);
+}
+
+.runs__table {
+  inline-size: 100%;
+  border-collapse: collapse;
+}
+
+.runs__table th,
+.runs__table td {
+  padding: var(--space-3);
+  text-align: start;
+  border-block-end: 1px solid var(--color-border);
+}
+
+.runs__table thead th {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  font-weight: var(--weight-medium);
+}
+
+.runs__attempt {
+  margin-inline-start: var(--space-2);
+  font-size: var(--text-body-sm);
+}

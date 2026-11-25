@@ -1,0 +1,63 @@
+@page "/app/p/{ProjectKey}/settings"
+@inject IStringLocalizer<ExecutionResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    A project's settings. For now one: how long its runs' screenshots are kept (gap analysis G-5). Screenshots are
+    customer data, so the choice is the customer's, never longer than 90 days, and a shorter time reaches screenshots
+    already kept.
+*@
+<PageTitle>@L["Settings_PageTitle", Project?.Name ?? ProjectKey, Brand.Value.ProductName]</PageTitle>
+
+@if (Loading)
+{
+    <TSkeleton Shape="SkeletonShape.Text" Lines="3" />
+}
+else if (Project is null)
+{
+    <h1>@L["Environments_NoSuchProject"]</h1>
+    <p class="t-muted">@L["Environments_NoSuchProject_Text"]</p>
+    <p><a href="@Routes.Projects">@L["Environments_BackToProjects"]</a></p>
+}
+else
+{
+    <div class="settings">
+        <header>
+            <ProjectNav ProjectKey="@Project.Key" ProjectName="@Project.Name" Current="settings" />
+            <h1>@L["Settings_Title"]</h1>
+        </header>
+
+        <section class="settings__section" aria-labelledby="settings-evidence" data-testid="evidence-policy">
+            <h2 id="settings-evidence" class="t-h4">@L["Settings_Evidence_Title"]</h2>
+            <p class="t-muted">@L["Settings_Evidence_Intro"]</p>
+
+            @if (Problem is not null)
+            {
+                <p class="settings__problem" role="alert">@Problem</p>
+            }
+            @if (Saved)
+            {
+                <p role="status" data-testid="evidence-saved">@L["Settings_Evidence_Saved"]</p>
+            }
+
+            <TRadioGroup TValue="int"
+                         Label="@L["Settings_Evidence_Label"]"
+                         Hint="@L["Settings_Evidence_Hint"]"
+                         Options="Options"
+                         @bind-Value="Days"
+                         Disabled="!Ready || !CanManage"
+                         data-testid="evidence-days" />
+
+            @if (CanManage)
+            {
+                <div>
+                    <TButton Variant="ButtonVariant.Primary" Loading="Busy" Disabled="!Ready" OnClick="SaveAsync" data-testid="save-evidence">@L["Settings_Evidence_Save"]</TButton>
+                </div>
+            }
+            else
+            {
+                <p class="t-muted">@L["Settings_AskAnAdmin"]</p>
+            }
+        </section>
+    </div>
+}

@@ -1,0 +1,17 @@
+@inject RoutableAssemblies Routable
+
+@* Finds the page for a URL in the host, the public website and all registered modules. *@
+<Router AppAssembly="typeof(Program).Assembly"
+        AdditionalAssemblies="Routable.Additional"
+        NotFoundPage="typeof(Autestiq.Website.Pages.NotFoundPage)">
+    <Found Context="routeData">
+        @* Authorize, not Route, so that navigating inside the circuit is checked as well as a
+           direct request to the server (D-1). *@
+        <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(AppLayout)">
+            <NotAuthorized>
+                <RedirectToSignIn />
+            </NotAuthorized>
+        </AuthorizeRouteView>
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+</Router>

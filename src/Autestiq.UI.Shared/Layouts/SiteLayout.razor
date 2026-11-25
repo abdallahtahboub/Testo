@@ -1,0 +1,15 @@
+@inherits LayoutComponentBase
+
+@* The public website's frame: header, page, footer. Static SSR throughout (ADR-0003). *@
+<TSkipLink />
+
+<div class="site">
+    <SiteHeader />
+
+    <main id="main-content" class="site-main" tabindex="-1">
+        @Body
+    </main>
+
+    <SiteFooter />
+    <CookieNotice />
+</div>

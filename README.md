@@ -1,31 +1,77 @@
-# Testo
+# AUTESTIQ
 
-**Testo** is an AI-assisted QA platform for software companies. It covers the whole
-software testing journey, from requirements to release sign-off, following the
-[ISTQB test process](docs/testing-journey.md). The first automated capability is
-AI-driven end-to-end web testing with a live progress view.
+**Autonomous Testing. Intelligent Quality.**
 
-> **Status after Milestone 3.** Accounts, organizations, roles, invitations and the audit log are
-> real and live in PostgreSQL. The design system is real. **The testing journey itself — plans,
-> requirements, test cases, runs, defects — does not exist yet**, not even as mock data: the seven
-> module projects are shells. The next work proves one real test execution end to end before
-> building screens over it (ADR-0017).
->
-> `docs/roadmap.md` §Inventory is the authoritative list of what is built, and
-> `docs/security-register.md` is the honest list of what is not yet safe.
-> `Testo` is a working name.
+Autestiq is an AI-assisted QA platform for software companies. It covers the whole software
+testing journey, from requirements to release sign-off, following the
+[ISTQB test process](docs/testing-journey.md).
+
+## The problem it is meant to solve
+
+Testing work is spread across tools that do not know about each other: requirements in one place,
+test cases in a second, automation in a third, defects in a fourth, and a report assembled by hand
+for whoever has to sign the release off. Nobody can answer "what have we actually tested, and what
+does that tell us about shipping this?" without a person spending a day joining it up.
+
+Autestiq is one place for that journey, with automated execution underneath it and an AI planner
+that turns a scenario written in a person's words into a plan a browser carries out.
+
+## What is actually built today
+
+This is a young codebase and the list is short on purpose. Nothing below is aspirational.
+
+| Built and working | Not built |
+|---|---|
+| Accounts, organizations, memberships, roles, invitations, audit log — on PostgreSQL, inside a tenant boundary | Test plans, requirements, a test case library, suites, defects, reporting |
+| The design system: tokens, components, light and dark themes, WCAG 2.2 AA | Email delivery, so no deployed host can start yet |
+| Test runs against our own targets and a project's environments, with screenshots per step and a retention policy | A deployment, a release, a migration command outside development |
+| Projects and environments, with proof of site ownership and production off by default | The minimized AI mode (G-2) |
+| Describing a test in a sentence and getting the AI's plan for it, only once the project allows AI processing | |
+| Approving a plan (an explicit tick when it may change data), running it read-only unless approved otherwise, and downloading it as a Python test | |
+| One test account per test environment, encrypted and write-only (ADR-0033); tester-stated expected results (ADR-0034) | |
+| The public website: 29 routes in English and German | |
+
+**The AI planner is measured on our own applications.** On 20 scenarios written after its prompt was
+frozen, it was correct 95% of the time on sound applications, caught every seeded defect where it
+reached a verdict, and never passed a broken application; the same held with every test id removed
+(ADR-0020, [`docs/ai-benchmark.md`](docs/ai-benchmark.md)). Read-only exploration, a customer site's
+default, measured 36 of 66 against 62 of 66. On two applications we did not build: eShopOnWeb 18 of 22 after
+explorer changes made on its own results, and Spring PetClinic, the clean measurement, 20 of 22 (16 of 22 strictly),
+neither with a false positive, and PetClinic without defects to catch. **Re-measured on 2026-11-24 with the current
+prompt**, which makes a plan list what it does not test: our applications unchanged (64 of 66 runs correct, with and
+without test ids); PetClinic 12 of 22 correct and 10 honestly inconclusive, still no false positive. The read-only
+and eShopOnWeb figures predate that prompt. The tagline is the company's, not a description of what the software does today.
+
+[`docs/roadmap.md`](docs/roadmap.md) §Inventory is the authoritative list of what is built, and
+[`docs/security-register.md`](docs/security-register.md) is the honest list of what is not yet safe.
+
+## Technology
+
+- **.NET 10**, C#, ASP.NET Core
+- **Blazor Web App** — static SSR for the public site and the account pages, InteractiveServer for the app
+- **PostgreSQL 16** with EF Core, one database, row-level tenant isolation
+- **Playwright** for test execution and for our own browser tests
+- **xUnit v3** on Microsoft.Testing.Platform, **bUnit** for components
+- The Anthropic API for planning, behind a provider-agnostic interface
+
+Nothing else: no JavaScript framework, no CSS framework, no cloud
+dependency. Docker runs the sealed worker container per run (ADR-0026). The one piece of JavaScript is a small ES
+module for the static header.
 
 ## Getting started
 
 You need the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) and a
 **PostgreSQL 16** to point it at. The product keeps accounts, organizations and roles in a
-database, so it will not start without one — and if it cannot reach the server it says which
-one it tried and how to get one running, rather than printing a connection error.
+database, so it will not start without one. If it cannot use the database it says which server
+it tried and which of three things went wrong, rather than printing a connection error: no
+server answered, the server answered but the database does not exist, or the server refused the
+user and password. The last one usually means another PostgreSQL already holds the port, with a
+password of its own.
 
 The quickest way to get one:
 
 ```bash
-docker run --name testo-db -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16
+docker run --name autestiq-db -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16
 ```
 
 Or install PostgreSQL locally. Note that Homebrew and apt create a superuser named after your
@@ -49,23 +95,25 @@ psql -d postgres -c "ALTER USER postgres WITH PASSWORD 'postgres';"
 To use a different server or account instead, override the connection string:
 
 ```bash
-export ConnectionStrings__Testo="Host=localhost;Database=testo_dev;Username=me;Password=secret"
+export ConnectionStrings__Autestiq="Host=localhost;Database=autestiq_dev;Username=me;Password=secret"
 ```
 
-**Run every command below from the repository root**, the folder containing `Testo.slnx`.
+**Run every command below from the repository root**, the folder containing `Autestiq.slnx`.
 From inside a project folder, `dotnet` only sees that one project: `dotnet test` then
 reports "No test projects were found".
 
 ```bash
-dotnet run --project src/Testo.Web
+dotnet run --project src/Autestiq.Web
 ```
 
-On the first run in development it creates the schema and seeds an organization, so there is
-somebody to sign in as. The log says who:
+On the first run in development it creates the database (`autestiq_dev`, from
+`appsettings.Development.json`) if the server does not have it yet, applies the migrations and
+seeds an organization, so there is somebody to sign in as. Outside development a missing
+database is refused instead: creating one is the deployment's job. The log says who to sign in as:
 
 ```
 Seeded the development database with Northwind Software.
-Sign in as mara@northwind.example with the password testo-development-password.
+Sign in as mara@northwind.example with the password autestiq-development-password.
 ```
 
 The site is served at `http://localhost:5080`:
@@ -75,15 +123,104 @@ The site is served at `http://localhost:5080`:
 | `/en`, `/de` | Public website (static, fast, indexable per language) |
 | `/account/sign-in` | Signing in (static, posts a plain form — ADR-0016) |
 | `/app` | Product app (interactive, behind the app shell) |
+| `/app/runs` | Test runs: start a scripted scenario, watch it, stop it, run it again |
+
+### Running a test run
+
+A run needs two more things than the web application: something to run against, and the worker
+that drives the browser. Start the demo shop in one terminal and leave it there:
+
+```bash
+dotnet run --project src/Autestiq.DemoShop --urls http://127.0.0.1:5090
+```
+
+Build the worker once, so the dispatcher has an executable to launch:
+
+```bash
+dotnet build src/Autestiq.Worker
+```
+
+`appsettings.Development.json` points at both. Then start a run from `/app/runs`.
+`demo-shop-checkout-total` is the one that fails: the shop charges for the first item in the
+basket and forgets the rest, and the step that fails keeps the screenshot that shows it.
+
+The worker drives Chromium through an egress proxy of its own that refuses every address but the
+target. It needs the same browser the tests use, so install that first (below), or point
+`AUTESTIQ_BROWSER_PATH` at a Chromium you already have.
+
+### Describing a test
+
+The tests page of a project (`/app/p/SHOP/tests`) asks for the project's permission to send what
+exploring finds to the AI provider, and only then offers to describe a test. Planning needs a model
+key in the server's configuration, never in a file in the repository:
+
+```bash
+export Planner__ApiKey="..."
+```
+
+Without one, a described test is explored and then says that AI planning is not set up, and nothing is
+sent. The budgets are in `appsettings.json` under `Planning`: $10 a month for the whole product and
+$2 per organization. Each plan's cost is counted at the price book's prices (ADR-0029).
+
+### Test accounts
+
+A test environment can keep one test account's sign-in values (ADR-0033). They are encrypted with ASP.NET Core
+Data Protection, whose key ring must live outside the database. Outside development the application refuses to
+start until it is told where:
+
+```bash
+export DataProtection__KeyDirectory=/var/lib/autestiq/keys
+```
+
+Keep that directory out of database backups and readable only by the application. Losing it makes every stored
+value unreadable: runs that need one are then refused, and the values have to be entered again.
+
+### The AI benchmark
+
+The planner is measured rather than described. One command runs twelve controlled scenarios against
+the demo shop, half of them with a real defect switched on, and writes
+[`docs/ai-benchmark.md`](docs/ai-benchmark.md):
+
+```bash
+dotnet run --project tools/Autestiq.Benchmark
+```
+
+Without a key that measures the hand-written baseline only. To measure the planner as well:
+
+```bash
+PLANNER__APIKEY=sk-... dotnet run --project tools/Autestiq.Benchmark
+```
+
+The key is read from configuration and never stored in the repository, and it is never given to the
+worker, which is treated as already compromised (ADR-0018, ADR-0019 §4). A full run with a planner
+makes one model call per scenario and costs cents, not dollars; the per-run token and money budgets
+stop it going further than that.
+
+Two options for measuring how a customer's site would fare:
+
+- `--read-only` explores as the product explores a customer's site: links followed, no control pressed,
+  no form sent. Its report gets a `-read-only` name of its own. With `--coverage` it costs nothing and says
+  how much of what each scenario needs the exploration shows.
+- `--max-total-usd 5` stops a run once planning has cost that much in all; a report cut short says its
+  figures are partial.
+
+```bash
+dotnet run --project tools/Autestiq.Benchmark -- --coverage --unseen --target booking --read-only
+```
 
 ### Tests
 
 ```bash
-dotnet test
+dotnet test --max-parallel-test-modules 1
 ```
 
 This runs everything: unit, component, architecture and browser tests. The browser tests
 start the application themselves, so nothing needs to be running first.
+
+The flag runs one test project at a time (tests inside a project still run in parallel), as CI
+does. Without it, the sealed-run tests create Docker networks while the browser tests run;
+Chromium takes each new network interface for a change of network and fails the page's
+requests with `ERR_NETWORK_CHANGED`, so browser tests fail at random.
 
 The data tests and the browser tests need **PostgreSQL**, because two of the three layers of
 tenant isolation are the database's own and an in-memory provider would pass tests that
@@ -92,14 +229,14 @@ look for the server at `localhost:5432` with the usual development credentials; 
 somewhere else with:
 
 ```bash
-export TESTO_TEST_DB="Host=localhost;Port=5432;Username=me;Password=secret"
+export AUTESTIQ_TEST_DB="Host=localhost;Port=5432;Username=me;Password=secret"
 ```
 
 **Once per machine**, the browser the tests drive has to be downloaded, or every browser
 test fails with *"Executable doesn't exist"*:
 
 ```bash
-dotnet build tests/Testo.E2E -t:InstallTestBrowser
+dotnet build tests/Autestiq.E2E -t:InstallTestBrowser
 ```
 
 That needs nothing beyond the .NET SDK: Playwright ships its own Node runtime inside the
@@ -109,29 +246,47 @@ build output and the target uses it. (Playwright's own documentation points at a
 To run only part of the suite:
 
 ```bash
-dotnet test --project tests/Testo.UI.Tests
-dotnet test --project tests/Testo.E2E --filter-class "Testo.E2E.Pages.ThemeTests"
+dotnet test --project tests/Autestiq.UI.Tests
+dotnet test --project tests/Autestiq.E2E --filter-class "Autestiq.E2E.Pages.ThemeTests"
 ```
 
 ## How the solution is organized
 
 ```
 src/
-  Testo.Contracts        DTOs and data service interfaces. No UI dependencies; the
-                         future backend reuses this project.
-  Testo.Platform         Module and capability contracts, registries, route constants,
-                         language helpers, feature-flag abstraction.
-  Testo.UI.Shared        The design system: tokens, fonts, components, layouts.
-  Testo.Website          The public marketing website (rendered statically).
-  Testo.Modules.*        One module per stage of the testing journey.
-  Testo.Capabilities.*   Pluggable test execution engines.
-  Testo.Mocks            In-memory data, deterministic. Swapped for HTTP clients later.
-  Testo.Web              The host: composition root only.
+  Autestiq.Contracts        DTOs and service interfaces. No UI dependencies; the future
+                            backend reuses this project.
+  Autestiq.Domain           Entities and the rules that hold whatever the storage is.
+  Autestiq.Persistence      EF Core on PostgreSQL, the migrations, the identity stores.
+  Autestiq.Application      The use cases. Returns resource keys, never English sentences.
+  Autestiq.Platform         Module and capability contracts, registries, route constants,
+                            language helpers, feature-flag abstraction.
+  Autestiq.UI.Shared        The design system: tokens, fonts, components, layouts.
+  Autestiq.Website          The public marketing website (rendered statically).
+  Autestiq.Modules.*        One module per stage of the testing journey. Six are shells.
+  Autestiq.Capabilities.*   Pluggable test execution engines.
+  Autestiq.Ai               The planner: prompt, parsing, the provider adapter.
+  Autestiq.Worker           Drives Chromium out of process, behind its own egress proxy.
+  Autestiq.DemoShop         A small web shop with switchable defects, to run tests against.
+  Autestiq.BookingShop      A clinic booking site, the second application tests run against.
+  Autestiq.InvoiceDesk      An invoice desk, the third, built to measure on something new.
+  Autestiq.Export           Writes validated plans out as tests in a customer's language.
+  Autestiq.Mocks            Deterministic in-memory data.
+  Autestiq.Web              The host: composition root only.
+tools/
+  Autestiq.Benchmark        Measures the planner against a hand-written baseline.
 tests/
-  Testo.UI.Tests         Component tests (bUnit) and the rules that guard the structure.
-  Testo.Mocks.Tests      Mock data and timing.
-  Testo.E2E              Browser tests (Playwright) and raw HTTP tests.
+  Autestiq.UI.Tests         Component tests (bUnit) and the rules that guard the structure.
+  Autestiq.Application.Tests  Use cases, tenant isolation, planning.
+  Autestiq.Worker.Tests     Execution, the egress policy, the crawl.
+  Autestiq.Mocks.Tests      Mock data and timing.
+  Autestiq.E2E              Browser tests (Playwright) and raw HTTP tests.
 ```
+
+The layering runs one way: `Web` → modules → `Application` → `Domain`, with `Contracts` and
+`Platform` beside them and `UI.Shared` holding no business logic at all. The worker is a separate
+process on purpose: it drives a browser at a target that may be hostile, so it is treated as
+already compromised and given no credentials and no route off the target (ADR-0018).
 
 A module never references another module. The dependency rules are
 [written down](docs/architecture.md#4-dependency-rules) and **enforced by a test**, so a
@@ -149,11 +304,22 @@ registration line. Nothing existing changes.
 | [`docs/sitemap.md`](docs/sitemap.md) | Every page of the website and the app |
 | [`docs/domain-model.md`](docs/domain-model.md) | What is stored, and how customers are kept apart |
 | [`docs/identity-and-access.md`](docs/identity-and-access.md) | Sign-in, roles, permissions, audit, GDPR |
-| [`docs/ux/`](docs/ux/) | Who uses Testo, the flows, how the interface behaves, how it is written |
+| [`docs/ux/`](docs/ux/) | Who uses Autestiq, the flows, how the interface behaves, how it is written |
 | [`docs/design-system.md`](docs/design-system.md) | Colors, type, spacing, components, accessibility rules |
 | [`docs/roadmap.md`](docs/roadmap.md) | The milestones and what "done" means for each |
 | [`docs/decisions/`](docs/decisions/) | Why each significant decision was made |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Branches, commits, pull requests, definition of done |
+
+## Limitations, and what comes next
+
+Today this is a platform with identity, a design system, a public website and real but narrow
+execution. The six remaining stages of the testing journey are project shells: no screens, no
+services, not even mock data behind them.
+
+The nearest planned work, in order, is in [`docs/roadmap.md`](docs/roadmap.md): re-measuring the
+planner after the four faults the first benchmark exposed, then the test-design and planning
+modules, then defects and reporting. Nothing is deployed, there is no hosting, no tenancy beyond
+the database boundary, and no customer-supplied target can be tested yet.
 
 ## Quality
 

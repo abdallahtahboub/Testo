@@ -1,0 +1,13 @@
+/* The frame only. The header, the footer and the notice style themselves: a class cannot cross a
+   component boundary, because CSS isolation scopes every selector to the component that declares
+   it (CLAUDE.md, CSS). */
+
+.site {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.site-main {
+  flex: 1;
+}

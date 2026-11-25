@@ -1,0 +1,28 @@
+@inject IStringLocalizer<ExecutionResources> L
+
+@*
+    Where a described test stands, in words and colour; never colour alone (docs/design-system.md §10).
+*@
+<TBadge Tone="Tone" data-testid="test-status">@L[Key]</TBadge>
+
+@code {
+    /// <summary>The status to show.</summary>
+    [Parameter, EditorRequired]
+    public TestCaseStatus Status { get; set; }
+
+    private string Key => Status switch
+    {
+        TestCaseStatus.Exploring => "TestStatus_Exploring",
+        TestCaseStatus.Planning => "TestStatus_Planning",
+        TestCaseStatus.Planned => "TestStatus_Planned",
+        TestCaseStatus.Failed => "TestStatus_Failed",
+        _ => "TestStatus_Exploring",
+    };
+
+    private Tone Tone => Status switch
+    {
+        TestCaseStatus.Planned => Tone.Success,
+        TestCaseStatus.Failed => Tone.Danger,
+        _ => Tone.Info,
+    };
+}

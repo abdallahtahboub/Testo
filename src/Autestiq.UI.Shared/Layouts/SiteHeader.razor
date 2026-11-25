@@ -1,0 +1,117 @@
+@inject IStringLocalizer<SharedResources> L
+@inject IOptions<BrandOptions> Brand
+@inject LocalizedTextLookup Text
+@inject ISiteMenu Menu
+
+@*
+    The public site's header: brand, mega-menu, language, theme, and the two things we want a
+    visitor to do.
+
+    It renders what ISiteMenu was given and owns none of those words (CLAUDE.md, Architecture
+    rules).
+
+    There is no hamburger, and that is on purpose. The obvious design — the whole navigation inside
+    one <details> that is collapsed on a phone and forced open by CSS on a desktop — does not work:
+    a browser hides a closed <details>'s content in a way CSS cannot override, so on a wide screen
+    both the menu and its toggle disappeared and the site had no navigation at all. Measured in
+    Chromium before it was written, not guessed.
+
+    So each section is its own disclosure, which behaves the same at every width and needs no
+    JavaScript to be usable. On a phone the five short words sit in a row that scrolls; on a desktop
+    they are a menu bar whose panels drop below the header. menu.js only closes them on Escape and
+    on an outside click (ADR-0004).
+
+    Each panel opens with a link to the section's own page, because a menu that can only be used by
+    hovering is no use on a phone.
+*@
+<header class="site-header" data-testid="site-header">
+    <div class="t-container site-header__inner">
+        <a class="site-header__brand"
+           href="@LocalizedPath.For(SupportedCultures.Current)"
+           aria-label="@L["Site_Header_Home", Brand.Value.ProductName]">
+            <TBrand />
+        </a>
+
+        <nav class="site-nav" aria-label="@L["Site_Header_Nav"]" data-site-nav>
+            <ul class="site-nav__sections" role="list">
+                @foreach (var section in Menu.Sections)
+                {
+                    <li class="site-nav__section">
+                        <details class="site-menu" data-site-menu>
+                            <summary class="site-menu__summary" data-testid="@($"menu-{section.Id}")">
+                                <span>@Text[section.Label]</span>
+                                <TIcon Name="IconName.ChevronDown" Size="IconSize.Small" />
+                            </summary>
+
+                            <div class="site-menu__panel" data-testid="@($"panel-{section.Id}")">
+                                <div class="t-container site-menu__layout">
+                                    <div class="site-menu__groups">
+                                        @foreach (var group in section.Groups)
+                                        {
+                                            <div class="site-menu__group">
+                                                @if (Text.Resolve(group.Heading) is { } heading)
+                                                {
+                                                    <p class="site-menu__heading">@heading</p>
+                                                }
+                                                <ul role="list">
+                                                    @foreach (var link in group.Links)
+                                                    {
+                                                        <li>
+                                                            <a class="site-menu__link" href="@Href(link.Page)">
+                                                                <span class="site-menu__link-label">
+                                                                    @Text[link.Label]
+                                                                    @if (link.IsPlaceholder)
+                                                                    {
+                                                                        <span class="site-menu__placeholder">@L["Site_Placeholder"]</span>
+                                                                    }
+                                                                </span>
+                                                                @if (Text.Resolve(link.Description) is { } description)
+                                                                {
+                                                                    <span class="site-menu__link-text">@description</span>
+                                                                }
+                                                            </a>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    @if (section.Feature is { } feature)
+                                    {
+                                        <a class="site-menu__feature" href="@Href(feature.Page)">
+                                            <span class="site-menu__feature-title">@Text[feature.Title]</span>
+                                            <span class="site-menu__feature-text">@Text[feature.Text]</span>
+                                            <span class="site-menu__feature-action">
+                                                @Text[feature.ActionLabel]
+                                                <TIcon Name="IconName.ChevronRight" Size="IconSize.Small" />
+                                            </span>
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </details>
+                    </li>
+                }
+
+                @foreach (var link in Menu.HeaderLinks)
+                {
+                    <li class="site-nav__section">
+                        <a class="site-nav__link" href="@Href(link.Page)">@Text[link.Label]</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+
+        <div class="site-header__tools">
+            <TLanguageSwitch />
+            <TThemeSwitch />
+            <TButton Href="@Routes.SignIn" Variant="ButtonVariant.Ghost">@L["Site_Header_SignIn"]</TButton>
+            <TButton Href="@Href(PublicPages.RequestDemo)" Variant="ButtonVariant.Primary">@L["Site_Header_RequestDemo"]</TButton>
+        </div>
+    </div>
+</header>
+
+@code {
+    private static string Href(string page) => LocalizedPath.For(SupportedCultures.Current, page);
+}

@@ -1,0 +1,913 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Nav_Runs" xml:space="preserve">
+    <value>Testläufe</value>
+  </data>
+  <data name="RunList_PageTitle" xml:space="preserve">
+    <value>Testläufe – {0}</value>
+  </data>
+  <data name="RunList_Title" xml:space="preserve">
+    <value>Testläufe</value>
+  </data>
+  <data name="RunList_Intro" xml:space="preserve">
+    <value>Jeder Lauf eines Szenarios gegen die Demo-Anwendung, neueste zuerst.</value>
+  </data>
+  <data name="RunList_Start" xml:space="preserve">
+    <value>Lauf starten</value>
+  </data>
+  <data name="RunList_StartScenario" xml:space="preserve">
+    <value>Starten</value>
+  </data>
+  <data name="RunList_Empty_Title" xml:space="preserve">
+    <value>Es ist noch nichts gelaufen</value>
+  </data>
+  <data name="RunList_Empty_Text" xml:space="preserve">
+    <value>Starten Sie ein Szenario, dann erscheint es hier, während es läuft.</value>
+  </data>
+  <data name="RunList_Column_Run" xml:space="preserve">
+    <value>Lauf</value>
+  </data>
+  <data name="RunList_Column_Scenario" xml:space="preserve">
+    <value>Szenario</value>
+  </data>
+  <data name="RunList_Column_Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="RunList_Column_Queued" xml:space="preserve">
+    <value>Eingereiht</value>
+  </data>
+  <data name="RunList_Attempt" xml:space="preserve">
+    <value>Versuch {0}</value>
+  </data>
+  <data name="Run_PageTitle" xml:space="preserve">
+    <value>Lauf {0} – {1}</value>
+  </data>
+  <data name="Run_Title" xml:space="preserve">
+    <value>Lauf {0}: {1}</value>
+  </data>
+  <data name="Run_Target" xml:space="preserve">
+    <value>Gelaufen gegen {0}</value>
+  </data>
+  <data name="Run_Cancel" xml:space="preserve">
+    <value>Diesen Lauf stoppen</value>
+  </data>
+  <data name="Run_Rerun" xml:space="preserve">
+    <value>Noch einmal laufen lassen</value>
+  </data>
+  <data name="Run_BackToList" xml:space="preserve">
+    <value>Alle Läufe</value>
+  </data>
+  <data name="Run_Steps_Title" xml:space="preserve">
+    <value>Schritte</value>
+  </data>
+  <data name="Run_Steps_Screenshot" xml:space="preserve">
+    <value>Bildschirmfoto von Schritt {0}</value>
+  </data>
+  <data name="Run_NotFound_Title" xml:space="preserve">
+    <value>Kein solcher Lauf</value>
+  </data>
+  <data name="Run_NotFound_Text" xml:space="preserve">
+    <value>Diesen Lauf gibt es nicht, oder er gehört zu einer anderen Organisation.</value>
+  </data>
+  <data name="Run_Failure_Title" xml:space="preserve">
+    <value>Warum er gestoppt hat</value>
+  </data>
+  <data name="Status_Queued" xml:space="preserve">
+    <value>Eingereiht</value>
+  </data>
+  <data name="Status_Running" xml:space="preserve">
+    <value>Läuft</value>
+  </data>
+  <data name="Status_Passed" xml:space="preserve">
+    <value>Bestanden</value>
+  </data>
+  <data name="Status_Failed" xml:space="preserve">
+    <value>Fehlgeschlagen</value>
+  </data>
+  <data name="Status_Cancelled" xml:space="preserve">
+    <value>Gestoppt</value>
+  </data>
+  <data name="Status_TimedOut" xml:space="preserve">
+    <value>Zeit abgelaufen</value>
+  </data>
+  <data name="Status_BudgetExceeded" xml:space="preserve">
+    <value>Budget überschritten</value>
+  </data>
+  <data name="Status_InfrastructureError" xml:space="preserve">
+    <value>Konnte nicht laufen</value>
+  </data>
+  <data name="Status_Inconclusive" xml:space="preserve">
+    <value>Ohne Aussage</value>
+  </data>
+  <data name="StepStatus_Pending" xml:space="preserve">
+    <value>Nicht gestartet</value>
+  </data>
+  <data name="StepStatus_Running" xml:space="preserve">
+    <value>Läuft</value>
+  </data>
+  <data name="StepStatus_Passed" xml:space="preserve">
+    <value>Bestanden</value>
+  </data>
+  <data name="StepStatus_Failed" xml:space="preserve">
+    <value>Fehlgeschlagen</value>
+  </data>
+  <data name="StepStatus_Skipped" xml:space="preserve">
+    <value>Übersprungen</value>
+  </data>
+  <data name="Execution_Error_NotAllowed" xml:space="preserve">
+    <value>Ihre Rolle erlaubt es nicht, Testläufe zu starten oder zu stoppen.</value>
+  </data>
+  <data name="Execution_Error_NoSuchScenario" xml:space="preserve">
+    <value>Ein Szenario mit diesem Namen gibt es nicht.</value>
+  </data>
+  <data name="Execution_Error_NoSuchProject" xml:space="preserve">
+    <value>Ein Projekt mit diesem Namen gibt es nicht.</value>
+  </data>
+  <data name="Execution_Error_NoSuchRun" xml:space="preserve">
+    <value>Einen solchen Lauf gibt es nicht.</value>
+  </data>
+  <data name="Execution_Error_Paused" xml:space="preserve">
+    <value>Testläufe sind gerade angehalten. Bitte versuchen Sie es später erneut.</value>
+  </data>
+  <data name="Execution_Error_InvalidOrigin" xml:space="preserve">
+    <value>Diese Website-Adresse kann nicht geprüft werden: Verwenden Sie https://, einen Host und nichts danach.</value>
+  </data>
+  <data name="Execution_Error_NoSuchProof" xml:space="preserve">
+    <value>Für diese Adresse wurde noch kein Nachweis angefordert.</value>
+  </data>
+  <data name="Execution_Error_MinutesUsedUp" xml:space="preserve">
+    <value>Diese Organisation hat alle Browser-Minuten dieses Monats verbraucht. Testläufe sind ab dem nächsten Monat oder nach einem Tarifwechsel wieder möglich.</value>
+  </data>
+  <data name="Execution_Error_TooManyStarts" xml:space="preserve">
+    <value>Zu viele Anfragen in der letzten Minute. Bitte warten Sie einen Moment und versuchen Sie es erneut.</value>
+  </data>
+  <data name="Execution_Error_AlreadyFinished" xml:space="preserve">
+    <value>Dieser Lauf ist bereits beendet.</value>
+  </data>
+  <data name="Run_Refresh" xml:space="preserve">
+    <value>Aktualisieren</value>
+  </data>
+  <data name="Run_Timing_Queued" xml:space="preserve">
+    <value>Eingereiht</value>
+  </data>
+  <data name="Run_Timing_Started" xml:space="preserve">
+    <value>Gestartet</value>
+  </data>
+  <data name="Run_Timing_Finished" xml:space="preserve">
+    <value>Beendet</value>
+  </data>
+  <data name="Run_Steps_Took" xml:space="preserve">
+    <value>{0} s</value>
+  </data>
+  <data name="Nav_Projects" xml:space="preserve">
+    <value>Projekte</value>
+  </data>
+  <data name="Projects_PageTitle" xml:space="preserve">
+    <value>Projekte – {0}</value>
+  </data>
+  <data name="Projects_Title" xml:space="preserve">
+    <value>Projekte</value>
+  </data>
+  <data name="Projects_Intro" xml:space="preserve">
+    <value>Ein Projekt ist eine Anwendung, die Sie testen. Seine Umgebungen, Tests und Läufe gehören zu ihm.</value>
+  </data>
+  <data name="Projects_Empty_Title" xml:space="preserve">
+    <value>Noch keine Projekte</value>
+  </data>
+  <data name="Projects_Empty_Text" xml:space="preserve">
+    <value>Legen Sie unten eines an, um eine Anwendung zu testen.</value>
+  </data>
+  <data name="Projects_EnvironmentCount" xml:space="preserve">
+    <value>Umgebungen: {0}</value>
+  </data>
+  <data name="Projects_New" xml:space="preserve">
+    <value>Projekt anlegen</value>
+  </data>
+  <data name="Projects_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Projects_Key" xml:space="preserve">
+    <value>Kürzel</value>
+  </data>
+  <data name="Projects_Key_Hint" xml:space="preserve">
+    <value>2 bis 10 Buchstaben und Ziffern, beginnend mit einem Buchstaben, etwa SHOP. Es erscheint in Adressen und lässt sich nicht ändern.</value>
+  </data>
+  <data name="Projects_Description" xml:space="preserve">
+    <value>Beschreibung</value>
+  </data>
+  <data name="Projects_Create" xml:space="preserve">
+    <value>Projekt anlegen</value>
+  </data>
+  <data name="Projects_LoadFailed" xml:space="preserve">
+    <value>Die Projekte konnten nicht geladen werden.</value>
+  </data>
+  <data name="Projects_Error_NotAllowed" xml:space="preserve">
+    <value>Nur Inhaber und Administratoren können Projekte anlegen.</value>
+  </data>
+  <data name="Projects_Error_NameRequired" xml:space="preserve">
+    <value>Geben Sie dem Projekt einen Namen mit bis zu 200 Zeichen.</value>
+  </data>
+  <data name="Projects_Error_InvalidKey" xml:space="preserve">
+    <value>Das Kürzel muss aus 2 bis 10 Buchstaben und Ziffern bestehen und mit einem Buchstaben beginnen.</value>
+  </data>
+  <data name="Projects_Error_KeyTaken" xml:space="preserve">
+    <value>Ein anderes Projekt verwendet dieses Kürzel bereits.</value>
+  </data>
+  <data name="Projects_Error_PlanLimit" xml:space="preserve">
+    <value>Ihr Tarif erlaubt kein weiteres Projekt.</value>
+  </data>
+  <data name="Environments_PageTitle" xml:space="preserve">
+    <value>Umgebungen von {0} – {1}</value>
+  </data>
+  <data name="Environments_Title" xml:space="preserve">
+    <value>Umgebungen</value>
+  </data>
+  <data name="Environments_Intro" xml:space="preserve">
+    <value>Eine Umgebung ist eine Adresse der Anwendung, etwa ihre Staging-Seite. Tests laufen gegen eine Umgebung erst, wenn Sie nachgewiesen haben, dass die Seite Ihnen gehört.</value>
+  </data>
+  <data name="Environments_NoSuchProject" xml:space="preserve">
+    <value>Projekt nicht gefunden</value>
+  </data>
+  <data name="Environments_NoSuchProject_Text" xml:space="preserve">
+    <value>In dieser Organisation gibt es kein Projekt mit diesem Kürzel.</value>
+  </data>
+  <data name="Environments_BackToProjects" xml:space="preserve">
+    <value>Zurück zu den Projekten</value>
+  </data>
+  <data name="Environments_Empty_Title" xml:space="preserve">
+    <value>Noch keine Umgebungen</value>
+  </data>
+  <data name="Environments_Empty_Text" xml:space="preserve">
+    <value>Fügen Sie die Adresse der Seite hinzu, die Sie testen möchten.</value>
+  </data>
+  <data name="Environments_Proof_Instructions" xml:space="preserve">
+    <value>Um nachzuweisen, dass die Seite Ihnen gehört, veröffentlichen Sie unter dieser Adresse eine Datei mit genau diesem Text und wählen Sie dann Jetzt prüfen.</value>
+  </data>
+  <data name="Environments_Proof_File" xml:space="preserve">
+    <value>Datei</value>
+  </data>
+  <data name="Environments_Proof_Token" xml:space="preserve">
+    <value>Text</value>
+  </data>
+  <data name="Environments_Prove" xml:space="preserve">
+    <value>Inhaberschaft nachweisen</value>
+  </data>
+  <data name="Environments_Check" xml:space="preserve">
+    <value>Jetzt prüfen</value>
+  </data>
+  <data name="Environments_Remove" xml:space="preserve">
+    <value>Entfernen</value>
+  </data>
+  <data name="Environments_New" xml:space="preserve">
+    <value>Umgebung hinzufügen</value>
+  </data>
+  <data name="Environments_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Environments_Name_Hint" xml:space="preserve">
+    <value>Etwa Staging oder Produktion.</value>
+  </data>
+  <data name="Environments_Origin" xml:space="preserve">
+    <value>Adresse</value>
+  </data>
+  <data name="Environments_Origin_Hint" xml:space="preserve">
+    <value>Die Adresse der Seite, etwa https://staging.example.com, ohne etwas dahinter.</value>
+  </data>
+  <data name="Environments_Add" xml:space="preserve">
+    <value>Umgebung hinzufügen</value>
+  </data>
+  <data name="Environments_LoadFailed" xml:space="preserve">
+    <value>Die Umgebungen konnten nicht geladen werden.</value>
+  </data>
+  <data name="Environments_Error_NotAllowed" xml:space="preserve">
+    <value>Nur Inhaber und Administratoren können Umgebungen ändern.</value>
+  </data>
+  <data name="Environments_Error_NameRequired" xml:space="preserve">
+    <value>Geben Sie der Umgebung einen Namen mit bis zu 100 Zeichen.</value>
+  </data>
+  <data name="Environments_Error_InvalidOrigin" xml:space="preserve">
+    <value>Das ist keine Website-Adresse, die getestet werden kann: Verwenden Sie https://, einen Host und nichts dahinter.</value>
+  </data>
+  <data name="Environments_Error_NoSuchProject" xml:space="preserve">
+    <value>Dieses Projekt gibt es nicht.</value>
+  </data>
+  <data name="Environments_Error_NameTaken" xml:space="preserve">
+    <value>Dieses Projekt hat bereits eine Umgebung mit diesem Namen.</value>
+  </data>
+  <data name="Environments_Error_OriginTaken" xml:space="preserve">
+    <value>Dieses Projekt hat bereits eine Umgebung unter dieser Adresse.</value>
+  </data>
+  <data name="Environments_Error_NoSuchEnvironment" xml:space="preserve">
+    <value>Diese Umgebung gibt es nicht.</value>
+  </data>
+  <data name="Proof_None" xml:space="preserve">
+    <value>Nicht nachgewiesen</value>
+  </data>
+  <data name="Proof_Issued" xml:space="preserve">
+    <value>Wartet auf die Datei</value>
+  </data>
+  <data name="Proof_Checking" xml:space="preserve">
+    <value>Wird geprüft</value>
+  </data>
+  <data name="Proof_Verified" xml:space="preserve">
+    <value>Nachgewiesen</value>
+  </data>
+  <data name="Proof_VerifiedUntil" xml:space="preserve">
+    <value>Nachgewiesen bis {0}</value>
+  </data>
+  <data name="Proof_Failed" xml:space="preserve">
+    <value>Prüfung fehlgeschlagen</value>
+  </data>
+  <data name="Environments_Production" xml:space="preserve">
+    <value>Produktion</value>
+  </data>
+  <data name="Environments_IsProduction" xml:space="preserve">
+    <value>Dies ist eine Produktivseite</value>
+  </data>
+  <data name="Environments_IsProduction_Hint" xml:space="preserve">
+    <value>Die Live-Seite, die echte Kunden nutzen. Tests dagegen werden abgelehnt, bis ein Inhaber sie freigibt.</value>
+  </data>
+  <data name="Environments_Production_Refused" xml:space="preserve">
+    <value>Tests gegen diese Produktivseite werden abgelehnt, bis ein Inhaber sie freigibt. Tests können hier echte Daten ändern: Bestellungen, Buchungen, Konten.</value>
+  </data>
+  <data name="Environments_Production_Acknowledge" xml:space="preserve">
+    <value>Mir ist bewusst, dass Tests auf dieser Seite echte Daten anlegen, ändern oder löschen können.</value>
+  </data>
+  <data name="Environments_Production_Authorize" xml:space="preserve">
+    <value>Tests auf Produktion freigeben</value>
+  </data>
+  <data name="Environments_Production_Authorized" xml:space="preserve">
+    <value>Ein Inhaber hat Tests gegen diese Produktivseite am {0} freigegeben.</value>
+  </data>
+  <data name="Environments_Production_Withdraw" xml:space="preserve">
+    <value>Freigabe zurückziehen</value>
+  </data>
+  <data name="Environments_Error_InvalidKind" xml:space="preserve">
+    <value>Wählen Sie, ob dies eine Testseite oder eine Produktivseite ist.</value>
+  </data>
+  <data name="Environments_Error_OwnerOnly" xml:space="preserve">
+    <value>Nur ein Inhaber kann Tests auf Produktion freigeben oder die Freigabe zurückziehen.</value>
+  </data>
+  <data name="Environments_Error_AcknowledgementRequired" xml:space="preserve">
+    <value>Bestätigen Sie zuerst den Hinweis: Tests können auf einer Produktivseite echte Daten ändern.</value>
+  </data>
+  <data name="Environments_Error_NotProduction" xml:space="preserve">
+    <value>Dies ist eine Testseite; sie braucht keine Freigabe.</value>
+  </data>
+  <data name="Tests_PageTitle" xml:space="preserve">
+    <value>Tests von {0} – {1}</value>
+  </data>
+  <data name="Tests_Title" xml:space="preserve">
+    <value>Tests</value>
+  </data>
+  <data name="Tests_Intro" xml:space="preserve">
+    <value>Beschreiben Sie einen Test in einem Satz. Autestiq erkundet die Seite und die KI schreibt einen Plan, den Sie prüfen, bevor etwas läuft.</value>
+  </data>
+  <data name="Tests_Ai_Title" xml:space="preserve">
+    <value>KI-Planung</value>
+  </data>
+  <data name="Tests_Ai_Off" xml:space="preserve">
+    <value>Die KI-Planung ist für dieses Projekt aus. Nichts daraus wird an einen KI-Anbieter gesendet, bis jemand, der Projekte verwaltet, es erlaubt.</value>
+  </data>
+  <data name="Tests_Ai_Allowed" xml:space="preserve">
+    <value>Die KI-Planung wurde für dieses Projekt am {0} erlaubt.</value>
+  </data>
+  <data name="Tests_Ai_Acknowledge" xml:space="preserve">
+    <value>Ich erlaube, dass die erkundeten Seiteninhalte dieses Projekts wie oben beschrieben zur Planung an den KI-Anbieter gesendet werden.</value>
+  </data>
+  <data name="Tests_Ai_Allow" xml:space="preserve">
+    <value>KI-Planung erlauben</value>
+  </data>
+  <data name="Tests_Ai_Withdraw" xml:space="preserve">
+    <value>Erlaubnis zurückziehen</value>
+  </data>
+  <data name="Tests_Ai_AskAnAdmin" xml:space="preserve">
+    <value>Bitten Sie einen Inhaber oder Administrator, sie zu erlauben.</value>
+  </data>
+  <data name="Tests_New" xml:space="preserve">
+    <value>Test beschreiben</value>
+  </data>
+  <data name="Tests_New_NoEnvironment" xml:space="preserve">
+    <value>Legen Sie zuerst eine Umgebung an:</value>
+  </data>
+  <data name="Tests_New_Environment" xml:space="preserve">
+    <value>Umgebung</value>
+  </data>
+  <data name="Tests_New_Description" xml:space="preserve">
+    <value>Was soll getestet werden?</value>
+  </data>
+  <data name="Tests_New_Description_Hint" xml:space="preserve">
+    <value>Ein oder zwei Sätze, wie eine Testerin es sagen würde. Zum Beispiel: Zwei Tassen in den Warenkorb legen und prüfen, dass er 22,50 £ anzeigt.</value>
+  </data>
+  <data name="Tests_New_ReadOnlyNote" xml:space="preserve">
+    <value>Auf Ihrer eigenen Seite folgt das Erkunden nur Links, es sei denn, ein Inhaber hat auf der Seite Umgebungen Aktionen erlaubt.</value>
+  </data>
+  <data name="Tests_New_Submit" xml:space="preserve">
+    <value>Erkunden und planen</value>
+  </data>
+  <data name="Tests_List" xml:space="preserve">
+    <value>Beschriebene Tests</value>
+  </data>
+  <data name="Tests_Empty_Title" xml:space="preserve">
+    <value>Noch keine Tests</value>
+  </data>
+  <data name="Tests_Empty_Text" xml:space="preserve">
+    <value>Beschreiben Sie oben einen, und sein Plan erscheint hier.</value>
+  </data>
+  <data name="Tests_LoadFailed" xml:space="preserve">
+    <value>Die Tests konnten nicht geladen werden.</value>
+  </data>
+  <data name="Tests_Error_NotAllowed" xml:space="preserve">
+    <value>Nur Inhaber, QA-Leitung und QA-Engineers können Tests beschreiben.</value>
+  </data>
+  <data name="Tests_Error_DescriptionRequired" xml:space="preserve">
+    <value>Beschreiben Sie den Test mit bis zu 1.000 Zeichen.</value>
+  </data>
+  <data name="Tests_Error_NoSuchProject" xml:space="preserve">
+    <value>Dieses Projekt gibt es nicht.</value>
+  </data>
+  <data name="Tests_Error_AiNotAllowed" xml:space="preserve">
+    <value>Die KI-Planung ist für dieses Projekt nicht erlaubt.</value>
+  </data>
+  <data name="Tests_Error_NoSuchEnvironment" xml:space="preserve">
+    <value>Wählen Sie eine der Umgebungen dieses Projekts.</value>
+  </data>
+  <data name="Tests_Error_ProductionNotAuthorized" xml:space="preserve">
+    <value>Das ist eine Produktivseite, die ein Inhaber nicht für Tests freigegeben hat.</value>
+  </data>
+  <data name="Tests_Error_Paused" xml:space="preserve">
+    <value>Das Testen ist derzeit pausiert. Bitte versuchen Sie es später erneut.</value>
+  </data>
+  <data name="Tests_Error_SiteNotAllowed" xml:space="preserve">
+    <value>Diese Seite kann noch nicht getestet werden: Weisen Sie zuerst auf der Seite Umgebungen nach, dass sie Ihnen gehört.</value>
+  </data>
+  <data name="Tests_Error_MinutesUsedUp" xml:space="preserve">
+    <value>Die Browserminuten dieses Monats sind aufgebraucht.</value>
+  </data>
+  <data name="Tests_Error_AiBudgetSpent" xml:space="preserve">
+    <value>Das KI-Planungsbudget dieses Monats ist aufgebraucht.</value>
+  </data>
+  <data name="Tests_Error_TooManyStarts" xml:space="preserve">
+    <value>Zu viele Anfragen in der letzten Minute. Bitte warten Sie einen Moment und versuchen Sie es erneut.</value>
+  </data>
+  <data name="Tests_Error_ExplorationFailed" xml:space="preserve">
+    <value>Das Erkunden der Seite ist nicht gelungen, daher gab es nichts zu planen.</value>
+  </data>
+  <data name="Tests_Error_NoPlanner" xml:space="preserve">
+    <value>Die KI-Planung ist auf diesem Server nicht eingerichtet.</value>
+  </data>
+  <data name="Tests_Error_PlanningInterrupted" xml:space="preserve">
+    <value>Die Planung wurde unterbrochen, bevor sie fertig war, daher gibt es keinen Plan. Ändern Sie die erwarteten Ergebnisse oder beschreiben Sie den Test erneut, um neu zu planen.</value>
+  </data>
+  <data name="Tests_Error_ExportRestsOnAccountValue" xml:space="preserve">
+    <value>Dieser Test kann nicht heruntergeladen werden, weil er nach dem eigenen Wert des Testkontos sucht, den der Test selbst eingegeben hat.</value>
+  </data>
+  <data name="Tests_Error_NoPlan" xml:space="preserve">
+    <value>Es konnte kein Plan geschrieben werden.</value>
+  </data>
+  <data name="Projects_Error_AiAcknowledgementRequired" xml:space="preserve">
+    <value>Bestätigen Sie zuerst die Erlaubnis: Sie sendet Seiteninhalte an den KI-Anbieter.</value>
+  </data>
+  <data name="Projects_Error_NoSuchProject" xml:space="preserve">
+    <value>Dieses Projekt gibt es nicht.</value>
+  </data>
+  <data name="Environments_Error_InUse" xml:space="preserve">
+    <value>Gegen diese Umgebung wurden Tests erkundet, daher bleibt sie bestehen.</value>
+  </data>
+  <data name="AiNotice_Sent_Title" xml:space="preserve">
+    <value>An den KI-Anbieter gesendet:</value>
+  </data>
+  <data name="AiNotice_Sent" xml:space="preserve">
+    <value>Ihre Testbeschreibung und was das Erkunden auf der Seite gefunden hat: Seitenadressen, Titel, Überschriften sowie Namen und sichtbarer Text von Schaltflächen, Links, Feldern und anderen Elementen. Auf einer echten Seite können das Namen, E-Mail-Adressen oder Bestellungen sein, die dort angezeigt werden.</value>
+  </data>
+  <data name="AiNotice_Never_Title" xml:space="preserve">
+    <value>Nie gesendet:</value>
+  </data>
+  <data name="AiNotice_Never" xml:space="preserve">
+    <value>Passwörter und andere Geheimnisse, Screenshots, Aufzeichnungen oder Netzwerk-Traces.</value>
+  </data>
+  <data name="TestStatus_Exploring" xml:space="preserve">
+    <value>Wird erkundet</value>
+  </data>
+  <data name="TestStatus_Planning" xml:space="preserve">
+    <value>Wird geplant</value>
+  </data>
+  <data name="TestStatus_Planned" xml:space="preserve">
+    <value>Geplant</value>
+  </data>
+  <data name="TestStatus_Failed" xml:space="preserve">
+    <value>Kein Plan</value>
+  </data>
+  <data name="Test_PageTitle" xml:space="preserve">
+    <value>Test Nr. {0} – {1}</value>
+  </data>
+  <data name="Test_NoSuchTest" xml:space="preserve">
+    <value>Test nicht gefunden</value>
+  </data>
+  <data name="Test_NoSuchTest_Text" xml:space="preserve">
+    <value>In diesem Projekt gibt es keinen Test mit dieser Nummer.</value>
+  </data>
+  <data name="Test_Title" xml:space="preserve">
+    <value>Test Nr. {0}</value>
+  </data>
+  <data name="Test_Against" xml:space="preserve">
+    <value>Gegen {0}, {1}</value>
+  </data>
+  <data name="Test_Asked" xml:space="preserve">
+    <value>Was Sie verlangt haben</value>
+  </data>
+  <data name="Test_Exploring" xml:space="preserve">
+    <value>Die Seite wird erkundet. Das kann einige Minuten dauern; die Seite aktualisiert sich selbst.</value>
+  </data>
+  <data name="Test_Planning" xml:space="preserve">
+    <value>Die KI schreibt den Plan. Die Seite aktualisiert sich selbst.</value>
+  </data>
+  <data name="Test_Plan" xml:space="preserve">
+    <value>Der Plan</value>
+  </data>
+  <data name="Test_Plan_NotApproved" xml:space="preserve">
+    <value>Von der KI geschrieben und vom Validator von Autestiq geprüft. Er läuft erst, wenn ein Inhaber oder die QA-Leitung ihn unten freigibt.</value>
+  </data>
+  <data name="Test_Plan_Partial" xml:space="preserve">
+    <value>Dieser Plan deckt nur einen Teil dessen ab, was Sie verlangt haben. Die Notizen unten sagen, welcher Teil fehlt: die eigenen Prüfungen von Autestiq, für ein erwartetes Ergebnis, das nichts prüft, und die der KI.</value>
+  </data>
+  <data name="Test_Checks" xml:space="preserve">
+    <value>Von Autestiq geprüft</value>
+  </data>
+  <data name="Test_Checks_Intro" xml:space="preserve">
+    <value>Was die Software von Autestiq selbst gefunden hat, als sie den Plan mit der erkundeten Seite abglich.</value>
+  </data>
+  <data name="Test_AiNotes" xml:space="preserve">
+    <value>Notizen der KI: ungeprüft</value>
+  </data>
+  <data name="Test_AiNotes_Intro" xml:space="preserve">
+    <value>Die Überlegungen und Annahmen der KI und was ihr beim Erkunden aufgefallen ist. Behandeln Sie sie als zu prüfende Punkte, nicht als Tatsachen oder Anforderungen.</value>
+  </data>
+  <data name="Test_Python" xml:space="preserve">
+    <value>Als Python-Test</value>
+  </data>
+  <data name="Test_Python_Intro" xml:space="preserve">
+    <value>Der Plan, geschrieben von festen Vorlagen, nie von der KI. Er kann heruntergeladen werden, sobald der Plan freigegeben ist.</value>
+  </data>
+  <data name="Test_Sent" xml:space="preserve">
+    <value>Was an die KI gesendet wurde</value>
+  </data>
+  <data name="Test_Sent_Intro" xml:space="preserve">
+    <value>Genau der Text über Ihre Anwendung, der an {0} gesendet wurde, mit einem festen Anweisungstext daneben. Die Planung kostete {1} $.</value>
+  </data>
+  <data name="Test_Sent_Attempt" xml:space="preserve">
+    <value>Versuch {0}</value>
+  </data>
+  <data name="Action_Goto" xml:space="preserve">
+    <value>Öffnen</value>
+  </data>
+  <data name="Action_Click" xml:space="preserve">
+    <value>Klicken</value>
+  </data>
+  <data name="Action_Type" xml:space="preserve">
+    <value>Eingeben</value>
+  </data>
+  <data name="Action_Press" xml:space="preserve">
+    <value>Taste drücken</value>
+  </data>
+  <data name="Action_WaitFor" xml:space="preserve">
+    <value>Warten auf</value>
+  </data>
+  <data name="Action_Select" xml:space="preserve">
+    <value>Auswählen</value>
+  </data>
+  <data name="Action_AssertText" xml:space="preserve">
+    <value>Text prüfen</value>
+  </data>
+  <data name="Action_AssertVisible" xml:space="preserve">
+    <value>Prüfen, dass es angezeigt wird</value>
+  </data>
+  <data name="Action_AssertNotVisible" xml:space="preserve">
+    <value>Prüfen, dass es nicht angezeigt wird</value>
+  </data>
+  <data name="Action_AssertUrl" xml:space="preserve">
+    <value>Adresse prüfen</value>
+  </data>
+  <data name="ProjectNav_Label" xml:space="preserve">
+    <value>Projekt</value>
+  </data>
+  <data name="ProjectNav_Tests" xml:space="preserve">
+    <value>Tests</value>
+  </data>
+  <data name="Planning_Error_Unreadable" xml:space="preserve">
+    <value>Die Antwort der KI war kein Plan.</value>
+  </data>
+  <data name="Planning_Error_UnknownAction" xml:space="preserve">
+    <value>Der Plan der KI verwendete einen Schritt, den es nicht gibt.</value>
+  </data>
+  <data name="Planning_Error_UnknownTarget" xml:space="preserve">
+    <value>Der Plan der KI nannte etwas, das beim Erkunden nie zu sehen war.</value>
+  </data>
+  <data name="Planning_Error_ForeignOrigin" xml:space="preserve">
+    <value>Der Plan der KI führte auf eine andere Seite.</value>
+  </data>
+  <data name="Planning_Error_TooManyActions" xml:space="preserve">
+    <value>Der Plan der KI war länger als erlaubt.</value>
+  </data>
+  <data name="Planning_Error_NoAssertions" xml:space="preserve">
+    <value>Der Plan der KI prüfte nichts.</value>
+  </data>
+  <data name="Planning_Error_Incomplete" xml:space="preserve">
+    <value>Einem Schritt im Plan der KI fehlte etwas, das er braucht.</value>
+  </data>
+  <data name="Planning_Error_BudgetSpent" xml:space="preserve">
+    <value>Die Planung hat ihr Ausgabenlimit erreicht.</value>
+  </data>
+  <data name="Planning_Error_ProviderUnavailable" xml:space="preserve">
+    <value>Der KI-Anbieter war nicht erreichbar.</value>
+  </data>
+  <data name="Planning_Error_ProviderRefusedTheKey" xml:space="preserve">
+    <value>Der KI-Anbieter hat den Schlüssel dieses Servers abgelehnt.</value>
+  </data>
+  <data name="Planning_Error_ProviderOutOfCredit" xml:space="preserve">
+    <value>Das Konto beim KI-Anbieter hat kein Guthaben mehr.</value>
+  </data>
+  <data name="Planning_Error_ProviderRateLimited" xml:space="preserve">
+    <value>Der KI-Anbieter hat um weniger Anfragen gebeten. Bitte versuchen Sie es gleich erneut.</value>
+  </data>
+  <data name="Planning_Error_NoPlanner" xml:space="preserve">
+    <value>Die KI-Planung ist auf diesem Server nicht eingerichtet.</value>
+  </data>
+  <data name="Approval_Title" xml:space="preserve">
+    <value>Freigabe</value>
+  </data>
+  <data name="Approval_NotApproved" xml:space="preserve">
+    <value>Nichts läuft, bis ein Inhaber oder die QA-Leitung diesen Plan freigibt.</value>
+  </data>
+  <data name="Approval_Changes" xml:space="preserve">
+    <value>Die Schritte {0} können Daten auf der Seite ändern: Sie drücken eine Schaltfläche oder Taste, wählen eine Option oder wirken auf etwas, das beim Erkunden nicht als Link zu sehen war. Das entscheidet die Software von Autestiq anhand des Plans, nicht die KI.</value>
+  </data>
+  <data name="Approval_ReadsOnly" xml:space="preserve">
+    <value>Kein Schritt dieses Plans sollte Daten ändern, daher läuft er nur lesend: Der Browser blockiert jede Anfrage, die Daten ändern könnte. Ein Link, der beim Aufrufen Daten ändert, würde nicht erkannt.</value>
+  </data>
+  <data name="Approval_AllowChange" xml:space="preserve">
+    <value>Ich gebe frei, dass dieser Plan Daten auf {0} ändert, zum Beispiel indem er Formulare sendet oder Bestellungen aufgibt.</value>
+  </data>
+  <data name="Approval_Approve" xml:space="preserve">
+    <value>Plan freigeben</value>
+  </data>
+  <data name="Approval_Approved" xml:space="preserve">
+    <value>Freigegeben von {0} am {1}.</value>
+  </data>
+  <data name="Approval_Approved_ChangesData" xml:space="preserve">
+    <value>Diese Freigabe erlaubt dem Plan, Daten zu ändern.</value>
+  </data>
+  <data name="Approval_Approved_ReadOnly" xml:space="preserve">
+    <value>Seine Läufe sind nur lesend.</value>
+  </data>
+  <data name="Approval_Withdraw" xml:space="preserve">
+    <value>Freigabe zurückziehen</value>
+  </data>
+  <data name="Approval_Partial" xml:space="preserve">
+    <value>Ein Plan, der nur einen Teil des Verlangten abdeckt, kann nicht freigegeben werden. Beschreiben Sie den fehlenden Teil als eigenen Test.</value>
+  </data>
+  <data name="Approval_NeedsSecret" xml:space="preserve">
+    <value>Dieser Plan meldet sich mit einem Wert an, den das Testkonto der Umgebung nicht hat, daher kann er nicht freigegeben werden. Fügen Sie ihn auf der Seite Umgebungen hinzu.</value>
+  </data>
+  <data name="Approval_AskAnApprover" xml:space="preserve">
+    <value>Bitten Sie einen Inhaber oder die QA-Leitung um die Freigabe.</value>
+  </data>
+  <data name="Approval_Run" xml:space="preserve">
+    <value>Test ausführen</value>
+  </data>
+  <data name="Approval_Runs" xml:space="preserve">
+    <value>Läufe</value>
+  </data>
+  <data name="Approval_Runs_Empty" xml:space="preserve">
+    <value>Er ist noch nicht gelaufen.</value>
+  </data>
+  <data name="Approval_Run_Item" xml:space="preserve">
+    <value>Lauf Nr. {0}</value>
+  </data>
+  <data name="Step_MayChangeData" xml:space="preserve">
+    <value>Kann Daten ändern</value>
+  </data>
+  <data name="Tests_Error_NotApprover" xml:space="preserve">
+    <value>Nur Inhaber und QA-Leitung können einen Plan freigeben.</value>
+  </data>
+  <data name="Tests_Error_NoSuchTest" xml:space="preserve">
+    <value>Diesen Test gibt es nicht.</value>
+  </data>
+  <data name="Tests_Error_NotPlanned" xml:space="preserve">
+    <value>Dieser Test hat keinen Plan zum Freigeben.</value>
+  </data>
+  <data name="Tests_Error_PartialPlan" xml:space="preserve">
+    <value>Ein Plan, der nur einen Teil des Tests abdeckt, kann nicht freigegeben werden.</value>
+  </data>
+  <data name="Tests_Error_NeedsSecret" xml:space="preserve">
+    <value>Dieser Plan meldet sich mit einem Wert an, den das Testkonto der Umgebung nicht hat. Fügen Sie ihn auf der Seite Umgebungen hinzu.</value>
+  </data>
+  <data name="Tests_Error_ChangeAcknowledgementRequired" xml:space="preserve">
+    <value>Dieser Plan kann Daten ändern: Bestätigen Sie mit dem Häkchen, dass Sie das freigeben.</value>
+  </data>
+  <data name="Tests_Error_CannotRun" xml:space="preserve">
+    <value>Nur Inhaber, QA-Leitung und QA-Engineers können Tests ausführen.</value>
+  </data>
+  <data name="Tests_Error_NotApproved" xml:space="preserve">
+    <value>Dieser Plan ist nicht freigegeben oder nicht der Plan, der freigegeben wurde.</value>
+  </data>
+  <data name="Approval_Changes_One" xml:space="preserve">
+    <value>Schritt {0} kann Daten auf der Seite ändern: Er drückt eine Schaltfläche oder Taste, wählt eine Option oder wirkt auf etwas, das beim Erkunden nicht als Link zu sehen war. Das entscheidet die Software von Autestiq anhand des Plans, nicht die KI.</value>
+  </data>
+  <data name="Approval_Download" xml:space="preserve">
+    <value>Python-Test herunterladen</value>
+  </data>
+  <data name="Approval_Download_RestsOnAccountValue" xml:space="preserve">
+    <value>Dieser Test kann nicht heruntergeladen werden: Eine Prüfung sucht nach dem eigenen Wert {0} des Testkontos, den der Test selbst eingegeben hat. Eine Seite kann ihn zeigen, ob die Anmeldung geklappt hat oder nicht, daher könnte eine heruntergeladene Datei bestehen, ohne etwas zu beweisen; Autestiqs eigene Läufe werten so ein Bestehen als nicht schlüssig. Prüfen Sie stattdessen etwas, das nur die angemeldete Anwendung zeigt.</value>
+  </data>
+  <data name="Approval_Download_ReadOnly" xml:space="preserve">
+    <value>Autestiq führt diesen Test in seinem eigenen Browser nur lesend aus. Die heruntergeladene Datei kann das nicht: Führen Sie sie nur dort aus, wo ein Test, der Daten ändert, vertretbar wäre. Das steht auch in ihren ersten Zeilen.</value>
+  </data>
+  <data name="Tests_Error_NoExporter" xml:space="preserve">
+    <value>Das Herunterladen von Tests ist auf diesem Server nicht eingerichtet.</value>
+  </data>
+  <data name="ProjectNav_Settings" xml:space="preserve">
+    <value>Einstellungen</value>
+  </data>
+  <data name="Settings_PageTitle" xml:space="preserve">
+    <value>Einstellungen von {0} – {1}</value>
+  </data>
+  <data name="Settings_Title" xml:space="preserve">
+    <value>Einstellungen</value>
+  </data>
+  <data name="Settings_Evidence_Title" xml:space="preserve">
+    <value>Screenshots</value>
+  </data>
+  <data name="Settings_Evidence_Intro" xml:space="preserve">
+    <value>Jeder Schritt eines Laufs behält einen Screenshot als Nachweis. Ein Screenshot kann alles zeigen, was Ihre Seite zeigte, auch personenbezogene Daten, daher wählen Sie, wie lange er aufbewahrt wird. Laufergebnisse und Schritte werden immer aufbewahrt.</value>
+  </data>
+  <data name="Settings_Evidence_Label" xml:space="preserve">
+    <value>Screenshots aufbewahren für</value>
+  </data>
+  <data name="Settings_Evidence_Hint" xml:space="preserve">
+    <value>Eine kürzere Zeit gilt auch für bereits aufbewahrte Screenshots: Sie werden innerhalb einer Stunde gelöscht.</value>
+  </data>
+  <data name="Settings_Evidence_Days90" xml:space="preserve">
+    <value>90 Tage</value>
+  </data>
+  <data name="Settings_Evidence_Days30" xml:space="preserve">
+    <value>30 Tage</value>
+  </data>
+  <data name="Settings_Evidence_Days7" xml:space="preserve">
+    <value>7 Tage</value>
+  </data>
+  <data name="Settings_Evidence_None" xml:space="preserve">
+    <value>Keine Screenshots aufbewahren</value>
+  </data>
+  <data name="Settings_Evidence_Save" xml:space="preserve">
+    <value>Speichern</value>
+  </data>
+  <data name="Settings_Evidence_Saved" xml:space="preserve">
+    <value>Gespeichert.</value>
+  </data>
+  <data name="Settings_AskAnAdmin" xml:space="preserve">
+    <value>Nur Inhaber, Administratoren und die QA-Leitung können das ändern.</value>
+  </data>
+  <data name="Projects_Error_InvalidRetention" xml:space="preserve">
+    <value>Wählen Sie eine der angebotenen Zeiten.</value>
+  </data>
+  <data name="Run_Steps_ScreenshotDeleted" xml:space="preserve">
+    <value>Der Screenshot wurde nach der Nachweisregel des Projekts gelöscht oder nie aufbewahrt.</value>
+  </data>
+  <data name="Environments_Acting_Off" xml:space="preserve">
+    <value>Das Erkunden dieser Seite folgt nur Links: Es drückt keine Schaltfläche und sendet kein Formular. So bleiben Ihre Daten unverändert, aber Tests von allem, was nach einem Klick geschieht, sind schwächer.</value>
+  </data>
+  <data name="Environments_Acting_Acknowledge" xml:space="preserve">
+    <value>Ich erlaube, dass das Erkunden dieser Seite ihre Schaltflächen drückt und ihre Formulare mit Testwerten sendet. Dabei können Datensätze entstehen, etwa Testbuchungen oder Bestellungen, die ich eventuell entfernen muss. Schaltflächen zum Bezahlen, Bestellen, Löschen, Stornieren oder Abmelden werden nie gedrückt.</value>
+  </data>
+  <data name="Environments_Acting_Allow" xml:space="preserve">
+    <value>Erkunden mit Aktionen erlauben</value>
+  </data>
+  <data name="Environments_Acting_Allowed" xml:space="preserve">
+    <value>Seit {0} darf das Erkunden dieser Seite ihre Schaltflächen drücken und ihre Formulare mit Testwerten senden.</value>
+  </data>
+  <data name="Environments_Acting_Withdraw" xml:space="preserve">
+    <value>Zurückziehen: nur Links folgen</value>
+  </data>
+  <data name="Environments_Error_ActingAcknowledgementRequired" xml:space="preserve">
+    <value>Bestätigen Sie zuerst: Erkunden mit Aktionen kann Datensätze auf Ihrer Seite anlegen.</value>
+  </data>
+  <data name="Environments_Error_ActingOnProduction" xml:space="preserve">
+    <value>Auf einer Produktivseite handelt das Erkunden nie.</value>
+  </data>
+  <data name="Test_Explored" xml:space="preserve">
+    <value>Was das Erkunden getan hat</value>
+  </data>
+  <data name="Test_Explored_Intro" xml:space="preserve">
+    <value>Das Erkunden hat diese Steuerelemente gedrückt und diese Formulare mit Testwerten gesendet. Was dabei entstanden ist, ist noch auf Ihrer Seite.</value>
+  </data>
+  <data name="Account_Title" xml:space="preserve">
+    <value>Testkonto</value>
+  </data>
+  <data name="Account_Intro" xml:space="preserve">
+    <value>Damit Tests sich anmelden können. Verwenden Sie ein Konto, das zum Testen angelegt wurde, nie das einer echten Person. Die Werte werden verschlüsselt und nie wieder angezeigt; geben Sie einen ein, um ihn zu ersetzen.</value>
+  </data>
+  <data name="Account_None" xml:space="preserve">
+    <value>Kein Testkonto: Tests von Seiten hinter einer Anmeldung können für diese Umgebung nicht freigegeben werden.</value>
+  </data>
+  <data name="Account_Saved" xml:space="preserve">
+    <value>{0}: gespeichert am {1}</value>
+  </data>
+  <data name="Account_Remove" xml:space="preserve">
+    <value>Entfernen</value>
+  </data>
+  <data name="Account_Username" xml:space="preserve">
+    <value>Benutzername oder E-Mail</value>
+  </data>
+  <data name="Account_Password" xml:space="preserve">
+    <value>Passwort</value>
+  </data>
+  <data name="Account_Save" xml:space="preserve">
+    <value>Testkonto speichern</value>
+  </data>
+  <data name="Environments_Error_InvalidSecret" xml:space="preserve">
+    <value>Geben Sie einen Wert mit höchstens 500 Zeichen ein.</value>
+  </data>
+  <data name="Environments_Error_SecretsOnProduction" xml:space="preserve">
+    <value>Eine Produktivseite hat kein Testkonto.</value>
+  </data>
+  <data name="Planning_Error_UnknownSecret" xml:space="preserve">
+    <value>Der Plan der KI gab einen Anmeldewert ein, den diese Umgebung nicht hat.</value>
+  </data>
+  <data name="Expected_Title" xml:space="preserve">
+    <value>Erwartete Ergebnisse</value>
+  </data>
+  <data name="Expected_Intro" xml:space="preserve">
+    <value>Was die Anwendung am Ende anzeigen soll, genau so geschrieben, wie es erscheint. Optional: Der Planer prüft diese, wenn die Erkundung das Ergebnis nicht erreicht, etwa eine Seite nach dem Bezahlen.</value>
+  </data>
+  <data name="Expected_NoSecrets" xml:space="preserve">
+    <value>Diese werden mit der Beschreibung an den KI-Anbieter gesendet. Tragen Sie niemals Passwörter oder personenbezogene Daten ein.</value>
+  </data>
+  <data name="Expected_Text" xml:space="preserve">
+    <value>Erwarteter Text {0}</value>
+  </data>
+  <data name="Expected_Path" xml:space="preserve">
+    <value>Auf Seite {0}</value>
+  </data>
+  <data name="Expected_Path_Hint" xml:space="preserve">
+    <value>Optional, etwa /order/confirmed.</value>
+  </data>
+  <data name="Expected_Remove" xml:space="preserve">
+    <value>Entfernen</value>
+  </data>
+  <data name="Expected_Remove_Label" xml:space="preserve">
+    <value>Erwartetes Ergebnis {0} entfernen</value>
+  </data>
+  <data name="Expected_Add" xml:space="preserve">
+    <value>Erwartetes Ergebnis hinzufügen</value>
+  </data>
+  <data name="Expected_Full" xml:space="preserve">
+    <value>Ein Test kann höchstens {0} erwartete Ergebnisse haben.</value>
+  </data>
+  <data name="Expected_On" xml:space="preserve">
+    <value>auf {0}</value>
+  </data>
+  <data name="Expected_None" xml:space="preserve">
+    <value>Keine erwarteten Ergebnisse. Der Planer prüft nur, was die Erkundung gesehen hat.</value>
+  </data>
+  <data name="Expected_Replans" xml:space="preserve">
+    <value>Beim Speichern wird der Test aus dem bereits Erkundeten neu geplant; das verbraucht KI-Budget.</value>
+  </data>
+  <data name="Expected_Save" xml:space="preserve">
+    <value>Speichern und neu planen</value>
+  </data>
+  <data name="Expected_Cancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="Expected_Edit" xml:space="preserve">
+    <value>Erwartete Ergebnisse ändern</value>
+  </data>
+  <data name="Expected_Locked" xml:space="preserve">
+    <value>Der Plan ist freigegeben, daher können seine erwarteten Ergebnisse nicht geändert werden. Ziehen Sie die Freigabe zurück, um sie zu ändern.</value>
+  </data>
+  <data name="Evidence_Observed" xml:space="preserve">
+    <value>Von der Erkundung beobachtet</value>
+  </data>
+  <data name="Evidence_StatedByTester" xml:space="preserve">
+    <value>Vom Tester angegeben</value>
+  </data>
+  <data name="Evidence_Assumed" xml:space="preserve">
+    <value>Angenommen: muss geprüft werden</value>
+  </data>
+  <data name="Tests_Error_InvalidExpectedResults" xml:space="preserve">
+    <value>Erwartete Ergebnisse brauchen einen Text von höchstens 200 Zeichen in einer Zeile, höchstens 5 davon, und eine Seite, die mit / beginnt.</value>
+  </data>
+  <data name="Tests_Error_ExpectedResultsApproved" xml:space="preserve">
+    <value>Der Plan ist freigegeben, daher können seine erwarteten Ergebnisse nicht geändert werden. Ziehen Sie zuerst die Freigabe zurück.</value>
+  </data>
+  <data name="Tests_Error_BeingPlanned" xml:space="preserve">
+    <value>Der Test wird gerade geplant. Versuchen Sie es gleich noch einmal.</value>
+  </data>
+  <data name="Planning_Error_AmbiguousTarget" xml:space="preserve">
+    <value>Der Plan der KI nannte ein Element, das mehrfach auf der Seite vorkommt und daher nicht eindeutig ist. Der Plan wurde abgelehnt.</value>
+  </data>
+</root>

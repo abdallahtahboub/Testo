@@ -1,0 +1,286 @@
+using Autestiq.Contracts.Planning;
+
+namespace Autestiq.Application.Planning;
+
+/// <summary>What validation made of a plan: what forbids it, and what is merely worth saying.</summary>
+/// <param name="Errors">
+/// Resource keys. Any one of these and the plan does not run at all — not in part, not repaired.
+/// </param>
+/// <param name="Notes">
+/// Things a person should know about a plan that is allowed to run, in plain words. Recorded on
+/// the run; never acted on.
+/// </param>
+public sealed record PlanReview(IReadOnlyList<string> Errors, IReadOnlyList<string> Notes)
+{
+    /// <summary>Whether the plan may run.</summary>
+    public bool Allowed => Errors.Count == 0;
+}
+
+/// <summary>
+/// Judges a plan before it is allowed near a browser.
+/// </summary>
+/// <remarks>
+/// <para>
+/// ADR-0019 §3 lives here. A plan that fails is not repaired, not trimmed to its valid prefix and
+/// not run in part: it goes back once with its errors, and a second failure ends the run saying
+/// planning failed. "Run the bit that works" is how a product starts reporting results for tests
+/// it never carried out.
+/// </para>
+/// <para>
+/// The checks are in two tiers, and which tier a check belongs in follows from what it protects.
+/// <strong>Refusals</strong> are the things that are not the application's business to decide: an
+/// action that does not exist, a path that could name another origin, a plan longer than the
+/// budget, a plan that checks nothing. <strong>Notes</strong> are the things a crawl cannot know:
+/// above all, whether an element exists, because a crawl sees an application in one state and a
+/// test exists to put it in others. A target nobody has seen is not a security problem — it fails
+/// at the step, by name, with a screenshot — so refusing it would forbid most real tests to buy
+/// nothing. What stops a hostile page is the closed vocabulary and the proxy, neither of which
+/// depends on this (<c>docs/security-register.md</c> R-9).
+/// </para>
+/// </remarks>
+public static class PlanValidator
+{
+    /// <summary>Judges a plan against the schema, the budget and the application as it was found.</summary>
+    /// <summary>How long a target's name, text, or the text it is looked for within, may be.</summary>
+    private const int MaxTargetText = 200;
+
+    /// <param name="plan">The plan.</param>
+    /// <param name="site">What exploring found.</param>
+    /// <param name="maxActions">The most actions a plan may have.</param>
+    /// <param name="secretNames">
+    /// The secrets the plan may type, by name (ADR-0033). A plan that names any other is refused: a secret it was not
+    /// given would fail the run for a reason that is not the application's. <c>null</c> skips the check, for callers
+    /// that judge a plan without knowing where it will run.
+    /// </param>
+    public static PlanReview Review(
+        TestPlan? plan,
+        SiteSnapshot site,
+        int maxActions,
+        IReadOnlyCollection<string>? secretNames = null,
+        IReadOnlyList<ExpectedResult>? expected = null)
+    {
+        ArgumentNullException.ThrowIfNull(site);
+
+        if (plan is null || plan.Actions.Count == 0)
+        {
+            return new PlanReview([PlanningErrors.Unreadable], []);
+        }
+
+        var errors = new List<string>();
+        var notes = new List<string>();
+
+        if (plan.Actions.Count > maxActions)
+        {
+            errors.Add(PlanningErrors.TooManyActions);
+        }
+
+        // A plan that checks nothing cannot find a defect, and a run that checks nothing and then
+        // passes is worse than no run at all: it is a false assurance (ADR-0019 §7).
+        if (plan.AssertionCount == 0)
+        {
+            errors.Add(PlanningErrors.NoAssertions);
+        }
+
+        foreach (var action in plan.Actions)
+        {
+            errors.AddRange(Refusals(action));
+
+            if (secretNames is not null && action.SecretName is { Length: > 0 } secret && !secretNames.Contains(secret, StringComparer.Ordinal))
+            {
+                errors.Add(PlanningErrors.UnknownSecret);
+            }
+
+            if (Ambiguous(action, site))
+            {
+                errors.Add(PlanningErrors.AmbiguousTarget);
+            }
+
+            // The tester has said this appears (ADR-0034): unseen by the crawl, but not a hope.
+            if (!ExpectedResults.States(action, expected) && Unseen(action, site) is { } note)
+            {
+                notes.Add(note);
+            }
+        }
+
+        return new PlanReview(
+            [.. errors.Distinct(StringComparer.Ordinal)],
+            [.. notes.Distinct(StringComparer.Ordinal)]);
+    }
+
+    private static IEnumerable<string> Refusals(PlannedAction action)
+    {
+        if (!Enum.IsDefined(action.Kind))
+        {
+            // Unreachable through the type; reachable by deserializing a number nobody defined.
+            yield return PlanningErrors.UnknownAction;
+            yield break;
+        }
+
+        if (string.IsNullOrWhiteSpace(action.Description))
+        {
+            yield return PlanningErrors.Incomplete;
+        }
+
+        switch (action.Kind)
+        {
+            case ActionKind.Goto:
+            case ActionKind.AssertUrl:
+                foreach (var error in CheckPath(action))
+                {
+                    yield return error;
+                }
+
+                break;
+
+            case ActionKind.Type:
+                if (action.Text is null or "" && action.SecretName is null or "")
+                {
+                    yield return PlanningErrors.Incomplete;
+                }
+
+                foreach (var error in CheckTarget(action))
+                {
+                    yield return error;
+                }
+
+                break;
+
+            case ActionKind.Press:
+            case ActionKind.AssertText:
+            case ActionKind.Select:
+                if (action.Text is null or "")
+                {
+                    yield return PlanningErrors.Incomplete;
+                }
+
+                foreach (var error in CheckTarget(action))
+                {
+                    yield return error;
+                }
+
+                break;
+
+            default:
+                foreach (var error in CheckTarget(action))
+                {
+                    yield return error;
+                }
+
+                break;
+        }
+    }
+
+    /// <summary>
+    /// A path, and only a path.
+    /// </summary>
+    /// <remarks>
+    /// Refused here as well as by the proxy, which is deliberate duplication: this one can explain
+    /// itself to a person before anything runs, and that one holds when every explanation has
+    /// failed. <c>//host</c>, <c>https://host</c>, a backslash and a userinfo <c>@</c> are all ways
+    /// a string that looks like a path names somewhere else.
+    /// </remarks>
+    private static IEnumerable<string> CheckPath(PlannedAction action)
+    {
+        if (action.Path is not { Length: > 0 } path)
+        {
+            yield return PlanningErrors.Incomplete;
+            yield break;
+        }
+
+        if (!path.StartsWith('/')
+            || path.StartsWith("//", StringComparison.Ordinal)
+            || path.Contains("://", StringComparison.Ordinal)
+            || path.Contains('\\', StringComparison.Ordinal)
+            || path.Contains('@', StringComparison.Ordinal))
+        {
+            yield return PlanningErrors.ForeignOrigin;
+        }
+    }
+
+    /// <summary>Whether the action says what to act on at all, which is not the same as whether it exists.</summary>
+    private static IEnumerable<string> CheckTarget(PlannedAction action)
+    {
+        if (action.Target is not { } target || string.IsNullOrWhiteSpace(target.Value))
+        {
+            yield return PlanningErrors.Incomplete;
+            yield break;
+        }
+
+        if (!Enum.IsDefined(target.Kind))
+        {
+            yield return PlanningErrors.UnknownTarget;
+            yield break;
+        }
+
+        if (target.Kind == TargetKind.RoleAndName && string.IsNullOrWhiteSpace(target.Role))
+        {
+            yield return PlanningErrors.Incomplete;
+        }
+
+        // A name, a text or the text a target is looked for within is a few words a person can read, never a
+        // document. A long one is somewhere to hide something, so it is refused (ADR-0024).
+        if (target.Value.Length > MaxTargetText || target.Within is { Length: > MaxTargetText })
+        {
+            yield return PlanningErrors.UnknownTarget;
+        }
+    }
+
+    /// <summary>
+    /// Whether a step names an element only in a way the crawl found does not tell it apart (ADR-0024).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The planner is told, for each element, how to name it, and <c>use=none</c> when nothing names it reliably. The
+    /// prompt asks it not to build a step on such an element, but a prompt is advisory (ADR-0019 §5): on eShopOnWeb a
+    /// plan checked a pager text shown twice, and failed a sound application. This is the rule in software.
+    /// </para>
+    /// <para>
+    /// Refused only when the failure is certain from what the crawl recorded: every element the target matches is one
+    /// the browser found no unique way to name, or one it could tell apart only inside a container the target leaves
+    /// out. A target the crawl never saw is not judged here (it may appear once the test acts), and neither is one
+    /// naming an element another way than the crawl chose, which may well be unique too.
+    /// </para>
+    /// <para>
+    /// A description that says how to name nothing, made before ADR-0024 or written by hand, gives the rule nothing to
+    /// go on, so it is not applied to one.
+    /// </para>
+    /// </remarks>
+    private static bool Ambiguous(PlannedAction action, SiteSnapshot site)
+    {
+        if (action.Target is not { } target || string.IsNullOrWhiteSpace(target.Value)
+            || !site.Pages.Any(page => page.Elements.Any(element => element.NamedBy is not null)))
+        {
+            return false;
+        }
+
+        var matches = site.ElementsFor(target);
+
+        return matches.Count > 0 && matches.All(element =>
+            element.NamedBy is null
+            || (element.NamedBy == target.Kind && element.Within is { Length: > 0 } && target.Within is not { Length: > 0 }));
+    }
+
+    /// <summary>
+    /// Says so when a plan names something the crawl never saw. Not a refusal: it may be an element
+    /// that only exists once the test has done something, which is the normal case. It is still
+    /// worth a person's attention, because the other explanation is a plan acting on hope.
+    /// </summary>
+    private static string? Unseen(PlannedAction action, SiteSnapshot site)
+    {
+        if (action.Target is not { } target || string.IsNullOrWhiteSpace(target.Value) || site.Offers(target))
+        {
+            return null;
+        }
+
+        if (action.Kind == ActionKind.AssertNotVisible)
+        {
+            // An absence the crawl also did not see is the ordinary case for this action, and
+            // saying so on every run would teach a person to skip the notes.
+            return null;
+        }
+
+        return $"The step “{action.Description}” acts on {target}, which was not on any page "
+            + "the crawl saw. That is normal for something that appears only once the test has acted, "
+            + "and a mistake otherwise.";
+    }
+}

@@ -1,0 +1,40 @@
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.Extensions.Localization
+@using Microsoft.Extensions.Options
+@using Autestiq.Contracts.Identity
+@using Autestiq.Platform
+@using Autestiq.Platform.Localization
+@using Autestiq.UI.Shared.Branding
+@using Autestiq.UI.Shared.Components
+@using Autestiq.Web.Components.Account
+@using Autestiq.Platform.Rendering
+@using Autestiq.Web.Components.Layout
+@using Autestiq.Web.Resources
+
+@*
+    Every page in this folder is rendered statically and posts a plain form.
+
+    A session cookie can only be set while an HTTP request is in progress, and an interactive
+    session has none (ADR-0016). That is why these pages sit outside /app and why nothing here
+    uses an event handler.
+*@
+@attribute [ExcludeFromInteractiveRouting]
+
+@*
+    Reachable without an account, necessarily: these are the pages somebody uses when they have
+    no session, or cannot get one. The fallback policy protects everything else (D-1).
+*@
+@attribute [AllowAnonymous]
+
+@* These pages carry forms, so they need an antiforgery token (ADR-0009). *@
+@attribute [HasForm]
+
+@*
+    The layout lives in Components/Layout, not here. An @layout in an _Imports applies to every
+    component in the folder, so a layout kept beside the pages it serves would be given itself as
+    its own layout and would nest inside itself without end.
+*@
+@layout AccountLayout

@@ -4,7 +4,7 @@
 - **Date:** 2026-11-12
 
 ## Context
-Testo needs sign-in for a business audience: organizations, invitations, roles, and
+Autestiq needs sign-in for a business audience: organizations, invitations, roles, and
 eventually single sign-on against the customer's own identity provider. The choice is
 between running authentication ourselves and buying it.
 
@@ -13,7 +13,7 @@ ASP.NET Core Identity, in our own database, for email and password, invitations,
 TOTP second factor.
 
 The application never references Identity. It depends on three interfaces in
-`Testo.Contracts`: `IAuthenticationService`, `ICurrentUser` and `IOrganizationContext`.
+`Autestiq.Contracts`: `IAuthenticationService`, `ICurrentUser` and `IOrganizationContext`.
 
 Per-organization OpenID Connect comes later as a second implementation behind the same
 interfaces. The sign-in screen asks for the email address first precisely so that the

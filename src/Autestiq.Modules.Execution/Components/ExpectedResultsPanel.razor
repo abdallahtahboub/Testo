@@ -1,0 +1,58 @@
+@inject IStringLocalizer<ExecutionResources> L
+
+@*
+    A test's expected results on its page (ADR-0034): what the tester stated, labelled as theirs, and while the plan is
+    not approved, a form to change them. Changing them plans the test again from what was already explored.
+*@
+<section class="results" aria-labelledby="test-expected" data-testid="test-expected">
+    <h2 id="test-expected" class="t-h4">@L["Expected_Title"]</h2>
+
+    @if (Problem is not null)
+    {
+        <p class="results__problem" role="alert">@Problem</p>
+    }
+
+    @if (Detail.ExpectedResults.Count > 0)
+    {
+        <ul class="results__list" data-testid="expected-list">
+            @foreach (var result in Detail.ExpectedResults)
+            {
+                <li>
+                    <span class="results__label"><TBadge Tone="Tone.Info">@L["Evidence_StatedByTester"]</TBadge></span>
+                    <span>“@result.Text”</span>
+                    @if (result.Path is { Length: > 0 } path)
+                    {
+                        <span class="t-muted">@L["Expected_On", path]</span>
+                    }
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p class="t-muted" data-testid="expected-none">@L["Expected_None"]</p>
+    }
+
+    @if (MayEdit)
+    {
+        @if (Editing)
+        {
+            <ExpectedResultsEditor Rows="Rows" Disabled="Busy || !Ready" />
+            <p class="t-muted">@L["Expected_Replans"]</p>
+            <div class="results__actions">
+                <TButton Variant="ButtonVariant.Primary" Loading="Busy" Disabled="!Ready" OnClick="SaveAsync" data-testid="expected-save">@L["Expected_Save"]</TButton>
+                <TButton Variant="ButtonVariant.Ghost" Disabled="Busy || !Ready" OnClick="Cancel" data-testid="expected-cancel">@L["Expected_Cancel"]</TButton>
+            </div>
+        }
+        else
+        {
+            <div>
+                <TButton Variant="ButtonVariant.Secondary" Disabled="!Ready" OnClick="Edit" data-testid="expected-edit">@L["Expected_Edit"]</TButton>
+            </div>
+        }
+    }
+    else if (Detail.Approval is not null)
+    {
+        <p class="t-muted" data-testid="expected-locked">@L["Expected_Locked"]</p>
+    }
+</section>

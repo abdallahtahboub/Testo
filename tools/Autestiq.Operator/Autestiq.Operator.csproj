@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Commands for the people who operate Autestiq, against its database: what no customer may do from the product.
+       Today one command, moving an organization to another plan version (ADR-0028). Not shipped to customers. -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Autestiq.Application/Autestiq.Application.csproj" />
+    <ProjectReference Include="../../src/Autestiq.Contracts/Autestiq.Contracts.csproj" />
+    <ProjectReference Include="../../src/Autestiq.Persistence/Autestiq.Persistence.csproj" />
+  </ItemGroup>
+
+</Project>

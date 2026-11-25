@@ -3,7 +3,7 @@
 > Status: **Accepted**, and built in Milestone 3 except where this document says otherwise.
 > Decisions recorded in ADR-0011 to ADR-0014 and ADR-0016.
 
-Who can sign in, what they may do, and how that is proved. Testo is sold to businesses, so
+Who can sign in, what they may do, and how that is proved. Autestiq is sold to businesses, so
 this is a sales topic as much as a technical one: a security questionnaire will ask most of
 these questions before a contract is signed.
 
@@ -101,7 +101,7 @@ than a shrug.
 
 | Risk | What stops it |
 |---|---|
-| Guessing a password | Rate limit per address and per IP; slow down, then lock with a self-service recovery. Never a silent lock |
+| Guessing a password | **Built:** lockout after ten attempts on an account, and thirty posts a minute per IP address on the account pages. Reading a page is never limited, so a shared office address still works. Never a silent lock |
 | Finding out who has an account | Identical response and timing whether the address exists or not |
 | Stealing a session | `HttpOnly` cookie, `Secure`, the session identifier rotated on sign-in and on privilege change |
 | Cross-site request forgery | Antiforgery tokens on every form that changes something, already in place |

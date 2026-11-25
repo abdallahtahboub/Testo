@@ -80,11 +80,29 @@ After these corrections, **all 9 baselines pass** on the sound application.
    - Adding roles changes the planner's prompt. Every planner figure we have was measured on the current prompt, so
      the change waits until it can be re-measured (`docs/open-questions.md`).
 
+## The explorer fixed, the same day
+
+Gaps 1 and 2 were fixed, with gap 3's worst part: an exploration that ran out of time ended with nothing, and now stops
+at three quarters of its budget and returns what it found (ADR-0021 amendment). Guarded pressing was also corrected: a
+request the page sends by itself (Juice Shop's live updates post every few seconds) no longer withholds a press, and its
+browser guard was found to leak while a page navigated, so the egress proxy now refuses writes too (ADR-0041 amendment,
+R-23).
+
+| Exploration | Before | After |
+|---|---|---|
+| Acting | 0% (out of time) | **74%**, stopping at its budget |
+| Read-only, links only | 24% | **68%** |
+| Read-only, guarded pressing | 24% | **74%** |
+
+Our three applications kept every figure, in all three modes, and explored faster (ADR-0021 amendment has the table).
+Still not shown on Juice Shop: the search route, reached only by buttons, and product names past the explorer's
+60-element limit per page.
+
 ## What is next (not started)
 
-1. **Fix gaps 1 and 2 in the explorer**, on Juice Shop. Re-measure the lab sets with the coverage check, so nothing
-   else falls, in all three modes.
-2. **Then gap 3**, the acting budget.
+1. **Done the same day** (above): gaps 1 and 2, and an exploration that stops in time.
+2. **Still open:** acting and guarded exploration of Juice Shop stop at their budget; the search route; the element
+   limit per page.
 3. **Gitea:** once the image or binary can be fetched, write its scenarios from source, then run its baselines and
    coverage. Do not tune anything on it.
 4. **Planner runs** on both, which need API credit and the owner's agreement.

@@ -65,3 +65,33 @@ presses spends the budget before a booking form is reached, and adding forms sho
 pages. [ADR-0022](0022-filling-forms-while-exploring.md) replaces the search (decision 5 and 7 here), and
 makes "opt-in" (decision 1) a check in code: pressing is refused on any application we do not run
 ourselves. Decisions 2, 3, 4 and 6 stand, with "cancel" added to the controls never pressed.
+
+## Amendment (2026-11-25, R9): client-side applications
+
+OWASP Juice Shop, the first client-side application measured, showed three things the explorer did not handle.
+Each is changed in `Autestiq.Worker.SiteExplorer`:
+
+1. **A fragment that is a route is part of the address.** A fragment that starts with `#/` or `#!/` is kept, so `/#/about`
+   and `/#/contact` are different pages; any other fragment (`#main`) is a place on a page and is dropped. A page whose
+   address has a fragment opens as a new document, from a blank page, so it does not inherit what the page before did.
+2. **A page is read once it has been drawn.** After loading, and after every press, the explorer waits for the network
+   to be quiet for half a second (at most 1.5 s). A page whose network never goes quiet, because it polls, is then
+   watched until its element count holds for three looks (at most 3 s), by locator: the worker runs no script.
+3. **Exploring stops in time.** At three quarters of the run's wall clock it stops opening and pressing and returns what it
+   found, marked cut short. It used to run until the run's own limit ended it, with nothing.
+
+Measured with the coverage check (the share of the hand-written baselines' steps the exploration shows), on the unseen
+sets for our applications and the nine Juice Shop scenarios, each on a fresh container:
+
+| Application | Acting | Read-only, links | Read-only, guarded pressing |
+|---|---|---|---|
+| Demo shop | 100% (before 100%) | 85% (85%) | 85% (85%) |
+| Clinic | 98% (98%) | 90% (90%) | 90% (90%) |
+| Invoice desk | 94% (94%) | 94% (94%) | 94% (94%) |
+| **Juice Shop** | **74% (0%)** | **68% (24%)** | **74% (24%)** |
+
+Nothing fell on our applications, and their explorations got faster, not slower: acting on the invoice desk took
+213 s, against 400 s with the first version of these changes, which watched every page. Juice Shop's acting and
+guarded explorations stop at the budget: what is left is mostly the search route, reached only by buttons, and product
+names past the 60-element limit per page.
+

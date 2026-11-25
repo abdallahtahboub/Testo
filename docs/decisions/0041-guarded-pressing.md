@@ -126,3 +126,8 @@ Three changes:
    being opened (a poll) is background, and does not withhold a press: on Juice Shop that withheld 11 of 19 visits. The
    cost: a press whose only write is that same request is described as the page without it.
 
+**Measured on a client-side application (2026-11-25, R9).** On OWASP Juice Shop, with the explorer changes of ADR-0021's
+R9 amendment, guarded pressing shows 74% of what the baselines need, against 68% for following links only, and the same
+as acting exploration (74%). It is the first application where it adds anything, as expected: its controls change the
+page in place. The figure is a coverage ceiling, not a planner result; no planner has run on Juice Shop.
+

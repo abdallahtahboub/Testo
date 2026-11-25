@@ -104,15 +104,23 @@ internal static partial class SiteExplorer
     /// The browser's write guard, fitted to the page's context, when the exploration may not act (ADR-0041). Null when
     /// it may.
     /// </param>
+    /// <param name="stopBy">
+    /// When to stop opening pages and pressing controls, and describe what was found, marked as cut short. Before the
+    /// run's own limit, which would end it with nothing.
+    /// </param>
     /// <param name="cancellationToken">Stops the exploration.</param>
     public static async Task<Exploration> ExploreAsync(
         IPage page,
         WorkerJob job,
         Func<Task>? startAfresh,
         ReadOnlyGuard? guard,
+        DateTimeOffset stopBy,
         CancellationToken cancellationToken)
     {
         var origin = new Uri(job.TargetOrigin);
+
+        // From the first page on, so that each page's own requests can be waited for (SettleAsync).
+        InFlight.Watch(page);
 
         // The crawl reads the application as it opened, like every visit after it. An earlier exploration, or
         // run, may have left a booking or a paid invoice behind.
@@ -144,8 +152,16 @@ internal static partial class SiteExplorer
         var opened = 0;
         var maxOpened = job.Budget.MaxPagesCrawled * PagesOpenedPerPageShown;
 
+        var outOfTime = false;
+
         while (pages.Count < job.Budget.MaxPagesCrawled && opened < maxOpened && frontier.Next() is { } path)
         {
+            if (TimeProvider.System.GetUtcNow() >= stopBy)
+            {
+                outOfTime = true;
+                break;
+            }
+
             cancellationToken.ThrowIfCancellationRequested();
             opened++;
 
@@ -177,7 +193,7 @@ internal static partial class SiteExplorer
         // Said rather than hidden: a planner that does not know it is looking at part of an
         // application will plan as though it were all of it. And not said when it is not so: a planner
         // told it has seen only part will hedge every plan it writes.
-        var truncated = frontier.HasUnseen;
+        var truncated = frontier.HasUnseen || outOfTime;
 
         var visits = 0;
         var visitsFailed = 0;
@@ -194,7 +210,7 @@ internal static partial class SiteExplorer
             if (acting || guarded)
             {
                 // Nothing a guarded visit does reaches the application, so there is nothing to put back.
-                var pressed = await PressAsync(page, job, pages, described, acting ? startAfresh : null, guarded ? guard : null, cancellationToken)
+                var pressed = await PressAsync(page, job, pages, described, acting ? startAfresh : null, guarded ? guard : null, stopBy, cancellationToken)
                     .ConfigureAwait(false);
                 pages.AddRange(pressed.Pages);
                 truncated |= pressed.Truncated;
@@ -359,7 +375,7 @@ internal static partial class SiteExplorer
                     origin.GetLeftPart(UriPartial.Authority),
                     StringComparison.OrdinalIgnoreCase))
             {
-                paths.Add(absolute.PathAndQuery);
+                paths.Add(AddressOf(absolute));
             }
         }
 
@@ -379,7 +395,18 @@ internal static partial class SiteExplorer
         {
             try
             {
-                return await page.GotoAsync(path, new PageGotoOptions { WaitUntil = WaitUntilState.Load });
+                // An address that differs from the page's own only by its route fragment would change the route
+                // inside the page already loaded, keeping whatever that page had done. Each page opens as a new
+                // document, as a plan's run opens it.
+                if (path.Contains('#', StringComparison.Ordinal))
+                {
+                    await page.GotoAsync("about:blank").ConfigureAwait(false);
+                }
+
+                var response = await page.GotoAsync(path, new PageGotoOptions { WaitUntil = WaitUntilState.Load }).ConfigureAwait(false);
+                await SettleAsync(page).ConfigureAwait(false);
+
+                return response;
             }
             catch (PlaywrightException exception) when (attempt < MaxOpenAttempts && WasInterrupted(exception))
             {
@@ -390,6 +417,94 @@ internal static partial class SiteExplorer
             {
                 return null;
             }
+        }
+    }
+
+    /// <summary>How long a page's requests in flight are waited for, at most, after it has loaded or been pressed.</summary>
+    private static readonly TimeSpan MaxQuiet = TimeSpan.FromMilliseconds(1500);
+
+    /// <summary>How long a page is watched for, at most, while it is still being drawn.</summary>
+    private static readonly TimeSpan MaxSettle = TimeSpan.FromSeconds(3);
+
+    /// <summary>How long apart two looks at a page are, when deciding whether it has stopped changing.</summary>
+    private static readonly TimeSpan SettleInterval = TimeSpan.FromMilliseconds(150);
+
+    /// <summary>How often the requests in flight are counted while waiting for them.</summary>
+    private static readonly TimeSpan QuietInterval = TimeSpan.FromMilliseconds(50);
+
+    /// <summary>
+    /// Waits until the page stops changing. A page without a script is read at once. Otherwise its requests in flight
+    /// are waited for (at most <see cref="MaxQuiet"/>), and then the number of its elements must be the same two looks
+    /// running, <see cref="SettleInterval"/> apart (at most <see cref="MaxSettle"/>).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A client-side application draws its page after the load event, once it has fetched what to show. Read at load,
+    /// OWASP Juice Shop showed no products and nothing to press (R9, 2026-11-25). So the requests the page has in flight
+    /// are waited for, and then the page itself is watched, by counting its elements with a locator: the worker runs
+    /// no script in the page (ADR-0019 §2).
+    /// </para>
+    /// <para>
+    /// The requests are counted by the explorer (<see cref="InFlight"/>), not with Playwright's "network idle", which
+    /// waits for half a second of silence on every page: on our applications that made exploring three to five times
+    /// slower, and the worker tests outgrew CI's limit. Any wait paid on every page costs as much, so a page that cannot
+    /// change by itself, having no script, pays none. Reading "nothing in flight" right after a load as "drawn" was
+    /// tried and lost the race with Playwright's events: a route's fetch was seen only after the page had been read. An application that keeps a request open (Juice Shop's polling) never has none in
+    /// flight; for it the wait is bounded, and the count of elements decides.
+    /// </para>
+    /// </remarks>
+    private static async Task SettleAsync(IPage page)
+    {
+        // A page without a script cannot draw anything after it has loaded: a page drawn on the server, as every page
+        // of ours is, is read at once and costs nothing.
+        try
+        {
+            if (await page.Locator("script").CountAsync().ConfigureAwait(false) == 0)
+            {
+                return;
+            }
+        }
+        catch (PlaywrightException)
+        {
+            return;
+        }
+
+        // Playwright tells of a request a moment after the page has sent it, so a page that has only just loaded can
+        // look as if it fetched nothing. Its requests are counted after a moment's grace.
+        await Task.Delay(QuietInterval, TimeProvider.System).ConfigureAwait(false);
+
+        var deadline = TimeProvider.System.GetUtcNow() + MaxQuiet;
+
+        while (InFlight.Of(page) > 0 && TimeProvider.System.GetUtcNow() < deadline)
+        {
+            await Task.Delay(QuietInterval, TimeProvider.System).ConfigureAwait(false);
+        }
+
+        var everything = page.Locator("body *");
+        var last = -1;
+        deadline = TimeProvider.System.GetUtcNow() + MaxSettle;
+
+        while (TimeProvider.System.GetUtcNow() < deadline)
+        {
+            int count;
+
+            try
+            {
+                count = await everything.CountAsync().ConfigureAwait(false);
+            }
+            catch (PlaywrightException)
+            {
+                // A page that navigated while being counted is read as it then is.
+                return;
+            }
+
+            if (count == last && count > 0)
+            {
+                return;
+            }
+
+            last = count;
+            await Task.Delay(SettleInterval, TimeProvider.System).ConfigureAwait(false);
         }
     }
 
@@ -715,8 +830,8 @@ internal static partial class SiteExplorer
     }
 
     /// <summary>
-    /// The paths this page links to, within the origin. Query strings and fragments are dropped:
-    /// two links to the same page are the same page, and a crawl that disagrees never finishes.
+    /// The addresses this page links to, within the origin, as <see cref="AddressOf"/> writes them: a fragment that
+    /// is only a place on the page is dropped, because two links to one page are one page.
     /// </summary>
     private static async Task<IReadOnlyList<string>> LinksAsync(IPage page, Uri origin)
     {
@@ -742,10 +857,29 @@ internal static partial class SiteExplorer
                 continue;
             }
 
-            paths.Add(absolute.PathAndQuery);
+            paths.Add(AddressOf(absolute));
         }
 
         return paths;
+    }
+
+    /// <summary>
+    /// Where a page is, as a plan opens it: its path and query, and its fragment when the fragment is a route
+    /// (<c>#/about</c>, <c>#!/about</c>), as a client-side application's addresses are. Any other fragment is a place
+    /// on the same page (<c>#main</c>) and is dropped.
+    /// </summary>
+    /// <remarks>
+    /// Before 2026-11-25 every fragment was dropped, and OWASP Juice Shop, whose every page is a route in the
+    /// fragment, was one page: <c>/</c> (R9).
+    /// </remarks>
+    internal static string AddressOf(Uri address)
+    {
+        ArgumentNullException.ThrowIfNull(address);
+
+        var fragment = address.Fragment;
+        var route = fragment.StartsWith("#/", StringComparison.Ordinal) || fragment.StartsWith("#!/", StringComparison.Ordinal);
+
+        return route ? address.PathAndQuery + fragment : address.PathAndQuery;
     }
 
     /// <summary>What a person would call this element.</summary>

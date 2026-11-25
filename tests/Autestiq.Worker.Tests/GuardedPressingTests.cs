@@ -34,7 +34,7 @@ public class GuardedPressingTests(GuardedSiteFixture site) : IClassFixture<Guard
         // It pressed: a guard that holds because nothing was tried proves nothing.
         Assert.InRange(Explorations.Visits(result), 8, 150);
 
-        // fetch with POST, PUT, PATCH and DELETE, a beacon, a WebSocket, a form sent by script, and the two forms'
+        // The page's own polling, fetch with POST, PUT, PATCH and DELETE, a beacon, a WebSocket, a form sent by script, and the two forms'
         // own buttons: none of it arrived.
         Assert.Empty(site.Writes);
     }
@@ -83,6 +83,24 @@ public class GuardedPressingTests(GuardedSiteFixture site) : IClassFixture<Guard
 
         Assert.DoesNotContain(snapshot.Pages, page => page.ReachedBy is { Count: > 0 });
         Assert.Contains("refused", result.Steps[0].Message, StringComparison.Ordinal);
+        Assert.Empty(site.Writes);
+    }
+
+    [Fact]
+    public async Task AnExplorationShortOfTime_StopsInTime_AndReturnsWhatItFound_SayingItIsCutShort()
+    {
+        // Ten seconds: enough to read the page, not to press everything on it. Out of time, an exploration used to end
+        // with nothing at all (R9, Juice Shop); now it stops at three quarters of its budget and describes what it has.
+        var result = await Jobs.ExploreAsync(
+            site.OriginByName,
+            Explorations.Budget with { WallClock = TimeSpan.FromSeconds(10) },
+            exploreStates: true,
+            pressGuarded: true);
+
+        var snapshot = Explorations.SnapshotOf(result);
+
+        Assert.NotEmpty(snapshot.Pages);
+        Assert.True(snapshot.Truncated);
         Assert.Empty(site.Writes);
     }
 }

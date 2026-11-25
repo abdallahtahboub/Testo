@@ -208,6 +208,52 @@ public class EgressProxyTests
         Assert.DoesNotContain("Connection: close", request, StringComparison.Ordinal);
     }
 
+    [Theory]
+    [InlineData("POST")]
+    [InlineData("PUT")]
+    [InlineData("PATCH")]
+    [InlineData("DELETE")]
+    public async Task ReadsOnly_AWrite_IsRefusedWithoutConnecting_AndNotAsAnUnreachableSite(string method)
+    {
+        // The second layer under the browser's guard (ADR-0041): its POST got through once while a page navigated.
+        using var target = new TcpListener(IPAddress.Loopback, 0);
+        target.Start();
+        var port = ((IPEndPoint)target.LocalEndpoint).Port;
+
+        var refusals = new List<string>();
+        await using var proxy = EgressProxy.Start(new EgressPolicy([], [$"http://127.0.0.1:{port}"]), refusals.Add);
+        proxy.ReadsOnly = true;
+
+        var answer = await SendAsync(
+            proxy.Port,
+            $"{method} http://127.0.0.1:{port}/api/draft HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\nContent-Length: 0\r\n\r\n");
+
+        Assert.StartsWith("HTTP/1.1 403", answer, StringComparison.Ordinal);
+        Assert.False(target.Pending(), "the far end must never be asked.");
+
+        var refusal = Assert.Single(refusals);
+        Assert.Contains($"a {method} to /api/draft", refusal, StringComparison.Ordinal);
+        Assert.Null(Unreachable.Of($"http://127.0.0.1:{port}", refusals, "Locator expected to be visible"));
+    }
+
+    [Fact]
+    public async Task ReadsOnly_ARead_StillPasses()
+    {
+        using var target = new TcpListener(IPAddress.Loopback, 0);
+        target.Start();
+        var port = ((IPEndPoint)target.LocalEndpoint).Port;
+
+        var received = ReceiveOnceAsync(target, "HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nok");
+
+        await using var proxy = EgressProxy.Start(new EgressPolicy([], [$"http://127.0.0.1:{port}"]), _ => Assert.Fail("a read is not refused"));
+        proxy.ReadsOnly = true;
+
+        var answer = await SendAsync(proxy.Port, $"GET http://127.0.0.1:{port}/ HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\n\r\n");
+
+        Assert.StartsWith("GET / HTTP/1.1", await received, StringComparison.Ordinal);
+        Assert.StartsWith("HTTP/1.1 200", answer, StringComparison.Ordinal);
+    }
+
     /// <summary>Answers one connection with a fixed response, and says what the request was.</summary>
     private static async Task<string> ReceiveOnceAsync(TcpListener listener, string response)
     {

@@ -110,3 +110,24 @@ kind of run gets it.
   tunnel (ADR-0030, part 3).
 - **A separate permission for guarded pressing.** Rejected: nothing leaves the browser that a plain visit would not
   send, so it needs no more permission than reading. The operator's switch is the safety valve.
+
+## Amendment (2026-11-25, R9): the browser's guard leaked; a second layer in the proxy
+
+The guarded-pressing test's server, whose page now posts every 300 ms as Juice Shop's live updates do, received one
+POST in one of two explorations: the browser's route did not see every request a page sent while it navigated (R-23).
+Three changes:
+
+1. **The egress proxy refuses writes for a guarded run or exploration** (`EgressProxy.ReadsOnly`). Every plain-http
+   request other than GET, HEAD or OPTIONS is refused there, without connecting, and the refusal is not written as an
+   origin, so it never reads as an unreachable site. An https request is in a tunnel the proxy cannot read: there the
+   browser's guard is still the only layer (R-23, open).
+2. **A guarded page is stopped before its context closes**: sent to a blank page and closed, while the routes still hold.
+3. **A press is judged by what it sent beyond what pages send by themselves.** A request blocked while pages were only
+   being opened (a poll) is background, and does not withhold a press: on Juice Shop that withheld 11 of 19 visits. The
+   cost: a press whose only write is that same request is described as the page without it.
+
+**Measured on a client-side application (2026-11-25, R9).** On OWASP Juice Shop, with the explorer changes of ADR-0021's
+R9 amendment, guarded pressing shows 74% of what the baselines need, against 68% for following links only, and the same
+as acting exploration (74%). It is the first application where it adds anything, as expected: its controls change the
+page in place. The figure is a coverage ceiling, not a planner result; no planner has run on Juice Shop.
+

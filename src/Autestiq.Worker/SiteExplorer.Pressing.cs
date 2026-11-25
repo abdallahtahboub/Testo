@@ -58,6 +58,19 @@ internal static partial class SiteExplorer
     }
 
     /// <summary>
+    /// Whether the presses of a visit tried to send something: a blocked request after they began whose method and path
+    /// had not been blocked while pages were only being opened.
+    /// </summary>
+    /// <remarks>
+    /// An application that polls its server sends the same request again and again whatever is pressed: OWASP Juice
+    /// Shop's live updates post to <c>/socket.io/</c> every few seconds, and counting every block withheld 11 of 19 visits
+    /// (R9, 2026-11-25). That request is the page's, already blocked while it opened. The cost: a press whose only
+    /// write is that same request is described, as the page without it.
+    /// </remarks>
+    private static bool PressSentSomething(ReadOnlyGuard guard, int blockedBefore, HashSet<string> background) =>
+        guard.Blocked.Skip(blockedBefore).Any(request => !background.Contains(request));
+
+    /// <summary>
     /// Whether pressing this element would send a form: a button inside one, or naming one, whose type is not
     /// "button" or "reset" (a button sends by default, and a type it does not know is the default), or a submit or
     /// image input. Asked by locators of ours, never by a script: the worker runs no string in the page.
@@ -122,6 +135,7 @@ internal static partial class SiteExplorer
         Dictionary<string, PageSnapshot> described,
         Func<Task>? startAfresh,
         ReadOnlyGuard? guard,
+        DateTimeOffset stopBy,
         CancellationToken cancellationToken)
     {
         // Under the guard nothing is typed, and no form is sent (ADR-0041).
@@ -155,6 +169,10 @@ internal static partial class SiteExplorer
         var failed = 0;
         var withheld = 0;
 
+        // What pages send by themselves, blocked while they were only being opened: the crawl's, and each visit's own
+        // opening. A press is judged by what it sent beyond that (PressSentSomething).
+        var background = new HashSet<string>(guard?.Blocked ?? [], StringComparer.Ordinal);
+
         while (queue.Count > 0)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -176,7 +194,7 @@ internal static partial class SiteExplorer
 
                 for (var index = 0; index < fills.Count; index++)
                 {
-                    if (visits >= MaxVisits || found.Count >= MaxExploredStates)
+                    if (visits >= MaxVisits || found.Count >= MaxExploredStates || TimeProvider.System.GetUtcNow() >= stopBy)
                     {
                         // Said rather than hidden, for the same reason as the crawl's own budget.
                         return new Pressing(found, Truncated: true, visits, failed, withheld);
@@ -185,7 +203,7 @@ internal static partial class SiteExplorer
                     var reached = new List<PressStep>(presses) { new(control.Target, fills[index]) };
                     var askForm = mayType && control.IsButton && index == 0;
 
-                    var visit = await VisitAsync(page, job, start, reached, mayType, askForm, described, startAfresh, guard, cancellationToken)
+                    var visit = await VisitAsync(page, job, start, reached, mayType, askForm, described, startAfresh, guard, background, cancellationToken)
                         .ConfigureAwait(false);
 
                     if (visit.Withheld)
@@ -200,7 +218,7 @@ internal static partial class SiteExplorer
                     {
                         // Once more, from the start. A visit that fails once and works the second time was
                         // the browser or the network; one that fails twice is the path.
-                        visit = await VisitAsync(page, job, start, reached, mayType, askForm, described, startAfresh, guard, cancellationToken)
+                        visit = await VisitAsync(page, job, start, reached, mayType, askForm, described, startAfresh, guard, background, cancellationToken)
                             .ConfigureAwait(false);
                     }
 
@@ -374,6 +392,7 @@ internal static partial class SiteExplorer
         Dictionary<string, PageSnapshot> described,
         Func<Task>? startAfresh,
         ReadOnlyGuard? guard,
+        HashSet<string> background,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -385,9 +404,16 @@ internal static partial class SiteExplorer
 
         await page.Context.ClearCookiesAsync().ConfigureAwait(false);
 
+        var openedFrom = guard?.Blocked.Count ?? 0;
+
         if (await Open(page, start).ConfigureAwait(false) is null)
         {
             return Visit.Failed;
+        }
+
+        if (guard is not null)
+        {
+            background.UnionWith(guard.Blocked.Skip(openedFrom));
         }
 
         var form = FormKind.None;
@@ -467,12 +493,12 @@ internal static partial class SiteExplorer
 
         // A press whose page tried to send something showed the page without it: an error, a spinner, or nothing. That
         // is not what the control does, so it is not told to a planner as though it were.
-        if (guard is not null && guard.Blocked.Count > blockedBefore)
+        if (guard is not null && PressSentSomething(guard, blockedBefore, background))
         {
             return Visit.NotDescribed;
         }
 
-        return new Visit(await LookAtAsync(page, here.PathAndQuery, described).ConfigureAwait(false), form, asksForPassword);
+        return new Visit(await LookAtAsync(page, AddressOf(here), described).ConfigureAwait(false), form, asksForPassword);
     }
 
     /// <summary>
@@ -520,6 +546,9 @@ internal static partial class SiteExplorer
         }
 
         await page.WaitForLoadStateAsync(LoadState.Load).ConfigureAwait(false);
+
+        // What a press changed in place may still be drawing.
+        await SettleAsync(page).ConfigureAwait(false);
     }
 
     /// <summary>

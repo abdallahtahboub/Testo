@@ -119,6 +119,9 @@ internal static partial class SiteExplorer
     {
         var origin = new Uri(job.TargetOrigin);
 
+        // From the first page on, so that each page's own requests can be waited for (SettleAsync).
+        InFlight.Watch(page);
+
         // The crawl reads the application as it opened, like every visit after it. An earlier exploration, or
         // run, may have left a booking or a paid invoice behind.
         if (startAfresh is not null && ExplorationPolicy.MayPressControls(job))
@@ -417,53 +420,49 @@ internal static partial class SiteExplorer
         }
     }
 
-    /// <summary>How long the network is given, at most, to fall quiet after a page has loaded.</summary>
+    /// <summary>How long a page's requests in flight are waited for, at most, after it has loaded or been pressed.</summary>
     private static readonly TimeSpan MaxQuiet = TimeSpan.FromMilliseconds(1500);
 
     /// <summary>How long a page is watched for, at most, while it is still being drawn.</summary>
     private static readonly TimeSpan MaxSettle = TimeSpan.FromSeconds(3);
 
     /// <summary>How long apart two looks at a page are, when deciding whether it has stopped changing.</summary>
-    private static readonly TimeSpan SettleInterval = TimeSpan.FromMilliseconds(250);
+    private static readonly TimeSpan SettleInterval = TimeSpan.FromMilliseconds(150);
+
+    /// <summary>How often the requests in flight are counted while waiting for them.</summary>
+    private static readonly TimeSpan QuietInterval = TimeSpan.FromMilliseconds(50);
 
     /// <summary>
-    /// Waits until the page stops changing: until its network has been quiet for half a second, or, for a page whose
-    /// network is never quiet within <see cref="MaxQuiet"/>, until the number of its elements is the same three looks
-    /// running (at most <see cref="MaxSettle"/>).
+    /// Waits until the page stops changing: until none of its requests is in flight (at most <see cref="MaxQuiet"/>),
+    /// and then until the number of its elements is the same two looks running, <see cref="SettleInterval"/> apart (at
+    /// most <see cref="MaxSettle"/>).
     /// </summary>
     /// <remarks>
+    /// <para>
     /// A client-side application draws its page after the load event, once it has fetched what to show. Read at load,
-    /// OWASP Juice Shop showed no products and nothing to press (R9, 2026-11-25). Waiting for the network to fall quiet
-    /// does not work for an application that polls, as Juice Shop does, so the page itself is watched, by counting its
-    /// elements with a locator: the worker runs no script in the page (ADR-0019 §2). A page that is already still costs
-    /// two intervals.
+    /// OWASP Juice Shop showed no products and nothing to press (R9, 2026-11-25). So the requests the page has in flight
+    /// are waited for, and then the page itself is watched, by counting its elements with a locator: the worker runs
+    /// no script in the page (ADR-0019 §2).
+    /// </para>
+    /// <para>
+    /// The requests are counted by the explorer (<see cref="InFlight"/>), not with Playwright's "network idle", which
+    /// waits for half a second of silence on every page: on our applications that made exploring three to five times
+    /// slower, and the worker tests outgrew CI's limit. An application that keeps a request open (Juice Shop's
+    /// polling) never has none in flight; for it the wait is bounded, and the count of elements decides.
+    /// </para>
     /// </remarks>
     private static async Task SettleAsync(IPage page)
     {
-        // First the network: what a page draws late it has usually fetched first. An application that polls never
-        // falls quiet, so this is bounded, and the page is then watched instead.
-        try
-        {
-            await page.WaitForLoadStateAsync(LoadState.NetworkIdle, new PageWaitForLoadStateOptions { Timeout = (float)MaxQuiet.TotalMilliseconds })
-                .ConfigureAwait(false);
+        var deadline = TimeProvider.System.GetUtcNow() + MaxQuiet;
 
-            // Quiet: what the page fetched has arrived and been drawn. Watching it as well would cost every page of an
-            // application that is already still half a second more, and a press on our applications twice that.
-            return;
-        }
-        catch (TimeoutException)
+        while (InFlight.Of(page) > 0 && TimeProvider.System.GetUtcNow() < deadline)
         {
-            // Still busy, as a polling application always is: the count below decides.
-        }
-        catch (PlaywrightException)
-        {
-            return;
+            await Task.Delay(QuietInterval, TimeProvider.System).ConfigureAwait(false);
         }
 
         var everything = page.Locator("body *");
         var last = -1;
-        var same = 0;
-        var deadline = TimeProvider.System.GetUtcNow() + MaxSettle;
+        deadline = TimeProvider.System.GetUtcNow() + MaxSettle;
 
         while (TimeProvider.System.GetUtcNow() < deadline)
         {
@@ -481,17 +480,10 @@ internal static partial class SiteExplorer
 
             if (count == last && count > 0)
             {
-                if (++same >= 2)
-                {
-                    return;
-                }
-            }
-            else
-            {
-                same = 0;
-                last = count;
+                return;
             }
 
+            last = count;
             await Task.Delay(SettleInterval, TimeProvider.System).ConfigureAwait(false);
         }
     }

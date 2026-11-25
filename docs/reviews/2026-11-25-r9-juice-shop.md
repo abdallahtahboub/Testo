@@ -9,7 +9,7 @@ exploration shows. **No planner was run.**
 | Application | Why | Role in R9 | Status |
 |---|---|---|---|
 | **OWASP Juice Shop 17.1.1** (MIT), Docker image `bkimminich/juice-shop:v17.1.1`, source commit `39b4686` | A client-side Angular application: pages drawn in the browser, addresses in the fragment (`/#/about`), navigation by buttons as much as links. The kind of application guarded pressing (ADR-0041) is for, and unlike any measured before | **Tuning**: gaps found here may be fixed in code, re-measured on the lab sets. Never a clean measurement | Scenarios, baselines and coverage done |
-| **Gitea 1.22.6** (MIT), source commit `8eefa1f` | A real, large application, server-rendered with client-side controls | **Clean**, as PetClinic was: scenarios written from source before any run, nothing tuned on it before the first planner run | Not started: Docker Hub refused the image (rate limit, 429), and fetching Gitea's own binary needs the owner's permission in this environment |
+| **Gitea 1.22.6** (MIT), source commit `8eefa1f` | A real, large application, server-rendered with client-side controls | **Clean**, as PetClinic was: scenarios written from source before any run, nothing tuned on it before the first planner run | Scenarios, baselines and coverage done (below) |
 
 ## Method
 
@@ -98,11 +98,52 @@ Our three applications kept every figure, in all three modes, and explored faste
 Still not shown on Juice Shop: the search route, reached only by buttons, and product names past the explorer's
 60-element limit per page.
 
+## Gitea, the clean application (2026-11-25)
+
+Gitea 1.22.6 is a large, real application nobody here wrote, server-rendered with client-side controls.
+- **Scenarios before any run.** Ten scenarios were written from its source (commit `8eefa1f`) and committed before it
+  first started (`tools/Autestiq.Benchmark/GiteaScenarios.cs`). The explorer, prompt and validator are frozen for it.
+- **Fresh every time.** `tools/r9/gitea-up.sh` starts it fresh, with one user and one public repository.
+- **The image.** Docker Hub refused this environment with a rate limit, so the image came through Google's mirror of
+  Docker Hub. Its digest is recorded in the scenario file.
+
+**Baselines, with no model:**
+- **9 of 10 pass as written.**
+- **One cannot be written and was removed**, its words kept in the file. The repository page shows the description
+  twice, and the README is a plain `div`, which is not a container a target may be scoped to. This is a vocabulary
+  gap, not fixed here because Gitea is frozen.
+
+**Coverage** (22 steps; a fresh instance per mode):
+
+| Exploration | Shown | Pages described | Time |
+|---|---|---|---|
+| Acting | 16 of 22 (73%) | 34, stopping at its budget | 453 s |
+| Read-only, links only | 15 of 22 (68%) | 24, stopping at its page limit | 28 s |
+| Read-only, guarded pressing | 15 of 22 (68%) | 39, stopping at its budget | 477 s |
+
+**What it shows, and what it does not:**
+1. **The crawl spends its page limit on one repository's pages:** files, commits, branches, activity.
+   - Read-only stopped at 24 pages without reaching the sign-in page, although the header links to it.
+   - Acting reached it, through presses.
+   - The crawl's order (one address of each kind first, `CrawlFrontier`) is not enough on an application with this
+     many kinds of page.
+2. **Four steps open pages no link leads to:** a search's results (`/explore/repos?q=…`) and a repository that does
+   not exist. No crawl shows them. Whether a planner writes them anyway is for the planner run to measure.
+3. **Sign-in and registration fields (Username, Email Address) were never shown**, in any mode, because the
+   registration page was never reached either.
+4. **Guarded pressing added nothing here.**
+   - Gitea's controls are mostly links, and its buttons send forms.
+   - It pressed in 46 visits, 2 of which could not be carried out, and spent the budget doing so.
+
+**These are recorded, not fixed.** Gitea is the clean measurement: nothing changes in answer to it before its first
+planner run is published, which needs API credit and the owner's agreement. Gaps 1 and 3 look general rather than
+Gitea's own. Fixing them belongs on Juice Shop or our own applications, and is re-measured on Gitea only after its
+planner run.
+
 ## What is next (not started)
 
 1. **Done the same day** (above): gaps 1 and 2, and an exploration that stops in time.
 2. **Still open:** acting and guarded exploration of Juice Shop stop at their budget; the search route; the element
    limit per page.
-3. **Gitea:** once the image or binary can be fetched, write its scenarios from source, then run its baselines and
-   coverage. Do not tune anything on it.
+3. **Gitea: done** (above). Its planner run is next, with no change made in answer to it before then.
 4. **Planner runs** on both, which need API credit and the owner's agreement.

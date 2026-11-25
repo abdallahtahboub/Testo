@@ -90,6 +90,9 @@ unreadable without the key ring.
 - A stuck test in Planning recovers by itself after 15 minutes (ADR-0037); a stuck run is reaped (ADR-0026).
 - Before migration, the background jobs log an error every second until the schema exists; migrate first.
 
+A run against a site that cannot be reached (wrong address, site down, not reachable from the internet) ends
+**inconclusive** with "The site could not be reached", never "Failed" (ADR-0026 amendment).
+
 ## 8. Not covered yet
 
 TLS and forwarded headers on a real host (R-8); a real SMTP provider (only configuration); a public, proved test site

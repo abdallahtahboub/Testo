@@ -104,12 +104,17 @@ internal static partial class SiteExplorer
     /// The browser's write guard, fitted to the page's context, when the exploration may not act (ADR-0041). Null when
     /// it may.
     /// </param>
+    /// <param name="stopBy">
+    /// When to stop opening pages and pressing controls, and describe what was found, marked as cut short. Before the
+    /// run's own limit, which would end it with nothing.
+    /// </param>
     /// <param name="cancellationToken">Stops the exploration.</param>
     public static async Task<Exploration> ExploreAsync(
         IPage page,
         WorkerJob job,
         Func<Task>? startAfresh,
         ReadOnlyGuard? guard,
+        DateTimeOffset stopBy,
         CancellationToken cancellationToken)
     {
         var origin = new Uri(job.TargetOrigin);
@@ -144,8 +149,16 @@ internal static partial class SiteExplorer
         var opened = 0;
         var maxOpened = job.Budget.MaxPagesCrawled * PagesOpenedPerPageShown;
 
+        var outOfTime = false;
+
         while (pages.Count < job.Budget.MaxPagesCrawled && opened < maxOpened && frontier.Next() is { } path)
         {
+            if (TimeProvider.System.GetUtcNow() >= stopBy)
+            {
+                outOfTime = true;
+                break;
+            }
+
             cancellationToken.ThrowIfCancellationRequested();
             opened++;
 
@@ -177,7 +190,7 @@ internal static partial class SiteExplorer
         // Said rather than hidden: a planner that does not know it is looking at part of an
         // application will plan as though it were all of it. And not said when it is not so: a planner
         // told it has seen only part will hedge every plan it writes.
-        var truncated = frontier.HasUnseen;
+        var truncated = frontier.HasUnseen || outOfTime;
 
         var visits = 0;
         var visitsFailed = 0;
@@ -194,7 +207,7 @@ internal static partial class SiteExplorer
             if (acting || guarded)
             {
                 // Nothing a guarded visit does reaches the application, so there is nothing to put back.
-                var pressed = await PressAsync(page, job, pages, described, acting ? startAfresh : null, guarded ? guard : null, cancellationToken)
+                var pressed = await PressAsync(page, job, pages, described, acting ? startAfresh : null, guarded ? guard : null, stopBy, cancellationToken)
                     .ConfigureAwait(false);
                 pages.AddRange(pressed.Pages);
                 truncated |= pressed.Truncated;
@@ -414,9 +427,9 @@ internal static partial class SiteExplorer
     private static readonly TimeSpan SettleInterval = TimeSpan.FromMilliseconds(250);
 
     /// <summary>
-    /// Waits until the page stops changing: until its network has been quiet for half a second (at most
-    /// <see cref="MaxQuiet"/>), and then until the number of its elements is the same three looks running (at most
-    /// <see cref="MaxSettle"/>).
+    /// Waits until the page stops changing: until its network has been quiet for half a second, or, for a page whose
+    /// network is never quiet within <see cref="MaxQuiet"/>, until the number of its elements is the same three looks
+    /// running (at most <see cref="MaxSettle"/>).
     /// </summary>
     /// <remarks>
     /// A client-side application draws its page after the load event, once it has fetched what to show. Read at load,
@@ -433,10 +446,14 @@ internal static partial class SiteExplorer
         {
             await page.WaitForLoadStateAsync(LoadState.NetworkIdle, new PageWaitForLoadStateOptions { Timeout = (float)MaxQuiet.TotalMilliseconds })
                 .ConfigureAwait(false);
+
+            // Quiet: what the page fetched has arrived and been drawn. Watching it as well would cost every page of an
+            // application that is already still half a second more, and a press on our applications twice that.
+            return;
         }
         catch (TimeoutException)
         {
-            // Still busy: the count below decides.
+            // Still busy, as a polling application always is: the count below decides.
         }
         catch (PlaywrightException)
         {

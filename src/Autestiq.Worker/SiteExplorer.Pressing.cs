@@ -135,6 +135,7 @@ internal static partial class SiteExplorer
         Dictionary<string, PageSnapshot> described,
         Func<Task>? startAfresh,
         ReadOnlyGuard? guard,
+        DateTimeOffset stopBy,
         CancellationToken cancellationToken)
     {
         // Under the guard nothing is typed, and no form is sent (ADR-0041).
@@ -193,7 +194,7 @@ internal static partial class SiteExplorer
 
                 for (var index = 0; index < fills.Count; index++)
                 {
-                    if (visits >= MaxVisits || found.Count >= MaxExploredStates)
+                    if (visits >= MaxVisits || found.Count >= MaxExploredStates || TimeProvider.System.GetUtcNow() >= stopBy)
                     {
                         // Said rather than hidden, for the same reason as the crawl's own budget.
                         return new Pressing(found, Truncated: true, visits, failed, withheld);

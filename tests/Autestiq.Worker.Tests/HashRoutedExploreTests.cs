@@ -30,7 +30,7 @@ public class HashRoutedExploreTests(HashRoutedSiteFixture site) : IClassFixture<
     [Fact]
     public async Task APage_IsReadOnceItIsDrawn_NotAtLoad()
     {
-        // Each route's text appears 600 ms after its page has loaded.
+        // Each route's text is fetched, and appears 600 ms after its page has loaded.
         var snapshot = Explorations.SnapshotOf(await CrawlAsync());
 
         Assert.Contains(snapshot.Pages, page => page.Path == "/#/about" && page.Heading == "About the orchard"

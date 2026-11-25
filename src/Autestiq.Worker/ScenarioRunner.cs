@@ -263,7 +263,10 @@ public sealed class ScenarioRunner(TimeProvider timeProvider)
 
         try
         {
-            var exploration = await SiteExplorer.ExploreAsync(page, job, StartAfresh, guard, budget).ConfigureAwait(false);
+            // Three quarters of the budget, leaving the rest for what is already under way and for the answer: an
+            // exploration that runs out of time returns nothing, one that stops in time returns what it found (R9).
+            var stopBy = startedAt + (job.Budget.WallClock * 0.75);
+            var exploration = await SiteExplorer.ExploreAsync(page, job, StartAfresh, guard, stopBy, budget).ConfigureAwait(false);
             var snapshot = exploration.Snapshot;
 
             steps[0] = step with

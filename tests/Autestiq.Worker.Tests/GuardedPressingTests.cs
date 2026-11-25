@@ -85,4 +85,22 @@ public class GuardedPressingTests(GuardedSiteFixture site) : IClassFixture<Guard
         Assert.Contains("refused", result.Steps[0].Message, StringComparison.Ordinal);
         Assert.Empty(site.Writes);
     }
+
+    [Fact]
+    public async Task AnExplorationShortOfTime_StopsInTime_AndReturnsWhatItFound_SayingItIsCutShort()
+    {
+        // Ten seconds: enough to read the page, not to press everything on it. Out of time, an exploration used to end
+        // with nothing at all (R9, Juice Shop); now it stops at three quarters of its budget and describes what it has.
+        var result = await Jobs.ExploreAsync(
+            site.OriginByName,
+            Explorations.Budget with { WallClock = TimeSpan.FromSeconds(10) },
+            exploreStates: true,
+            pressGuarded: true);
+
+        var snapshot = Explorations.SnapshotOf(result);
+
+        Assert.NotEmpty(snapshot.Pages);
+        Assert.True(snapshot.Truncated);
+        Assert.Empty(site.Writes);
+    }
 }

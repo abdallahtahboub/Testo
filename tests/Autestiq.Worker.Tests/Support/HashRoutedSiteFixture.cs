@@ -10,7 +10,8 @@ namespace Autestiq.Worker.Tests.Support;
 
 /// <summary>
 /// A client-side application in miniature, shaped as OWASP Juice Shop is (R9): one document whose pages are routes in
-/// the fragment (<c>/#/about</c>), each drawn by the page's own script well after the load event.
+/// the fragment (<c>/#/about</c>), each drawn by the page's own script once it has fetched what to show, 600 ms after the
+/// load event.
 /// </summary>
 public sealed class HashRoutedSiteFixture : IAsyncLifetime
 {
@@ -27,6 +28,19 @@ public sealed class HashRoutedSiteFixture : IAsyncLifetime
 
         _app = builder.Build();
         _app.MapGet("/", () => Results.Content(Page, "text/html"));
+
+        // What each route shows, fetched by the page's router and answered slowly, as an application's data is.
+        _app.MapGet("/content", async (string? route) =>
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(600), TimeProvider.System).ConfigureAwait(false);
+
+            return Results.Content(route switch
+            {
+                "#/about" => "<h1>About the orchard</h1><p>Founded in 2014</p>",
+                "#/contact" => "<h1>Write to us</h1><p>We answer within a day</p>",
+                _ => "<h1>Welcome</h1><p>Fresh apples daily</p>",
+            }, "text/html");
+        });
 
         await _app.StartAsync().ConfigureAwait(false);
 
@@ -52,14 +66,9 @@ public sealed class HashRoutedSiteFixture : IAsyncLifetime
         <nav><a href="#/about">About</a> <a href="#/contact">Contact</a> <a href="#main">Skip to the content</a></nav>
         <main id="main"></main>
         <script>
-          const pages = {
-            '#/about': '<h1>About the orchard</h1><p>Founded in 2014</p>',
-            '#/contact': '<h1>Write to us</h1><p>We answer within a day</p>',
-          };
-          function draw() {
-            setTimeout(() => {
-              document.getElementById('main').innerHTML = pages[location.hash] ?? '<h1>Welcome</h1><p>Fresh apples daily</p>';
-            }, 600);
+          async function draw() {
+            const answer = await fetch('/content?route=' + encodeURIComponent(location.hash));
+            document.getElementById('main').innerHTML = await answer.text();
           }
           window.addEventListener('hashchange', draw);
           draw();

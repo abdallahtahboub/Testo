@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Autestiq.Application;
 using Autestiq.Application.Costs;
+using Autestiq.Application.Identity;
 using Autestiq.Application.Usage;
 using Autestiq.Contracts.Identity;
 using Autestiq.Domain.Costs;
@@ -14,6 +15,8 @@ using Autestiq.Persistence;
 //   set-prices [--browser-hour <usd>] [--storage-gb-month <usd>] [--model <id> <input-usd> <output-usd>]...
 //              [--estimate] [--from <yyyy-MM-ddTHH:mm:ssZ>] --note <text> --by <name>
 //   cost-report [yyyy-MM] [--eur-rate <euros per dollar>]
+//   create-organization <slug> <name> --owner <email> --by <name>
+//                                    a new organization, its owner invited by email (needs Email__Smtp__*, ADR-0040)
 //   rehearsal-report <organization-slug>   the rehearsal's measures, from the content-free views (Milestone 5.1 R6)
 //   migrations                       which migrations the database has, and which it lacks
 //   migrate                          applies every migration it lacks (Milestone 5.1 R2)
@@ -32,7 +35,26 @@ if (connection is null)
     return 2;
 }
 
-var services = new ServiceCollection()
+// Email for the commands that send it, from the same settings the web host reads (Email__Smtp__Host and the rest).
+var smtp = new SmtpOptions
+{
+    Host = Environment.GetEnvironmentVariable("Email__Smtp__Host") ?? "",
+    Port = int.TryParse(Environment.GetEnvironmentVariable("Email__Smtp__Port"), CultureInfo.InvariantCulture, out var smtpPort) ? smtpPort : 587,
+    StartTls = !string.Equals(Environment.GetEnvironmentVariable("Email__Smtp__StartTls"), "false", StringComparison.OrdinalIgnoreCase),
+    User = Environment.GetEnvironmentVariable("Email__Smtp__User"),
+    Password = Environment.GetEnvironmentVariable("Email__Smtp__Password"),
+    From = Environment.GetEnvironmentVariable("Email__Smtp__From") ?? "",
+    PublicBaseUrl = Environment.GetEnvironmentVariable("Email__Smtp__PublicBaseUrl") ?? "",
+};
+
+var collection = new ServiceCollection();
+
+if (smtp.Host.Length > 0)
+{
+    collection.AddAutestiqSmtpEmail(smtp);
+}
+
+var services = collection
     .AddLogging()
     .AddSingleton<ICurrentUser>(OperatorPrincipal.Instance)
     .AddSingleton<IOrganizationContext>(OperatorPrincipal.Instance)
@@ -50,10 +72,50 @@ await using (services.ConfigureAwait(false))
         ["set-prices", .. var rest] => await SetPricesAsync(database, rest).ConfigureAwait(false),
         ["cost-report", .. var rest] => await CostReportAsync(database, rest).ConfigureAwait(false),
         ["migrations"] => await MigrationsAsync(database).ConfigureAwait(false),
+        ["create-organization", var slug, var name, .. var rest] => await CreateOrganizationAsync(scope.ServiceProvider, database, smtp.Host.Length > 0, slug, name, rest).ConfigureAwait(false),
         ["rehearsal-report", var slug] => await RehearsalReportAsync(database, slug).ConfigureAwait(false),
         ["migrate", .. var rest] => await MigrateAsync(database, rest).ConfigureAwait(false),
         _ => Usage(),
     };
+}
+
+static async Task<int> CreateOrganizationAsync(IServiceProvider provider, AutestiqDbContext database, bool emailConfigured, string slug, string name, string[] rest)
+{
+    var owner = Option(rest, "--owner");
+    var by = Option(rest, "--by");
+
+    if (owner is null || by is null)
+    {
+        Console.Error.WriteLine("Name the owner with --owner <email> and who is making the change with --by <name>.");
+        return 2;
+    }
+
+    // The owner's link goes by email or not at all: printed here, it would sit in a terminal's history.
+    if (!emailConfigured)
+    {
+        Console.Error.WriteLine("Email is not configured: set Email__Smtp__Host, __From and __PublicBaseUrl (and __User, __Password), so the owner's invitation can be sent.");
+        return 2;
+    }
+
+    var (organization, problem) = await OrganizationBootstrap.CreateAsync(
+        database,
+        provider.GetRequiredService<TenantWriteScope>(),
+        provider.GetRequiredService<IInvitationNotifier>(),
+        TimeProvider.System,
+        slug,
+        name,
+        owner,
+        by,
+        CancellationToken.None).ConfigureAwait(false);
+
+    if (problem is not null)
+    {
+        Console.Error.WriteLine(problem);
+        return 2;
+    }
+
+    Console.WriteLine($"Created {slug} ({organization}); the owner's invitation was sent to {owner}.");
+    return 0;
 }
 
 static async Task<int> RehearsalReportAsync(AutestiqDbContext database, string slug)
@@ -142,6 +204,7 @@ static int Usage()
           set-plan <organization-slug> <plan-code> [version] --by <name>
           set-prices [--browser-hour <usd>] [--storage-gb-month <usd>] [--model <id> <input-usd> <output-usd>]... [--estimate] [--from <instant>] --note <text> --by <name>
           cost-report [yyyy-MM] [--eur-rate <euros per dollar>]
+          create-organization <slug> <name> --owner <email> --by <name>
           rehearsal-report <organization-slug>
           migrations
           migrate [--to <migration>|0 --yes]

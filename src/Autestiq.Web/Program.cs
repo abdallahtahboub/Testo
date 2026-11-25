@@ -85,6 +85,13 @@ var connectionString = builder.Configuration.GetConnectionString("Autestiq")
         + "\"Host=localhost;Database=autestiq_dev;Username=postgres;Password=postgres\". "
         + "See README.md for how to get a PostgreSQL to point it at.");
 
+// Invitation and password-reset email, through any provider's SMTP relay (ADR-0040). Registered before the
+// application, whose development sender, which writes links to the log, is used only when none is.
+if (builder.Configuration.GetSection(Autestiq.Application.Identity.SmtpOptions.Section).Get<Autestiq.Application.Identity.SmtpOptions>() is { Host.Length: > 0 } smtp)
+{
+    builder.Services.AddAutestiqSmtpEmail(smtp);
+}
+
 builder.Services.AddAutestiqApplication(connectionString);
 
 // The key ring for test accounts' sign-in values, outside the database (ADR-0033).
@@ -94,6 +101,15 @@ builder.Services.Configure<Autestiq.Application.Usage.UsageOptions>(builder.Conf
 builder.Services.Configure<Autestiq.Application.Testing.PlanningOptions>(builder.Configuration.GetSection(Autestiq.Application.Testing.PlanningOptions.Section));
 builder.Services.Configure<Autestiq.Application.Execution.EvidenceRetentionOptions>(builder.Configuration.GetSection(Autestiq.Application.Execution.EvidenceRetentionOptions.Section));
 builder.Services.Configure<ArtifactStoreOptions>(builder.Configuration.GetSection(ArtifactStoreOptions.SectionName));
+
+// Evidence is customer data and is backed up with the database (data-architecture.md §8): outside development it is
+// never left in the system's temporary directory by default (found in the local rehearsal of R3, 2026-11-25).
+if (!builder.Environment.IsDevelopment() && string.IsNullOrWhiteSpace(builder.Configuration[$"{ArtifactStoreOptions.SectionName}:Directory"]))
+{
+    throw new InvalidOperationException(
+        $"{ArtifactStoreOptions.SectionName}:Directory is not configured. It names the directory where screenshots are kept, "
+        + "which is customer data and must be backed up: set it, for example with the environment variable Artifacts__Directory.");
+}
 
 // Runs are carried out by a worker process, outside this one (ADR-0018).
 builder.Services.AddAutestiqRunDispatcher();

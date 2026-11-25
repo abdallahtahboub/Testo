@@ -58,6 +58,9 @@ internal class AutestiqWebApplication(string connectionString) : WebApplicationF
         // A deployed site refuses to start without a key ring for sign-in values (ADR-0033), so this one gets its own.
         builder.UseSetting("DataProtection:KeyDirectory", Directory.CreateTempSubdirectory("autestiq-e2e-keys-").FullName);
 
+        // Production refuses to keep evidence in the temporary directory by default (R3 rehearsal); the tests name one.
+        builder.UseSetting("Artifacts:Directory", Directory.CreateTempSubdirectory("autestiq-e2e-artifacts-").FullName);
+
         builder.ConfigureServices(services =>
         {
             services.AddSingleton<IStartupFilter, FailingPathFilter>();

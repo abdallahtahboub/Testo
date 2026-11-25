@@ -433,9 +433,9 @@ internal static partial class SiteExplorer
     private static readonly TimeSpan QuietInterval = TimeSpan.FromMilliseconds(50);
 
     /// <summary>
-    /// Waits until the page stops changing: until none of its requests is in flight (at most <see cref="MaxQuiet"/>),
-    /// and then until the number of its elements is the same two looks running, <see cref="SettleInterval"/> apart (at
-    /// most <see cref="MaxSettle"/>).
+    /// Waits until the page stops changing. A page with no request in flight is read at once. Otherwise its requests
+    /// are waited for (at most <see cref="MaxQuiet"/>), and then the number of its elements must be the same two looks
+    /// running, <see cref="SettleInterval"/> apart (at most <see cref="MaxSettle"/>).
     /// </summary>
     /// <remarks>
     /// <para>
@@ -447,12 +447,20 @@ internal static partial class SiteExplorer
     /// <para>
     /// The requests are counted by the explorer (<see cref="InFlight"/>), not with Playwright's "network idle", which
     /// waits for half a second of silence on every page: on our applications that made exploring three to five times
-    /// slower, and the worker tests outgrew CI's limit. An application that keeps a request open (Juice Shop's
-    /// polling) never has none in flight; for it the wait is bounded, and the count of elements decides.
+    /// slower, and the worker tests outgrew CI's limit. Any wait paid on every page costs as much, so a page with
+    /// nothing in flight pays none. An application that keeps a request open (Juice Shop's polling) never has none in
+    /// flight; for it the wait is bounded, and the count of elements decides.
     /// </para>
     /// </remarks>
     private static async Task SettleAsync(IPage page)
     {
+        // Nothing in flight once the page has loaded, or once a press is over: a page drawn on the server, as every
+        // page of ours is, is read at once and costs nothing.
+        if (InFlight.Of(page) == 0)
+        {
+            return;
+        }
+
         var deadline = TimeProvider.System.GetUtcNow() + MaxQuiet;
 
         while (InFlight.Of(page) > 0 && TimeProvider.System.GetUtcNow() < deadline)

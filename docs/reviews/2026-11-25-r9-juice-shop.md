@@ -148,12 +148,20 @@ The lab sets, served without test ids. Each cell shows before / after the change
 |---|---|---|---|---|---|---|
 | Demo shop | 39 / 39 of 40 | 147 / 147 | 81 / 81 | — / 0 | 66 / 66 | 0 / 0 |
 | Clinic | 51 / 51 of 52 | 401 / 401 | 311 / 311 | — / 0 | 90 / 90 | 0 / 0 |
-| Invoice desk | 27 / 27 of 31 | 660 | 312 | — | 348 | 0 / 0 |
+| Invoice desk | 27 / 27 of 31 | 660 / 660 | 312 / 312 | — / 0 | 348 / 348 | 0 / 0 |
 
 **Nothing fell.** Our applications have no number fields, menus, tabs or dialogs, so the new kinds are not used there.
 Elements are still named as before. That includes the check that a locator finds the element described and not
 another, which on these applications changed no choice. The new kinds are shown working by the worker's own tests
-(`StrongLocatorsTests`). The Juice Shop measurement, where menus and dialogs appear, follows when it finishes.
+(`StrongLocatorsTests`).
+
+With test ids, in all three modes, every figure on our applications is unchanged: demo shop 100%, 85%, 85%; clinic
+98%, 90%, 90%; invoice desk 94%, 94%, 94%.
+
+**On Juice Shop, too, coverage is unchanged:** 74% acting, 68% read-only and 74% with guarded pressing. The one
+scenario that needed a menu entry was removed before the change, because no baseline could be written then. So none
+of the nine remaining steps depends on what is new. The gain is in what can now be named, and it will show in
+planner runs, which need API credit. The coverage check, by design, counts only what the existing baselines need.
 
 ## What is next (not started)
 

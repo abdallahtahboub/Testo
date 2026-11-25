@@ -433,7 +433,7 @@ internal static partial class SiteExplorer
     private static readonly TimeSpan QuietInterval = TimeSpan.FromMilliseconds(50);
 
     /// <summary>
-    /// Waits until the page stops changing. A page with no request in flight is read at once. Otherwise its requests
+    /// Waits until the page stops changing. A page without a script is read at once. Otherwise its requests in flight
     /// are waited for (at most <see cref="MaxQuiet"/>), and then the number of its elements must be the same two looks
     /// running, <see cref="SettleInterval"/> apart (at most <see cref="MaxSettle"/>).
     /// </summary>
@@ -447,19 +447,31 @@ internal static partial class SiteExplorer
     /// <para>
     /// The requests are counted by the explorer (<see cref="InFlight"/>), not with Playwright's "network idle", which
     /// waits for half a second of silence on every page: on our applications that made exploring three to five times
-    /// slower, and the worker tests outgrew CI's limit. Any wait paid on every page costs as much, so a page with
-    /// nothing in flight pays none. An application that keeps a request open (Juice Shop's polling) never has none in
+    /// slower, and the worker tests outgrew CI's limit. Any wait paid on every page costs as much, so a page that cannot
+    /// change by itself, having no script, pays none. Reading "nothing in flight" right after a load as "drawn" was
+    /// tried and lost the race with Playwright's events: a route's fetch was seen only after the page had been read. An application that keeps a request open (Juice Shop's polling) never has none in
     /// flight; for it the wait is bounded, and the count of elements decides.
     /// </para>
     /// </remarks>
     private static async Task SettleAsync(IPage page)
     {
-        // Nothing in flight once the page has loaded, or once a press is over: a page drawn on the server, as every
-        // page of ours is, is read at once and costs nothing.
-        if (InFlight.Of(page) == 0)
+        // A page without a script cannot draw anything after it has loaded: a page drawn on the server, as every page
+        // of ours is, is read at once and costs nothing.
+        try
+        {
+            if (await page.Locator("script").CountAsync().ConfigureAwait(false) == 0)
+            {
+                return;
+            }
+        }
+        catch (PlaywrightException)
         {
             return;
         }
+
+        // Playwright tells of a request a moment after the page has sent it, so a page that has only just loaded can
+        // look as if it fetched nothing. Its requests are counted after a moment's grace.
+        await Task.Delay(QuietInterval, TimeProvider.System).ConfigureAwait(false);
 
         var deadline = TimeProvider.System.GetUtcNow() + MaxQuiet;
 

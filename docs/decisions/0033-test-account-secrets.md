@@ -86,6 +86,9 @@ A hosted store is therefore an interim, and must be labelled as one.
   When the stored values cannot be read, every secret the plan types counts, so the check fails closed. One regression
   fixture (`tests/Shared/AccountValueFixture.cs`) is run by the worker, where it ends inconclusive, and downloaded by
   the application tests, where it is refused.
+  **Amended 2026-11-25 (R-20):** the database keeps a canary written with the key ring, and readiness is refused when
+  the key ring cannot read it, so a database restored without its key ring is no longer silently "ready". The
+  operator's `key-ring-reset` accepts a key ring lost for good.
 - **The screen.** Each test environment on the Environments page has a "Test account" panel: the saved names with
   their dates and a Remove button, and a user name and a password field (the browser is told not to fill either).
   Saving clears both fields; nothing saved is shown again. Who set a value is in the audit log, not on the panel.

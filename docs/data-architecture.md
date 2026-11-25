@@ -42,7 +42,7 @@ Related: [`domain-model.md`](domain-model.md) (the entities and how isolation is
 |---|---|---|---|
 | **PostgreSQL**, one database for every tenant (ADR-0012) | Every entity: identity, projects, tests, runs, usage, costs, audit | One server; development uses a local one | `organization_id` on every row inside the boundary; EF query filter and save guard; composite foreign keys |
 | **Artifact store** (`IArtifactStore`, `FileSystemArtifactStore`) | Screenshots per run step | A local directory | Every key begins with the organization; served only through signed links (`ArtifactLinks`) |
-| **Data Protection key ring** (`DataProtection:KeyDirectory`) | The keys that encrypt test-account values (ADR-0033) | A local directory, required outside development | Purpose per organization and environment |
+| **Data Protection key ring** (`DataProtection:KeyDirectory`) | The keys that encrypt test-account values (ADR-0033) | A local directory, required outside development | Purpose per organization and environment. A canary in the database (`key_ring_canaries`) proves the key ring is the database's own (R-20) |
 | **Application logs** | Events, warnings, errors from `[LoggerMessage]` methods | The console (stdout); nothing collects or keeps them | None structured yet: messages carry ids, never page text or secrets |
 | **The AI provider** | What a planning call sends, for as long as the provider keeps it | Anthropic, under its terms | Sent only for projects with the AI permission (G-1); recorded per attempt |
 | **Backups** | — | **None** (G16 in `commercial-readiness.md`) | — |

@@ -17,6 +17,8 @@ using Autestiq.Persistence;
 //   cost-report [yyyy-MM] [--eur-rate <euros per dollar>]
 //   create-organization <slug> <name> --owner <email> --by <name>
 //                                    a new organization, its owner invited by email (needs Email__Smtp__*, ADR-0040)
+//   key-ring-reset --by <name> --yes      accepts that the key ring is lost for good (R-20): stored test-account
+//                                         values become unusable and must be entered again
 //   rehearsal-report <organization-slug>   the rehearsal's measures, from the content-free views (Milestone 5.1 R6)
 //   migrations                       which migrations the database has, and which it lacks
 //   migrate                          applies every migration it lacks (Milestone 5.1 R2)
@@ -72,6 +74,7 @@ await using (services.ConfigureAwait(false))
         ["set-prices", .. var rest] => await SetPricesAsync(database, rest).ConfigureAwait(false),
         ["cost-report", .. var rest] => await CostReportAsync(database, rest).ConfigureAwait(false),
         ["migrations"] => await MigrationsAsync(database).ConfigureAwait(false),
+        ["key-ring-reset", .. var rest] => await KeyRingResetAsync(database, rest).ConfigureAwait(false),
         ["create-organization", var slug, var name, .. var rest] => await CreateOrganizationAsync(scope.ServiceProvider, database, smtp.Host.Length > 0, slug, name, rest).ConfigureAwait(false),
         ["rehearsal-report", var slug] => await RehearsalReportAsync(database, slug).ConfigureAwait(false),
         ["migrate", .. var rest] => await MigrateAsync(database, rest).ConfigureAwait(false),
@@ -115,6 +118,25 @@ static async Task<int> CreateOrganizationAsync(IServiceProvider provider, Autest
     }
 
     Console.WriteLine($"Created {slug} ({organization}); the owner's invitation was sent to {owner}.");
+    return 0;
+}
+
+static async Task<int> KeyRingResetAsync(AutestiqDbContext database, string[] rest)
+{
+    var by = Option(rest, "--by");
+    var secrets = await database.EnvironmentSecrets.IgnoreQueryFilters().CountAsync().ConfigureAwait(false);
+
+    // Every stored test-account value was written with the lost key ring: say so before anything changes.
+    if (by is null || !rest.Contains("--yes", StringComparer.Ordinal))
+    {
+        Console.Error.WriteLine($"This accepts that the key ring is lost: {secrets} stored test-account value(s) can then never be read, "
+            + "and each must be entered again. If the right key ring can be restored, restore it instead. To go on: --by <name> --yes.");
+        return 2;
+    }
+
+    var removed = await database.KeyRingCanaries.ExecuteDeleteAsync().ConfigureAwait(false);
+    Console.WriteLine($"Key ring reset by {by}: {removed} canary removed; the running key ring writes a new one at the next readiness check. "
+        + $"{secrets} stored test-account value(s) are unreadable and must be entered again.");
     return 0;
 }
 
@@ -205,6 +227,7 @@ static int Usage()
           set-prices [--browser-hour <usd>] [--storage-gb-month <usd>] [--model <id> <input-usd> <output-usd>]... [--estimate] [--from <instant>] --note <text> --by <name>
           cost-report [yyyy-MM] [--eur-rate <euros per dollar>]
           create-organization <slug> <name> --owner <email> --by <name>
+          key-ring-reset --by <name> --yes
           rehearsal-report <organization-slug>
           migrations
           migrate [--to <migration>|0 --yes]

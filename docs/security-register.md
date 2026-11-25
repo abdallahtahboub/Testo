@@ -371,11 +371,16 @@ no `DELETE` on audit and usage tables) and operator; a review list of every `Ign
 **Evaluated separately, later:** native RLS, which needs a session variable per connection and a plan for the
 background jobs that cross organizations, and database-level append-only protection (R-4).
 
-### R-20 · A key ring that does not match the database goes unnoticed — **Medium; found 2026-11-25 (R3 rehearsal)**
+### R-20 · A key ring that does not match the database goes unnoticed — **Fixed 2026-11-25**
 Restored without its key ring, the host creates a new one, reports ready, and every stored test-account value is
 silently unreadable until a run needs one and is refused (rehearsal step 10). **Fix:** a canary value written with the
 key ring when the database is first used, stored in the database, and checked by `/health/ready`: a key ring that cannot
 read it is not ready. Until then the runbook (§6) restores the database and the key ring together and checks by hand.
+**Fixed (2026-11-25):** `key_ring_canaries` holds one value encrypted with the key ring, written by the first readiness
+check on a database without one (one row, by primary key, whichever instance is first); `/health/ready` answers
+`not ready: key-ring` when the key ring cannot read it, and never overwrites it. The operator's `key-ring-reset --by
+<name> --yes` accepts a key ring lost for good, saying how many stored values become unusable. Tested with fakes and
+with the real host: the restore without the key ring now reports not ready.
 
 ### R-7 · One database for every tenant — **Accepted, documented**
 

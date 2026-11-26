@@ -1,0 +1,58 @@
+/* The month, its figures as tiles, the allowance as a meter with its state in words, then what the figures count. */
+
+.usage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.usage__header h1 {
+  margin-block-end: var(--space-2);
+}
+
+.usage__month {
+  margin: 0;
+}
+
+.usage__tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.usage__tiles > ::deep * {
+  flex: 1 1 12rem;
+}
+
+.usage__allowance,
+.usage__notes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-inline-size: var(--measure);
+}
+
+.usage__meter {
+  inline-size: 100%;
+  block-size: var(--space-4);
+}
+
+.usage__state {
+  margin: 0;
+}
+
+.usage__state--nearly {
+  font-weight: var(--weight-semibold);
+}
+
+.usage__state--used-up {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  color: var(--color-danger);
+}
+
+.usage__notes ul {
+  margin: 0;
+  padding-inline-start: var(--space-5);
+}

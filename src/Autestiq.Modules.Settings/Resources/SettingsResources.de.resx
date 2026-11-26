@@ -238,4 +238,73 @@
   <data name="Audit_Change_To" xml:space="preserve">
     <value>geändert in</value>
   </data>
+  <data name="Nav_Usage" xml:space="preserve">
+    <value>Verbrauch</value>
+  </data>
+  <data name="Usage_PageTitle" xml:space="preserve">
+    <value>Verbrauch – {0}</value>
+  </data>
+  <data name="Usage_Title" xml:space="preserve">
+    <value>Verbrauch</value>
+  </data>
+  <data name="Usage_Intro" xml:space="preserve">
+    <value>Was die Organisation in diesem Monat verbraucht hat, gemessen an dem, was ihr Plan erlaubt. Es sind Zählungen aus dem Verbrauchsbuch, keine Kosten.</value>
+  </data>
+  <data name="Usage_NotAllowed_Title" xml:space="preserve">
+    <value>Der Verbrauch wird Ihnen nicht angezeigt</value>
+  </data>
+  <data name="Usage_NotAllowed_Text" xml:space="preserve">
+    <value>Fragen Sie einen Eigentümer oder Admin Ihrer Organisation.</value>
+  </data>
+  <data name="Usage_LoadFailed" xml:space="preserve">
+    <value>Der Verbrauch konnte nicht gelesen werden. Versuchen Sie es gleich noch einmal.</value>
+  </data>
+  <data name="Usage_Month" xml:space="preserve">
+    <value>{0}. Das Kontingent beginnt am {1} (UTC) von Neuem.</value>
+  </data>
+  <data name="Usage_Minutes" xml:space="preserve">
+    <value>Browser-Minuten</value>
+  </data>
+  <data name="Usage_Of" xml:space="preserve">
+    <value>{0} von {1}</value>
+  </data>
+  <data name="Usage_Runs" xml:space="preserve">
+    <value>Abrechenbare Läufe</value>
+  </data>
+  <data name="Usage_Concurrent" xml:space="preserve">
+    <value>Gleichzeitige Läufe</value>
+  </data>
+  <data name="Usage_Plan" xml:space="preserve">
+    <value>Plan</value>
+  </data>
+  <data name="Usage_PlanVersion" xml:space="preserve">
+    <value>{0}, Version {1}</value>
+  </data>
+  <data name="Usage_Allowance" xml:space="preserve">
+    <value>Browser-Minuten dieses Monats</value>
+  </data>
+  <data name="Usage_State_Left" xml:space="preserve">
+    <value>Noch {0} Minuten in diesem Monat.</value>
+  </data>
+  <data name="Usage_State_Nearly" xml:space="preserve">
+    <value>Fast aufgebraucht: noch {0} Minuten in diesem Monat.</value>
+  </data>
+  <data name="Usage_State_UsedUp" xml:space="preserve">
+    <value>Alle Browser-Minuten dieses Monats sind verbraucht. Neue Läufe werden bis zum {0} (UTC) abgelehnt.</value>
+  </data>
+  <data name="Usage_Notes" xml:space="preserve">
+    <value>Was diese Zahlen zählen</value>
+  </data>
+  <data name="Usage_Note_Billable" xml:space="preserve">
+    <value>Es zählen nur Läufe, die Ihre Anwendung erreicht haben und nicht durch unsere Schuld endeten.</value>
+  </data>
+  <data name="Usage_Note_Rounding" xml:space="preserve">
+    <value>Browser-Zeit wird sekundengenau erfasst und für den ganzen Monat einmal auf eine Minute aufgerundet.</value>
+  </data>
+  <data name="Usage_Note_Running" xml:space="preserve">
+    <value>Ein laufender Lauf wird gezählt, wenn er endet; die Zahl kann daher um einige Minuten steigen.</value>
+  </data>
+  <data name="Usage_Note_Plan" xml:space="preserve">
+    <value>Die Grenzen stammen aus der Version des Plans, auf der Ihre Organisation steht; nur ein Betreiber stellt sie auf eine andere um.</value>
+  </data>
 </root>

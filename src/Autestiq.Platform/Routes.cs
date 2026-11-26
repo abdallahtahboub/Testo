@@ -64,6 +64,9 @@ public static class Routes
     /// <summary>The organization's audit log, for people who may read it (E1.2).</summary>
     public const string AuditLog = App + "/settings/audit";
 
+    /// <summary>The organization's usage this month against its plan (E1.3).</summary>
+    public const string Usage = App + "/settings/usage";
+
     /// <summary>One run.</summary>
     public static string Run(Guid runId) => $"{Runs}/{runId}";
 

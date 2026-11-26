@@ -23,6 +23,7 @@
 | **Will customer-derived experience ever be used beyond the tenant it came from?** | The most valuable data is the most sensitive; the strategy proposes never by default, opt-in only. | `docs/ai-learning/security-and-governance.md` |
 | **May the research workspace use Python (PyTorch, Transformers, TRL)?** | Fine-tuning tooling is Python; CLAUDE.md requires approval for non-.NET tools. Only needed from AI learning Phase 4. | `docs/ai-learning/learning-and-models.md` |
 | **How should read-only exploration improve?** | It is a customer site's default until an Owner allows acting, and it measures 36 of 66 against 62 of 66. | ADR-0020, ADR-0032 |
+| An event platform (Kafka or similar). **Considered and deferred (2026-11-26).** | Not needed at the estimated size (ADR-0038): PostgreSQL holds the run queue, audit log and usage ledger, and SignalR (inside Blazor Server) carries live updates. Before any event platform: a durable outbox in PostgreSQL for webhooks and audit export (E3, E4), then a managed queue if workers spread across regions. Reconsider only on measured need: sustained high event rates, several independent services replaying one history, or a database queue that no longer keeps up; an ADR with the owner's approval. | `docs/standups/2026-11-26.md` |
 
 ## Technical debt and known limits
 

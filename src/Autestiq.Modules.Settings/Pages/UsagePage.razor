@@ -1,0 +1,54 @@
+@page "/app/settings/usage"
+@inject IStringLocalizer<SettingsResources> L
+@inject IOptions<BrandOptions> Brand
+@using System.Globalization
+
+@*
+    The organization's use of this month against what its plan allows (E1.3), as the usage ledger counts it (ADR-0027)
+    and the plan version the organization is on sets it (ADR-0028). Counts, not money: prices are the price book's
+    business and are not shown here.
+*@
+<PageTitle>@L["Usage_PageTitle", Brand.Value.ProductName]</PageTitle>
+
+<div class="usage">
+    <header class="usage__header">
+        <h1>@L["Usage_Title"]</h1>
+        <p class="t-muted">@L["Usage_Intro"]</p>
+    </header>
+
+    <TAsyncView Loading="Loading" Error="@LoadError" OnRetry="LoadAsync" IsEmpty="Usage is null">
+        <EmptyContent>
+            <TEmptyState Title="@L["Usage_NotAllowed_Title"]" data-testid="usage-not-allowed">@L["Usage_NotAllowed_Text"]</TEmptyState>
+        </EmptyContent>
+        <ChildContent>
+            @if (Usage is { } usage)
+            {
+                <p class="usage__month" data-testid="usage-month">@L["Usage_Month", MonthName(usage), ResetsOn(usage)]</p>
+
+                <div class="usage__tiles">
+                    <TKpiTile Label="@L["Usage_Minutes"]" Value="@L["Usage_Of", usage.BrowserMinutesUsed.ToString("N0", CultureInfo.CurrentCulture), usage.BrowserMinutesAllowed.ToString("N0", CultureInfo.CurrentCulture)]" data-testid="usage-minutes" />
+                    <TKpiTile Label="@L["Usage_Runs"]" Value="@usage.BillableRuns.ToString("N0", CultureInfo.CurrentCulture)" data-testid="usage-runs" />
+                    <TKpiTile Label="@L["Usage_Concurrent"]" Value="@usage.ConcurrentRunsAllowed.ToString("N0", CultureInfo.CurrentCulture)" data-testid="usage-concurrent" />
+                    <TKpiTile Label="@L["Usage_Plan"]" Value="@L["Usage_PlanVersion", usage.PlanName, usage.PlanVersion]" data-testid="usage-plan" />
+                </div>
+
+                <section class="usage__allowance" aria-labelledby="usage-allowance">
+                    <h2 id="usage-allowance" class="t-h4">@L["Usage_Allowance"]</h2>
+                    <meter class="usage__meter" min="0" max="@Math.Max(1, usage.BrowserMinutesAllowed)" value="@Math.Min(usage.BrowserMinutesUsed, Math.Max(1, usage.BrowserMinutesAllowed))"
+                           aria-labelledby="usage-allowance" aria-describedby="usage-state" data-testid="usage-meter"></meter>
+                    <p id="usage-state" class="@StateClass(usage)" role="@(UsedUp(usage) ? "alert" : null)" data-testid="usage-state">@State(usage)</p>
+                </section>
+
+                <section class="usage__notes" aria-labelledby="usage-notes">
+                    <h2 id="usage-notes" class="t-h4">@L["Usage_Notes"]</h2>
+                    <ul>
+                        <li>@L["Usage_Note_Billable"]</li>
+                        <li>@L["Usage_Note_Rounding"]</li>
+                        <li>@L["Usage_Note_Running"]</li>
+                        <li>@L["Usage_Note_Plan"]</li>
+                    </ul>
+                </section>
+            }
+        </ChildContent>
+    </TAsyncView>
+</div>

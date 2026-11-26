@@ -34,6 +34,7 @@ public class PageSmokeTests(AppFixture app) : BrowserTest(app)
                 pages.Add(Routes.ProjectSettings("SHOP"), "en", "Settings of Northwind Shop – Autestiq", "Settings", scheme);
                 pages.Add(Routes.Members, "en", "Members – Autestiq", "Members", scheme);
                 pages.Add(Routes.AuditLog, "en", "Audit log – Autestiq", "Audit log", scheme);
+                pages.Add(Routes.Usage, "en", "Usage – Autestiq", "Usage", scheme);
                 pages.Add(Routes.Test("SHOP", Guid.Parse("88888888-8888-8888-8888-888888888888")), "en", "Test #… – Autestiq", "No such test", scheme);
 
                 // A run that is not this organization's. The page still has a title and one

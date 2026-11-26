@@ -238,4 +238,73 @@
   <data name="Audit_Change_To" xml:space="preserve">
     <value>changed to</value>
   </data>
+  <data name="Nav_Usage" xml:space="preserve">
+    <value>Usage</value>
+  </data>
+  <data name="Usage_PageTitle" xml:space="preserve">
+    <value>Usage – {0}</value>
+  </data>
+  <data name="Usage_Title" xml:space="preserve">
+    <value>Usage</value>
+  </data>
+  <data name="Usage_Intro" xml:space="preserve">
+    <value>What the organization has used this month, against what its plan allows. These are counts from the usage ledger, not charges.</value>
+  </data>
+  <data name="Usage_NotAllowed_Title" xml:space="preserve">
+    <value>Usage is not shown to you</value>
+  </data>
+  <data name="Usage_NotAllowed_Text" xml:space="preserve">
+    <value>Ask an owner or an admin of your organization.</value>
+  </data>
+  <data name="Usage_LoadFailed" xml:space="preserve">
+    <value>Usage could not be read. Try again in a moment.</value>
+  </data>
+  <data name="Usage_Month" xml:space="preserve">
+    <value>{0}. The allowance starts again on {1} (UTC).</value>
+  </data>
+  <data name="Usage_Minutes" xml:space="preserve">
+    <value>Browser minutes</value>
+  </data>
+  <data name="Usage_Of" xml:space="preserve">
+    <value>{0} of {1}</value>
+  </data>
+  <data name="Usage_Runs" xml:space="preserve">
+    <value>Billable runs</value>
+  </data>
+  <data name="Usage_Concurrent" xml:space="preserve">
+    <value>Runs at once</value>
+  </data>
+  <data name="Usage_Plan" xml:space="preserve">
+    <value>Plan</value>
+  </data>
+  <data name="Usage_PlanVersion" xml:space="preserve">
+    <value>{0}, version {1}</value>
+  </data>
+  <data name="Usage_Allowance" xml:space="preserve">
+    <value>This month's browser minutes</value>
+  </data>
+  <data name="Usage_State_Left" xml:space="preserve">
+    <value>{0} minutes left this month.</value>
+  </data>
+  <data name="Usage_State_Nearly" xml:space="preserve">
+    <value>Nearly used up: {0} minutes left this month.</value>
+  </data>
+  <data name="Usage_State_UsedUp" xml:space="preserve">
+    <value>All of this month's browser minutes are used. New runs are refused until {0} (UTC).</value>
+  </data>
+  <data name="Usage_Notes" xml:space="preserve">
+    <value>What these figures count</value>
+  </data>
+  <data name="Usage_Note_Billable" xml:space="preserve">
+    <value>A run counts only if it reached your application and did not end through a fault of ours.</value>
+  </data>
+  <data name="Usage_Note_Rounding" xml:space="preserve">
+    <value>Browser time is recorded to the second and rounded up to a minute once for the whole month.</value>
+  </data>
+  <data name="Usage_Note_Running" xml:space="preserve">
+    <value>A run still going is counted when it finishes, so the figure can rise by a few minutes.</value>
+  </data>
+  <data name="Usage_Note_Plan" xml:space="preserve">
+    <value>The limits come from the version of the plan your organization is on; only an operator moves it to another.</value>
+  </data>
 </root>

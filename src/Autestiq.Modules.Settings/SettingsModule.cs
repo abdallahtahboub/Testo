@@ -45,5 +45,16 @@ public sealed class SettingsModule : IFeatureModule
             Order: 20,
             FeatureFlag: FeatureFlag,
             RequiredPermission: Permission.ReadAuditLog));
+
+        // Everyone who may read the organization may see what it has used: the service's own rule (Permission.Read).
+        navigation.Add(new NavItem(
+            "usage",
+            LocalizedText.From<SettingsResources>("Nav_Usage"),
+            Routes.Usage,
+            "Clock",
+            NavGroup.Settings,
+            Order: 30,
+            FeatureFlag: FeatureFlag,
+            RequiredPermission: Permission.Read));
     }
 }

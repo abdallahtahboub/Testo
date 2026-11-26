@@ -307,4 +307,91 @@
   <data name="Usage_Note_Plan" xml:space="preserve">
     <value>The limits come from the version of the plan your organization is on; only an operator moves it to another.</value>
   </data>
+  <data name="Nav_Organization" xml:space="preserve">
+    <value>Organization</value>
+  </data>
+  <data name="Organization_PageTitle" xml:space="preserve">
+    <value>Organization – {0}</value>
+  </data>
+  <data name="Organization_Title" xml:space="preserve">
+    <value>Organization</value>
+  </data>
+  <data name="Organization_Intro" xml:space="preserve">
+    <value>Who your organization is in the product, and what its plan allows.</value>
+  </data>
+  <data name="Organization_NotAllowed_Title" xml:space="preserve">
+    <value>Only owners and admins see the organization's settings</value>
+  </data>
+  <data name="Organization_NotAllowed_Text" xml:space="preserve">
+    <value>Ask an owner or an admin of your organization.</value>
+  </data>
+  <data name="Organization_LoadFailed" xml:space="preserve">
+    <value>The organization could not be read. Try again in a moment.</value>
+  </data>
+  <data name="Organization_Identity" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Organization_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Organization_Slug" xml:space="preserve">
+    <value>Address in the product</value>
+  </data>
+  <data name="Organization_Region" xml:space="preserve">
+    <value>Data region</value>
+  </data>
+  <data name="Organization_TwoFactor" xml:space="preserve">
+    <value>Two-factor sign-in</value>
+  </data>
+  <data name="Organization_TwoFactor_Required" xml:space="preserve">
+    <value>Required for every member</value>
+  </data>
+  <data name="Organization_TwoFactor_Optional" xml:space="preserve">
+    <value>Each member's choice</value>
+  </data>
+  <data name="Organization_Created" xml:space="preserve">
+    <value>Created</value>
+  </data>
+  <data name="Organization_Plan" xml:space="preserve">
+    <value>Plan</value>
+  </data>
+  <data name="Organization_Plan_Name" xml:space="preserve">
+    <value>Plan</value>
+  </data>
+  <data name="Organization_Plan_Version" xml:space="preserve">
+    <value>{0}, version {1}</value>
+  </data>
+  <data name="Organization_Plan_Since" xml:space="preserve">
+    <value>This version since</value>
+  </data>
+  <data name="Organization_Plan_Minutes" xml:space="preserve">
+    <value>Browser minutes a month</value>
+  </data>
+  <data name="Organization_Plan_Concurrent" xml:space="preserve">
+    <value>Runs at once</value>
+  </data>
+  <data name="Organization_Plan_Projects" xml:space="preserve">
+    <value>Projects</value>
+  </data>
+  <data name="Organization_Plan_ProjectsOf" xml:space="preserve">
+    <value>{0} of {1}</value>
+  </data>
+  <data name="Organization_Plan_ProjectsUnlimited" xml:space="preserve">
+    <value>{0}, no limit</value>
+  </data>
+  <data name="Organization_Plan_Members" xml:space="preserve">
+    <value>Members</value>
+  </data>
+  <data name="Organization_Plan_HowToChange" xml:space="preserve">
+    <value>Your organization keeps this version of its plan until it is moved to another; for now only an operator does that.</value>
+  </data>
+  <data name="Organization_Plan_UsageLink" xml:space="preserve">
+    <value>See this month's usage</value>
+  </data>
+  <data name="Organization_Changes" xml:space="preserve">
+    <value>Changing these settings</value>
+  </data>
+  <data name="Organization_Changes_Text" xml:space="preserve">
+    <value>This page shows the settings; it does not change them yet. For now the {0} team renames an organization, changes its plan or requires two-factor sign-in, on an owner's request.</value>
+  </data>
 </root>

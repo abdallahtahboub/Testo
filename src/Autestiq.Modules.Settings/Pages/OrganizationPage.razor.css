@@ -1,0 +1,46 @@
+/* Who the organization is, then what its plan allows, as two lists of facts; then what cannot be changed here yet. */
+
+.organization {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.organization__header h1 {
+  margin-block-end: var(--space-2);
+}
+
+.organization__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-inline-size: var(--measure);
+}
+
+.organization__section p {
+  margin: 0;
+}
+
+.organization__facts {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.organization__facts > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-block: var(--space-2);
+  border-block-end: 1px solid var(--color-border);
+}
+
+.organization__facts dt {
+  color: var(--color-text-muted);
+}
+
+.organization__facts dd {
+  margin: 0;
+  font-weight: var(--weight-medium);
+}

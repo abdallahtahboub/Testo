@@ -105,6 +105,7 @@ Routes are scoped by project: `/app/p/{projectKey}/...` (e.g., `/app/p/orion/def
 | `/app/projects` | Execution | Projects | The organization's projects, and adding one within the plan's limit *(built, Milestone 5 part 1; the project picker at `/app` comes later)* |
 | `/app/settings` | Settings | Settings overview | Entry to settings areas |
 | `/app/settings/integrations` | Settings | Integrations (P) | Git, Azure DevOps, Jira connection cards (UI only) |
+| `/app/settings/organization` | Settings | Organization | Name, address, data region, two-factor rule; the plan version and its limits; read-only; Owners and Admins only *(built, E1.4, ADR-0043)* |
 | `/app/settings/members` | Settings | Members | Members and their roles, removing one, inviting, sending an invitation again and withdrawing it; Owners and Admins only *(built, E1.1)* |
 | `/app/settings/audit` | Settings | Audit log | What happened, newest first, filtered by person, action and days in UTC; read-only; Owners and Admins only *(built, E1.2)* |
 | `/app/settings/usage` | Settings | Usage | This month's browser minutes against the plan, billable runs, runs at once, the plan and its version; everyone in the organization *(built, E1.3)* |

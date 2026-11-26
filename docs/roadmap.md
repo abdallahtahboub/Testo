@@ -437,7 +437,7 @@ feature flags are built; its mock sign-in and mock data were superseded by real 
 
 **Done when:** each module registers its nav entry with one line and appears in the nav; turning a flag off hides its nav entry, widgets and routes (tested); dashboard widgets show loading, empty, error and data states (bUnit); seed-data consistency tests pass; E2E covers sign-in → dashboard → switch project.
 
-## Milestone 5.1 — Pilot readiness *(approved by the owner on 2026-11-24; R1, R2, R4 and R6 built; R5 measured in part; R3 rehearsed locally; R7 released and tagged `v0.5.0`; R8 built 2026-11-25 (ADR-0041); R9 started 2026-11-25)*
+## Milestone 5.1 — Pilot readiness *(approved by the owner on 2026-11-24; **accepted as done on 2026-11-26** ([summary](reviews/2026-11-26-milestone-5.1-summary.md)), with R3 on the real host, R5's remainder and R-23 on https carried forward; R1, R2, R4 and R6 built; R5 measured in part; R3 rehearsed locally; R7 released and tagged `v0.5.0`; R8 built 2026-11-25 (ADR-0041); R9 started 2026-11-25)*
 **Objective.** One QA team repeatedly uses the first customer flow on one authorized staging application, with
 synthetic data and one dedicated test account, and trusts the verdict. Real customer data needs a separate readiness
 decision afterwards (the P1 items below). The findings behind it, and their evidence, are in the dated review

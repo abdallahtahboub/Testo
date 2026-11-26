@@ -60,6 +60,10 @@ Read first: `docs/architecture.md`, `docs/data-architecture.md` (accepted design
 - **Update docs when you change behavior or structure** — in the same commit. Record architectural decisions as ADRs in `docs/decisions/NNNN-short-title.md` (template: `0000-template.md`).
 - Commit after each meaningful step; small commits with clear messages (imperative mood, e.g. `Add TKpiTile component with delta indicator`).
 - Before saying a milestone is done: `dotnet build` (zero warnings) and `dotnet test` (incl. Playwright) must pass. Report failures honestly.
+- **A stand-up every working day, recorded in the repository** (the owner, 2026-11-26): what was done since the last one
+  (merged pull requests linked), what is next, what waits on the owner, risks and decisions, in
+  `docs/standups/YYYY-MM-DD.md`, with the index in `docs/standups/README.md` updated. Facts from the repository, not
+  from memory; implemented and planned never mixed.
 
 ## Knowledge management and AI collaboration (binding, owner's requirement of 2026-11-24)
 

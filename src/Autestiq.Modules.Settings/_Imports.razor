@@ -1,6 +1,18 @@
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.Extensions.Localization
+@using Microsoft.Extensions.Options
 @using Autestiq.Platform
+@using Autestiq.UI.Shared.Branding
 @using Autestiq.UI.Shared.Components
+@using Autestiq.Contracts.Common
+@using Autestiq.Contracts.Identity
+@using Autestiq.Modules.Settings.Resources
+
+@*
+    Product pages, so a signed-in person is required. PageAuthorizationTests fails the build for
+    any routable page that declares neither this nor [AllowAnonymous] (D-1).
+*@
+@attribute [Authorize]

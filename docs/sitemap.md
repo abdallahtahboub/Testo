@@ -105,7 +105,7 @@ Routes are scoped by project: `/app/p/{projectKey}/...` (e.g., `/app/p/orion/def
 | `/app/projects` | Execution | Projects | The organization's projects, and adding one within the plan's limit *(built, Milestone 5 part 1; the project picker at `/app` comes later)* |
 | `/app/settings` | Settings | Settings overview | Entry to settings areas |
 | `/app/settings/integrations` | Settings | Integrations (P) | Git, Azure DevOps, Jira connection cards (UI only) |
-| `/app/settings/team` | Settings | Team members | Members, roles, invite (UI only) |
+| `/app/settings/members` | Settings | Members | Members and their roles, removing one, inviting, sending an invitation again and withdrawing it; Owners and Admins only *(built, E1.1)* |
 | `/app/settings/capabilities` | Settings | Capabilities | List of registered capabilities; renders each one's settings UI |
 | `/app/settings/project` | Settings | Project settings | Name, key, releases, workflow |
 | `/app/settings/profile` | Settings | My profile | Language, theme, notification preferences |

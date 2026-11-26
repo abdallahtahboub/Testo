@@ -58,6 +58,9 @@ public static class Routes
 
     public const string Runs = App + "/runs";
 
+    /// <summary>The organization's members and pending invitations (E1.1).</summary>
+    public const string Members = App + "/settings/members";
+
     /// <summary>One run.</summary>
     public static string Run(Guid runId) => $"{Runs}/{runId}";
 

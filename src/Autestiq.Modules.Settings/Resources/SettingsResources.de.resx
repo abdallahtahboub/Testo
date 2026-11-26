@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+    <data name="Nav_Members" xml:space="preserve">
+    <value>Mitglieder</value>
+  </data>
+  <data name="Members_PageTitle" xml:space="preserve">
+    <value>Mitglieder – {0}</value>
+  </data>
+  <data name="Members_Title" xml:space="preserve">
+    <value>Mitglieder</value>
+  </data>
+  <data name="Members_Intro" xml:space="preserve">
+    <value>Wer zu dieser Organisation gehört, was jede Person darf und wer eingeladen wurde.</value>
+  </data>
+  <data name="Members_NotAllowed_Title" xml:space="preserve">
+    <value>Nur Inhaber und Admins verwalten Mitglieder</value>
+  </data>
+  <data name="Members_NotAllowed_Text" xml:space="preserve">
+    <value>Bitten Sie einen Inhaber oder Admin Ihrer Organisation, wenn jemand hinzugefügt oder seine Rolle geändert werden soll.</value>
+  </data>
+  <data name="Members_People" xml:space="preserve">
+    <value>Personen</value>
+  </data>
+  <data name="Members_Empty_Title" xml:space="preserve">
+    <value>Noch keine Mitglieder</value>
+  </data>
+  <data name="Members_Empty_Text" xml:space="preserve">
+    <value>Laden Sie unten jemanden ein.</value>
+  </data>
+  <data name="Members_LoadFailed" xml:space="preserve">
+    <value>Die Mitglieder konnten nicht geladen werden. Versuchen Sie es erneut.</value>
+  </data>
+  <data name="Members_You" xml:space="preserve">
+    <value>(Sie)</value>
+  </data>
+  <data name="Members_Role_For" xml:space="preserve">
+    <value>Rolle von {0}</value>
+  </data>
+  <data name="Members_Remove" xml:space="preserve">
+    <value>Entfernen</value>
+  </data>
+  <data name="Members_Remove_Label" xml:space="preserve">
+    <value>{0} entfernen</value>
+  </data>
+  <data name="Members_Remove_Title" xml:space="preserve">
+    <value>{0} aus dieser Organisation entfernen?</value>
+  </data>
+  <data name="Members_Remove_Confirm" xml:space="preserve">
+    <value>Mitglied entfernen</value>
+  </data>
+  <data name="Members_Remove_Consequence" xml:space="preserve">
+    <value>Die Person wird sofort abgemeldet. Ihre Arbeit bleibt erhalten und ist ihr weiterhin zugeordnet.</value>
+  </data>
+  <data name="Members_Invite" xml:space="preserve">
+    <value>Jemanden einladen</value>
+  </data>
+  <data name="Members_Invite_Email" xml:space="preserve">
+    <value>E-Mail-Adresse</value>
+  </data>
+  <data name="Members_Invite_Role" xml:space="preserve">
+    <value>Rolle</value>
+  </data>
+  <data name="Members_Invite_Send" xml:space="preserve">
+    <value>Einladung senden</value>
+  </data>
+  <data name="Members_Invite_EmailRequired" xml:space="preserve">
+    <value>Geben Sie die einzuladende E-Mail-Adresse ein.</value>
+  </data>
+  <data name="Members_Pending" xml:space="preserve">
+    <value>Offene Einladungen</value>
+  </data>
+  <data name="Members_Pending_None" xml:space="preserve">
+    <value>Keine Einladungen stehen aus.</value>
+  </data>
+  <data name="Members_Pending_Detail" xml:space="preserve">
+    <value>{0}, eingeladen von {1}, gültig bis {2}</value>
+  </data>
+  <data name="Members_Resend" xml:space="preserve">
+    <value>Erneut senden</value>
+  </data>
+  <data name="Members_Resend_Label" xml:space="preserve">
+    <value>Die Einladung an {0} erneut senden</value>
+  </data>
+  <data name="Members_Revoke" xml:space="preserve">
+    <value>Zurückziehen</value>
+  </data>
+  <data name="Members_Revoke_Label" xml:space="preserve">
+    <value>Die Einladung an {0} zurückziehen</value>
+  </data>
+  <data name="Members_Done_Role" xml:space="preserve">
+    <value>{0} ist jetzt {1}.</value>
+  </data>
+  <data name="Members_Done_Removed" xml:space="preserve">
+    <value>{0} wurde entfernt.</value>
+  </data>
+  <data name="Members_Done_Invited" xml:space="preserve">
+    <value>Eine Einladung wurde an {0} gesendet.</value>
+  </data>
+  <data name="Members_Done_Resent" xml:space="preserve">
+    <value>Eine neue Einladung wurde an {0} gesendet; der frühere Link gilt nicht mehr.</value>
+  </data>
+  <data name="Members_Done_Revoked" xml:space="preserve">
+    <value>Die Einladung an {0} wurde zurückgezogen; ihr Link gilt nicht mehr.</value>
+  </data>
+  <data name="Members_Error_NotAllowed" xml:space="preserve">
+    <value>Das dürfen Sie nicht.</value>
+  </data>
+  <data name="Members_Error_AboveYourRole" xml:space="preserve">
+    <value>Sie können niemandem eine höhere Rolle als Ihre eigene geben.</value>
+  </data>
+  <data name="Members_Error_AlreadyAMember" xml:space="preserve">
+    <value>Diese Adresse gehört bereits einem Mitglied.</value>
+  </data>
+  <data name="Members_Error_CannotChangeOwnRole" xml:space="preserve">
+    <value>Sie können Ihre eigene Rolle nicht ändern.</value>
+  </data>
+  <data name="Members_Error_CannotRemoveYourself" xml:space="preserve">
+    <value>Sie können sich nicht selbst entfernen.</value>
+  </data>
+  <data name="Members_Error_InvitationNotFound" xml:space="preserve">
+    <value>Diese Einladung ist nicht mehr offen.</value>
+  </data>
+  <data name="Members_Error_LastOwner" xml:space="preserve">
+    <value>Die Organisation muss mindestens einen Inhaber behalten.</value>
+  </data>
+  <data name="Members_Error_NotFound" xml:space="preserve">
+    <value>Dieses Mitglied gehört nicht mehr zu dieser Organisation.</value>
+  </data>
+  <data name="Role_Viewer" xml:space="preserve">
+    <value>Betrachter</value>
+  </data>
+  <data name="Role_Developer" xml:space="preserve">
+    <value>Entwickler</value>
+  </data>
+  <data name="Role_QaEngineer" xml:space="preserve">
+    <value>QA-Ingenieur</value>
+  </data>
+  <data name="Role_QaLead" xml:space="preserve">
+    <value>QA-Leitung</value>
+  </data>
+  <data name="Role_Admin" xml:space="preserve">
+    <value>Admin</value>
+  </data>
+  <data name="Role_Owner" xml:space="preserve">
+    <value>Inhaber</value>
+  </data>
+</root>

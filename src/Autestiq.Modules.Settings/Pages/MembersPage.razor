@@ -1,0 +1,146 @@
+@page "/app/settings/members"
+@inject IStringLocalizer<SettingsResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    Who belongs to the organization, what they may do, and who has been invited (E1.1). The services decide every change
+    and refuse what is not allowed; this page only spares a person the buttons that would be refused.
+*@
+<PageTitle>@L["Members_PageTitle", Brand.Value.ProductName]</PageTitle>
+
+<div class="members">
+    <header class="members__header">
+        <h1>@L["Members_Title"]</h1>
+        <p class="t-muted">@L["Members_Intro"]</p>
+    </header>
+
+    @if (!CanManage)
+    {
+        <TEmptyState Title="@L["Members_NotAllowed_Title"]" data-testid="members-not-allowed">@L["Members_NotAllowed_Text"]</TEmptyState>
+    }
+    else
+    {
+        @if (Problem is not null)
+        {
+            <p class="members__problem" role="alert" data-testid="members-problem">@Problem</p>
+        }
+
+        @if (Done is not null)
+        {
+            <p class="members__done" role="status" data-testid="members-done">@Done</p>
+        }
+
+        <section class="members__section" aria-labelledby="members-people">
+            <h2 id="members-people" class="t-h4">@L["Members_People"]</h2>
+
+            <TAsyncView Loading="Loading" Error="@LoadError" OnRetry="LoadAsync" IsEmpty="Members.Count == 0">
+                <EmptyContent>
+                    <TEmptyState Title="@L["Members_Empty_Title"]">@L["Members_Empty_Text"]</TEmptyState>
+                </EmptyContent>
+                <ChildContent>
+                    <ul class="members__list" data-testid="members">
+                        @foreach (var member in Members)
+                        {
+                            var self = member.UserId == CurrentUser.UserId;
+                            <li class="members__item" data-testid="@($"member-{member.Email}")">
+                                <div class="members__who">
+                                    <p class="members__name">@member.DisplayName @if (self) { <span class="t-muted">@L["Members_You"]</span> }</p>
+                                    <p class="t-muted">@member.Email</p>
+                                </div>
+                                <div class="members__actions">
+                                    @if (self)
+                                    {
+                                        <TBadge>@RoleName(member.Role)</TBadge>
+                                    }
+                                    else
+                                    {
+                                        <TField Label="@L["Members_Role_For", member.DisplayName]">
+                                            <TSelect Context="context" Value="@member.Role.ToString()" Disabled="Busy || !Ready"
+                                                     ValueChanged="value => ChangeRoleAsync(member, value)" data-testid="@($"role-{member.Email}")">
+                                                @foreach (var role in Roles)
+                                                {
+                                                    <option value="@role">@RoleName(role)</option>
+                                                }
+                                            </TSelect>
+                                        </TField>
+                                        <TButton Variant="ButtonVariant.Ghost" Disabled="Busy || !Ready" OnClick="() => Removing = member"
+                                                 AriaLabel="@L["Members_Remove_Label", member.DisplayName]" data-testid="@($"remove-{member.Email}")">
+                                            @L["Members_Remove"]
+                                        </TButton>
+                                    }
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </ChildContent>
+            </TAsyncView>
+
+            @if (Removing is { } leaving)
+            {
+                <TConfirm Title="@L["Members_Remove_Title", leaving.DisplayName]"
+                          ConfirmLabel="@L["Members_Remove_Confirm"]"
+                          Consequence="@L["Members_Remove_Consequence"]"
+                          Working="Busy"
+                          OnConfirm="RemoveAsync"
+                          OnCancel="() => Removing = null"
+                          data-testid="remove-confirm" />
+            }
+        </section>
+
+        <section class="members__section" aria-labelledby="members-invite">
+            <h2 id="members-invite" class="t-h4">@L["Members_Invite"]</h2>
+            <div class="members__form">
+                <TField Label="@L["Members_Invite_Email"]" Required>
+                    <TInput Context="context" type="email" Disabled="!Ready" @bind-Value="InviteEmail" Required data-testid="invite-email" />
+                </TField>
+                <TField Label="@L["Members_Invite_Role"]" Required>
+                    <TSelect Context="context" Value="@InviteRole.ToString()" Disabled="!Ready"
+                             ValueChanged="value => InviteRole = Enum.TryParse<Role>(value, out var chosen) ? chosen : InviteRole" data-testid="invite-role">
+                        @foreach (var role in Roles)
+                        {
+                            <option value="@role">@RoleName(role)</option>
+                        }
+                    </TSelect>
+                </TField>
+                <div>
+                    <TButton Variant="ButtonVariant.Primary" Loading="Busy" Disabled="!Ready" OnClick="InviteAsync" data-testid="invite">
+                        @L["Members_Invite_Send"]
+                    </TButton>
+                </div>
+            </div>
+        </section>
+
+        <section class="members__section" aria-labelledby="members-pending">
+            <h2 id="members-pending" class="t-h4">@L["Members_Pending"]</h2>
+
+            @if (Invitations.Count == 0)
+            {
+                <p class="t-muted" data-testid="pending-none">@L["Members_Pending_None"]</p>
+            }
+            else
+            {
+                <ul class="members__list" data-testid="pending">
+                    @foreach (var invitation in Invitations)
+                    {
+                        <li class="members__item" data-testid="@($"pending-{invitation.Email}")">
+                            <div class="members__who">
+                                <p class="members__name">@invitation.Email</p>
+                                <p class="t-muted">@L["Members_Pending_Detail", RoleName(invitation.Role), invitation.InvitedByName, invitation.ExpiresAt.ToString("d", System.Globalization.CultureInfo.CurrentCulture)]</p>
+                            </div>
+                            <div class="members__actions">
+                                <TButton Variant="ButtonVariant.Secondary" Disabled="Busy || !Ready" OnClick="() => ResendAsync(invitation)"
+                                         AriaLabel="@L["Members_Resend_Label", invitation.Email]" data-testid="@($"resend-{invitation.Email}")">
+                                    @L["Members_Resend"]
+                                </TButton>
+                                <TButton Variant="ButtonVariant.Ghost" Disabled="Busy || !Ready" OnClick="() => RevokeAsync(invitation)"
+                                         AriaLabel="@L["Members_Revoke_Label", invitation.Email]" data-testid="@($"revoke-{invitation.Email}")">
+                                    @L["Members_Revoke"]
+                                </TButton>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+        </section>
+    }
+</div>

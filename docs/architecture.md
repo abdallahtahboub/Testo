@@ -210,7 +210,7 @@ widgets) and the flag-aware shell arrive in Milestone 4.
 ```csharp
 public sealed record NavItem(
     string Id, LocalizedText Label, string Href, string Icon,
-    NavGroup Group, int Order = 0, string? FeatureFlag = null, string? RequiredRole = null);
+    NavGroup Group, int Order = 0, string? FeatureFlag = null, Permission? RequiredPermission = null);
 
 public interface INavigationRegistry { void Add(NavItem item); IReadOnlyList<NavItem> Items { get; } }
 ```

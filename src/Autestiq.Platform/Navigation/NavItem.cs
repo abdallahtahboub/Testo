@@ -1,3 +1,4 @@
+using Autestiq.Contracts.Identity;
 using Autestiq.Platform.Localization;
 
 namespace Autestiq.Platform.Navigation;
@@ -10,7 +11,10 @@ namespace Autestiq.Platform.Navigation;
 /// <param name="Group">The navigation section the entry belongs to.</param>
 /// <param name="Order">Position inside the section; lower comes first.</param>
 /// <param name="FeatureFlag">Optional flag that hides the entry while it is off.</param>
-/// <param name="RequiredRole">Optional role a user needs to see the entry.</param>
+/// <param name="RequiredPermission">
+/// Optional permission a person needs to see the entry. Hiding it spares a person a link that would be refused; the
+/// page and its services refuse all the same.
+/// </param>
 public sealed record NavItem(
     string Id,
     LocalizedText Label,
@@ -19,4 +23,4 @@ public sealed record NavItem(
     NavGroup Group,
     int Order = 0,
     string? FeatureFlag = null,
-    string? RequiredRole = null);
+    Permission? RequiredPermission = null);

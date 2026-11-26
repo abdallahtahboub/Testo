@@ -556,8 +556,9 @@ document's "Today" column says. Each milestone is planned in detail and approved
 | E8 | Trust and certification | Later | The private agent, a security documentation pack, a penetration test, SOC 2 then ISO 27001, an accessibility statement | E9; owner: when |
 | E9 | Platform and operations | With go-live | Hosting, TLS, alerting, logs, status page, backups with tested restores, an SLA, scale-out, a trial organization | Owner: hosting |
 | E10 | Commercial | Later | Self-service plans and invoices, enterprise contracts, usage alerts | Owner: pricing and billing provider |
+| E11 | **Enterprise-grade database** (the owner, 2026-11-26) | Medium; its first step before the pilot | Integrity enforced by PostgreSQL (CHECK constraints, composite foreign keys everywhere), security in depth (three roles, row-level security, append-only in the database), measured query budgets with query plans on realistic data, a pagination standard (maximum page size, keyset for growing lists), partitioning and replicas when measured, operations. Today's schema: [`database-schema.md`](database-schema.md); the goal: [`business/goal-enterprise-database.md`](business/goal-enterprise-database.md) | Row-level security and any new infrastructure: the owner |
 
-**Order:** E1, Milestones 6.2 and 6.3, E2 and E3, then E4 to E7, with E9 at the go-live stage and E8 and E10 after it.
+**Order:** E1, Milestones 6.2 and 6.3, E2 and E3, then E4 to E7, with E9 at the go-live stage and E8 and E10 after it. E11's first step (integrity constraints, the missing foreign keys, a maximum page size everywhere) is small and best done before the pilot, while the tables are small; the rest follows its own order.
 Pilot readiness (Milestone 5.1) comes first; this programme does not reorder it.
 
 ### E1 — Administration *(approved by the owner on 2026-11-26; built, awaiting the owner's review)*

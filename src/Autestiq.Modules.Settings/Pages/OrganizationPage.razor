@@ -1,0 +1,96 @@
+@page "/app/settings/organization"
+@using System.Globalization
+@inject IStringLocalizer<SettingsResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    The organization as its owners and admins see it (E1.4, ADR-0043): who it is and what its plan version allows.
+    Read-only: renaming, the two-factor rule and the plan are changed elsewhere for now, and the page says where.
+*@
+<PageTitle>@L["Organization_PageTitle", Brand.Value.ProductName]</PageTitle>
+
+<div class="organization">
+    <header class="organization__header">
+        <h1>@L["Organization_Title"]</h1>
+        <p class="t-muted">@L["Organization_Intro"]</p>
+    </header>
+
+    <TAsyncView Loading="Loading" Error="@LoadError" OnRetry="LoadAsync" IsEmpty="Profile is null">
+        <EmptyContent>
+            <TEmptyState Title="@L["Organization_NotAllowed_Title"]" data-testid="organization-not-allowed">@L["Organization_NotAllowed_Text"]</TEmptyState>
+        </EmptyContent>
+        <ChildContent>
+            @if (Profile is { } profile)
+            {
+                <section class="organization__section" aria-labelledby="organization-identity">
+                    <h2 id="organization-identity" class="t-h4">@L["Organization_Identity"]</h2>
+                    <dl class="organization__facts" data-testid="organization-identity">
+                        <div><dt>@L["Organization_Name"]</dt><dd data-testid="organization-name">@profile.Name</dd></div>
+                        <div><dt>@L["Organization_Slug"]</dt><dd><code>@profile.Slug</code></dd></div>
+                        <div><dt>@L["Organization_Region"]</dt><dd data-testid="organization-region">@profile.DataRegion</dd></div>
+                        <div><dt>@L["Organization_TwoFactor"]</dt><dd data-testid="organization-two-factor">@L[profile.RequiresTwoFactor ? "Organization_TwoFactor_Required" : "Organization_TwoFactor_Optional"]</dd></div>
+                        <div><dt>@L["Organization_Created"]</dt><dd>@profile.CreatedAt.UtcDateTime.ToString("D", CultureInfo.CurrentCulture)</dd></div>
+                    </dl>
+                </section>
+
+                <section class="organization__section" aria-labelledby="organization-plan">
+                    <h2 id="organization-plan" class="t-h4">@L["Organization_Plan"]</h2>
+                    <dl class="organization__facts" data-testid="organization-plan">
+                        <div><dt>@L["Organization_Plan_Name"]</dt><dd data-testid="organization-plan-name">@L["Organization_Plan_Version", profile.PlanName, profile.PlanVersion]</dd></div>
+                        <div><dt>@L["Organization_Plan_Since"]</dt><dd>@profile.PlanSince.UtcDateTime.ToString("D", CultureInfo.CurrentCulture)</dd></div>
+                        <div><dt>@L["Organization_Plan_Minutes"]</dt><dd>@profile.MonthlyBrowserMinutes.ToString("N0", CultureInfo.CurrentCulture)</dd></div>
+                        <div><dt>@L["Organization_Plan_Concurrent"]</dt><dd>@profile.ConcurrentRuns.ToString("N0", CultureInfo.CurrentCulture)</dd></div>
+                        <div><dt>@L["Organization_Plan_Projects"]</dt><dd data-testid="organization-projects">@Projects(profile)</dd></div>
+                        <div><dt>@L["Organization_Plan_Members"]</dt><dd data-testid="organization-members">@profile.ActiveMembers.ToString("N0", CultureInfo.CurrentCulture)</dd></div>
+                    </dl>
+                    <p class="t-muted">@L["Organization_Plan_HowToChange"]</p>
+                    <p><a href="@Routes.Usage">@L["Organization_Plan_UsageLink"]</a></p>
+                </section>
+
+                <section class="organization__section" aria-labelledby="organization-changes">
+                    <h2 id="organization-changes" class="t-h4">@L["Organization_Changes"]</h2>
+                    <p class="t-muted" data-testid="organization-read-only">@L["Organization_Changes_Text", Brand.Value.ProductName]</p>
+                </section>
+            }
+        </ChildContent>
+    </TAsyncView>
+</div>
+
+@code {
+    [Inject]
+    private IOrganizationService Organizations { get; set; } = null!;
+
+    private bool Loading { get; set; } = true;
+
+    private string? LoadError { get; set; }
+
+    /// <summary>The organization; <c>null</c> when the service gives none, which it does without the permission.</summary>
+    private OrganizationProfile? Profile { get; set; }
+
+    /// <inheritdoc />
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        Loading = true;
+        LoadError = null;
+
+        try
+        {
+            Profile = await Organizations.GetCurrentAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+        catch (InvalidOperationException)
+        {
+            LoadError = L["Organization_LoadFailed"];
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    private string Projects(OrganizationProfile profile) =>
+        profile.MaxProjects is { } max
+            ? L["Organization_Plan_ProjectsOf", profile.ActiveProjects.ToString("N0", CultureInfo.CurrentCulture), max.ToString("N0", CultureInfo.CurrentCulture)]
+            : L["Organization_Plan_ProjectsUnlimited", profile.ActiveProjects.ToString("N0", CultureInfo.CurrentCulture)];
+}

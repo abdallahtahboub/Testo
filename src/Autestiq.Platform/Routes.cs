@@ -67,6 +67,9 @@ public static class Routes
     /// <summary>The organization's usage this month against its plan (E1.3).</summary>
     public const string Usage = App + "/settings/usage";
 
+    /// <summary>The organization: its name and its plan, read-only (E1.4).</summary>
+    public const string Organization = App + "/settings/organization";
+
     /// <summary>One run.</summary>
     public static string Run(Guid runId) => $"{Runs}/{runId}";
 

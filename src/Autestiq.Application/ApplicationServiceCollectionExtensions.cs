@@ -33,6 +33,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<IMembershipService, MembershipService>();
         services.AddScoped<IInvitationService, InvitationService>();
         services.AddScoped<IAuditLog, AuditLog>();
+        services.AddScoped<IOrganizationService, Identity.OrganizationService>();
         services.AddScoped<IExecutionService, ExecutionService>();
         services.AddScoped<IOriginProofService, OriginProofService>();
         services.AddScoped<Contracts.Projects.IProjectService, Projects.ProjectService>();

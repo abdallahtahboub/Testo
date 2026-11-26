@@ -24,6 +24,17 @@ public sealed class SettingsModule : IFeatureModule
     {
         ArgumentNullException.ThrowIfNull(navigation);
 
+        // Shown only to owners and admins, as the service shows the organization to nobody else (ADR-0043).
+        navigation.Add(new NavItem(
+            "organization",
+            LocalizedText.From<SettingsResources>("Nav_Organization"),
+            Routes.Organization,
+            "Settings",
+            NavGroup.Settings,
+            Order: 5,
+            FeatureFlag: FeatureFlag,
+            RequiredPermission: Permission.ManageOrganization));
+
         // Shown only to people who manage people: the page and its services refuse everyone else as well.
         navigation.Add(new NavItem(
             "members",

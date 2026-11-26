@@ -137,7 +137,7 @@ public sealed class SignInTests : IAsyncLifetime
         using var scope = _services.CreateScope();
         var log = scope.ServiceProvider.GetRequiredService<IAuditLog>();
 
-        var entries = await log.ReadAsync(1, 50, TestContext.Current.CancellationToken);
+        var entries = await log.ReadAsync(new AuditQuery(), TestContext.Current.CancellationToken);
 
         Assert.Contains(entries.Items, entry => entry.Action == "user.signed_in" && entry.ActorName == _ownerEmail);
     }

@@ -1,0 +1,112 @@
+@page "/app/settings/audit"
+@inject IStringLocalizer<SettingsResources> L
+@inject IOptions<BrandOptions> Brand
+
+@*
+    What happened in the organization, newest first (E1.2): who did what, to what, when and from where. Read-only:
+    the log is written by the use cases that cause each entry, never from a page. Times and days are in UTC, so the
+    log reads the same for everyone who reads it.
+*@
+<PageTitle>@L["Audit_PageTitle", Brand.Value.ProductName]</PageTitle>
+
+<div class="audit">
+    <header class="audit__header">
+        <h1>@L["Audit_Title"]</h1>
+        <p class="t-muted">@L["Audit_Intro"]</p>
+    </header>
+
+    @if (!CanRead)
+    {
+        <TEmptyState Title="@L["Audit_NotAllowed_Title"]" data-testid="audit-not-allowed">@L["Audit_NotAllowed_Text"]</TEmptyState>
+    }
+    else
+    {
+        <section class="audit__filters" aria-labelledby="audit-filters">
+            <h2 id="audit-filters" class="t-h4">@L["Audit_Filters"]</h2>
+            <div class="audit__filter-row">
+                <TField Label="@L["Audit_Filter_Person"]">
+                    <TSelect Context="context" Value="@(Actor ?? "")" Disabled="!Ready" ValueChanged="ChooseActorAsync" data-testid="filter-person">
+                        <option value="">@L["Audit_Filter_Anyone"]</option>
+                        @foreach (var actor in Choices.Actors)
+                        {
+                            <option value="@actor">@actor</option>
+                        }
+                    </TSelect>
+                </TField>
+                <TField Label="@L["Audit_Filter_Action"]">
+                    <TSelect Context="context" Value="@(Action ?? "")" Disabled="!Ready" ValueChanged="ChooseActionAsync" data-testid="filter-action">
+                        <option value="">@L["Audit_Filter_AnyAction"]</option>
+                        @foreach (var action in Choices.Actions)
+                        {
+                            <option value="@action">@action</option>
+                        }
+                    </TSelect>
+                </TField>
+                <TField Label="@L["Audit_Filter_From"]" Hint="@L["Audit_Filter_Utc"]">
+                    <TInput Context="context" type="date" Disabled="!Ready" Value="@Text(From)" OnCommitted="ChooseFromAsync" data-testid="filter-from" />
+                </TField>
+                <TField Label="@L["Audit_Filter_To"]" Hint="@L["Audit_Filter_Utc"]">
+                    <TInput Context="context" type="date" Disabled="!Ready" Value="@Text(To)" OnCommitted="ChooseToAsync" data-testid="filter-to" />
+                </TField>
+            </div>
+            @if (Filtered)
+            {
+                <div>
+                    <TButton Variant="ButtonVariant.Ghost" Disabled="!Ready" OnClick="ClearAsync" data-testid="filter-clear">@L["Audit_Filter_Clear"]</TButton>
+                </div>
+            }
+            @if (DateProblem)
+            {
+                <p class="audit__problem" role="alert" data-testid="audit-dates-problem">@L["Audit_Filter_DatesBackwards"]</p>
+            }
+        </section>
+
+        <section class="audit__entries" aria-labelledby="audit-entries">
+            <h2 id="audit-entries" class="t-h4">@L["Audit_Entries"]</h2>
+
+            <TAsyncView Loading="Loading" Error="@LoadError" OnRetry="LoadAsync" IsEmpty="Entries.Items.Count == 0">
+                <EmptyContent>
+                    <TEmptyState Title="@L[Filtered ? "Audit_Empty_Filtered_Title" : "Audit_Empty_Title"]" data-testid="audit-empty">
+                        @L[Filtered ? "Audit_Empty_Filtered_Text" : "Audit_Empty_Text"]
+                    </TEmptyState>
+                </EmptyContent>
+                <ChildContent>
+                    <div class="audit__scroll" tabindex="0" role="region" aria-labelledby="audit-entries">
+                        <table class="audit__table" data-testid="audit-entries">
+                            <caption class="t-visually-hidden">@L["Audit_Entries"]</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">@L["Audit_Column_When"]</th>
+                                    <th scope="col">@L["Audit_Column_Who"]</th>
+                                    <th scope="col">@L["Audit_Column_What"]</th>
+                                    <th scope="col">@L["Audit_Column_Subject"]</th>
+                                    <th scope="col">@L["Audit_Column_Change"]</th>
+                                    <th scope="col">@L["Audit_Column_Address"]</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var entry in Entries.Items)
+                                {
+                                    <tr data-testid="audit-entry">
+                                        <td class="t-tabular audit__when">@entry.At.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture)</td>
+                                        <td>@(entry.ActorName ?? L["Audit_System"])</td>
+                                        <td><code>@entry.Action</code></td>
+                                        <td>@entry.SubjectType@if (entry.SubjectName is { } name) { <span class="t-muted">: @name</span> }</td>
+                                        <td class="audit__change">
+                                            @if (entry.Before is not null || entry.After is not null)
+                                            {
+                                                <span>@(entry.Before ?? "—")</span> <span aria-hidden="true">→</span><span class="t-visually-hidden">@L["Audit_Change_To"]</span> <span>@(entry.After ?? "—")</span>
+                                            }
+                                        </td>
+                                        <td class="t-tabular">@entry.IpAddress</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <TPagination PageIndex="PageIndex" PageSize="PageSize" TotalCount="Entries.TotalCount" PageIndexChanged="GoToAsync" data-testid="audit-pages" />
+                </ChildContent>
+            </TAsyncView>
+        </section>
+    }
+</div>

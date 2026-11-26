@@ -195,6 +195,9 @@ The residency decision is open. This design keeps it open and gives the study wh
 
 ## 11. What is not built, and where it is tracked
 
+The schema as built, table by table, is [`database-schema.md`](database-schema.md); the target is the owner's
+[enterprise-database goal](business/goal-enterprise-database.md) (E11).
+
 | Item | Tracked in |
 |---|---|
 | Lifecycle of snapshots and planning payloads; project and organization deletion; verified deletion | G-5 (gap analysis) |

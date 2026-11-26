@@ -29,8 +29,9 @@ public partial class FeatureFlagTests(AppFixture app)
         Assert.Equal(7, states.Count);
 
         // Planning, because this copy of the application was told to; execution, because
-        // Milestone 3.3 built it and appsettings.json has it on. Everything else is still a shell.
-        string[] on = ["planning", "execution"];
+        // Milestone 3.3 built it and appsettings.json has it on; settings, because E1 builds its
+        // administration pages. Everything else is still a shell.
+        string[] on = ["planning", "execution", "settings"];
         Assert.All(on, module => Assert.Equal("On", states[module]));
         Assert.All(states.Where(state => !on.Contains(state.Key)), state => Assert.Equal("Off", state.Value));
     }

@@ -1,4 +1,5 @@
 using Bunit;
+using Autestiq.Contracts.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Autestiq.Platform.Features;
 using Autestiq.Platform.Localization;
@@ -56,6 +57,29 @@ public class AppNavTests : DesignSystemTestContext
         Assert.Empty(cut.FindAll("[data-testid='nav-defects']"));
     }
 
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(false, false)]
+    public void Render_AnItemThatNeedsAPermission_IsShownOnlyToSomebodyWhoHasIt(bool has, bool shown)
+    {
+        Services.AddSingleton<ICurrentUser>(new Someone(has));
+        var cut = RenderWith(
+            new SwitchedFlags(),
+            Item("runs", NavGroup.Run, 1),
+            Item("members", NavGroup.Settings, 1) with { RequiredPermission = Permission.ManagePeople });
+
+        Assert.Equal(shown, cut.FindAll("[data-testid='nav-members']").Count == 1);
+        Assert.Single(cut.FindAll("[data-testid='nav-runs']"));
+    }
+
+    [Fact]
+    public void Render_AnItemThatNeedsAPermission_IsHiddenWhenNobodyIsKnown()
+    {
+        var cut = RenderWith(new SwitchedFlags(), Item("members", NavGroup.Settings, 1) with { RequiredPermission = Permission.ManagePeople });
+
+        Assert.Empty(cut.FindAll("[data-testid='nav-members']"));
+    }
+
     [Fact]
     public void Render_NothingSwitchedOn_SaysSo()
     {
@@ -91,5 +115,20 @@ public class AppNavTests : DesignSystemTestContext
         var cut = RenderWith(new SwitchedFlags(), Item("runs", NavGroup.Run, 1));
 
         Assert.Equal("Ausführen", cut.Find(".app-nav__heading").TextContent);
+    }
+
+    private sealed class Someone(bool canManagePeople) : ICurrentUser
+    {
+        public bool IsSignedIn => true;
+
+        public Guid? UserId => Guid.Empty;
+
+        public string? Email => "tom@northwind.example";
+
+        public string? DisplayName => "Tom Becker";
+
+        public Role? Role => canManagePeople ? Contracts.Identity.Role.Admin : Contracts.Identity.Role.QaEngineer;
+
+        public bool Can(Permission permission) => permission != Permission.ManagePeople || canManagePeople;
     }
 }

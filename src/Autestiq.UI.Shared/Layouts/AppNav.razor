@@ -3,6 +3,7 @@
 @inject IFeatureFlags Flags
 @inject IStringLocalizerFactory Localizers
 @inject IStringLocalizer<SharedResources> L
+@inject IServiceProvider Services
 
 @*
     The product's navigation, drawn from what the modules registered (Milestone 5), grouped by
@@ -45,8 +46,16 @@ else
     {
         var shown = new List<NavItem>();
 
+        // Who is looking, when the host knows: an entry that needs a permission is hidden from people who lack it.
+        var person = Services.GetService(typeof(Autestiq.Contracts.Identity.ICurrentUser)) as Autestiq.Contracts.Identity.ICurrentUser;
+
         foreach (var item in Registry.Items)
         {
+            if (item.RequiredPermission is { } needed && person?.Can(needed) != true)
+            {
+                continue;
+            }
+
             if (await Flags.IsEnabledAsync(item.FeatureFlag, CancellationToken.None).ConfigureAwait(false))
             {
                 shown.Add(item);

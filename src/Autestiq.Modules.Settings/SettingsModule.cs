@@ -34,5 +34,16 @@ public sealed class SettingsModule : IFeatureModule
             Order: 10,
             FeatureFlag: FeatureFlag,
             RequiredPermission: Permission.ManagePeople));
+
+        // Shown only to people who may read the log, which is also all the service gives anyone else: nothing.
+        navigation.Add(new NavItem(
+            "audit",
+            LocalizedText.From<SettingsResources>("Nav_Audit"),
+            Routes.AuditLog,
+            "Document",
+            NavGroup.Settings,
+            Order: 20,
+            FeatureFlag: FeatureFlag,
+            RequiredPermission: Permission.ReadAuditLog));
     }
 }

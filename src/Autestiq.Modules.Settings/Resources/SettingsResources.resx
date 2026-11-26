@@ -148,4 +148,94 @@
   <data name="Role_Owner" xml:space="preserve">
     <value>Owner</value>
   </data>
+  <data name="Nav_Audit" xml:space="preserve">
+    <value>Audit log</value>
+  </data>
+  <data name="Audit_PageTitle" xml:space="preserve">
+    <value>Audit log – {0}</value>
+  </data>
+  <data name="Audit_Title" xml:space="preserve">
+    <value>Audit log</value>
+  </data>
+  <data name="Audit_Intro" xml:space="preserve">
+    <value>What happened in the organization, newest first: who did what, to what, when and from where. Entries are written by the product itself and cannot be changed.</value>
+  </data>
+  <data name="Audit_NotAllowed_Title" xml:space="preserve">
+    <value>Only owners and admins read the audit log</value>
+  </data>
+  <data name="Audit_NotAllowed_Text" xml:space="preserve">
+    <value>Ask an owner or an admin of your organization if you need to know what happened.</value>
+  </data>
+  <data name="Audit_Filters" xml:space="preserve">
+    <value>Filters</value>
+  </data>
+  <data name="Audit_Filter_Person" xml:space="preserve">
+    <value>Person</value>
+  </data>
+  <data name="Audit_Filter_Anyone" xml:space="preserve">
+    <value>Anyone</value>
+  </data>
+  <data name="Audit_Filter_Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="Audit_Filter_AnyAction" xml:space="preserve">
+    <value>Any action</value>
+  </data>
+  <data name="Audit_Filter_From" xml:space="preserve">
+    <value>From</value>
+  </data>
+  <data name="Audit_Filter_To" xml:space="preserve">
+    <value>To</value>
+  </data>
+  <data name="Audit_Filter_Utc" xml:space="preserve">
+    <value>A day in UTC.</value>
+  </data>
+  <data name="Audit_Filter_Clear" xml:space="preserve">
+    <value>Clear the filters</value>
+  </data>
+  <data name="Audit_Filter_DatesBackwards" xml:space="preserve">
+    <value>The last day is before the first, so nothing can match. Change one of the days.</value>
+  </data>
+  <data name="Audit_Entries" xml:space="preserve">
+    <value>Entries</value>
+  </data>
+  <data name="Audit_Empty_Title" xml:space="preserve">
+    <value>Nothing has been recorded yet</value>
+  </data>
+  <data name="Audit_Empty_Text" xml:space="preserve">
+    <value>Entries appear here as people sign in, invite, change roles and approve tests.</value>
+  </data>
+  <data name="Audit_Empty_Filtered_Title" xml:space="preserve">
+    <value>No entry matches these filters</value>
+  </data>
+  <data name="Audit_Empty_Filtered_Text" xml:space="preserve">
+    <value>Choose another person, action or day, or clear the filters.</value>
+  </data>
+  <data name="Audit_LoadFailed" xml:space="preserve">
+    <value>The audit log could not be read. Try again in a moment.</value>
+  </data>
+  <data name="Audit_Column_When" xml:space="preserve">
+    <value>When (UTC)</value>
+  </data>
+  <data name="Audit_Column_Who" xml:space="preserve">
+    <value>Who</value>
+  </data>
+  <data name="Audit_Column_What" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="Audit_Column_Subject" xml:space="preserve">
+    <value>Concerning</value>
+  </data>
+  <data name="Audit_Column_Change" xml:space="preserve">
+    <value>Change</value>
+  </data>
+  <data name="Audit_Column_Address" xml:space="preserve">
+    <value>IP address</value>
+  </data>
+  <data name="Audit_System" xml:space="preserve">
+    <value>The system</value>
+  </data>
+  <data name="Audit_Change_To" xml:space="preserve">
+    <value>changed to</value>
+  </data>
 </root>

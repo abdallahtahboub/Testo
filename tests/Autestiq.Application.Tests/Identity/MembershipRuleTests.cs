@@ -190,7 +190,7 @@ public sealed class MembershipRuleTests : IAsyncLifetime
 
         using var scope = _services.CreateScope();
         var log = scope.ServiceProvider.GetRequiredService<IAuditLog>();
-        var entries = await log.ReadAsync(1, 50, TestContext.Current.CancellationToken);
+        var entries = await log.ReadAsync(new AuditQuery(), TestContext.Current.CancellationToken);
 
         Assert.Contains(entries.Items, entry => entry.Action == "member.removed");
     }
@@ -204,7 +204,7 @@ public sealed class MembershipRuleTests : IAsyncLifetime
         using var scope = _services.CreateScope();
         var log = scope.ServiceProvider.GetRequiredService<IAuditLog>();
 
-        var entries = await log.ReadAsync(1, 50, TestContext.Current.CancellationToken);
+        var entries = await log.ReadAsync(new AuditQuery(), TestContext.Current.CancellationToken);
 
         Assert.Empty(entries.Items);
     }

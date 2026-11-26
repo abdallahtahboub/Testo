@@ -1,0 +1,64 @@
+/* The filters above, the entries below; the table scrolls sideways on a narrow screen, not the page. */
+
+.audit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.audit__header h1 {
+  margin-block-end: var(--space-2);
+}
+
+.audit__filters,
+.audit__entries {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.audit__filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.audit__scroll {
+  overflow-x: auto;
+}
+
+.audit__table {
+  inline-size: 100%;
+  border-collapse: collapse;
+}
+
+.audit__table th,
+.audit__table td {
+  padding: var(--space-3);
+  text-align: start;
+  vertical-align: top;
+  border-block-end: 1px solid var(--color-border);
+}
+
+.audit__table thead th {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  font-weight: var(--weight-medium);
+}
+
+.audit__when {
+  white-space: nowrap;
+}
+
+.audit__change {
+  overflow-wrap: anywhere;
+}
+
+.audit__problem {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  color: var(--color-danger);
+}
